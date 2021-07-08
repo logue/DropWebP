@@ -1,0 +1,3 @@
+[submodule "WebP.Net"]
+	path = WebP.Net
+	url = https://github.com/Sharp0802/WebP.Net

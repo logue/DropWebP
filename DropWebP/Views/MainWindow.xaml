@@ -1,0 +1,12 @@
+﻿<fw:AcrylicWindow x:Class="DropWebP.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
+        xmlns:prism="http://prismlibrary.com/"
+        prism:ViewModelLocator.AutoWireViewModel="True"
+        Title="{Binding Title}" Height="350" Width="525" >
+    <Grid>
+        <ContentControl prism:RegionManager.RegionName="ContentRegion"  />
+        <ContentControl prism:RegionManager.RegionName="StatusBarRegion" Grid.Row="1" VerticalAlignment="Bottom" />
+    </Grid>
+</fw:AcrylicWindow>
