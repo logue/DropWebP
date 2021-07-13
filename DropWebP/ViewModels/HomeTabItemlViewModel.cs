@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Interop;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using Windows.UI.Popups;
 using WinRT;
 
 namespace DropWebP.ViewModels
@@ -21,7 +22,7 @@ namespace DropWebP.ViewModels
         /// <summary>
         /// Webのエンコーダー
         /// </summary>
-        private IWebPEncorderService webPEncorderService;
+        private IWebPService webPEncorderService;
 
         /// <summary>
         /// ファイルブラウザボタンのコマンド
@@ -46,7 +47,7 @@ namespace DropWebP.ViewModels
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public HomeTabItemlViewModel(IWebPEncorderService webPEncorderService)
+        public HomeTabItemlViewModel(IWebPService webPEncorderService)
         {
             BrowseButtonCommand = new DelegateCommand(ExecuteBrowseButtonCommand);
 
@@ -74,7 +75,11 @@ namespace DropWebP.ViewModels
             {
                 // Application now has read/write access to the picked file
                 Debug.WriteLine(file.Path);
-                webPEncorderService.EncordeWebP(file.Path, Properties.Settings.Default.Lossless ? -1 : Properties.Settings.Default.Quality);
+                webPEncorderService.ConvertWebP(file.Path, Properties.Settings.Default.Lossless ? -1 : Properties.Settings.Default.Quality);
+                MessageDialog dialog = new MessageDialog("Finish");
+                withWindow = dialog.As<IInitializeWithWindow>();
+                withWindow.Initialize(new WindowInteropHelper(Application.Current.MainWindow).Handle);
+                _ = await dialog.ShowAsync();
             }
             else
             {

@@ -2,6 +2,7 @@
 using Prism.Mvvm;
 using Reactive.Bindings;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Windows;
 
 namespace DropWebP.ViewModels
@@ -45,16 +46,12 @@ namespace DropWebP.ViewModels
         {
             StatusBarText = obj.Text;
         }
-
         /*
-        public event PropertyChangedEventHandler PropertyChanged;
-
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         */
-
     }
 }

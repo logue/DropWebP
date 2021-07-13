@@ -41,7 +41,7 @@ namespace DropWebP.ViewModels
         /// </summary>
         public ReactiveCommand<DragEventArgs> DropCommand { get; } = new ReactiveCommand<DragEventArgs>();
 
-        public IWebPEncorderService webPEncorderService;
+        public IWebPService webPEncorderService;
 
         /// <summary>
         /// タイトル
@@ -50,7 +50,7 @@ namespace DropWebP.ViewModels
 
         /// <summary>コンストラクタ</summary>
         /// <param name="regionManager">インジェクションするIRegionManager。</param>
-        public MainWindowViewModel(IRegionManager regionManager, IEventAggregator eventAggregator, IWebPEncorderService webPEncorderService)
+        public MainWindowViewModel(IRegionManager regionManager, IEventAggregator eventAggregator, IWebPService webPEncorderService)
         {
             regionManager.RegisterViewWithRegion("ContentRegion", typeof(HomeTabItem));
             regionManager.RegisterViewWithRegion("ContentRegion", typeof(ConfigTabItem));
@@ -96,7 +96,7 @@ namespace DropWebP.ViewModels
             // ドロップされたものがFileDrop形式の場合は、各ファイルのパス文字列を文字列配列に格納する。
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
             // 複数ドロップの可能性もあるので、今回は最初のファイルを選択して表示
-            webPEncorderService.EncordeWebP(files[0], -1);
+            webPEncorderService.ConvertWebP(files[0], -1);
         }
     }
 }

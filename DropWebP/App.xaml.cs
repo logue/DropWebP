@@ -65,7 +65,7 @@ namespace DropWebP
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
             // エンコーダー
-            containerRegistry.RegisterSingleton<IWebPEncorderService, WebPEncorderService>();
+            containerRegistry.RegisterSingleton<IWebPService, WebPService>();
         }
 
         protected override void ConfigureViewModelLocator()

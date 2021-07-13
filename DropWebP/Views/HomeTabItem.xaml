@@ -18,7 +18,7 @@
             FontFamily="Segoe MDL2 Assets"
             FontSize="64"
             Text="&#xE8B9;" />
-        <TextBlock Text="{Binding Message}" HorizontalAlignment="Center" />
+        <TextBlock HorizontalAlignment="Center" Text="{Binding Message}" />
         <Button
             Margin="24"
             Command="{Binding BrowseButtonCommand}"
