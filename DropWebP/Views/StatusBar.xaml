@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:prism="http://prismlibrary.com/"             
              prism:ViewModelLocator.AutoWireViewModel="True">
-    <StatusBar VerticalAlignment="Bottom" Background="#44FFFFFF" BorderThickness="0,1,0,0" BorderBrush="Gray">
+    <StatusBar VerticalAlignment="Bottom" Background="#99FFFFFF" BorderThickness="0,1,0,0" BorderBrush="Gray">
         <StatusBarItem Visibility="{Binding progressBarVisibility.Value}">
             <ProgressBar Width="50" Height="12" Value="{Binding progress.Value}" Maximum="{Binding progressMaximum.Value}" Minimum="0"/>
         </StatusBarItem>

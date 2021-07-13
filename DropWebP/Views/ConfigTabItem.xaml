@@ -1,0 +1,38 @@
+﻿<UserControl
+    x:Class="DropWebP.Views.ConfigTabItem"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:av="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:prism="http://prismlibrary.com/"
+    xmlns:viewmodels="clr-namespace:DropWebP.ViewModels"
+    av:DataContext="{av:DesignInstance Type=viewmodels:ConfigTabItemViewModel}"
+    prism:ViewModelLocator.AutoWireViewModel="True"
+    mc:Ignorable="av">
+    <StackPanel Margin="10">
+        <CheckBox Command="{Binding ToggleLossless}" Content="{Binding LosslessText}" />
+        <GroupBox Header="{Binding QualityText}" IsEnabled="{Binding !ToggleLossless}">
+            <StackPanel Orientation="Horizontal">
+                <Slider
+                    Width="200"
+                    Maximum="100"
+                    Value="{Binding QualityValue}" />
+                <TextBox Width="30" Text="{Binding QualityValue}" />
+            </StackPanel>
+        </GroupBox>
+        <CheckBox Command="{Binding ToggleKeepOriginal}" Content="{Binding KeepOriginalText}" />
+        <Button
+            Margin="24"
+            Command="{Binding BrowseButtonCommand}"
+            Cursor="Hand"
+            Style="{StaticResource ButtonRoundRevealStyle}">
+            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                <TextBlock
+                    VerticalAlignment="Center"
+                    FontFamily="Segoe MDL2 Assets"
+                    Text="&#xE78C;" />
+                <TextBlock VerticalAlignment="Center" Text="{Binding SaveText}" />
+            </StackPanel>
+        </Button>
+    </StackPanel>
+</UserControl>

@@ -1,5 +1,7 @@
-﻿using Prism.Mvvm;
+﻿using DropWebP.Utility;
+using Prism.Mvvm;
 using Reactive.Bindings;
+using System.ComponentModel;
 using System.Windows;
 
 namespace DropWebP.ViewModels
@@ -7,7 +9,7 @@ namespace DropWebP.ViewModels
     /// <summary>
     /// ステータスバーのViewModel
     /// </summary>
-    public class StatusBarViewModel : BindableBase
+    public class StatusBarViewModel : BindableBase, INotifyPropertyChanged
     {
         /// <summary>
         /// ステータスバーに表示するテキスト
@@ -25,11 +27,34 @@ namespace DropWebP.ViewModels
         /// プログレスバーの最大値
         /// </summary>
         public ReactiveProperty<int> progressMaximum { get; set; } = new ReactiveProperty<int>(100);
+        public string StatusBarText { get; private set; }
+
         /// <summary>
         /// コンストラクタ
         /// </summary>
         public StatusBarViewModel()
         {
+            Messenger.Default.Register<UpdateStatusBar>(this, OnUpdateStatusBar);
         }
+
+        /// <summary>
+        /// ステータスバーが更新された
+        /// </summary>
+        /// <param name="obj"></param>
+        private void OnUpdateStatusBar(UpdateStatusBar obj)
+        {
+            StatusBarText = obj.Text;
+        }
+
+        /*
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        */
+
     }
 }

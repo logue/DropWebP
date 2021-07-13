@@ -7,7 +7,13 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="Views\DragNDropControl.xaml.cs">
+    <Compile Update="Views\AboutTabItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\ConfigTabItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\HomeTabItem.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\StatusBar.xaml.cs">
@@ -15,7 +21,13 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Views\DragNDropControl.xaml">
+    <Page Update="Views\AboutTabItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\ConfigTabItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\HomeTabItem.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\MainWindow.xaml">
