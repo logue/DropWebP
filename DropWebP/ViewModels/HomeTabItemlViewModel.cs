@@ -3,7 +3,6 @@ using Prism.Commands;
 using Prism.Mvvm;
 using Reactive.Bindings;
 using System;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Interop;
 using Windows.Storage;
@@ -22,7 +21,9 @@ namespace DropWebP.ViewModels
         /// <summary>
         /// Webのエンコーダー
         /// </summary>
-        private IWebPService webPEncorderService;
+        private IWebPService webPService;
+
+        // private IStatusBarViewModel statusBarViewModel;
 
         /// <summary>
         /// ファイルブラウザボタンのコマンド
@@ -42,16 +43,17 @@ namespace DropWebP.ViewModels
         /// <summary>
         /// ドラッグ・アンド・ドロップで画像ファイルをWebPに変換
         /// </summary>
-        public string Message { get; set; } = "Convert image files to WebP by drag and drop";
+        public string Message { get; set; } = "Drag and drop image file(s) to convert WebP.";
 
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public HomeTabItemlViewModel(IWebPService webPEncorderService)
+        public HomeTabItemlViewModel(IWebPService webPService)
         {
             BrowseButtonCommand = new DelegateCommand(ExecuteBrowseButtonCommand);
 
-            this.webPEncorderService = webPEncorderService;
+            this.webPService = webPService;
+            // this.statusBarViewModel = statusBarViewModel;
         }
 
         /// <summary>
@@ -69,22 +71,47 @@ namespace DropWebP.ViewModels
             // ウィンドウバンドルを取得
             IInitializeWithWindow withWindow = picker.As<IInitializeWithWindow>();
             withWindow.Initialize(new WindowInteropHelper(Application.Current.MainWindow).Handle);
+
             // ファイルダイアログを表示
             StorageFile file = await picker.PickSingleFileAsync();
-            if (file != null)
+            // IReadOnlyList<StorageFile> files = await picker.PickMultipleFilesAsync();
+
+            if (file == null)
             {
-                // Application now has read/write access to the picked file
-                Debug.WriteLine(file.Path);
-                webPEncorderService.ConvertWebP(file.Path, Properties.Settings.Default.Lossless ? -1 : Properties.Settings.Default.Quality);
-                MessageDialog dialog = new MessageDialog("Finish");
-                withWindow = dialog.As<IInitializeWithWindow>();
-                withWindow.Initialize(new WindowInteropHelper(Application.Current.MainWindow).Handle);
-                _ = await dialog.ShowAsync();
+                return;
+            }
+
+            webPService.ConvertWebP(file.Path, Properties.Settings.Default.Lossless ? -1 : Properties.Settings.Default.Quality);
+            MessageDialog dialog = new MessageDialog("Finish");
+            withWindow = dialog.As<IInitializeWithWindow>();
+            withWindow.Initialize(new WindowInteropHelper(Application.Current.MainWindow).Handle);
+            _ = await dialog.ShowAsync();
+
+            /*
+            // ファイルの個数
+            int count = files.Count;
+
+            // ダイアログ
+            MessageDialog dialog;
+            if (count == 0)
+            {
+                // 選択されているファイルがない場合
+                dialog = new MessageDialog("Operation cancelled.");
+                return;
             }
             else
             {
-                Debug.WriteLine("Operation cancelled.");
+                for (int i = 0; i <= count - 1; i++)
+                {
+                    webPService.ConvertWebP(files[i].Path, Properties.Settings.Default.Lossless ? -1 : Properties.Settings.Default.Quality);
+                }
+                dialog = new MessageDialog("Finish");
             }
+            withWindow = dialog.As<IInitializeWithWindow>();
+            withWindow.Initialize(new WindowInteropHelper(Application.Current.MainWindow).Handle);
+
+            _ = dialog.ShowAsync();
+            */
         }
     }
 }

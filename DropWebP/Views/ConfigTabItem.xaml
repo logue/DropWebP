@@ -10,22 +10,31 @@
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="av">
     <StackPanel Margin="10">
-        <CheckBox Command="{Binding ToggleLossless}" Content="{Binding LosslessText}" />
-        <GroupBox Header="{Binding QualityText}" IsEnabled="{Binding !ToggleLossless}">
+        <CheckBox
+            x:Name="LosslessCheckBox"
+            Checked="LosslessCheckBox_Checked"
+            Content="{Binding LosslessText}"
+            IsChecked="{Binding ToggleLossless}"
+            Unchecked="LosslessCheckBox_Unchecked" />
+        <GroupBox x:Name="QualityGroup" Header="{Binding QualityText}">
             <StackPanel Orientation="Horizontal">
                 <Slider
+                    x:Name="QualitySlider"
                     Width="200"
                     Maximum="100"
+                    ValueChanged="QualitySlider_ValueChanged"
                     Value="{Binding QualityValue}" />
-                <TextBox Width="30" Text="{Binding QualityValue}" />
+                <TextBox
+                    x:Name="QualityValueText"
+                    Width="30"
+                    Text="{Binding QualityValue}" />
             </StackPanel>
         </GroupBox>
-        <CheckBox Command="{Binding ToggleKeepOriginal}" Content="{Binding KeepOriginalText}" />
+        <CheckBox Content="{Binding KeepOriginalText}" IsChecked="{Binding ToggleKeepOriginal}" />
         <Button
             Margin="24"
-            Command="{Binding BrowseButtonCommand}"
-            Cursor="Hand"
-            Style="{StaticResource ButtonRoundRevealStyle}">
+            Command="{Binding SaveButtonCommand}"
+            Style="{StaticResource ButtonRevealStyle}">
             <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                 <TextBlock
                     VerticalAlignment="Center"

@@ -1,5 +1,12 @@
-﻿using Prism.Commands;
+﻿using DropWebP.Interfaces;
+using Prism.Commands;
 using Prism.Mvvm;
+using Reactive.Bindings;
+using System;
+using System.Windows;
+using System.Windows.Interop;
+using Windows.UI.Popups;
+using WinRT;
 
 namespace DropWebP.ViewModels
 {
@@ -21,10 +28,7 @@ namespace DropWebP.ViewModels
         public bool ToggleLossless
         {
             get => Properties.Settings.Default.Lossless;
-            set
-            {
-                Properties.Settings.Default.Lossless = value;
-            }
+            set => Properties.Settings.Default.Lossless = value;
         }
 
         /// <summary>
@@ -38,10 +42,7 @@ namespace DropWebP.ViewModels
         public long QualityValue
         {
             get => Properties.Settings.Default.Quality;
-            set
-            {
-                Properties.Settings.Default.Quality = value;
-            }
+            set => Properties.Settings.Default.Quality = value;
         }
 
         /// <summary>
@@ -55,10 +56,7 @@ namespace DropWebP.ViewModels
         public bool ToggleKeepOriginal
         {
             get => Properties.Settings.Default.KeepOriginal;
-            set
-            {
-                Properties.Settings.Default.KeepOriginal = value;
-            }
+            set => Properties.Settings.Default.KeepOriginal = value;
         }
 
         /// <summary>
@@ -82,10 +80,16 @@ namespace DropWebP.ViewModels
         /// <summary>
         /// 設定保存
         /// </summary>
-        private void ExecuteSaveButtonCommand()
+        private async void ExecuteSaveButtonCommand()
         {
+            MessageDialog dialog = new MessageDialog("Saved");
+            // ウィンドウバンドルを取得
+            IInitializeWithWindow withWindow = dialog.As<IInitializeWithWindow>();
+            withWindow.Initialize(new WindowInteropHelper(Application.Current.MainWindow).Handle);
+            // 設定を保存
             Properties.Settings.Default.Save();
-            // TODO: 保存完了通知
+            // 保存完了通知
+            _ = await dialog.ShowAsync();
         }
     }
 }

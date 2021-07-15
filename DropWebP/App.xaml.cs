@@ -2,6 +2,7 @@
 using DropWebP.Service;
 using DropWebP.ViewModels;
 using DropWebP.Views;
+using Prism.DryIoc;
 using Prism.Ioc;
 using Prism.Mvvm;
 using System;
@@ -16,7 +17,8 @@ namespace DropWebP
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-    public partial class App
+    public partial class App : PrismApplication
+
     {
         // 外部プロセスのメイン・ウィンドウを起動するためのWin32 API
         [DllImport("user32.dll")]
@@ -29,7 +31,10 @@ namespace DropWebP
         private const int SW_RESTORE = 9;
         Semaphore semaphore = null;
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         protected override Window CreateShell()
         {
             // 複数インスタンスが動かないようにするための処理
@@ -62,12 +67,19 @@ namespace DropWebP
             return null;
         }
 
+        /// <summary>
+        /// コンテナを登録
+        /// </summary>
+        /// <param name="containerRegistry"></param>
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
             // エンコーダー
             containerRegistry.RegisterSingleton<IWebPService, WebPService>();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         protected override void ConfigureViewModelLocator()
         {
             base.ConfigureViewModelLocator();

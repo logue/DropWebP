@@ -8,6 +8,10 @@ namespace DropWebP.Views
     /// </summary>
     public partial class AboutTabItem : UserControl
     {
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="vm">ビューモデル</param>
         public AboutTabItem(AboutTabItemViewModel vm)
         {
             InitializeComponent();

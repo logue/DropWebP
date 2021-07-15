@@ -1,13 +1,20 @@
-﻿namespace DropWebP.Views
+﻿using DropWebP.ViewModels;
+
+namespace DropWebP.Views
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow
     {
-        public MainWindow()
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        public MainWindow(MainWindowViewModel vm)
         {
             InitializeComponent();
+            DataContext = vm;
         }
     }
 }
+

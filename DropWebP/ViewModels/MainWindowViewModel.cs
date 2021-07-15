@@ -13,9 +13,6 @@ namespace DropWebP.ViewModels
 {
     public class MainWindowViewModel : BindableBase
     {
-        private IRegionManager regionManager;
-        private IEventAggregator eventAggregator;
-
         /// <summary>
         /// MainWindowのCloseイベント
         /// </summary>
@@ -41,7 +38,20 @@ namespace DropWebP.ViewModels
         /// </summary>
         public ReactiveCommand<DragEventArgs> DropCommand { get; } = new ReactiveCommand<DragEventArgs>();
 
-        public IWebPService webPEncorderService;
+        /// <summary>
+        /// プログレスリングの表示制御
+        /// </summary>
+        public Visibility ProgressRing { get; set; } = Visibility.Hidden;
+
+        /// <summary>
+        /// ステータスバーのビューモデル
+        /// </summary>
+        // public IStatusBarViewModel statusBarViewModel;
+
+        /// <summary>
+        /// WebPサービス
+        /// </summary>
+        public IWebPService webPService;
 
         /// <summary>
         /// タイトル
@@ -50,7 +60,7 @@ namespace DropWebP.ViewModels
 
         /// <summary>コンストラクタ</summary>
         /// <param name="regionManager">インジェクションするIRegionManager。</param>
-        public MainWindowViewModel(IRegionManager regionManager, IEventAggregator eventAggregator, IWebPService webPEncorderService)
+        public MainWindowViewModel(IRegionManager regionManager, IEventAggregator eventAggregator, IWebPService webPService)
         {
             regionManager.RegisterViewWithRegion("ContentRegion", typeof(HomeTabItem));
             regionManager.RegisterViewWithRegion("ContentRegion", typeof(ConfigTabItem));
@@ -61,10 +71,9 @@ namespace DropWebP.ViewModels
             DropCommand.Subscribe(ImageDrop).AddTo(Disposable);
             ClosedCommand.Subscribe(Close).AddTo(Disposable);
 
-            this.regionManager = regionManager;
-            this.eventAggregator = eventAggregator;
+            // this.statusBarViewModel = statusBarViewModel;
 
-            this.webPEncorderService = webPEncorderService;
+            this.webPService = webPService;
         }
 
         /// <summary>
@@ -95,8 +104,34 @@ namespace DropWebP.ViewModels
         {
             // ドロップされたものがFileDrop形式の場合は、各ファイルのパス文字列を文字列配列に格納する。
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            // 複数ドロップの可能性もあるので、今回は最初のファイルを選択して表示
-            webPEncorderService.ConvertWebP(files[0], -1);
+            // ファイルの個数
+            int count = files.Length;
+
+            /*
+            // ステータスバーのビューモデルの更新
+            statusBarViewModel.ProgressBarVisibility.Value = Visibility.Visible;
+            statusBarViewModel.Progress.Value = 0;
+            statusBarViewModel.ProgressMaximum.Value = count;
+            */
+            // 進捗リングを表示
+            ProgressRing = Visibility.Visible;
+
+            for (int i = 0; i <= count - 1; i++)
+            {
+                /*
+                statusBarViewModel.Progress.Value = i;
+                statusBarViewModel.StatusBarText.Value = files[i];
+                */
+                // Debug.WriteLine(files[i]);
+                webPService.ConvertWebP(files[i], Properties.Settings.Default.Lossless ? -1 : Properties.Settings.Default.Quality);
+            }
+
+            // 進捗リングを非表示
+            ProgressRing = Visibility.Hidden;
+            /*
+            statusBarViewModel.ProgressBarVisibility.Value = Visibility.Hidden;
+            statusBarViewModel.StatusBarText.Value = "Finish.";
+            */
         }
     }
 }

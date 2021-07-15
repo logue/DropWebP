@@ -9,10 +9,7 @@
     av:DataContext="{av:DesignInstance Type=viewmodels:HomeTabItemlViewModel}"
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="av">
-    <StackPanel
-        HorizontalAlignment="Center"
-        VerticalAlignment="Center"
-        AllowDrop="True">
+    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
         <TextBlock
             HorizontalAlignment="Center"
             FontFamily="Segoe MDL2 Assets"
@@ -22,8 +19,7 @@
         <Button
             Margin="24"
             Command="{Binding BrowseButtonCommand}"
-            Cursor="Hand"
-            Style="{StaticResource ButtonRoundRevealStyle}">
+            Style="{StaticResource ButtonRevealStyle}">
 
             <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                 <TextBlock
@@ -34,4 +30,5 @@
             </StackPanel>
         </Button>
     </StackPanel>
+
 </UserControl>

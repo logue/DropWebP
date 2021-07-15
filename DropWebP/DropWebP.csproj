@@ -15,9 +15,9 @@
     <Copyright>(c) 2021 Masashi Yoshikawa</Copyright>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/logue/DropWebP</PackageProjectUrl>
-    <AssemblyVersion>0.0.2.0</AssemblyVersion>
-    <FileVersion>0.0.2.0</FileVersion>
-    <Version>0.0.1-alpha</Version>
+    <AssemblyVersion>0.0.2.1</AssemblyVersion>
+    <FileVersion>0.0.2.1</FileVersion>
+    <Version>0.2.1-alpha</Version>
     <Description>Encode image file to WebP.</Description>
     <RepositoryUrl>git@github.com:logue/DropWebP.git</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
@@ -95,6 +95,7 @@
     <PackageReference Include="Prism.DryIoc" Version="8.1.97" />
     <PackageReference Include="FluentWPF" Version="0.9.0" />
     <PackageReference Include="ReactiveProperty.WPF" Version="7.11.0" />
+    <PackageReference Include="WindowsProgressRing" Version="1.0.0" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\LICENSE">

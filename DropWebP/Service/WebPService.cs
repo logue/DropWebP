@@ -1,5 +1,4 @@
 ﻿using DropWebP.Interfaces;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
@@ -51,6 +50,7 @@ namespace DropWebP.Service
 
             ConvertWebP(path, outputPath, quality);
         }
+
         /// <summary>
         /// ファイルをWebPに変換する
         /// </summary>
@@ -59,34 +59,33 @@ namespace DropWebP.Service
         /// <param name="quality">品質。負数で無劣化圧縮</param>
         public void ConvertWebP(string path, string outputPath, long quality = -1)
         {
-            if (!File.Exists(path))
-            {
-                throw new FileNotFoundException();
-            }
-            // 画像ファイル読み込み
-            Bitmap bitmap = new Bitmap(path);
-
-            // WebPに変換
-            File.WriteAllBytes(outputPath, EncodeWebP(bitmap, quality));
+            // ファイルに書き出し
+            File.WriteAllBytes(outputPath, EncodeWebP(LoadBitmap(path), quality));
         }
 
-        // <summary>
-        /// WebPで変換する
+        /// <summary>
+        /// ファイルをWebPに変換する（非同期版）
+        /// </summary>
+        /// <param name="path">ファイルの入力パス</param>
+        /// <param name="quality">品質。負数で無劣化圧縮</param>
+        public Task ConvertWebPAsync(string path, long quality = -1)
+        {
+            // 出力ファイル名
+            string outputPath = GetFileName(path) + ".webp";
+
+            return ConvertWebPAsync(path, outputPath, quality);
+        }
+
+        /// <summary>
+        /// ファイルをWebPに変換する（非同期版）
         /// </summary>
         /// <param name="path">ファイルの入力パス</param>
         /// <param name="outputPath">ファイルの出力先</param>
         /// <param name="quality">品質。負数で無劣化圧縮</param>
         public Task ConvertWebPAsync(string path, string outputPath, long quality = -1)
         {
-            if (!File.Exists(path))
-            {
-                throw new FileNotFoundException();
-            }
-            // 画像ファイル読み込み
-            Bitmap bitmap = new Bitmap(path);
-
             // ファイルに書き出し
-            return File.WriteAllBytesAsync(outputPath, EncodeWebP(bitmap, quality));
+            return File.WriteAllBytesAsync(outputPath, EncodeWebP(LoadBitmap(path), quality));
         }
 
         /// <summary>
@@ -102,6 +101,31 @@ namespace DropWebP.Service
                 return path;
             }
             return path.Replace(extension, string.Empty);
+        }
+
+        /// <summary>
+        /// Load Bitmap
+        /// </summary>
+        /// <see cref="https://stackoverflow.com/questions/2808753/right-way-to-dispose-image-bitmap-and-picturebox"/>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        private static Bitmap LoadBitmap(string path)
+        {
+            if (!File.Exists(path))
+            {
+                throw new FileNotFoundException();
+            }
+
+            //Open file in read only mode
+            using (FileStream stream = new FileStream(path, FileMode.Open, FileAccess.Read))
+            //Get a binary reader for the file stream
+            using (BinaryReader reader = new BinaryReader(stream))
+            {
+                //copy the content of the file into a memory stream
+                var memoryStream = new MemoryStream(reader.ReadBytes((int)stream.Length));
+                //make a new Bitmap object the owner of the MemoryStream
+                return new Bitmap(memoryStream);
+            }
         }
     }
 }

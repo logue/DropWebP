@@ -2,70 +2,72 @@
     x:Class="DropWebP.Views.AboutTabItem"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:av="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
-    prism:ViewModelLocator.AutoWireViewModel="True">
+    xmlns:viewmodels="clr-namespace:DropWebP.ViewModels"
+    av:DataContext="{av:DesignInstance Type=viewmodels:AboutTabItemViewModel}"
+    prism:ViewModelLocator.AutoWireViewModel="True"
+    mc:Ignorable="av">
     <Grid Margin="3" VerticalAlignment="Stretch">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto" />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto" />
-            <RowDefinition Height="auto" />
-            <RowDefinition Height="20" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Image
             x:Name="Logo"
             Grid.Row="0"
             Grid.RowSpan="5"
             Grid.Column="0"
-            Grid.ColumnSpan="1"
-            Width="128"
-            Height="128"
-            Margin="10,0"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Source="/Resources/vise.png"
-            Stretch="Fill"
-            StretchDirection="Both" />
+            Width="64"
+            Height="64"
+            Margin="0,-1,0,0"
+            Source="/Resources/vise.png" />
         <TextBlock
             x:Name="TextBlock_ProductName"
             Grid.Row="0"
             Grid.Column="1"
             FontSize="24"
-            Text="ProductName" />
+            Text="{Binding Title}" />
         <TextBlock
             x:Name="TextBlock_ProductDescription"
             Grid.Row="1"
             Grid.Column="1"
-            Text="ProductDescription" />
+            Text="{Binding Description}" />
         <TextBlock
             x:Name="TextBlock_ProductVersion"
+            Grid.Row="2"
+            Grid.Column="1"
+            Text="{Binding Version}" />
+        <TextBlock
+            x:Name="TextBlock_WebPVersion"
             Grid.Row="3"
             Grid.Column="1"
-            Text="Version" />
+            Text="{Binding WebPVersion}" />
         <TextBlock
             x:Name="TextBlock_ProductCopyright"
             Grid.Row="4"
             Grid.Column="1"
             VerticalAlignment="Bottom"
-            Text="Copyright" />
+            Text="{Binding Copyright}" />
         <Button
             x:Name="Button_Visit"
             Grid.Row="5"
-            Grid.RowSpan="2"
             Grid.Column="1"
+            Grid.ColumnSpan="2"
             Margin="5"
-            Padding="10,6"
             HorizontalAlignment="Right"
             VerticalAlignment="Bottom"
             Command="{Binding VisitButtonCommand}"
-            Cursor="Hand"
-            Style="{StaticResource ButtonRoundRevealStyle}">
+            Style="{StaticResource ButtonRevealStyle}">
             <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                 <TextBlock
                     VerticalAlignment="Center"
