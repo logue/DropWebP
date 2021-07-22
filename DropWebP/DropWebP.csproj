@@ -1,101 +1,45 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net5.0-windows10.0.19041.0</TargetFramework>
-    <UseWPF>true</UseWPF>
-    <AssemblyName>DropWebP</AssemblyName>
-    <StartupObject>DropWebP.App</StartupObject>
-    <Platforms>AnyCPU;x64;x86</Platforms>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <SignAssembly>false</SignAssembly>
-    <Authors>Masashi Yoshikawa</Authors>
-    <Company>Logue</Company>
-    <Copyright>(c) 2021 Masashi Yoshikawa</Copyright>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageProjectUrl>https://github.com/logue/DropWebP</PackageProjectUrl>
-    <AssemblyVersion>0.0.2.1</AssemblyVersion>
-    <FileVersion>0.0.2.1</FileVersion>
-    <Version>0.2.1-alpha</Version>
-    <Description>Encode image file to WebP.</Description>
-    <RepositoryUrl>git@github.com:logue/DropWebP.git</RepositoryUrl>
-    <RepositoryType>Git</RepositoryType>
     <ApplicationIcon>Resources\vise.ico</ApplicationIcon>
+    <AssemblyName>DropWebP</AssemblyName>
+    <AssemblyVersion>0.0.2.1</AssemblyVersion>
+    <Authors>Masashi Yoshikawa</Authors>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Company>Logue</Company>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Copyright>(c) 2021 Masashi Yoshikawa</Copyright>
+    <Description>Encode image file to WebP.</Description>
+    <FileVersion>0.0.2.1</FileVersion>
+    <OutputType>WinExe</OutputType>
     <PackageIcon>vise.png</PackageIcon>
     <PackageIconUrl />
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/logue/DropWebP</PackageProjectUrl>
     <PackageTags>WebP</PackageTags>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Platforms>AnyCPU;x64;x86</Platforms>
+    <RepositoryType>Git</RepositoryType>
+    <RepositoryUrl>git@github.com:logue/DropWebP.git</RepositoryUrl>
+    <SignAssembly>false</SignAssembly>
+    <StartupObject>DropWebP.App</StartupObject>
+    <TargetFramework>net5.0-windows10.0.19041.0</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Version>0.2.1-alpha</Version>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <TargetPlatformVersion>10.0</TargetPlatformVersion>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <TargetPlatformVersion>10.0</TargetPlatformVersion>
-    <PlatformTarget>x86</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <TargetPlatformVersion>10.0</TargetPlatformVersion>
-    <PlatformTarget>x64</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <TargetPlatformVersion>10.0</TargetPlatformVersion>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-    <TargetPlatformVersion>10.0</TargetPlatformVersion>
-    <PlatformTarget>x86</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <TargetPlatformVersion>10.0</TargetPlatformVersion>
-    <PlatformTarget>x64</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  <PropertyGroup>
+    <EnableTypeInfoReflection>false</EnableTypeInfoReflection>
+    <EnableXBindDiagnostics>false</EnableXBindDiagnostics>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="DropWebP %28Package%29\**" />
+    <EmbeddedResource Remove="DropWebP %28Package%29\**" />
+    <None Remove="DropWebP %28Package%29\**" />
+    <Page Remove="DropWebP %28Package%29\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MahApps.Metro" Version="2.4.7" />
     <PackageReference Include="Prism.DryIoc" Version="8.1.97" />
-    <PackageReference Include="FluentWPF" Version="0.9.0" />
     <PackageReference Include="ReactiveProperty.WPF" Version="7.11.0" />
-    <PackageReference Include="WindowsProgressRing" Version="1.0.0" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\LICENSE">

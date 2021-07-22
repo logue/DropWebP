@@ -1,6 +1,8 @@
 ﻿using DropWebP.Interfaces;
-using DropWebP.Utility;
+using DropWebP.Services;
+using Prism.Events;
 using Prism.Mvvm;
+using Prism.Regions;
 using Reactive.Bindings;
 using System.ComponentModel;
 using System.Windows;
@@ -12,6 +14,9 @@ namespace DropWebP.ViewModels
     /// </summary>
     public class StatusBarViewModel : BindableBase, INotifyPropertyChanged, IStatusBarViewModel
     {
+        private IEventAggregator eventAggregator;
+        private IRegionManager regionManager;
+
         /// <summary>
         /// ステータスバーに表示するテキスト
         /// </summary>
@@ -35,18 +40,28 @@ namespace DropWebP.ViewModels
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public StatusBarViewModel()
+        public StatusBarViewModel(IEventAggregator eventAggregator, IRegionManager regionManager)
         {
-            Messenger.Default.Register<UpdateStatusBar>(this, OnUpdateStatusBar);
+            _ = eventAggregator.GetEvent<StatusBarService>().Subscribe(OnUpdateStatusBar);
         }
 
         /// <summary>
         /// ステータスバーが更新された
         /// </summary>
         /// <param name="obj"></param>
-        private void OnUpdateStatusBar(UpdateStatusBar obj)
+        private void OnUpdateStatusBar(StatusBarEvent e)
         {
-            StatusBarText.Value = obj.Text;
+            StatusBarText.Value = e.message;
+            if (e.progressMaximum != 0)
+            {
+                ProgressBarVisibility.Value = Visibility.Visible;
+                ProgressMaximum.Value = e.progressMaximum;
+                Progress.Value = e.progress;
+            }
+            else
+            {
+                ProgressBarVisibility.Value = Visibility.Collapsed;
+            }
         }
     }
 }

@@ -1,14 +1,15 @@
 ﻿<UserControl
-    x:Class="DropWebP.Views.HomeTabItem"
+    x:Class="DropWebP.Views.HomeContent"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:av="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
     xmlns:viewmodels="clr-namespace:DropWebP.ViewModels"
-    av:DataContext="{av:DesignInstance Type=viewmodels:HomeTabItemlViewModel}"
+    d:DataContext="{d:DesignInstance Type=viewmodels:HomeContentViewModel}"
     prism:ViewModelLocator.AutoWireViewModel="True"
-    mc:Ignorable="av">
+    mc:Ignorable="d">
     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
         <TextBlock
             HorizontalAlignment="Center"
@@ -17,12 +18,12 @@
             Text="&#xE8B9;" />
         <TextBlock HorizontalAlignment="Center" Text="{Binding Message}" />
         <Button
-            Margin="24"
+            mah:ControlsHelper.RecognizesAccessKey="True"
             Command="{Binding BrowseButtonCommand}"
-            Style="{StaticResource ButtonRevealStyle}">
-
+            Style="{StaticResource MahApps.Styles.Button}">
             <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                 <TextBlock
+                    Margin="0,0,5,0"
                     VerticalAlignment="Center"
                     FontFamily="Segoe MDL2 Assets"
                     Text="&#xE838;" />
@@ -30,5 +31,4 @@
             </StackPanel>
         </Button>
     </StackPanel>
-
 </UserControl>

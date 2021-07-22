@@ -1,20 +1,21 @@
 ﻿using DropWebP.ViewModels;
+using System.Windows.Controls;
 
 namespace DropWebP.Views
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for AboutTabItem
     /// </summary>
-    public partial class MainWindow
+    public partial class AboutDialog : UserControl
     {
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public MainWindow(MainWindowViewModel vm)
+        /// <param name="vm">ビューモデル</param>
+        public AboutDialog(AboutDialogViewModel vm)
         {
             InitializeComponent();
             DataContext = vm;
         }
     }
 }
-

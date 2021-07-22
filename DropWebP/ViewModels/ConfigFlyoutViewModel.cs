@@ -1,21 +1,37 @@
-﻿using DropWebP.Interfaces;
+﻿using DropWebP.Services;
+using MahApps.Metro.Controls;
 using Prism.Commands;
+using Prism.Events;
 using Prism.Mvvm;
-using Reactive.Bindings;
-using System;
-using System.Windows;
-using System.Windows.Interop;
-using Windows.UI.Popups;
-using WinRT;
+using Prism.Regions;
+using System.Diagnostics;
 
 namespace DropWebP.ViewModels
 {
-    public class ConfigTabItemViewModel : BindableBase
+    public class ConfigFlyoutViewModel : BindableBase, INavigationAware
     {
+        private IEventAggregator eventAggregator;
+        private IRegionManager regionManager;
+
         /// <summary>
-        /// タブ名
+        /// Flyoutの題名
         /// </summary>
-        public string Name { get; set; } = "Config";
+        public string Header { get; set; } = "Config";
+
+        /// <summary>
+        /// Flyout開閉フラグ
+        /// </summary>
+        public bool IsOpen { get; set; } = false;
+
+        /// <summary>
+        /// Flyoutの高さ
+        /// </summary>
+        public int Height { get; set; } = 200;
+
+        /// <summary>
+        /// Flyoutの位置
+        /// </summary>
+        public Position Position { get; set; } = Position.Left;
 
         /// <summary>
         /// 可逆圧縮
@@ -69,27 +85,54 @@ namespace DropWebP.ViewModels
         /// </summary>
         public string SaveText { get; set; } = "Save Configure";
 
+        private string data;
+
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public ConfigTabItemViewModel()
+        public ConfigFlyoutViewModel(IEventAggregator eventAggregator, IRegionManager regionManager)
         {
             SaveButtonCommand = new DelegateCommand(ExecuteSaveButtonCommand);
+
+            this.eventAggregator = eventAggregator;
+            this.regionManager = regionManager;
+
+            _ = eventAggregator.GetEvent<MessageService>().Subscribe(OnMesageReceieved);
         }
 
         /// <summary>
         /// 設定保存
         /// </summary>
-        private async void ExecuteSaveButtonCommand()
+        private void ExecuteSaveButtonCommand()
         {
-            MessageDialog dialog = new MessageDialog("Saved");
-            // ウィンドウバンドルを取得
-            IInitializeWithWindow withWindow = dialog.As<IInitializeWithWindow>();
-            withWindow.Initialize(new WindowInteropHelper(Application.Current.MainWindow).Handle);
             // 設定を保存
             Properties.Settings.Default.Save();
-            // 保存完了通知
-            _ = await dialog.ShowAsync();
+        }
+
+
+        private void OnMesageReceieved(string obj)
+        {
+            Debug.WriteLine("イベント受け取り", obj);
+            IsOpen = true;
+        }
+
+        public void OnNavigatedTo(NavigationContext navigationContext)
+        {
+            IsOpen = true;
+            Debug.WriteLine("OnNavigatedTo");
+        }
+
+        public bool IsNavigationTarget(NavigationContext navigationContext)
+        {
+            Debug.WriteLine("IsNavigationTarget");
+            //return true;
+            return data != null;
+        }
+
+        public void OnNavigatedFrom(NavigationContext navigationContext)
+        {
+            Debug.WriteLine("OnNavigatedFrom");
+            IsOpen = true;
         }
     }
 }

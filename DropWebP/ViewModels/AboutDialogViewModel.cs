@@ -1,15 +1,20 @@
 ﻿using Prism.Commands;
 using Prism.Mvvm;
+using Prism.Services.Dialogs;
+using System;
+using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using WebP.Net;
 
 namespace DropWebP.ViewModels
 {
     /// <summary>
-    /// アバウトタブのビューモデル
+    /// アバウト画面のビューモデル
     /// </summary>
-    public class AboutTabItemViewModel : BindableBase
+    public class AboutDialogViewModel : BindableBase, IDialogAware
     {
+        #region Properties
         /// <summary>
         /// タブ名
         /// </summary>
@@ -117,19 +122,63 @@ namespace DropWebP.ViewModels
         }
 
         /// <summary>
+        /// ダイアログのCloseを要求するAction。
+        /// </summary>
+        public event Action<IDialogResult> RequestClose;
+        #endregion
+
+        /// <summary>
         /// コンストラクタ
         /// </summary>
-        public AboutTabItemViewModel()
+        public AboutDialogViewModel()
         {
             VisitButtonCommand = new DelegateCommand(ExecuteVisitButtonCommand);
         }
+
+        /// <summary>ダイアログがClose可能かを取得します。</summary>
+        /// <returns></returns>
+        public bool CanCloseDialog() { return true; }
+
+        /// <summary>ダイアログClose時のイベントハンドラ。</summary>
+        public void OnDialogClosed() { }
+
+        /// <summary>ダイアログOpen時のイベントハンドラ。</summary>
+        /// <param name="parameters">IDialogServiceに設定されたパラメータを表すIDialogParameters。</param>
+        public void OnDialogOpened(IDialogParameters parameters) { }
 
         /// <summary>
         /// プロジェクトサイト閲覧ボタンを実行
         /// </summary>
         private void ExecuteVisitButtonCommand()
         {
-            System.Diagnostics.Process.Start("https://github.com/logue/DropWebP");
+            string url = "https://github.com/logue/DropWebP";
+            try
+            {
+                Process.Start(url);
+            }
+            catch
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    //Windowsのとき  
+                    url = url.Replace("&", "^&");
+                    Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    //Linuxのとき  
+                    Process.Start("xdg-open", url);
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    //Macのとき  
+                    Process.Start("open", url);
+                }
+                else
+                {
+                    throw;
+                }
+            }
         }
     }
 }

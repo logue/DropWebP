@@ -39,7 +39,7 @@ namespace DropWebP.Interfaces
         public void ConvertWebP(string path, string outputPath, long quality);
 
         /// <summary>
-        /// WebPで変換する
+        /// WebPで変換する（非同期版）
         /// </summary>
         /// <param name="path">ファイルの入力パス</param>
         /// <param name="quality">品質。負数で無劣化圧縮</param>

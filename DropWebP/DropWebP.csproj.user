@@ -9,30 +9,31 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="Views\AboutTabItem.xaml.cs">
+    <Compile Update="Views\AboutDialog.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Views\ConfigTabItem.xaml.cs">
+    <Compile Update="Views\ConfigFlyout.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Views\HomeTabItem.xaml.cs">
+    <Compile Update="Views\HomeContent.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\StatusBar.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Page Update="Views\AboutTabItem.xaml">
+    <Page Update="Views\AboutDialog.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Views\ConfigTabItem.xaml">
+    <Page Update="Views\ConfigFlyout.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Views\HomeTabItem.xaml">
+    <Page Update="Views\HomeContent.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Views\MainWindow.xaml">
+    <Page Update="Views\ShellWindow.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\StatusBar.xaml">

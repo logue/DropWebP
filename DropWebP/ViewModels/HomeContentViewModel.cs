@@ -16,7 +16,7 @@ namespace DropWebP.ViewModels
     /// ドラッグアンドロップする領域のViewModel
     /// https://github.com/nabehiro22/Image_DragAndDrop のコードを流用
     /// </summary>
-    public class HomeTabItemlViewModel : BindableBase
+    public class HomeContentViewModel : BindableBase
     {
         /// <summary>
         /// Webのエンコーダー
@@ -48,7 +48,7 @@ namespace DropWebP.ViewModels
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public HomeTabItemlViewModel(IWebPService webPService)
+        public HomeContentViewModel(IWebPService webPService)
         {
             BrowseButtonCommand = new DelegateCommand(ExecuteBrowseButtonCommand);
 

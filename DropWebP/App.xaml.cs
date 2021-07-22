@@ -1,14 +1,11 @@
 ﻿using DropWebP.Interfaces;
 using DropWebP.Service;
-using DropWebP.ViewModels;
+using DropWebP.Utility;
 using DropWebP.Views;
+using MahApps.Metro.Controls;
 using Prism.DryIoc;
 using Prism.Ioc;
-using Prism.Mvvm;
-using System;
-using System.Diagnostics;
-using System.Reflection;
-using System.Runtime.InteropServices;
+using Prism.Regions;
 using System.Threading;
 using System.Windows;
 
@@ -18,18 +15,8 @@ namespace DropWebP
     /// Interaction logic for App.xaml
     /// </summary>
     public partial class App : PrismApplication
-
     {
-        // 外部プロセスのメイン・ウィンドウを起動するためのWin32 API
-        [DllImport("user32.dll")]
-        private static extern bool SetForegroundWindow(IntPtr hWnd);
-        [DllImport("user32.dll")]
-        private static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
-        [DllImport("user32.dll")]
-        private static extern bool IsIconic(IntPtr hWnd);
-        // ShowWindowAsync関数のパラメータに渡す定義値(画面を元の大きさに戻す)
-        private const int SW_RESTORE = 9;
-        Semaphore semaphore = null;
+        private Mutex mutex = new(false, "DropWebP");
 
         /// <summary>
         /// 
@@ -37,34 +24,7 @@ namespace DropWebP
         /// <returns></returns>
         protected override Window CreateShell()
         {
-            // 複数インスタンスが動かないようにするための処理
-            semaphore = new Semaphore(1, 1, Assembly.GetExecutingAssembly().GetName().Name, out bool createdNew);
-            // まだアプリが起動してなければ
-            if (createdNew)
-            {
-                return Container.Resolve<MainWindow>();
-            }
-            // 既にアプリが起動していればそのアプリを前面に出す
-            foreach (var p in Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName))
-            {
-                // 自分自身のプロセスIDは無視する
-                if (p.Id != Process.GetCurrentProcess().Id)
-                {
-                    // プロセスのフルパス名を比較して同じアプリケーションか検証
-                    if (p.MainModule.FileName == Process.GetCurrentProcess().MainModule.FileName)
-                    {
-                        // メイン・ウィンドウが最小化されていれば元に戻す
-                        if (IsIconic(p.MainWindowHandle))
-                        {
-                            ShowWindowAsync(p.MainWindowHandle, SW_RESTORE);
-                        }
-                        // メイン・ウィンドウを最前面に表示する
-                        SetForegroundWindow(p.MainWindowHandle);
-                    }
-                }
-            }
-            Shutdown();
-            return null;
+            return Container.Resolve<ShellWindow>();
         }
 
         /// <summary>
@@ -73,6 +33,8 @@ namespace DropWebP
         /// <param name="containerRegistry"></param>
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
+            // ダイアログのデザインを揃える
+            containerRegistry.RegisterDialogWindow<MetroDialogWindow>();
             // エンコーダー
             containerRegistry.RegisterSingleton<IWebPService, WebPService>();
         }
@@ -80,11 +42,34 @@ namespace DropWebP
         /// <summary>
         /// 
         /// </summary>
-        protected override void ConfigureViewModelLocator()
+        protected override void ConfigureRegionAdapterMappings(RegionAdapterMappings regionAdapterMappings)
         {
-            base.ConfigureViewModelLocator();
+            base.ConfigureRegionAdapterMappings(regionAdapterMappings);
+            regionAdapterMappings.RegisterMapping(typeof(FlyoutsControl), Container.Resolve<FlyoutsControlRegionAdapter>());
+        }
 
-            ViewModelLocationProvider.Register<MainWindow, MainWindowViewModel>();
+        private void PrismApplication_Exit(object sender, ExitEventArgs e)
+        {
+            if (mutex.WaitOne(0, false))
+            {
+                return;
+            }
+
+            MessageBox.Show("多重起動はできません。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+            mutex.Close();
+            mutex = null;
+            Shutdown();
+        }
+
+        private void PrismApplication_Startup(object sender, StartupEventArgs e)
+        {
+            /*
+            if (mutex != null)
+            {
+                mutex.ReleaseMutex();
+                mutex.Close();
+            }
+            */
         }
     }
 }
