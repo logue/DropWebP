@@ -44,8 +44,8 @@ namespace DropWebP
         /// </summary>
         protected override void ConfigureRegionAdapterMappings(RegionAdapterMappings regionAdapterMappings)
         {
-            base.ConfigureRegionAdapterMappings(regionAdapterMappings);
             regionAdapterMappings.RegisterMapping(typeof(FlyoutsControl), Container.Resolve<FlyoutsControlRegionAdapter>());
+            base.ConfigureRegionAdapterMappings(regionAdapterMappings);
         }
 
         private void PrismApplication_Exit(object sender, ExitEventArgs e)

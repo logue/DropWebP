@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using MahApps.Metro.Controls;
+using System.Drawing;
 using System.Threading.Tasks;
 
 namespace DropWebP.Interfaces
@@ -52,5 +53,12 @@ namespace DropWebP.Interfaces
         /// <param name="outputPath">ファイルの出力先</param>
         /// <param name="quality">品質。負数で無劣化圧縮</param>
         public Task ConvertWebPAsync(string path, string outputPath, long quality);
+
+        /// <summary>
+        /// 変換処理
+        /// </summary>
+        /// <param name="files">変換対象のファイル</param>
+        /// <param name="Shell">親画面</param>
+        public void Convert(string[] files, MetroWindow Shell);
     }
 }

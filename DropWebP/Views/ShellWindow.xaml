@@ -4,17 +4,23 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
+    xmlns:r1="clr-namespace:Reactive.Bindings.Interactivity;assembly=ReactiveProperty.WPF"
     xmlns:viewmodels="clr-namespace:DropWebP.ViewModels"
     Title="{Binding Title}"
     Width="480"
     Height="320"
+    MinWidth="480"
+    MinHeight="320"
     Dialog:DialogParticipation.Register="{Binding}"
     d:DataContext="{d:DesignInstance Type=viewmodels:ShellWindowViewModel}"
     prism:ViewModelLocator.AutoWireViewModel="True"
     AllowDrop="True"
+    BorderThickness="1"
     GlowBrush="{DynamicResource MahApps.Brushes.Accent}"
     ShowMaxRestoreButton="False"
     mc:Ignorable="d">
@@ -28,13 +34,18 @@
                     Text="&#xE8BD;" />
             </Button>
             <Button Command="{Binding ConfigButtonCommand}">
-                <TextBlock
-                    VerticalAlignment="Center"
-                    FontFamily="Segoe MDL2 Assets"
-                    Text="&#xE713;" />
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock
+                        Margin="0,0,5,0"
+                        VerticalAlignment="Center"
+                        FontFamily="Segoe MDL2 Assets"
+                        Text="&#xE713;" />
+                    <TextBlock VerticalAlignment="Center" Text="{Binding ConfigText}" />
+                </StackPanel>
             </Button>
         </mah:WindowCommands>
     </mah:MetroWindow.RightWindowCommands>
+    <!--  flyout  -->
     <mah:MetroWindow.Flyouts>
         <mah:FlyoutsControl prism:RegionManager.RegionName="FlyoutRegion">
             <mah:FlyoutsControl.ItemContainerStyle>
@@ -42,12 +53,24 @@
                     <Setter Property="Header" Value="{Binding Header}" />
                     <Setter Property="IsOpen" Value="{Binding IsOpen}" />
                     <Setter Property="Position" Value="{Binding Position}" />
+                    <Setter Property="Theme" Value="Inverse" />
                 </Style>
             </mah:FlyoutsControl.ItemContainerStyle>
         </mah:FlyoutsControl>
     </mah:MetroWindow.Flyouts>
+    <!--  D&D  -->
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="PreviewDragOver">
+            <r1:EventToReactiveCommand Command="{Binding PreviewDragOverCommand}" />
+        </i:EventTrigger>
+        <i:EventTrigger EventName="Drop">
+            <r1:EventToReactiveCommand Command="{Binding DropCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <Grid>
-        <ContentControl prism:RegionManager.RegionName="ContentRegion" />
-        <mah:ProgressRing IsActive="{Binding ProgressRing}" />
+        <ContentControl
+            HorizontalContentAlignment="Stretch"
+            VerticalContentAlignment="Stretch"
+            prism:RegionManager.RegionName="ContentRegion" />
     </Grid>
 </mah:MetroWindow>

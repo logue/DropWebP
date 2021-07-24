@@ -5,23 +5,12 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:prism="http://prismlibrary.com/"
-    xmlns:r1="clr-namespace:Reactive.Bindings.Interactivity;assembly=ReactiveProperty.WPF"
     xmlns:viewmodels="clr-namespace:DropWebP.ViewModels"
     d:DataContext="{d:DesignInstance Type=viewmodels:HomeContentViewModel}"
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
-    <!--  D&D  -->
-    <i:Interaction.Triggers>
-        <i:EventTrigger EventName="PreviewDragOver">
-            <r1:EventToReactiveCommand Command="{Binding PreviewDragOverCommand}" />
-        </i:EventTrigger>
-        <i:EventTrigger EventName="Drop">
-            <r1:EventToReactiveCommand Command="{Binding DropCommand}" />
-        </i:EventTrigger>
-    </i:Interaction.Triggers>
-    <StackPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
         <TextBlock
             HorizontalAlignment="Center"
             FontFamily="Segoe MDL2 Assets"

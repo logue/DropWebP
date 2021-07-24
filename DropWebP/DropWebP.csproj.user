@@ -9,9 +9,6 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="Views\AboutDialog.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Update="Views\ConfigFlyout.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -21,9 +18,6 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <Page Update="Views\AboutDialog.xaml">
-      <SubType>Designer</SubType>
-    </Page>
     <Page Update="Views\ConfigFlyout.xaml">
       <SubType>Designer</SubType>
     </Page>

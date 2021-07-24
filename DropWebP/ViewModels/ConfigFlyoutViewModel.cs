@@ -21,17 +21,22 @@ namespace DropWebP.ViewModels
         /// <summary>
         /// Flyout開閉フラグ
         /// </summary>
-        public bool IsOpen { get; set; } = false;
-
-        /// <summary>
-        /// Flyoutの高さ
-        /// </summary>
-        public int Height { get; set; } = 200;
+        private bool isOpen = false;
+        public bool IsOpen
+        {
+            get { return this.isOpen; }
+            set { SetProperty(ref this.isOpen, value); }
+        }
 
         /// <summary>
         /// Flyoutの位置
         /// </summary>
-        public Position Position { get; set; } = Position.Left;
+        public Position Position { get; set; } = Position.Right;
+
+        /// <summary>
+        /// Flyoutの閉じるボタン
+        /// </summary>
+        public DelegateCommand CloseCommand { get; }
 
         /// <summary>
         /// 可逆圧縮
@@ -76,23 +81,11 @@ namespace DropWebP.ViewModels
         }
 
         /// <summary>
-        /// 設定保存ボタンのコマンド
-        /// </summary>
-        public DelegateCommand SaveButtonCommand { get; }
-
-        /// <summary>
-        /// 保存ボタン
-        /// </summary>
-        public string SaveText { get; set; } = "Save Configure";
-
-        private string data;
-
-        /// <summary>
         /// コンストラクタ
         /// </summary>
         public ConfigFlyoutViewModel(IEventAggregator eventAggregator, IRegionManager regionManager)
         {
-            SaveButtonCommand = new DelegateCommand(ExecuteSaveButtonCommand);
+            CloseCommand = new DelegateCommand(ExecuteSaveButtonCommand);
 
             this.eventAggregator = eventAggregator;
             this.regionManager = regionManager;
@@ -105,33 +98,44 @@ namespace DropWebP.ViewModels
         /// </summary>
         private void ExecuteSaveButtonCommand()
         {
+            Debug.WriteLine("保存しました");
             // 設定を保存
             Properties.Settings.Default.Save();
+            IsOpen = false;
         }
 
-
+        /// <summary>
+        /// イベントを受け取った
+        /// </summary>
+        /// <param name="obj"></param>
         private void OnMesageReceieved(string obj)
         {
-            Debug.WriteLine("イベント受け取り", obj);
-            IsOpen = true;
+            // Debug.WriteLine("イベント受け取り", obj);
+            // var k = regionManager.Regions["FlyoutRegion"].Views;
+            // regionManager.Regions["FlyoutRegion"].Activate(k.First())
+            // Debug.WriteLine(k.First().ToString());
         }
 
         public void OnNavigatedTo(NavigationContext navigationContext)
         {
-            IsOpen = true;
-            Debug.WriteLine("OnNavigatedTo");
+            // IsOpen = true;
+            // Debug.WriteLine("OnNavigatedTo");
         }
 
         public bool IsNavigationTarget(NavigationContext navigationContext)
         {
-            Debug.WriteLine("IsNavigationTarget");
-            //return true;
-            return data != null;
+            // Debug.WriteLine("IsNavigationTarget");
+            return true;
         }
 
+        /// <summary>
+        /// ナビゲーション発生
+        /// </summary>
+        /// <param name="navigationContext"></param>
         public void OnNavigatedFrom(NavigationContext navigationContext)
         {
-            Debug.WriteLine("OnNavigatedFrom");
+            // Debug.WriteLine("OnNavigatedFrom");
+            // flyoutを開く
             IsOpen = true;
         }
     }

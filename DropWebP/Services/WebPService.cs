@@ -1,4 +1,7 @@
 ﻿using DropWebP.Interfaces;
+using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
+using System;
 using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
@@ -126,6 +129,61 @@ namespace DropWebP.Service
                 //make a new Bitmap object the owner of the MemoryStream
                 return new Bitmap(memoryStream);
             }
+        }
+
+        /// <summary>
+        /// 変換処理
+        /// </summary>
+        /// <param name="files">変換対象のファイル</param>
+        /// <param name="Shell">親画面</param>
+        public async void Convert(string[] files, MetroWindow Shell)
+        {
+            // 全ファイル数
+            int count = files.Length;
+
+            // Metroダイアログのデフォルト設定
+            MetroDialogSettings metroDialogSettings = new MetroDialogSettings()
+            {
+                AffirmativeButtonText = "OK",
+                NegativeButtonText = "Cancel"
+            };
+
+            // プログレスコントローラー
+            ProgressDialogController controller = await Shell.ShowProgressAsync("Now converting", "Initializing....", false, metroDialogSettings);
+            controller.SetIndeterminate();
+            // キャンセルボタンが押されたときの設定
+            controller.Canceled += async (object sender, EventArgs e) =>
+            {
+                controller.Minimum = 0;
+                controller.Maximum = 0;
+                await controller.CloseAsync();
+                return;
+            };
+            // プログレスダイアログの進捗情報の登録
+            controller.Minimum = 0;
+            controller.Maximum = count;
+
+            await Task.Run(() =>
+            {
+                // キャンセル可能
+                controller.SetCancelable(true);
+                for (int i = 0; i <= count; i++)
+                {
+                    if (i == count)
+                    {
+                        controller.SetCancelable(false);
+                        break;
+                    }
+                    controller.SetProgress(i);
+                    controller.SetMessage(files[i]);
+
+                    // 変換処理
+                    ConvertWebPAsync(files[i], Properties.Settings.Default.Lossless ? -1 : Properties.Settings.Default.Quality);
+                }
+            });
+            await controller.CloseAsync();
+
+            await Shell.ShowMessageAsync("Finish.", count.ToString() + " files are converted.");
         }
     }
 }
