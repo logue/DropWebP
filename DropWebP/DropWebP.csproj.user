@@ -18,9 +18,6 @@
     <Compile Update="Views\HomeContent.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Views\StatusBar.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
@@ -34,9 +31,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\ShellWindow.xaml">
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Views\StatusBar.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>

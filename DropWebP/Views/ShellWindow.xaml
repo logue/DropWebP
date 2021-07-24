@@ -4,11 +4,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
-    xmlns:r1="clr-namespace:Reactive.Bindings.Interactivity;assembly=ReactiveProperty.WPF"
     xmlns:viewmodels="clr-namespace:DropWebP.ViewModels"
     Title="{Binding Title}"
     Width="480"
@@ -48,20 +46,8 @@
             </mah:FlyoutsControl.ItemContainerStyle>
         </mah:FlyoutsControl>
     </mah:MetroWindow.Flyouts>
-    <!--  D&D  -->
-    <i:Interaction.Triggers>
-        <i:EventTrigger EventName="PreviewDragOver">
-            <r1:EventToReactiveCommand Command="{Binding PreviewDragOverCommand}" />
-        </i:EventTrigger>
-        <i:EventTrigger EventName="Drop">
-            <r1:EventToReactiveCommand Command="{Binding DropCommand}" />
-        </i:EventTrigger>
-    </i:Interaction.Triggers>
-    <DockPanel>
-        <StatusBar prism:RegionManager.RegionName="StatusBarRegion" DockPanel.Dock="Bottom" />
-        <Grid>
-            <ContentControl prism:RegionManager.RegionName="ContentRegion" />
-            <mah:ProgressRing IsActive="{Binding ProgressRing}" />
-        </Grid>
-    </DockPanel>
+    <Grid>
+        <ContentControl prism:RegionManager.RegionName="ContentRegion" />
+        <mah:ProgressRing IsActive="{Binding ProgressRing}" />
+    </Grid>
 </mah:MetroWindow>
