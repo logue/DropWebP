@@ -67,10 +67,22 @@
             <r1:EventToReactiveCommand Command="{Binding DropCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
-    <Grid>
+    <Window.InputBindings>
+        <KeyBinding
+            Key="V"
+            Command="{Binding PasteCommand}"
+            Gesture="Ctrl+V"
+            Modifiers="Ctrl" />
+    </Window.InputBindings>
+    <Window.ContextMenu>
+        <ContextMenu>
+            <MenuItem Command="{Binding PasteCommand}" Header="Paste (_V)" />
+        </ContextMenu>
+    </Window.ContextMenu>
+    <DockPanel>
         <ContentControl
             HorizontalContentAlignment="Stretch"
             VerticalContentAlignment="Stretch"
             prism:RegionManager.RegionName="ContentRegion" />
-    </Grid>
+    </DockPanel>
 </mah:MetroWindow>
