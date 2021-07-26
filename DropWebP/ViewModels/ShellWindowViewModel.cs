@@ -31,7 +31,6 @@ namespace DropWebP.ViewModels
     {
         private IEventAggregator eventAggregator;
         private IRegionManager regionManager;
-        private ClipboardWatcher clipboardWatcher;
 
         /// <summary>
         /// WebPサービス

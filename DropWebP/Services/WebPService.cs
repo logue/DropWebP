@@ -1,9 +1,12 @@
 ﻿using DropWebP.Interfaces;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
+using SharpEXR;
 using System;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using WebP.Net;
 
@@ -62,8 +65,9 @@ namespace DropWebP.Service
         /// <param name="quality">品質。負数で無劣化圧縮</param>
         public void ConvertWebP(string path, string outputPath, long quality = -1)
         {
+            Bitmap bitmap = LoadBitmap(path);
             // ファイルに書き出し
-            File.WriteAllBytes(outputPath, EncodeWebP(LoadBitmap(path), quality));
+            File.WriteAllBytes(outputPath, EncodeWebP(bitmap, quality));
         }
 
         /// <summary>
@@ -87,8 +91,9 @@ namespace DropWebP.Service
         /// <param name="quality">品質。負数で無劣化圧縮</param>
         public Task ConvertWebPAsync(string path, string outputPath, long quality = -1)
         {
+            Bitmap bitmap = LoadBitmap(path);
             // ファイルに書き出し
-            return File.WriteAllBytesAsync(outputPath, EncodeWebP(LoadBitmap(path), quality));
+            return File.WriteAllBytesAsync(outputPath, EncodeWebP(bitmap, quality));
         }
 
         /// <summary>
@@ -117,6 +122,27 @@ namespace DropWebP.Service
             if (!File.Exists(path))
             {
                 throw new FileNotFoundException();
+            }
+
+            if (Path.GetExtension(path) == ".exr")
+            {
+                // HDR画像の場合（Cyberpunk2077対策）
+                EXRFile exrFile = EXRFile.FromFile(path);
+                EXRPart part = exrFile.Parts[0];
+
+                // EXRファイルを開く
+                part.OpenParallel(path);
+                // 画像サイズを割り当てる
+                Bitmap bmp = new Bitmap(part.DataWindow.Width, part.DataWindow.Height);
+                BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+                byte[] destBytes = part.GetBytes(ImageDestFormat.BGRA8, GammaEncoding.sRGB, data.Stride);
+                // Bitmapに画像をコピー
+                Marshal.Copy(destBytes, 0, data.Scan0, destBytes.Length);
+                bmp.UnlockBits(data);
+                // EXRファイルを閉じる
+                part.Close();
+
+                return bmp;
             }
 
             //Open file in read only mode
