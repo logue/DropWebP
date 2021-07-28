@@ -4,10 +4,13 @@ using Prism.Services.Dialogs;
 namespace DropWebP.Utility
 {
     /// <summary>
-    /// インラインダイアログのラッパー
+    /// インラインダイアログのラッパー.
     /// </summary>
-    class MetroDialogWindow : MetroWindow, IDialogWindow
+    internal class MetroDialogWindow : MetroWindow, IDialogWindow
     {
+        /// <summary>
+        /// Gets or sets the Result.
+        /// </summary>
         public IDialogResult Result { get; set; }
     }
 }

@@ -58,5 +58,17 @@ namespace DropWebP.Properties {
                 this["KeepOriginal"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IgnoreJpeg {
+            get {
+                return ((bool)(this["IgnoreJpeg"]));
+            }
+            set {
+                this["IgnoreJpeg"] = value;
+            }
+        }
     }
 }

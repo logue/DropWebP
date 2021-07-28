@@ -3,12 +3,12 @@
 namespace DropWebP.Views
 {
     /// <summary>
-    /// Interaction logic for HomeTabItem
+    /// Interaction logic for HomeContent.
     /// </summary>
     public partial class HomeContent : UserControl
     {
         /// <summary>
-        /// コンストラクタ
+        /// Initializes a new instance of the <see cref="HomeContent"/> class.
         /// </summary>
         public HomeContent()
         {

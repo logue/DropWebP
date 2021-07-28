@@ -4,10 +4,13 @@ using System.Reflection;
 namespace DropWebP.Models
 {
     /// <summary>
-    /// バージョン情報
+    /// バージョン情報.
     /// </summary>
     public class AppAssembly : BindableBase
     {
+        /// <summary>
+        /// Gets the Title.
+        /// </summary>
         public string Title
         {
             get
@@ -24,7 +27,15 @@ namespace DropWebP.Models
                 return System.IO.Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().CodeBase);
             }
         }
+
+        /// <summary>
+        /// Gets the Version.
+        /// </summary>
         public string Version => Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
+        /// <summary>
+        /// Gets the Description.
+        /// </summary>
         public string Description
         {
             get
@@ -37,6 +48,10 @@ namespace DropWebP.Models
                 return ((AssemblyDescriptionAttribute)attributes[0]).Description;
             }
         }
+
+        /// <summary>
+        /// Gets the Product.
+        /// </summary>
         public string Product
         {
             get
@@ -49,6 +64,10 @@ namespace DropWebP.Models
                 return ((AssemblyProductAttribute)attributes[0]).Product;
             }
         }
+
+        /// <summary>
+        /// Gets the Copyright.
+        /// </summary>
         public string Copyright
         {
             get
@@ -61,6 +80,10 @@ namespace DropWebP.Models
                 return ((AssemblyCopyrightAttribute)attributes[0]).Copyright;
             }
         }
+
+        /// <summary>
+        /// Gets the Company.
+        /// </summary>
         public string Company
         {
             get
@@ -74,5 +97,4 @@ namespace DropWebP.Models
             }
         }
     }
-
 }

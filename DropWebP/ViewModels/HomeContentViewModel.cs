@@ -1,71 +1,78 @@
 ﻿using DropWebP.Interfaces;
+using DropWebP.Utility;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
 using Prism.Regions;
-using Reactive.Bindings;
-using System;
+using System.Diagnostics;
+using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Windows;
-using System.Windows.Interop;
-using Windows.Storage;
-using Windows.Storage.Pickers;
-using WinRT;
 
 namespace DropWebP.ViewModels
 {
     /// <summary>
     /// ドラッグアンドロップする領域のViewModel
-    /// https://github.com/nabehiro22/Image_DragAndDrop のコードを流用
+    /// https://github.com/nabehiro22/Image_DragAndDrop のコードを流用.
     /// </summary>
     public class HomeContentViewModel : BindableBase
     {
+        /// <summary>
+        /// Defines the eventAggregator.
+        /// </summary>
         private IEventAggregator eventAggregator;
+
+        /// <summary>
+        /// Defines the regionManager.
+        /// </summary>
         private IRegionManager regionManager;
 
         /// <summary>
-        /// MetroWindow
+        /// Gets or sets the Shell
+        /// MetroWindow.
         /// </summary>
         public MetroWindow Shell { get; set; } = Application.Current.MainWindow as MetroWindow;
 
         /// <summary>
-        /// Webのエンコーダー
+        /// Webのエンコーダー.
         /// </summary>
-        private IWebPService webPService;
+        private readonly IWebPService webPService;
 
         /// <summary>
-        /// ファイルブラウザボタンのコマンド
+        /// ファイルブラウザボタンのコマンド.
         /// </summary>
         public DelegateCommand BrowseButtonCommand { get; }
 
         /// <summary>
-        /// タブ名
+        /// タブ名.
         /// </summary>
         public string Name { get; set; } = "Home";
 
         /// <summary>
-        /// ブラウズボタン
+        /// ブラウズボタン.
         /// </summary>
-        public string BrowseText { get; set; } = "Browse...";
+        public string BrowseText { get; set; } = "Browse Foldar...";
 
         /// <summary>
-        /// ドラッグ・アンド・ドロップで画像ファイルをWebPに変換
+        /// ドラッグ・アンド・ドロップで画像ファイルをWebPに変換.
         /// </summary>
         public string Message { get; set; } = "Drag and drop image file(s) to convert WebP.";
 
         /// <summary>
-        /// ダイアログのインスタンス
+        /// Gets or sets the MahAppsDialogCoordinator
+        /// ダイアログのインスタンス.
         /// </summary>
         public IDialogCoordinator MahAppsDialogCoordinator { get; set; }
 
-
         /// <summary>
-        /// コンストラクタ
+        /// Initializes a new instance of the <see cref="HomeContentViewModel"/> class.
         /// </summary>
-        /// /// <summary>コンストラクタ</summary>
-        /// <param name="regionManager">インジェクションするIRegionManager。</param>
+        /// <param name="eventAggregator">The eventAggregator<see cref="IEventAggregator"/>.</param>
+        /// <param name="regionManager">インジェクションするIRegionManager。.</param>
+        /// <param name="webPService">The webPService<see cref="IWebPService"/>.</param>
         public HomeContentViewModel(IEventAggregator eventAggregator, IRegionManager regionManager, IWebPService webPService)
         {
             // フォルダ選択ボタンイベントハンドラ
@@ -77,38 +84,32 @@ namespace DropWebP.ViewModels
         }
 
         /// <summary>
-        /// ファイルブラウザボタンが押された
+        /// ファイルブラウザボタンが押された.
         /// </summary>
-        private async void ExecuteBrowseButtonCommand()
+        private void ExecuteBrowseButtonCommand()
         {
             // ダイアログを定義
-            FolderPicker picker = new FolderPicker()
-            {
-                ViewMode = PickerViewMode.Thumbnail,
-                SuggestedStartLocation = PickerLocationId.PicturesLibrary,
-                FileTypeFilter = { ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".jxr" }
-            };
-            // ウィンドウバンドルを取得
-            IInitializeWithWindow withWindow = picker.As<IInitializeWithWindow>();
-            withWindow.Initialize(new WindowInteropHelper(Application.Current.MainWindow).Handle);
-
+            FolderPickerEx picker = new();
             // ファイルダイアログを表示
-            StorageFolder folder = await picker.PickSingleFolderAsync();
+            var folder = picker.PickSingleFolder();
 
             if (folder == null)
             {
                 return;
             }
 
-            // Application now has read/write access to all contents in the picked folder
-            // (including other sub-folder contents)
-            // Windows.Storage.AccessCache.StorageApplicationPermissions.FutureAccessList.AddOrReplace("PickedFolderToken", folder);
+            /*
+            // TODO: ファイルの絞り込み処理
+            string[] imageFileExtensions = ImageCodecInfo.GetImageEncoders()
+                                      .Select(c => c.FilenameExtension.Replace("*", ""))
+                                      .SelectMany(e => e.Split(';')).ToArray();
 
             // ファイル一覧
-            string[] files = Directory.GetFiles(folder.Path, "*.jpg, *.jpeg, *.png, *.bmp, *.gif, *.jxr", SearchOption.TopDirectoryOnly);
-
+            string[] files = Directory.GetFiles(folder.Path, string.Join(",", imageFileExtensions) + ".exr", SearchOption.TopDirectoryOnly);
+            Debug.WriteLine(string.Join(",", imageFileExtensions));
+            */
             // 変換処理
-            webPService.Convert(files, Shell);
+            webPService.Convert(Directory.GetFiles(folder.Path), Shell);
         }
     }
 }

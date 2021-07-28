@@ -1,21 +1,29 @@
-﻿using MahApps.Metro.Controls;
-using Prism.Regions;
-using System.Collections.Specialized;
-using System.Windows;
-
-namespace DropWebP.Utility
+﻿namespace DropWebP.Utility
 {
-    class FlyoutsControlRegionAdapter : RegionAdapterBase<FlyoutsControl>
+    using MahApps.Metro.Controls;
+    using Prism.Regions;
+    using System.Collections.Specialized;
+    using System.Windows;
+
+    /// <summary>
+    /// Defines the <see cref="FlyoutsControlRegionAdapter" />.
+    /// </summary>
+    internal class FlyoutsControlRegionAdapter : RegionAdapterBase<FlyoutsControl>
     {
         /// <summary>
-        /// コンストラクタ
+        /// Initializes a new instance of the <see cref="FlyoutsControlRegionAdapter"/> class.
         /// </summary>
-        /// <param name="factory"></param>
+        /// <param name="factory">.</param>
         public FlyoutsControlRegionAdapter(IRegionBehaviorFactory factory)
             : base(factory)
         {
         }
 
+        /// <summary>
+        /// The Adapt.
+        /// </summary>
+        /// <param name="region">The region<see cref="IRegion"/>.</param>
+        /// <param name="regionTarget">The regionTarget<see cref="FlyoutsControl"/>.</param>
         protected override void Adapt(IRegion region, FlyoutsControl regionTarget)
         {
             region.ActiveViews.CollectionChanged += (s, e) =>
@@ -34,6 +42,10 @@ namespace DropWebP.Utility
             };
         }
 
+        /// <summary>
+        /// The CreateRegion.
+        /// </summary>
+        /// <returns>The <see cref="IRegion"/>.</returns>
         protected override IRegion CreateRegion()
         {
             return new AllActiveRegion();

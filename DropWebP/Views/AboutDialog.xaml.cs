@@ -1,21 +1,17 @@
-﻿using DropWebP.ViewModels;
-using System.Windows.Controls;
-
+﻿using MahApps.Metro.Controls;
 namespace DropWebP.Views
 {
     /// <summary>
-    /// Interaction logic for AboutTabItem
+    /// Interaction logic for AboutDialog.
     /// </summary>
-    public partial class AboutDialog : UserControl
+    public partial class AboutDialog : MetroWindow
     {
         /// <summary>
-        /// コンストラクタ
+        /// Initializes a new instance of the <see cref="AboutDialog"/> class.
         /// </summary>
-        /// <param name="vm">ビューモデル</param>
-        public AboutDialog(AboutDialogViewModel vm)
+        public AboutDialog()
         {
             InitializeComponent();
-            DataContext = vm;
         }
     }
 }

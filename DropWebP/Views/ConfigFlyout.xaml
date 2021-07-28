@@ -6,8 +6,8 @@
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
-    xmlns:viewmodels="clr-namespace:DropWebP.ViewModels"
-    d:DataContext="{d:DesignInstance Type=viewmodels:ConfigFlyoutViewModel}"
+    d:Height="480"
+    d:Width="200"
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
     <StackPanel>
@@ -52,5 +52,9 @@
             Content="{Binding KeepOriginalText}"
             IsEnabled="False"
             IsOn="{Binding ToggleKeepOriginal}" />
+        <mah:ToggleSwitch
+            Content="{Binding IgnoreJpegText}"
+            IsEnabled="False"
+            IsOn="{Binding ToggleIgnoreJpeg}" />
     </StackPanel>
 </UserControl>

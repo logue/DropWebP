@@ -8,84 +8,100 @@ using System.Diagnostics;
 
 namespace DropWebP.ViewModels
 {
+    /// <summary>
+    /// Defines the <see cref="ConfigFlyoutViewModel" />.
+    /// </summary>
     public class ConfigFlyoutViewModel : BindableBase, INavigationAware
     {
+        /// <summary>
+        /// Defines the eventAggregator.
+        /// </summary>
         private IEventAggregator eventAggregator;
+
+        /// <summary>
+        /// Defines the regionManager.
+        /// </summary>
         private IRegionManager regionManager;
 
         /// <summary>
-        /// Flyoutの題名
+        /// Gets or sets the Header
+        /// Flyoutの題名.
         /// </summary>
         public string Header { get; set; } = "Config";
 
         /// <summary>
-        /// Flyout開閉フラグ
+        /// Flyout開閉フラグ.
         /// </summary>
         private bool isOpen = false;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether IsOpen.
+        /// </summary>
         public bool IsOpen
         {
-            get { return this.isOpen; }
-            set { SetProperty(ref this.isOpen, value); }
+            get { return isOpen; }
+            set { SetProperty(ref isOpen, value); }
         }
 
         /// <summary>
-        /// Flyoutの位置
+        /// Flyoutの位置.
         /// </summary>
         public Position Position { get; set; } = Position.Right;
 
         /// <summary>
-        /// Flyoutの閉じるボタン
+        /// Flyoutの閉じるボタン.
         /// </summary>
-        public DelegateCommand CloseCommand { get; }
+        public DelegateCommand CloseFlyoutCommand { get; private set; }
 
         /// <summary>
-        /// 可逆圧縮
+        /// Gets or sets the LosslessText
+        /// 可逆圧縮.
         /// </summary>
         public string LosslessText { get; set; } = "Lossless";
 
         /// <summary>
-        /// 可逆圧縮スイッチ
+        /// 可逆圧縮スイッチ.
         /// </summary>
-        public bool ToggleLossless
-        {
-            get => Properties.Settings.Default.Lossless;
-            set => Properties.Settings.Default.Lossless = value;
-        }
+        public bool ToggleLossless { get => Properties.Settings.Default.Lossless; set => Properties.Settings.Default.Lossless = value; }
 
         /// <summary>
-        /// 圧縮レベル
+        /// 圧縮レベル.
         /// </summary>
         public string QualityText { get; set; } = "Quality";
 
         /// <summary>
-        /// 圧縮レベルスライダー
+        /// 圧縮レベルスライダー.
         /// </summary>
-        public long QualityValue
-        {
-            get => Properties.Settings.Default.Quality;
-            set => Properties.Settings.Default.Quality = value;
-        }
+        public long QualityValue { get => Properties.Settings.Default.Quality; set => Properties.Settings.Default.Quality = value; }
 
         /// <summary>
-        /// 変換前のファイルを残す
+        /// 変換前のファイルを残す.
         /// </summary>
         public string KeepOriginalText { get; set; } = "Keep Original";
 
         /// <summary>
-        /// 変換前のファイルを残すチェックボックス
+        /// 変換前のファイルを残すチェックボックス.
         /// </summary>
-        public bool ToggleKeepOriginal
-        {
-            get => Properties.Settings.Default.KeepOriginal;
-            set => Properties.Settings.Default.KeepOriginal = value;
-        }
+        public bool ToggleKeepOriginal { get => Properties.Settings.Default.KeepOriginal; set => Properties.Settings.Default.KeepOriginal = value; }
 
         /// <summary>
-        /// コンストラクタ
+        /// 変換前のファイルを残す.
         /// </summary>
+        public string IgnoreJpegText { get; set; } = "Ignore JPEG image file";
+
+        /// <summary>
+        /// 変換前のファイルを残すチェックボックス.
+        /// </summary>
+        public bool ToggleIgnoreJpeg { get => Properties.Settings.Default.IgnoreJpeg; set => Properties.Settings.Default.IgnoreJpeg = value; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConfigFlyoutViewModel"/> class.
+        /// </summary>
+        /// <param name="eventAggregator">The eventAggregator<see cref="IEventAggregator"/>.</param>
+        /// <param name="regionManager">The regionManager<see cref="IRegionManager"/>.</param>
         public ConfigFlyoutViewModel(IEventAggregator eventAggregator, IRegionManager regionManager)
         {
-            CloseCommand = new DelegateCommand(ExecuteSaveButtonCommand);
+            CloseFlyoutCommand = new DelegateCommand(ExecuteSaveButtonCommand);
 
             this.eventAggregator = eventAggregator;
             this.regionManager = regionManager;
@@ -94,7 +110,7 @@ namespace DropWebP.ViewModels
         }
 
         /// <summary>
-        /// 設定保存
+        /// 設定保存.
         /// </summary>
         private void ExecuteSaveButtonCommand()
         {
@@ -105,37 +121,43 @@ namespace DropWebP.ViewModels
         }
 
         /// <summary>
-        /// イベントを受け取った
+        /// イベントを受け取った.
         /// </summary>
-        /// <param name="obj"></param>
+        /// <param name="obj">.</param>
         private void OnMesageReceieved(string obj)
         {
-            // Debug.WriteLine("イベント受け取り", obj);
-            // var k = regionManager.Regions["FlyoutRegion"].Views;
-            // regionManager.Regions["FlyoutRegion"].Activate(k.First())
-            // Debug.WriteLine(k.First().ToString());
+            Debug.WriteLine("OnMesageReceieved", obj);
         }
 
+        /// <summary>
+        /// The OnNavigatedTo.
+        /// </summary>
+        /// <param name="navigationContext">The navigationContext<see cref="NavigationContext"/>.</param>
         public void OnNavigatedTo(NavigationContext navigationContext)
         {
-            // IsOpen = true;
-            // Debug.WriteLine("OnNavigatedTo");
+            Debug.WriteLine("OnNavigatedTo", navigationContext);
         }
 
+        /// <summary>
+        /// The IsNavigationTarget.
+        /// </summary>
+        /// <param name="navigationContext">The navigationContext<see cref="NavigationContext"/>.</param>
+        /// <returns>The <see cref="bool"/>.</returns>
         public bool IsNavigationTarget(NavigationContext navigationContext)
         {
-            // Debug.WriteLine("IsNavigationTarget");
+            Debug.WriteLine("IsNavigationTarget", navigationContext);
             return true;
         }
 
         /// <summary>
-        /// ナビゲーション発生
+        /// ナビゲーション発生.
         /// </summary>
-        /// <param name="navigationContext"></param>
+        /// <param name="navigationContext">.</param>
         public void OnNavigatedFrom(NavigationContext navigationContext)
         {
             // Debug.WriteLine("OnNavigatedFrom");
             // flyoutを開く
+            Properties.Settings.Default.Reload();
             IsOpen = true;
         }
     }

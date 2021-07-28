@@ -3,12 +3,12 @@
 namespace DropWebP.Views
 {
     /// <summary>
-    /// Interaction logic for Shell.xaml
+    /// Interaction logic for Shell.xaml.
     /// </summary>
     public partial class ShellWindow : MetroWindow
     {
         /// <summary>
-        /// コンストラクタ
+        /// Initializes a new instance of the <see cref="ShellWindow"/> class.
         /// </summary>
         public ShellWindow()
         {
@@ -16,4 +16,3 @@ namespace DropWebP.Views
         }
     }
 }
-

@@ -4,12 +4,12 @@ using System.Windows.Controls;
 namespace DropWebP.Views
 {
     /// <summary>
-    /// Interaction logic for ConfigTabItem
+    /// Interaction logic for ConfigFlyout.
     /// </summary>
     public partial class ConfigFlyout : UserControl
     {
         /// <summary>
-        /// コンストラクタ
+        /// Initializes a new instance of the <see cref="ConfigFlyout"/> class.
         /// </summary>
         public ConfigFlyout()
         {
@@ -17,10 +17,10 @@ namespace DropWebP.Views
         }
 
         /// <summary>
-        /// スライダーが変化したときに値を表示されている値を変更する
+        /// スライダーが変化したときに値を表示されている値を変更する.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <param name="sender">.</param>
+        /// <param name="e">.</param>
         private void QualitySlider_ValueChanged(object sender, System.Windows.RoutedPropertyChangedEventArgs<double> e)
         {
             if (QualityGroup != null && QualityGroup.IsEnabled)
@@ -30,10 +30,10 @@ namespace DropWebP.Views
         }
 
         /// <summary>
-        /// 可逆圧縮トグル
+        /// 可逆圧縮トグル.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <param name="sender">.</param>
+        /// <param name="e">.</param>
         private void LosslessToggleSwitch_Toggled(object sender, System.Windows.RoutedEventArgs e)
         {
             ToggleSwitch toggleSwitch = sender as ToggleSwitch;

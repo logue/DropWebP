@@ -5,33 +5,42 @@ using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Windows.Input;
 using WebP.Net;
 
 namespace DropWebP.ViewModels
 {
     /// <summary>
-    /// アバウト画面のビューモデル
+    /// アバウト画面のビューモデル.
     /// </summary>
     public class AboutDialogViewModel : BindableBase, IDialogAware
     {
-        #region Properties
         /// <summary>
-        /// タブ名
+        /// Gets or sets the Name
+        /// タブ名.
         /// </summary>
         public string Name { get; set; } = "About";
 
         /// <summary>
-        /// プロジェクトサイト閲覧ボタン
+        /// Gets or sets the VisitText
+        /// プロジェクトサイト閲覧ボタン.
         /// </summary>
         public string VisitText { get; set; } = "Visit project site";
 
         /// <summary>
-        /// プロジェクトサイト閲覧ボタンのコマンド
+        /// 閉じるコマンド
+        /// </summary>
+        private readonly ICommand CloseCommand;
+
+        /// <summary>
+        /// Gets the VisitButtonCommand
+        /// プロジェクトサイト閲覧ボタンのコマンド.
         /// </summary>
         public DelegateCommand VisitButtonCommand { get; }
 
         /// <summary>
-        /// アプリケーション名
+        /// Gets the Title
+        /// アプリケーション名.
         /// </summary>
         public string Title
         {
@@ -51,12 +60,16 @@ namespace DropWebP.ViewModels
                 return ((AssemblyTitleAttribute)attributes[0]).Title;
             }
         }
+
         /// <summary>
-        /// バージョン
+        /// Gets the Version
+        /// バージョン.
         /// </summary>
         public string Version => Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
         /// <summary>
-        /// 説明
+        /// Gets the Description
+        /// 説明.
         /// </summary>
         public string Description
         {
@@ -70,8 +83,10 @@ namespace DropWebP.ViewModels
                 return ((AssemblyDescriptionAttribute)attributes[0]).Description;
             }
         }
+
         /// <summary>
-        /// 製品名
+        /// Gets the Product
+        /// 製品名.
         /// </summary>
         public string Product
         {
@@ -85,8 +100,10 @@ namespace DropWebP.ViewModels
                 return ((AssemblyProductAttribute)attributes[0]).Product;
             }
         }
+
         /// <summary>
-        /// 著作権表記
+        /// Gets the Copyright
+        /// 著作権表記.
         /// </summary>
         public string Copyright
         {
@@ -100,8 +117,10 @@ namespace DropWebP.ViewModels
                 return ((AssemblyCopyrightAttribute)attributes[0]).Copyright;
             }
         }
+
         /// <summary>
-        /// 会社名
+        /// Gets the Company
+        /// 会社名.
         /// </summary>
         public string Company
         {
@@ -116,38 +135,51 @@ namespace DropWebP.ViewModels
             }
         }
 
-        public string WebPVersion
-        {
-            get => "libwebp Version: " + WebPLibrary.GetVersion().ToString();
-        }
+        /// <summary>
+        /// Gets the WebPVersion.
+        /// </summary>
+        public string WebPVersion { get => "libwebp Version: " + WebPLibrary.GetVersion().ToString(); }
 
         /// <summary>
-        /// ダイアログのCloseを要求するAction。
+        /// ダイアログのCloseを要求するAction。.
         /// </summary>
         public event Action<IDialogResult> RequestClose;
-        #endregion
 
         /// <summary>
-        /// コンストラクタ
+        /// Initializes a new instance of the <see cref="AboutDialogViewModel"/> class.
         /// </summary>
         public AboutDialogViewModel()
         {
             VisitButtonCommand = new DelegateCommand(ExecuteVisitButtonCommand);
+
         }
 
-        /// <summary>ダイアログがClose可能かを取得します。</summary>
-        /// <returns></returns>
-        public bool CanCloseDialog() { return true; }
-
-        /// <summary>ダイアログClose時のイベントハンドラ。</summary>
-        public void OnDialogClosed() { }
-
-        /// <summary>ダイアログOpen時のイベントハンドラ。</summary>
-        /// <param name="parameters">IDialogServiceに設定されたパラメータを表すIDialogParameters。</param>
-        public void OnDialogOpened(IDialogParameters parameters) { }
+        /// <summary>
+        /// The CanCloseDialog.
+        /// </summary>
+        /// <returns>.</returns>
+        public bool CanCloseDialog()
+        {
+            return true;
+        }
 
         /// <summary>
-        /// プロジェクトサイト閲覧ボタンを実行
+        /// The OnDialogClosed.
+        /// </summary>
+        public void OnDialogClosed()
+        {
+        }
+
+        /// <summary>
+        /// The OnDialogOpened.
+        /// </summary>
+        /// <param name="parameters">IDialogServiceに設定されたパラメータを表すIDialogParameters。.</param>
+        public void OnDialogOpened(IDialogParameters parameters)
+        {
+        }
+
+        /// <summary>
+        /// プロジェクトサイト閲覧ボタンを実行.
         /// </summary>
         private void ExecuteVisitButtonCommand()
         {

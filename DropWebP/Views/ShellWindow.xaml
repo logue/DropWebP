@@ -22,16 +22,21 @@
     AllowDrop="True"
     BorderThickness="1"
     GlowBrush="{DynamicResource MahApps.Brushes.Accent}"
+    NonActiveGlowBrush="{DynamicResource MahApps.Brushes.Border.NonActive}"
     ShowMaxRestoreButton="False"
     mc:Ignorable="d">
     <!--  Titlebar button  -->
     <mah:MetroWindow.RightWindowCommands>
         <mah:WindowCommands>
             <Button Command="{Binding AboutButtonCommand}">
-                <TextBlock
-                    VerticalAlignment="Center"
-                    FontFamily="Segoe MDL2 Assets"
-                    Text="&#xE8BD;" />
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock
+                        Margin="0,0,5,0"
+                        VerticalAlignment="Center"
+                        FontFamily="Segoe MDL2 Assets"
+                        Text="&#xE8BD;" />
+                    <TextBlock VerticalAlignment="Center" Text="{Binding AboutText}" />
+                </StackPanel>
             </Button>
             <Button Command="{Binding ConfigButtonCommand}">
                 <StackPanel Orientation="Horizontal">
@@ -51,11 +56,17 @@
             <mah:FlyoutsControl.ItemContainerStyle>
                 <Style TargetType="{x:Type mah:Flyout}">
                     <Setter Property="Header" Value="{Binding Header}" />
-                    <Setter Property="IsOpen" Value="{Binding IsOpen}" />
+                    <Setter Property="IsOpen" Value="{Binding IsOpen, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
                     <Setter Property="Position" Value="{Binding Position}" />
                     <Setter Property="Theme" Value="Inverse" />
+                    <Setter Property="CloseCommand" Value="{Binding CloseFlyoutCommand}" />
                 </Style>
             </mah:FlyoutsControl.ItemContainerStyle>
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="FlyoutDisplayChanged">
+                    <prism:InvokeCommandAction Command="{Binding FlyoutDisplayChanged}" TriggerParameterPath="IsOpen" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
         </mah:FlyoutsControl>
     </mah:MetroWindow.Flyouts>
     <!--  D&D  -->
@@ -68,17 +79,35 @@
         </i:EventTrigger>
     </i:Interaction.Triggers>
     <Window.InputBindings>
+        <!--
+            KeyBinding
+            Key="O"
+            Command="{Binding OpenCommand}"
+            Gesture="Ctrl+O"
+            Modifiers="Ctrl" /
+        -->
         <KeyBinding
             Key="V"
             Command="{Binding PasteCommand}"
             Gesture="Ctrl+V"
             Modifiers="Ctrl" />
+        <KeyBinding
+            Key="X"
+            Command="{Binding ExitCommand}"
+            Gesture="Ctrl+X"
+            Modifiers="Ctrl" />
     </Window.InputBindings>
-    <Window.ContextMenu>
+    <mah:MetroWindow.ContextMenu>
         <ContextMenu>
-            <MenuItem Command="{Binding PasteCommand}" Header="Paste (_V)" />
+            <MenuItem
+                Command="{Binding OpenCommand}"
+                Header="Convert from File(s) (_O)"
+                IsEnabled="False" />
+            <MenuItem Command="{Binding PasteCommand}" Header="Convert from Clipbpard Image (_V)" />
+            <Separator />
+            <MenuItem Command="{Binding ExitCommand}" Header="E_xit" />
         </ContextMenu>
-    </Window.ContextMenu>
+    </mah:MetroWindow.ContextMenu>
     <DockPanel>
         <ContentControl
             HorizontalContentAlignment="Stretch"

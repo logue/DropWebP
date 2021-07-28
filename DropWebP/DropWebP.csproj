@@ -2,14 +2,14 @@
   <PropertyGroup>
     <ApplicationIcon>Resources\vise.ico</ApplicationIcon>
     <AssemblyName>DropWebP</AssemblyName>
-    <AssemblyVersion>0.3.0.1</AssemblyVersion>
+    <AssemblyVersion>0.3.0.5</AssemblyVersion>
     <Authors>Masashi Yoshikawa</Authors>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Company>Logue</Company>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Copyright>(c) 2021 Masashi Yoshikawa</Copyright>
+    <Copyright>(c) 2021 Logue</Copyright>
     <Description>Encode image file to WebP.</Description>
-    <FileVersion>0.3.0.1</FileVersion>
+    <FileVersion>0.3.0.5</FileVersion>
     <OutputType>WinExe</OutputType>
     <PackageIcon>vise.png</PackageIcon>
     <PackageIconUrl />
@@ -29,6 +29,10 @@
   <PropertyGroup>
     <EnableTypeInfoReflection>false</EnableTypeInfoReflection>
     <EnableXBindDiagnostics>false</EnableXBindDiagnostics>
+    <PackageReleaseNotes>クリップボードに対応
+設定を保存
+OpenEXRフォーマットに対応</PackageReleaseNotes>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="DropWebP %28Package%29\**" />
