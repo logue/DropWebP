@@ -29,9 +29,10 @@
   <PropertyGroup>
     <EnableTypeInfoReflection>false</EnableTypeInfoReflection>
     <EnableXBindDiagnostics>false</EnableXBindDiagnostics>
-    <PackageReleaseNotes>クリップボードに対応
-設定を保存
-OpenEXRフォーマットに対応</PackageReleaseNotes>
+    <PackageReleaseNotes>クリップボードからWebP出力に対応
+OpenEXRフォーマットに対応
+オリジナルを保持しないオプション追加
+Jpegを無視するオプション追加</PackageReleaseNotes>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
   <ItemGroup>
