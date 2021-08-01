@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
+    xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -18,6 +18,8 @@
     MinHeight="320"
     Dialog:DialogParticipation.Register="{Binding}"
     d:DataContext="{d:DesignInstance Type=viewmodels:ShellWindowViewModel}"
+    fw:AcrylicWindow.AcrylicWindowStyle="None"
+    fw:AcrylicWindow.Enabled="True"
     prism:ViewModelLocator.AutoWireViewModel="True"
     AllowDrop="True"
     BorderThickness="1"
@@ -97,8 +99,8 @@
             Gesture="Ctrl+X"
             Modifiers="Ctrl" />
     </Window.InputBindings>
-    <mah:MetroWindow.ContextMenu>
-        <ContextMenu>
+    <Window.ContextMenu>
+        <fw:AcrylicContextMenu>
             <MenuItem
                 Command="{Binding OpenCommand}"
                 Header="Convert from File(s) (_O)"
@@ -106,8 +108,8 @@
             <MenuItem Command="{Binding PasteCommand}" Header="Convert from Clipbpard Image (_V)" />
             <Separator />
             <MenuItem Command="{Binding ExitCommand}" Header="E_xit" />
-        </ContextMenu>
-    </mah:MetroWindow.ContextMenu>
+        </fw:AcrylicContextMenu>
+    </Window.ContextMenu>
     <DockPanel>
         <ContentControl
             HorizontalContentAlignment="Stretch"

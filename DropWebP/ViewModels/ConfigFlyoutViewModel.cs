@@ -85,12 +85,12 @@ namespace DropWebP.ViewModels
         public bool ToggleKeepOriginal { get => Properties.Settings.Default.KeepOriginal; set => Properties.Settings.Default.KeepOriginal = value; }
 
         /// <summary>
-        /// 変換前のファイルを残す.
+        /// Jpegを無視
         /// </summary>
-        public string IgnoreJpegText { get; set; } = "Ignore JPEG image file";
+        public string IgnoreJpegText { get; set; } = "Ignore JPEG image";
 
         /// <summary>
-        /// 変換前のファイルを残すチェックボックス.
+        /// Jpegを無視
         /// </summary>
         public bool ToggleIgnoreJpeg { get => Properties.Settings.Default.IgnoreJpeg; set => Properties.Settings.Default.IgnoreJpeg = value; }
 

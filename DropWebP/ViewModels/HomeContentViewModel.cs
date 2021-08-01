@@ -6,10 +6,7 @@ using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
 using Prism.Regions;
-using System.Diagnostics;
-using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
 using System.Windows;
 
 namespace DropWebP.ViewModels

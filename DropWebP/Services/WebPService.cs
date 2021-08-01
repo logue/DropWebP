@@ -129,7 +129,7 @@ namespace DropWebP.Service
         {
             if (!File.Exists(path))
             {
-                throw new FileNotFoundException();
+                throw new FileNotFoundException(path);
             }
 
             Bitmap bmp = null;
@@ -189,7 +189,6 @@ namespace DropWebP.Service
 
             // プログレスコントローラー
             ProgressDialogController controller = await Shell.ShowProgressAsync("Now converting", "Initializing....", false, metroDialogSettings);
-            controller.SetIndeterminate();
             // キャンセルボタンが押されたときの設定
             controller.Canceled += async (object sender, EventArgs e) =>
             {
@@ -222,11 +221,18 @@ namespace DropWebP.Service
                             controller.SetCancelable(false);
                             break;
                         }
+                        controller.SetTitle(string.Format("Converting...({0}/{1})", i, count));
                         controller.SetProgress(i);
                         controller.SetMessage(Path.GetFileName(files[i]));
 
                         // 変換処理
                         ConvertWebPAsync(files[i], Properties.Settings.Default.Lossless ? -1 : Properties.Settings.Default.Quality);
+
+                        if (!Properties.Settings.Default.KeepOriginal)
+                        {
+                            // オリジナルを保持しない場合
+                            File.Delete(files[i]);
+                        }
                     }
                 });
             }
@@ -251,6 +257,13 @@ namespace DropWebP.Service
 
             // なんかエラーが起きるファイル形式
             imageFileExtensions.Remove(".tif");
+
+            if (Properties.Settings.Default.IgnoreJpeg)
+            {
+                // Jpegを無視する場合
+                imageFileExtensions.Remove(".jpg");
+                imageFileExtensions.Remove(".jpeg");
+            }
             return imageFileExtensions;
         }
     }

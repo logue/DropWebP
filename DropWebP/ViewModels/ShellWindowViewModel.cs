@@ -30,8 +30,8 @@ namespace DropWebP.ViewModels
     /// </summary>
     public class ShellWindowViewModel : BindableBase
     {
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetActiveWindow();
+        [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
+        public static extern IntPtr GetActiveWindow();
 
         /// <summary>
         /// Defines the eventAggregator.
@@ -235,24 +235,38 @@ namespace DropWebP.ViewModels
         }
 
         /// <summary>
-        /// クリップボードから画像を受け取ったときのメソッド.
+        /// ファイルを開くときのメソッド
         /// </summary>
         private async void ExecuteOpenCommand()
         {
+            // TODO: 動きません！
+            // メモ：https://github.com/microsoft/WindowsAppSDK/issues/466
+
             Debug.WriteLine("開く");
-            FileOpenPicker picker = new FileOpenPicker()
+            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageEncoders();
+            foreach (ImageCodecInfo c in codecs)
+            {
+                // string codecName = c.CodecName.Substring(8).Replace("Codec", "Files").Trim();
+                // mfolderPicker.FileTypeFilter.Add(codecName, new List<string>() { c.FilenameExtension });
+                Debug.WriteLine(c.FilenameExtension);
+                //mfolderPicker.FileTypeFilter.Add(c.FilenameExtension);
+            }
+
+            FileOpenPicker picker = new()
             {
                 ViewMode = PickerViewMode.Thumbnail,
                 SuggestedStartLocation = PickerLocationId.PicturesLibrary,
             };
+
             // ウィンドウバンドルを取得
+            IInitializeWithWindow initializeWithWindowWrapper = picker.As<IInitializeWithWindow>();
             IntPtr hwnd = GetActiveWindow();
-            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+            initializeWithWindowWrapper.Initialize(hwnd);
 
             IReadOnlyList<StorageFile> selectedFiles = await picker.PickMultipleFilesAsync();
-
-            if (selectedFiles == null)
+            if (selectedFiles.Count() == 0)
             {
+                // 選択個数が0のとき中止
                 return;
             }
             string[] files = selectedFiles.Select(s => s.Path).ToArray();

@@ -1,10 +1,10 @@
-﻿namespace DropWebP.Utility
-{
-    using MahApps.Metro.Controls;
-    using Prism.Regions;
-    using System.Collections.Specialized;
-    using System.Windows;
+﻿using MahApps.Metro.Controls;
+using Prism.Regions;
+using System.Collections.Specialized;
+using System.Windows;
 
+namespace DropWebP.Utility
+{
     /// <summary>
     /// Defines the <see cref="FlyoutsControlRegionAdapter" />.
     /// </summary>

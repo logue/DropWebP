@@ -2,14 +2,14 @@
   <PropertyGroup>
     <ApplicationIcon>Resources\vise.ico</ApplicationIcon>
     <AssemblyName>DropWebP</AssemblyName>
-    <AssemblyVersion>0.3.0.5</AssemblyVersion>
+    <AssemblyVersion>0.3.1.6</AssemblyVersion>
     <Authors>Masashi Yoshikawa</Authors>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Company>Logue</Company>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Copyright>(c) 2021 Logue</Copyright>
     <Description>Encode image file to WebP.</Description>
-    <FileVersion>0.3.0.5</FileVersion>
+    <FileVersion>0.3.1.6</FileVersion>
     <OutputType>WinExe</OutputType>
     <PackageIcon>vise.png</PackageIcon>
     <PackageIconUrl />
@@ -24,7 +24,7 @@
     <StartupObject>DropWebP.App</StartupObject>
     <TargetFramework>net5.0-windows10.0.19041.0</TargetFramework>
     <UseWPF>true</UseWPF>
-    <Version>0.3.0-alpha</Version>
+    <Version>0.3.1-alpha</Version>
   </PropertyGroup>
   <PropertyGroup>
     <EnableTypeInfoReflection>false</EnableTypeInfoReflection>
@@ -41,6 +41,11 @@ OpenEXRフォーマットに対応</PackageReleaseNotes>
     <Page Remove="DropWebP %28Package%29\**" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Remove="Utility\AcrylicBase.cs" />
+    <Compile Remove="Utility\MetroAcrylicWindow.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FluentWPF" Version="0.9.0" />
     <PackageReference Include="MahApps.Metro" Version="2.4.7" />
     <PackageReference Include="Prism.DryIoc" Version="8.1.97" />
     <PackageReference Include="ReactiveProperty.WPF" Version="7.11.0" />
