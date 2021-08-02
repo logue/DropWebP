@@ -28,15 +28,15 @@ namespace DropWebP.ViewModels
         private IRegionManager regionManager;
 
         /// <summary>
-        /// Gets or sets the Shell
-        /// MetroWindow.
-        /// </summary>
-        public MetroWindow Shell { get; set; } = Application.Current.MainWindow as MetroWindow;
-
-        /// <summary>
         /// Webのエンコーダー.
         /// </summary>
         private readonly IWebPService webPService;
+
+        /// <summary>
+        /// Gets or sets the Shell
+        /// MetroWindow.
+        /// </summary>
+        private MetroWindow Shell { get; set; } = Application.Current.MainWindow as MetroWindow;
 
         /// <summary>
         /// ファイルブラウザボタンのコマンド.
@@ -44,23 +44,17 @@ namespace DropWebP.ViewModels
         public DelegateCommand BrowseButtonCommand { get; }
 
         /// <summary>
-        /// タブ名.
-        /// </summary>
-        public string Name { get; set; } = "Home";
-
-        /// <summary>
         /// ブラウズボタン.
         /// </summary>
-        public string BrowseText { get; set; } = "Browse Foldar...";
+        public string BrowseText { get; } = "Select Foldar...";
 
         /// <summary>
         /// ドラッグ・アンド・ドロップで画像ファイルをWebPに変換.
         /// </summary>
-        public string Message { get; set; } = "Drag and drop image file(s) to convert WebP.";
+        public string Message { get; } = "Drag and drop image file(s) to convert WebP.";
 
         /// <summary>
-        /// Gets or sets the MahAppsDialogCoordinator
-        /// ダイアログのインスタンス.
+        /// Metroダイアログのインスタンス.
         /// </summary>
         public IDialogCoordinator MahAppsDialogCoordinator { get; set; }
 

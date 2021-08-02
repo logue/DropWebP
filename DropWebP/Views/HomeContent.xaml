@@ -18,9 +18,11 @@
             Text="&#xE8B9;" />
         <TextBlock HorizontalAlignment="Center" Text="{Binding Message}" />
         <Button
+            Height="32"
+            Margin="5"
             mah:ControlsHelper.RecognizesAccessKey="True"
             Command="{Binding BrowseButtonCommand}"
-            Style="{StaticResource MahApps.Styles.Button}">
+            Style="{StaticResource ButtonRevealStyle}">
             <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                 <TextBlock
                     Margin="0,0,5,0"

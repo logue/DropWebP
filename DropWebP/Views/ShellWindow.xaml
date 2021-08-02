@@ -12,14 +12,15 @@
     xmlns:r1="clr-namespace:Reactive.Bindings.Interactivity;assembly=ReactiveProperty.WPF"
     xmlns:viewmodels="clr-namespace:DropWebP.ViewModels"
     Title="{Binding Title}"
-    Width="480"
-    Height="320"
-    MinWidth="480"
-    MinHeight="320"
+    Width="512"
+    Height="288"
+    MinWidth="512"
+    MinHeight="288"
     Dialog:DialogParticipation.Register="{Binding}"
     d:DataContext="{d:DesignInstance Type=viewmodels:ShellWindowViewModel}"
     fw:AcrylicWindow.AcrylicWindowStyle="None"
     fw:AcrylicWindow.Enabled="True"
+    fw:PointerTracker.Enabled="True"
     prism:ViewModelLocator.AutoWireViewModel="True"
     AllowDrop="True"
     BorderThickness="1"
@@ -30,7 +31,7 @@
     <!--  Titlebar button  -->
     <mah:MetroWindow.RightWindowCommands>
         <mah:WindowCommands>
-            <Button Command="{Binding AboutButtonCommand}">
+            <Button Command="{Binding AboutCommand, Mode=OneTime}">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock
                         Margin="0,0,5,0"
@@ -40,7 +41,7 @@
                     <TextBlock VerticalAlignment="Center" Text="{Binding AboutText}" />
                 </StackPanel>
             </Button>
-            <Button Command="{Binding ConfigButtonCommand}">
+            <Button Command="{Binding ConfigCommand, Mode=OneTime}">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock
                         Margin="0,0,5,0"
@@ -60,7 +61,6 @@
                     <Setter Property="Header" Value="{Binding Header}" />
                     <Setter Property="IsOpen" Value="{Binding IsOpen, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
                     <Setter Property="Position" Value="{Binding Position}" />
-                    <Setter Property="Theme" Value="Inverse" />
                     <Setter Property="CloseCommand" Value="{Binding CloseFlyoutCommand}" />
                 </Style>
             </mah:FlyoutsControl.ItemContainerStyle>
@@ -110,10 +110,7 @@
             <MenuItem Command="{Binding ExitCommand}" Header="E_xit" />
         </fw:AcrylicContextMenu>
     </Window.ContextMenu>
-    <DockPanel>
-        <ContentControl
-            HorizontalContentAlignment="Stretch"
-            VerticalContentAlignment="Stretch"
-            prism:RegionManager.RegionName="ContentRegion" />
-    </DockPanel>
+    <Grid fw:PointerTracker.Enabled="True" Background="#66FFFFFF">
+        <ContentControl prism:RegionManager.RegionName="ContentRegion" />
+    </Grid>
 </mah:MetroWindow>

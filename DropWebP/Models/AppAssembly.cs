@@ -1,17 +1,16 @@
-﻿using Prism.Mvvm;
-using System.Reflection;
+﻿using System.Reflection;
 
 namespace DropWebP.Models
 {
     /// <summary>
     /// バージョン情報.
     /// </summary>
-    public class AppAssembly : BindableBase
+    public class AppAssembly
     {
         /// <summary>
         /// Gets the Title.
         /// </summary>
-        public string Title
+        public static string Title
         {
             get
             {
@@ -24,19 +23,20 @@ namespace DropWebP.Models
                         return titleAttribute.Title;
                     }
                 }
-                return System.IO.Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().CodeBase);
+                return System.IO.Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().Location);
             }
         }
+
 
         /// <summary>
         /// Gets the Version.
         /// </summary>
-        public string Version => Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        public static string Version => Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
         /// <summary>
         /// Gets the Description.
         /// </summary>
-        public string Description
+        public static string Description
         {
             get
             {
@@ -52,7 +52,7 @@ namespace DropWebP.Models
         /// <summary>
         /// Gets the Product.
         /// </summary>
-        public string Product
+        public static string Product
         {
             get
             {
@@ -68,7 +68,7 @@ namespace DropWebP.Models
         /// <summary>
         /// Gets the Copyright.
         /// </summary>
-        public string Copyright
+        public static string Copyright
         {
             get
             {
@@ -84,7 +84,7 @@ namespace DropWebP.Models
         /// <summary>
         /// Gets the Company.
         /// </summary>
-        public string Company
+        public static string Company
         {
             get
             {

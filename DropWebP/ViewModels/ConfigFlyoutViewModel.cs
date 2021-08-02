@@ -9,7 +9,7 @@ using System.Diagnostics;
 namespace DropWebP.ViewModels
 {
     /// <summary>
-    /// Defines the <see cref="ConfigFlyoutViewModel" />.
+    /// 設定フライアウトのViewModel
     /// </summary>
     public class ConfigFlyoutViewModel : BindableBase, INavigationAware
     {
@@ -24,7 +24,6 @@ namespace DropWebP.ViewModels
         private IRegionManager regionManager;
 
         /// <summary>
-        /// Gets or sets the Header
         /// Flyoutの題名.
         /// </summary>
         public string Header { get; set; } = "Config";
@@ -35,12 +34,12 @@ namespace DropWebP.ViewModels
         private bool isOpen = false;
 
         /// <summary>
-        /// Gets or sets a value indicating whether IsOpen.
+        /// 開閉フラグ
         /// </summary>
         public bool IsOpen
         {
-            get { return isOpen; }
-            set { SetProperty(ref isOpen, value); }
+            get => isOpen;
+            set => SetProperty(ref isOpen, value);
         }
 
         /// <summary>
@@ -54,7 +53,6 @@ namespace DropWebP.ViewModels
         public DelegateCommand CloseFlyoutCommand { get; private set; }
 
         /// <summary>
-        /// Gets or sets the LosslessText
         /// 可逆圧縮.
         /// </summary>
         public string LosslessText { get; set; } = "Lossless";
@@ -90,7 +88,7 @@ namespace DropWebP.ViewModels
         public string IgnoreJpegText { get; set; } = "Ignore JPEG image";
 
         /// <summary>
-        /// Jpegを無視
+        /// Jpegを無視のチェックボックス
         /// </summary>
         public bool ToggleIgnoreJpeg { get => Properties.Settings.Default.IgnoreJpeg; set => Properties.Settings.Default.IgnoreJpeg = value; }
 

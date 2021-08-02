@@ -1,11 +1,12 @@
-﻿using Prism.Commands;
+﻿using DropWebP.Models;
+using DropWebP.Utility;
+using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
 using System;
 using System.Diagnostics;
-using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Windows.Input;
+using System.Windows.Media;
 using WebP.Net;
 
 namespace DropWebP.ViewModels
@@ -16,127 +17,43 @@ namespace DropWebP.ViewModels
     public class AboutDialogViewModel : BindableBase, IDialogAware
     {
         /// <summary>
+        /// 閉じるコマンド
+        /// </summary>
+        public DelegateCommand CloseCommand { get; }
+
+        /// <summary>
+        /// プロジェクトサイト閲覧ボタンのコマンド.
+        /// </summary>
+        public DelegateCommand VisitCommand { get; }
+
+        /// <summary>
         /// Gets or sets the Name
         /// タブ名.
         /// </summary>
-        public string Name { get; set; } = "About";
+        public string Title => "About";
 
         /// <summary>
-        /// Gets or sets the VisitText
         /// プロジェクトサイト閲覧ボタン.
         /// </summary>
         public string VisitText { get; set; } = "Visit project site";
 
         /// <summary>
-        /// 閉じるコマンド
+        /// 閉じるボタン
         /// </summary>
-        private readonly ICommand CloseCommand;
+        public string CloseText { get; set; } = "Close";
 
         /// <summary>
-        /// Gets the VisitButtonCommand
-        /// プロジェクトサイト閲覧ボタンのコマンド.
+        /// ロゴ画像
         /// </summary>
-        public DelegateCommand VisitButtonCommand { get; }
+        public ImageSource Logo { get; set; }
 
         /// <summary>
-        /// Gets the Title
-        /// アプリケーション名.
+        /// アセンブリ情報モデル
         /// </summary>
-        public string Title
-        {
-            get
-            {
-                object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyTitleAttribute), false);
-                if (attributes.Length > 0)
-                {
-                    AssemblyTitleAttribute titleAttribute = (AssemblyTitleAttribute)attributes[0];
-                    if (titleAttribute.Title != "")
-                    {
-                        return titleAttribute.Title;
-                    }
-                }
-
-                // return System.IO.Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().CodeBase);
-                return ((AssemblyTitleAttribute)attributes[0]).Title;
-            }
-        }
+        public AppAssembly Assembly { get; }
 
         /// <summary>
-        /// Gets the Version
-        /// バージョン.
-        /// </summary>
-        public string Version => Assembly.GetExecutingAssembly().GetName().Version.ToString();
-
-        /// <summary>
-        /// Gets the Description
-        /// 説明.
-        /// </summary>
-        public string Description
-        {
-            get
-            {
-                object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyDescriptionAttribute), false);
-                if (attributes.Length == 0)
-                {
-                    return "";
-                }
-                return ((AssemblyDescriptionAttribute)attributes[0]).Description;
-            }
-        }
-
-        /// <summary>
-        /// Gets the Product
-        /// 製品名.
-        /// </summary>
-        public string Product
-        {
-            get
-            {
-                object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyProductAttribute), false);
-                if (attributes.Length == 0)
-                {
-                    return "";
-                }
-                return ((AssemblyProductAttribute)attributes[0]).Product;
-            }
-        }
-
-        /// <summary>
-        /// Gets the Copyright
-        /// 著作権表記.
-        /// </summary>
-        public string Copyright
-        {
-            get
-            {
-                object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false);
-                if (attributes.Length == 0)
-                {
-                    return "";
-                }
-                return ((AssemblyCopyrightAttribute)attributes[0]).Copyright;
-            }
-        }
-
-        /// <summary>
-        /// Gets the Company
-        /// 会社名.
-        /// </summary>
-        public string Company
-        {
-            get
-            {
-                object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCompanyAttribute), false);
-                if (attributes.Length == 0)
-                {
-                    return "";
-                }
-                return ((AssemblyCompanyAttribute)attributes[0]).Company;
-            }
-        }
-
-        /// <summary>
-        /// Gets the WebPVersion.
+        /// 使用しているLibWebPのバージョン
         /// </summary>
         public string WebPVersion { get => "libwebp Version: " + WebPLibrary.GetVersion().ToString(); }
 
@@ -146,12 +63,15 @@ namespace DropWebP.ViewModels
         public event Action<IDialogResult> RequestClose;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AboutDialogViewModel"/> class.
+        /// コンストラクタ
         /// </summary>
         public AboutDialogViewModel()
         {
-            VisitButtonCommand = new DelegateCommand(ExecuteVisitButtonCommand);
+            VisitCommand = new DelegateCommand(ExecuteVisitCommand);
+            CloseCommand = new DelegateCommand(ExecuteCloseCommand);
+            Assembly = new AppAssembly();
 
+            Logo = BitmapToImageSource.Convert(Properties.Resources.AppIcon);
         }
 
         /// <summary>
@@ -181,7 +101,7 @@ namespace DropWebP.ViewModels
         /// <summary>
         /// プロジェクトサイト閲覧ボタンを実行.
         /// </summary>
-        private void ExecuteVisitButtonCommand()
+        private void ExecuteVisitCommand()
         {
             string url = "https://github.com/logue/DropWebP";
             try
@@ -194,23 +114,30 @@ namespace DropWebP.ViewModels
                 {
                     //Windowsのとき  
                     url = url.Replace("&", "^&");
-                    Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+                    _ = Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
                     //Linuxのとき  
-                    Process.Start("xdg-open", url);
+                    _ = Process.Start("xdg-open", url);
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
                     //Macのとき  
-                    Process.Start("open", url);
+                    _ = Process.Start("open", url);
                 }
                 else
                 {
                     throw;
                 }
             }
+        }
+        /// <summary>
+        /// 閉じるボタン
+        /// </summary>
+        private void ExecuteCloseCommand()
+        {
+            RequestClose?.Invoke(new DialogResult(ButtonResult.Cancel));
         }
     }
 }

@@ -9,7 +9,7 @@ namespace DropWebP.Views
     public partial class ConfigFlyout : UserControl
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConfigFlyout"/> class.
+        /// コンストラクタ
         /// </summary>
         public ConfigFlyout()
         {
