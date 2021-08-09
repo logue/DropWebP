@@ -34,22 +34,22 @@ namespace DropWebP.ViewModels
         /// <summary>
         /// イベントアグリエイター
         /// </summary>
-        private readonly IEventAggregator eventAggregator;
+        private readonly IEventAggregator EventAggregator;
 
         /// <summary>
         /// リージョンマネージャー
         /// </summary>
-        private readonly IRegionManager regionManager;
+        private readonly IRegionManager RegionManager;
 
         /// <summary>
         /// ダイアログサービス
         /// </summary>
-        private readonly IDialogService dialogService;
+        private readonly IDialogService DialogService;
 
         /// <summary>
         /// WebPサービス.
         /// </summary>
-        private readonly IWebPService webPService;
+        private readonly IWebPService WebPService;
 
         /// <summary>
         /// Gets or sets the Shell
@@ -166,10 +166,12 @@ namespace DropWebP.ViewModels
             // 設定ボタンイベントハンドラ
             ConfigCommand = new DelegateCommand(ShowConfigFloyout);
 
-            this.eventAggregator = eventAggregator;
-            this.regionManager = regionManager;
-            this.dialogService = dialogService;
-            this.webPService = webPService;
+            Debug.WriteLine("イベント割当");
+
+            EventAggregator = eventAggregator;
+            RegionManager = regionManager;
+            DialogService = dialogService;
+            WebPService = webPService;
         }
 
         public ShellWindowViewModel() { }
@@ -202,7 +204,7 @@ namespace DropWebP.ViewModels
         {
             // ドロップされたものがFileDrop形式の場合は、各ファイルのパス文字列を文字列配列に格納する。
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            webPService.Convert(files, Shell);
+            WebPService.Convert(files, Shell);
         }
 
         /// <summary>
@@ -211,7 +213,7 @@ namespace DropWebP.ViewModels
         private void ShowAboutDialog()
         {
             Debug.WriteLine("アバウトクリック");
-            dialogService.ShowDialog("AboutDialog");
+            DialogService.ShowDialog("AboutDialog");
         }
 
         /// <summary>
@@ -221,7 +223,7 @@ namespace DropWebP.ViewModels
         {
             Debug.WriteLine("設定ボタンクリック");
             // eventAggregator.GetEvent<MessageService>().Publish("Top");
-            regionManager.RequestNavigate("FlyoutRegion", "ConfigFlyOut");
+            RegionManager.RequestNavigate("FlyoutRegion", "ConfigFlyOut");
         }
 
         /// <summary>
@@ -258,9 +260,9 @@ namespace DropWebP.ViewModels
             };
 
             // ウィンドウバンドルを取得
-            IInitializeWithWindow initializeWithWindowWrapper = picker.As<IInitializeWithWindow>();
             IntPtr hwnd = GetActiveWindow();
-            initializeWithWindowWrapper.Initialize(hwnd);
+            IInitializeWithWindow withWindow = picker.As<IInitializeWithWindow>();
+            withWindow.Initialize(hwnd);
 
             IReadOnlyList<StorageFile> selectedFiles = await picker.PickMultipleFilesAsync();
             if (selectedFiles.Count() == 0)
@@ -269,7 +271,7 @@ namespace DropWebP.ViewModels
                 return;
             }
             string[] files = selectedFiles.Select(s => s.Path).ToArray();
-            webPService.Convert(files, Shell);
+            WebPService.Convert(files, Shell);
         }
 
         /// <summary>
@@ -293,8 +295,8 @@ namespace DropWebP.ViewModels
                 return;
             }
 
-            //DeviceIndependentBitmapのbyte配列の15番目がbpp、
-            //これが32未満ならBgr32へ変換、これでアルファの値が0でも255扱いになって表示される
+            // DeviceIndependentBitmapのbyte配列の15番目がbpp、
+            // これが32未満ならBgr32へ変換、これでアルファの値が0でも255扱いになって表示される
             byte[] dib = ms.ToArray();
 
             // BitmapSourceを取得
@@ -337,7 +339,7 @@ namespace DropWebP.ViewModels
                 return;
             }
             // エンコード
-            byte[] bytes = webPService.EncodeWebP(bitmap, Properties.Settings.Default.Lossless ? -1 : Properties.Settings.Default.Quality);
+            byte[] bytes = WebPService.EncodeWebP(bitmap, Properties.Settings.Default.Lossless ? -1 : Properties.Settings.Default.Quality);
             // 書き出し
             await FileIO.WriteBytesAsync(file, bytes);
         }
@@ -354,6 +356,6 @@ namespace DropWebP.ViewModels
         /// </summary>
         /// <returns></returns>
         [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
-        public static extern IntPtr GetActiveWindow();
+        private static extern IntPtr GetActiveWindow();
     }
 }

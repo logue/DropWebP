@@ -3,34 +3,22 @@ using DropWebP.Utility;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using Prism.Commands;
-using Prism.Events;
 using Prism.Mvvm;
-using Prism.Regions;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 
 namespace DropWebP.ViewModels
 {
     /// <summary>
-    /// ドラッグアンドロップする領域のViewModel
-    /// https://github.com/nabehiro22/Image_DragAndDrop のコードを流用.
+    /// ホーム画面のビューモデル
     /// </summary>
     public class HomeContentViewModel : BindableBase
     {
         /// <summary>
-        /// Defines the eventAggregator.
+        /// WebPサービス.
         /// </summary>
-        private IEventAggregator eventAggregator;
-
-        /// <summary>
-        /// Defines the regionManager.
-        /// </summary>
-        private IRegionManager regionManager;
-
-        /// <summary>
-        /// Webのエンコーダー.
-        /// </summary>
-        private readonly IWebPService webPService;
+        private readonly IWebPService WebPService;
 
         /// <summary>
         /// Gets or sets the Shell
@@ -41,7 +29,7 @@ namespace DropWebP.ViewModels
         /// <summary>
         /// ファイルブラウザボタンのコマンド.
         /// </summary>
-        public DelegateCommand BrowseButtonCommand { get; }
+        public DelegateCommand BrowseCommand { get; }
 
         /// <summary>
         /// ブラウズボタン.
@@ -54,24 +42,14 @@ namespace DropWebP.ViewModels
         public string Message { get; } = "Drag and drop image file(s) to convert WebP.";
 
         /// <summary>
-        /// Metroダイアログのインスタンス.
+        /// コンストラクタ
         /// </summary>
-        public IDialogCoordinator MahAppsDialogCoordinator { get; set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HomeContentViewModel"/> class.
-        /// </summary>
-        /// <param name="eventAggregator">The eventAggregator<see cref="IEventAggregator"/>.</param>
-        /// <param name="regionManager">インジェクションするIRegionManager。.</param>
         /// <param name="webPService">The webPService<see cref="IWebPService"/>.</param>
-        public HomeContentViewModel(IEventAggregator eventAggregator, IRegionManager regionManager, IWebPService webPService)
+        public HomeContentViewModel(IWebPService webPService)
         {
             // フォルダ選択ボタンイベントハンドラ
-            BrowseButtonCommand = new DelegateCommand(ExecuteBrowseButtonCommand);
-
-            this.eventAggregator = eventAggregator;
-            this.regionManager = regionManager;
-            this.webPService = webPService;
+            BrowseCommand = new DelegateCommand(ExecuteBrowseButtonCommand);
+            WebPService = webPService;
         }
 
         /// <summary>
@@ -79,6 +57,7 @@ namespace DropWebP.ViewModels
         /// </summary>
         private void ExecuteBrowseButtonCommand()
         {
+            Debug.WriteLine("ブラウズボタン");
             // ダイアログを定義
             FolderPickerEx picker = new();
             // ファイルダイアログを表示
@@ -89,18 +68,8 @@ namespace DropWebP.ViewModels
                 return;
             }
 
-            /*
-            // TODO: ファイルの絞り込み処理
-            string[] imageFileExtensions = ImageCodecInfo.GetImageEncoders()
-                                      .Select(c => c.FilenameExtension.Replace("*", ""))
-                                      .SelectMany(e => e.Split(';')).ToArray();
-
-            // ファイル一覧
-            string[] files = Directory.GetFiles(folder.Path, string.Join(",", imageFileExtensions) + ".exr", SearchOption.TopDirectoryOnly);
-            Debug.WriteLine(string.Join(",", imageFileExtensions));
-            */
             // 変換処理
-            webPService.Convert(Directory.GetFiles(folder.Path), Shell);
+            WebPService.Convert(Directory.GetFiles(folder.Path), Shell);
         }
     }
 }

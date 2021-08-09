@@ -10,7 +10,10 @@
     d:DataContext="{d:DesignInstance Type=viewmodels:HomeContentViewModel}"
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
-    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+    <StackPanel
+        HorizontalAlignment="Center"
+        VerticalAlignment="Center"
+        Background="#01FFFFFF">
         <TextBlock
             HorizontalAlignment="Center"
             FontFamily="Segoe MDL2 Assets"
@@ -21,7 +24,7 @@
             Height="32"
             Margin="5"
             mah:ControlsHelper.RecognizesAccessKey="True"
-            Command="{Binding BrowseButtonCommand}"
+            Command="{Binding BrowseCommand}"
             Style="{StaticResource ButtonRevealStyle}">
             <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                 <TextBlock

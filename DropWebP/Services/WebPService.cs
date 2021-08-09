@@ -28,6 +28,7 @@ namespace DropWebP.Service
         /// <returns>WebPに圧縮したバイト配列.</returns>
         public byte[] EncodeWebP(Bitmap bitmap, long quality = -1)
         {
+            // TODO: BGRとABGRの判定と、それに応じた圧縮処理
             if (quality < 0)
             {
                 return WebPEncoder.EncodeLossless(bitmap);
@@ -181,7 +182,7 @@ namespace DropWebP.Service
             int count = files.Length;
 
             // Metroダイアログのデフォルト設定
-            MetroDialogSettings metroDialogSettings = new MetroDialogSettings()
+            MetroDialogSettings metroDialogSettings = new()
             {
                 AffirmativeButtonText = "OK",
                 NegativeButtonText = "Cancel"
@@ -192,11 +193,10 @@ namespace DropWebP.Service
             // キャンセルボタンが押されたときの設定
             controller.Canceled += async (object sender, EventArgs e) =>
             {
-                controller.Minimum = 0;
-                controller.Maximum = 0;
                 await controller.CloseAsync();
                 return;
             };
+            controller.SetIndeterminate();
 
             Debug.Write(files);
             if (count == 1)
@@ -210,7 +210,7 @@ namespace DropWebP.Service
                 controller.Minimum = 0;
                 controller.Maximum = count;
 
-                await Task.Run(() =>
+                await Task.Run(async () =>
                 {
                     // キャンセル可能
                     controller.SetCancelable(true);
@@ -219,14 +219,15 @@ namespace DropWebP.Service
                         if (i == count)
                         {
                             controller.SetCancelable(false);
+                            controller.SetIndeterminate();
                             break;
                         }
-                        controller.SetTitle(string.Format("Converting...({0}/{1})", i, count));
+                        controller.SetTitle(string.Format("Converting... ({0}/{1})", i, count));
                         controller.SetProgress(i);
                         controller.SetMessage(Path.GetFileName(files[i]));
 
                         // 変換処理
-                        ConvertWebPAsync(files[i], Properties.Settings.Default.Lossless ? -1 : Properties.Settings.Default.Quality);
+                        await ConvertWebPAsync(files[i], Properties.Settings.Default.Lossless ? -1 : Properties.Settings.Default.Quality);
 
                         if (!Properties.Settings.Default.KeepOriginal)
                         {

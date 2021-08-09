@@ -1,5 +1,6 @@
 ﻿using DropWebP.Interfaces;
 using DropWebP.Service;
+using DropWebP.Services;
 using DropWebP.Utility;
 using DropWebP.ViewModels;
 using DropWebP.Views;
@@ -30,7 +31,7 @@ namespace DropWebP
         private static extern bool IsIconic(IntPtr hWnd);
         // ShowWindowAsync関数のパラメータに渡す定義値(画面を元の大きさに戻す)
         private const int SW_RESTORE = 9;
-        Semaphore semaphore = null;
+        private Semaphore semaphore;
 
         /// <summary>
         /// The CreateShell.
@@ -74,10 +75,17 @@ namespace DropWebP
         /// <param name="containerRegistry">.</param>
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            // ダイアログのデザインを揃える
-            containerRegistry.RegisterDialogWindow<MetroDialogService>();
+            // _= containerRegistry.RegisterInstance<Window>(Container.Resolve<ShellWindow>());
+            // アプリケーションコマンド
+            // _ = containerRegistry.RegisterSingleton<IApplicationCommands, ApplicationCommandsProxy>();
+            // 多言語化
+            _ = containerRegistry.RegisterInstance<ILocalizerService>(Container.Resolve<LocalizerService>());
             // エンコーダー
             _ = containerRegistry.RegisterSingleton<IWebPService, WebPService>();
+            // ログ
+            _ = containerRegistry.RegisterSingleton<ILoggerService, LoggerService>();
+            // ダイアログのデザインを揃える
+            containerRegistry.RegisterDialogWindow<MetroDialogService>();
             // アバウドダイアログ
             containerRegistry.RegisterDialog<AboutDialog, AboutDialogViewModel>();
         }
@@ -90,6 +98,7 @@ namespace DropWebP
         {
             // 設定フライアウト
             regionAdapterMappings.RegisterMapping(typeof(FlyoutsControl), Container.Resolve<FlyoutsControlRegionAdapter>());
+
             base.ConfigureRegionAdapterMappings(regionAdapterMappings);
         }
     }

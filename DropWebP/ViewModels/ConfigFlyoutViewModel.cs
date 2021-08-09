@@ -1,10 +1,11 @@
-﻿using DropWebP.Services;
+﻿using DropWebP.Interfaces;
 using MahApps.Metro.Controls;
 using Prism.Commands;
-using Prism.Events;
 using Prism.Mvvm;
 using Prism.Regions;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace DropWebP.ViewModels
 {
@@ -14,14 +15,9 @@ namespace DropWebP.ViewModels
     public class ConfigFlyoutViewModel : BindableBase, INavigationAware
     {
         /// <summary>
-        /// Defines the eventAggregator.
+        /// 多言語化サービス
         /// </summary>
-        private IEventAggregator eventAggregator;
-
-        /// <summary>
-        /// Defines the regionManager.
-        /// </summary>
-        private IRegionManager regionManager;
+        private readonly ILocalizerService LocalizerService;
 
         /// <summary>
         /// Flyoutの題名.
@@ -31,7 +27,7 @@ namespace DropWebP.ViewModels
         /// <summary>
         /// Flyout開閉フラグ.
         /// </summary>
-        private bool isOpen = false;
+        private bool isOpen;
 
         /// <summary>
         /// 開閉フラグ
@@ -83,28 +79,46 @@ namespace DropWebP.ViewModels
         public bool ToggleKeepOriginal { get => Properties.Settings.Default.KeepOriginal; set => Properties.Settings.Default.KeepOriginal = value; }
 
         /// <summary>
-        /// Jpegを無視
+        /// Jpegを無視.
         /// </summary>
         public string IgnoreJpegText { get; set; } = "Ignore JPEG image";
 
         /// <summary>
-        /// Jpegを無視のチェックボックス
+        /// Jpegを無視のチェックボックス.
         /// </summary>
         public bool ToggleIgnoreJpeg { get => Properties.Settings.Default.IgnoreJpeg; set => Properties.Settings.Default.IgnoreJpeg = value; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConfigFlyoutViewModel"/> class.
+        /// Supported languages
         /// </summary>
-        /// <param name="eventAggregator">The eventAggregator<see cref="IEventAggregator"/>.</param>
-        /// <param name="regionManager">The regionManager<see cref="IRegionManager"/>.</param>
-        public ConfigFlyoutViewModel(IEventAggregator eventAggregator, IRegionManager regionManager)
+        public IList<CultureInfo> SupportedLanguages => LocalizerService?.SupportedLanguages;
+
+        /// <summary>
+        /// The selected language
+        /// </summary>
+        public CultureInfo SelectedLanguage
+        {
+            get => LocalizerService != null ? LocalizerService.SelectedLanguage : null;
+            set
+            {
+                if (LocalizerService != null && value != null && value != LocalizerService.SelectedLanguage)
+                {
+                    LocalizerService.SelectedLanguage = value;
+                    Properties.Settings.Default.Language = value.ToString();
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// コンストラクタ.
+        /// </summary>
+        public ConfigFlyoutViewModel(ILocalizerService localizerService)
         {
             CloseFlyoutCommand = new DelegateCommand(ExecuteSaveButtonCommand);
+            // SelectedLanguage = SupportedLanguages.FirstOrDefault(c => c.Name.Equals(Properties.Settings.Default.Language, System.StringComparison.Ordinal));
 
-            this.eventAggregator = eventAggregator;
-            this.regionManager = regionManager;
-
-            _ = eventAggregator.GetEvent<MessageService>().Subscribe(OnMesageReceieved);
+            LocalizerService = localizerService;
         }
 
         /// <summary>

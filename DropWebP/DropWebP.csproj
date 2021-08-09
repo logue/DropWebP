@@ -46,10 +46,13 @@ Jpegを無視するオプション追加</PackageReleaseNotes>
   <ItemGroup>
     <PackageReference Include="FluentWPF" Version="0.9.0" />
     <PackageReference Include="MahApps.Metro" Version="2.4.7" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
+    <PackageReference Include="ObjectDumper.NET" Version="3.1.21178.1" />
     <PackageReference Include="Prism.DryIoc" Version="8.1.97" />
     <PackageReference Include="ReactiveProperty.WPF" Version="7.11.0" />
     <PackageReference Include="SharpEXR" Version="1.0.0.19" />
     <PackageReference Include="WpfClipboardMonitor" Version="1.2.0" />
+    <PackageReference Include="WPFLocalizeExtension" Version="3.8.0" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\LICENSE">

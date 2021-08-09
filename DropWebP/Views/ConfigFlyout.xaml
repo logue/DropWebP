@@ -7,16 +7,12 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
     xmlns:viewmodels="clr-namespace:DropWebP.ViewModels"
+    Padding="5"
     d:DataContext="{d:DesignInstance Type=viewmodels:ConfigFlyoutViewModel}"
     d:Height="480"
     d:Width="200"
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
-    <UserControl.Resources>
-        <Style TargetType="mah:Flyout">
-            <Setter Property="Background" Value="#99000000" />
-        </Style>
-    </UserControl.Resources>
     <StackPanel>
         <GroupBox Header="{Binding QualityText}">
             <StackPanel>
@@ -57,5 +53,16 @@
         </GroupBox>
         <mah:ToggleSwitch Content="{Binding KeepOriginalText}" IsOn="{Binding ToggleKeepOriginal}" />
         <mah:ToggleSwitch Content="{Binding IgnoreJpegText}" IsOn="{Binding ToggleIgnoreJpeg}" />
+        <TextBlock
+            Grid.Row="4"
+            Grid.Column="0"
+            VerticalAlignment="Center"
+            Text="Language" />
+        <ComboBox
+            Grid.Row="4"
+            Grid.Column="2"
+            DisplayMemberPath="DisplayName"
+            ItemsSource="{Binding Path=SupportedLanguages, UpdateSourceTrigger=PropertyChanged}"
+            SelectedItem="{Binding Path=SelectedLanguage, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
     </StackPanel>
 </UserControl>
