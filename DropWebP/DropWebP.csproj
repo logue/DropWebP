@@ -2,14 +2,14 @@
   <PropertyGroup>
     <ApplicationIcon>Resources\vise.ico</ApplicationIcon>
     <AssemblyName>DropWebP</AssemblyName>
-    <AssemblyVersion>0.3.5.7</AssemblyVersion>
+    <AssemblyVersion>0.4.0.8</AssemblyVersion>
     <Authors>Masashi Yoshikawa</Authors>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Company>Logue</Company>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Copyright>(c) 2021 Logue</Copyright>
     <Description>Encode image file to WebP.</Description>
-    <FileVersion>0.3.5.7</FileVersion>
+    <FileVersion>0.4.0.8</FileVersion>
     <OutputType>WinExe</OutputType>
     <PackageIcon>vise.png</PackageIcon>
     <PackageIconUrl />
@@ -24,13 +24,14 @@
     <StartupObject>DropWebP.App</StartupObject>
     <TargetFramework>net5.0-windows10.0.19041.0</TargetFramework>
     <UseWPF>true</UseWPF>
-    <Version>0.3.5-beta</Version>
+    <Version>0.4.0-beta</Version>
   </PropertyGroup>
   <PropertyGroup>
     <EnableTypeInfoReflection>false</EnableTypeInfoReflection>
     <EnableXBindDiagnostics>false</EnableXBindDiagnostics>
     <PackageReleaseNotes>オリジナルを保持しないオプション追加
-Jpegを無視するオプション追加</PackageReleaseNotes>
+Jpegを無視するオプション追加
+多言語化対応</PackageReleaseNotes>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
   <ItemGroup>

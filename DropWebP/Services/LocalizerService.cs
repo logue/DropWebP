@@ -69,7 +69,7 @@ namespace DropWebP.Services
         public string GetLocalizedString(string key)
         {
             LocExtension locExtension = new(key);
-            locExtension.ResolveLocalizedValue(out string uiString);
+            _ = locExtension.ResolveLocalizedValue(out string uiString);
             return uiString;
         }
     }

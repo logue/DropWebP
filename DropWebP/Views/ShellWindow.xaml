@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:lex="http://wpflocalizeextension.codeplex.com"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
@@ -21,6 +22,9 @@
     fw:AcrylicWindow.AcrylicWindowStyle="None"
     fw:AcrylicWindow.Enabled="True"
     fw:PointerTracker.Enabled="True"
+    lex:LocalizeDictionary.DesignCulture="en"
+    lex:ResxLocalizationProvider.DefaultAssembly="DropWebP"
+    lex:ResxLocalizationProvider.DefaultDictionary="Resources"
     prism:ViewModelLocator.AutoWireViewModel="True"
     AllowDrop="True"
     Background="{DynamicResource MahApps.Brushes.Accent4}"
@@ -39,7 +43,7 @@
                         VerticalAlignment="Center"
                         FontFamily="Segoe MDL2 Assets"
                         Text="&#xE8BD;" />
-                    <TextBlock VerticalAlignment="Center" Text="{Binding AboutText}" />
+                    <TextBlock VerticalAlignment="Center" Text="{lex:Loc AboutText}" />
                 </StackPanel>
             </Button>
             <Button Command="{Binding ConfigCommand, Mode=OneTime}">
@@ -49,7 +53,7 @@
                         VerticalAlignment="Center"
                         FontFamily="Segoe MDL2 Assets"
                         Text="&#xE713;" />
-                    <TextBlock VerticalAlignment="Center" Text="{Binding ConfigText}" />
+                    <TextBlock VerticalAlignment="Center" Text="{lex:Loc ConfigText}" />
                 </StackPanel>
             </Button>
         </mah:WindowCommands>
@@ -61,8 +65,12 @@
                 <Style TargetType="{x:Type mah:Flyout}">
                     <Setter Property="Header" Value="{Binding Header}" />
                     <Setter Property="IsOpen" Value="{Binding IsOpen, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+                    <Setter Property="Width" Value="{Binding Width}" />
+                    <Setter Property="Theme" Value="{Binding Theme}" />
                     <Setter Property="Position" Value="{Binding Position}" />
                     <Setter Property="CloseCommand" Value="{Binding CloseFlyoutCommand}" />
+                    <Setter Property="AreAnimationsEnabled" Value="True" />
+                    <Setter Property="Background" Value="#CC000000" />
                 </Style>
             </mah:FlyoutsControl.ItemContainerStyle>
             <i:Interaction.Triggers>
@@ -104,11 +112,11 @@
         <fw:AcrylicContextMenu>
             <MenuItem
                 Command="{Binding OpenCommand}"
-                Header="Convert from File(s) (_O)"
+                Header="{lex:Loc ConvertFromFileText}"
                 IsEnabled="False" />
-            <MenuItem Command="{Binding PasteCommand}" Header="Convert from Clipbpard Image (_V)" />
+            <MenuItem Command="{Binding PasteCommand}" Header="{lex:Loc ConvertFromClipboardText}" />
             <Separator />
-            <MenuItem Command="{Binding ExitCommand}" Header="E_xit" />
+            <MenuItem Command="{Binding ExitCommand}" Header="{lex:Loc ExitText}" />
         </fw:AcrylicContextMenu>
     </Window.ContextMenu>
     <Grid fw:PointerTracker.Enabled="True" Background="#66FFFFFF">

@@ -79,22 +79,10 @@ namespace DropWebP.ViewModels
         public string Title { get; set; } = "DropWebP";
 
         /// <summary>
-        /// Gets or sets the AboutText
-        /// アバウトボタンテキスト.
-        /// </summary>
-        public string AboutText { get; set; } = "About";
-
-        /// <summary>
         /// Gets or sets the AboutButtonCommand
         /// アバウトボタンクリック時のコマンド.
         /// </summary>
         public DelegateCommand AboutCommand { get; set; }
-
-        /// <summary>
-        /// Gets or sets the ConfigText
-        /// 設定ボタンテキスト.
-        /// </summary>
-        public string ConfigText { get; set; } = "Config";
 
         /// <summary>
         /// Gets or sets a value indicating whether IsImage.

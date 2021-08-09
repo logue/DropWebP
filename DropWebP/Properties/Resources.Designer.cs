@@ -8,93 +8,303 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace DropWebP.Properties
-{
+namespace DropWebP.Properties {
+    using System;
+    
+    
     /// <summary>
-    /// ローカライズされた文字列などを検索するための、厳密に型指定されたリソース クラスです。.
+    ///   ローカライズされた文字列などを検索するための、厳密に型指定されたリソース クラスです。
     /// </summary>
+    // このクラスは StronglyTypedResourceBuilder クラスが ResGen
+    // または Visual Studio のようなツールを使用して自動生成されました。
+    // メンバーを追加または削除するには、.ResX ファイルを編集して、/str オプションと共に
+    // ResGen を実行し直すか、または VS プロジェクトをビルドし直します。
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class Resources
-    {
-        /// <summary>
-        /// Defines the resourceMan.
-        /// </summary>
+    public class Resources {
+        
         private static global::System.Resources.ResourceManager resourceMan;
-
-        /// <summary>
-        /// Defines the resourceCulture.
-        /// </summary>
+        
         private static global::System.Globalization.CultureInfo resourceCulture;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Resources"/> class.
-        /// </summary>
+        
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Resources()
-        {
+        internal Resources() {
         }
-
+        
         /// <summary>
-        /// Gets the ResourceManager
-        /// このクラスで使用されているキャッシュされた ResourceManager インスタンスを返します。.
+        ///   このクラスで使用されているキャッシュされた ResourceManager インスタンスを返します。
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Resources.ResourceManager ResourceManager
-        {
-            get
-            {
-                if (object.ReferenceEquals(resourceMan, null))
-                {
+        public static global::System.Resources.ResourceManager ResourceManager {
+            get {
+                if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DropWebP.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
             }
         }
-
+        
         /// <summary>
-        /// Gets or sets the Culture
-        /// すべてについて、現在のスレッドの CurrentUICulture プロパティをオーバーライドします
-        ///   現在のスレッドの CurrentUICulture プロパティをオーバーライドします。.
+        ///   すべてについて、現在のスレッドの CurrentUICulture プロパティをオーバーライドします
+        ///   現在のスレッドの CurrentUICulture プロパティをオーバーライドします。
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Globalization.CultureInfo Culture
-        {
-            get
-            {
+        public static global::System.Globalization.CultureInfo Culture {
+            get {
                 return resourceCulture;
             }
-            set
-            {
+            set {
                 resourceCulture = value;
             }
         }
-
+        
         /// <summary>
-        /// Gets the AppIcon
-        /// 型 System.Drawing.Bitmap のローカライズされたリソースを検索します。.
+        ///   About に類似しているローカライズされた文字列を検索します。
         /// </summary>
-        public static System.Drawing.Bitmap AppIcon
-        {
-            get
-            {
+        public static string AboutText {
+            get {
+                return ResourceManager.GetString("AboutText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        public static System.Drawing.Bitmap AppIcon {
+            get {
                 object obj = ResourceManager.GetObject("AppIcon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-
+        
         /// <summary>
-        /// Gets the vise
-        /// (アイコン) に類似した型 System.Drawing.Icon のローカライズされたリソースを検索します。.
+        ///   Select Folder... に類似しているローカライズされた文字列を検索します。
         /// </summary>
-        public static System.Drawing.Icon vise
-        {
-            get
-            {
+        public static string BrowseFolderText {
+            get {
+                return ResourceManager.GetString("BrowseFolderText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Batch convert images in the selected folder. に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string BrowseFolderTooltip {
+            get {
+                return ResourceManager.GetString("BrowseFolderTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Close に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string CloseText {
+            get {
+                return ResourceManager.GetString("CloseText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Config に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ConfigText {
+            get {
+                return ResourceManager.GetString("ConfigText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Convert from Clipboard... (_V) に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ConvertFromClipboardText {
+            get {
+                return ResourceManager.GetString("ConvertFromClipboardText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Convert from File(s)... (_O) に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ConvertFromFileText {
+            get {
+                return ResourceManager.GetString("ConvertFromFileText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Cancel に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string DialogCancel {
+            get {
+                return ResourceManager.GetString("DialogCancel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Converting WebP... に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string DialogConvertingText {
+            get {
+                return ResourceManager.GetString("DialogConvertingText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Finish. に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string DialogFinishText {
+            get {
+                return ResourceManager.GetString("DialogFinishText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   initializing... に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string DialogInitializingText {
+            get {
+                return ResourceManager.GetString("DialogInitializingText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   OK に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string DialogOk {
+            get {
+                return ResourceManager.GetString("DialogOk", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   {0} file(s) are converted. に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string DialogResultText {
+            get {
+                return ResourceManager.GetString("DialogResultText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   E_xit に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ExitText {
+            get {
+                return ResourceManager.GetString("ExitText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Drag and drop image file(s) to convert WebP.
+        ///You can also use CTRL + V to convert the image in the clipboard directly to WebP. に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string HomeMessage {
+            get {
+                return ResourceManager.GetString("HomeMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ignore JPEG images に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string IgnoreJpegText {
+            get {
+                return ResourceManager.GetString("IgnoreJpegText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Keep original image に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string KeepOriginalText {
+            get {
+                return ResourceManager.GetString("KeepOriginalText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Turn on this toggle if you want to keep the unconverted image. に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string KeepOriginalTooltip {
+            get {
+                return ResourceManager.GetString("KeepOriginalTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Display Language に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string LanguageText {
+            get {
+                return ResourceManager.GetString("LanguageText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Lossless に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string LosslessText {
+            get {
+                return ResourceManager.GetString("LosslessText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Turn on this toggle for lossless compression. に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string LosslessTooltip {
+            get {
+                return ResourceManager.GetString("LosslessTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Quality に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string QualityText {
+            get {
+                return ResourceManager.GetString("QualityText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Specifies the quality of lossy compression of images.
+        ///Normally, select 95. に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string QualityTooltip {
+            get {
+                return ResourceManager.GetString("QualityTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Since JPEG images are originally compressed, compressing them with WebP may increase the capacity.
+        ///You can skip the JPEG compression process by turning on this toggle. に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ToggleIgnoreJpegTooltip {
+            get {
+                return ResourceManager.GetString("ToggleIgnoreJpegTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   (アイコン) に類似した型 System.Drawing.Icon のローカライズされたリソースを検索します。
+        /// </summary>
+        public static System.Drawing.Icon vise {
+            get {
                 object obj = ResourceManager.GetObject("vise", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Visit Project site に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string VisitText {
+            get {
+                return ResourceManager.GetString("VisitText", resourceCulture);
             }
         }
     }

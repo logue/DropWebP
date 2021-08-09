@@ -112,94 +112,87 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="AppIcon" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\vise.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="vise" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\vise.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="AboutText" xml:space="preserve">
-    <value>About</value>
+    <value>バージョン情報</value>
   </data>
   <data name="ConfigText" xml:space="preserve">
-    <value>Config</value>
+    <value>設定</value>
   </data>
   <data name="VisitText" xml:space="preserve">
-    <value>Visit Project site</value>
+    <value>プロジェクトサイトへ</value>
   </data>
   <data name="CloseText" xml:space="preserve">
-    <value>Close</value>
+    <value>閉じる</value>
   </data>
   <data name="HomeMessage" xml:space="preserve">
-    <value>Drag and drop image file(s) to convert WebP.
-You can also use CTRL + V to convert the image in the clipboard directly to WebP.</value>
+    <value>WebPに変換したい画像ファイルをドラッグ・アンド・ドロップしてください。
+CTRL + Vでクリップボード内の画像を直接WebPに変換することもできます。</value>
   </data>
   <data name="BrowseFolderText" xml:space="preserve">
-    <value>Select Folder...</value>
+    <value>フォルダを選択...</value>
   </data>
   <data name="BrowseFolderTooltip" xml:space="preserve">
-    <value>Batch convert images in the selected folder.</value>
+    <value>選択したフォルダ内の画像を一括変換します。</value>
   </data>
   <data name="QualityText" xml:space="preserve">
-    <value>Quality</value>
+    <value>品質</value>
   </data>
   <data name="LosslessText" xml:space="preserve">
-    <value>Lossless</value>
+    <value>無劣化</value>
   </data>
   <data name="QualityTooltip" xml:space="preserve">
-    <value>Specifies the quality of lossy compression of images.
-Normally, select 95.</value>
+    <value>画像を不可逆圧縮するときの品質を指定します。
+通常は、95を選択してください。</value>
   </data>
   <data name="LosslessTooltip" xml:space="preserve">
-    <value>Turn on this toggle for lossless compression.</value>
+    <value>ロスレス圧縮をする場合はこのトグルをオンにしてください。</value>
   </data>
   <data name="KeepOriginalText" xml:space="preserve">
-    <value>Keep original image</value>
+    <value>元画像を保持する</value>
   </data>
   <data name="KeepOriginalTooltip" xml:space="preserve">
-    <value>Turn on this toggle if you want to keep the unconverted image.</value>
+    <value>変換前の画像を残す場合はこのトグルをオンにしてください。</value>
   </data>
   <data name="IgnoreJpegText" xml:space="preserve">
-    <value>Ignore JPEG images</value>
+    <value>JPEG画像を無視する</value>
   </data>
   <data name="ToggleIgnoreJpegTooltip" xml:space="preserve">
-    <value>Since JPEG images are originally compressed, compressing them with WebP may increase the capacity.
-You can skip the JPEG compression process by turning on this toggle.</value>
+    <value>JPEG画像は元々圧縮されているため、WebPで圧縮すると容量が逆に増えてしまう可能性があります。
+このトグルをオンにすることでJPEGの圧縮処理をスキップすることができます。</value>
   </data>
   <data name="LanguageText" xml:space="preserve">
-    <value>Display Language</value>
+    <value>表示言語</value>
   </data>
   <data name="ConvertFromFileText" xml:space="preserve">
-    <value>Convert from File(s)... (_O)</value>
+    <value>ファイルから変換...(_O)</value>
   </data>
   <data name="ConvertFromClipboardText" xml:space="preserve">
-    <value>Convert from Clipboard... (_V)</value>
+    <value>クリップボードから変換...(_V)</value>
   </data>
   <data name="ExitText" xml:space="preserve">
-    <value>E_xit</value>
+    <value>終了(_X)</value>
   </data>
   <data name="DialogOk" xml:space="preserve">
     <value>OK</value>
   </data>
   <data name="DialogCancel" xml:space="preserve">
-    <value>Cancel</value>
+    <value>キャンセル</value>
   </data>
   <data name="DialogConvertingText" xml:space="preserve">
-    <value>Converting WebP...</value>
+    <value>WebPに変換しています...</value>
   </data>
   <data name="DialogInitializingText" xml:space="preserve">
-    <value>initializing...</value>
+    <value>初期化しています…。</value>
   </data>
   <data name="DialogFinishText" xml:space="preserve">
-    <value>Finish.</value>
+    <value>完了しました。</value>
   </data>
   <data name="DialogResultText" xml:space="preserve">
-    <value>{0} file(s) are converted.</value>
+    <value>{0}件のファイルを変換しました。</value>
   </data>
 </root>

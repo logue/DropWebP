@@ -21,6 +21,20 @@ namespace DropWebP.Service
     public class WebPService : IWebPService
     {
         /// <summary>
+        /// 多言語化サービス
+        /// </summary>
+        private ILocalizerService LocalizerService;
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="localizerService"></param>
+        public WebPService(ILocalizerService localizerService)
+        {
+            LocalizerService = localizerService;
+        }
+
+        /// <summary>
         /// BitmapをWebPに変換.
         /// </summary>
         /// <param name="bitmap">ビットマップ.</param>
@@ -184,12 +198,14 @@ namespace DropWebP.Service
             // Metroダイアログのデフォルト設定
             MetroDialogSettings metroDialogSettings = new()
             {
-                AffirmativeButtonText = "OK",
-                NegativeButtonText = "Cancel"
+                AffirmativeButtonText = LocalizerService.GetLocalizedString("DialogOk"),
+                NegativeButtonText = LocalizerService.GetLocalizedString("DialogCancel")
             };
 
             // プログレスコントローラー
-            ProgressDialogController controller = await Shell.ShowProgressAsync("Now converting", "Initializing....", false, metroDialogSettings);
+            ProgressDialogController controller = await Shell.ShowProgressAsync(
+                LocalizerService.GetLocalizedString("DialogConvertingText"),
+                LocalizerService.GetLocalizedString("DialogInitializingText"), false, metroDialogSettings);
             // キャンセルボタンが押されたときの設定
             controller.Canceled += async (object sender, EventArgs e) =>
             {
@@ -199,6 +215,7 @@ namespace DropWebP.Service
             controller.SetIndeterminate();
 
             Debug.Write(files);
+
             if (count == 1)
             {
                 controller.SetMessage(Path.GetFileName(files[0]));
@@ -222,12 +239,12 @@ namespace DropWebP.Service
                             controller.SetIndeterminate();
                             break;
                         }
-                        controller.SetTitle(string.Format("Converting... ({0}/{1})", i, count));
+                        controller.SetTitle(LocalizerService.GetLocalizedString("DialogConvertingText") + string.Format(" ({0}/{1})", i, count));
                         controller.SetProgress(i);
                         controller.SetMessage(Path.GetFileName(files[i]));
 
                         // 変換処理
-                        await ConvertWebPAsync(files[i], Properties.Settings.Default.Lossless ? -1 : Properties.Settings.Default.Quality);
+                        ConvertWebP(files[i], Properties.Settings.Default.Lossless ? -1 : Properties.Settings.Default.Quality);
 
                         if (!Properties.Settings.Default.KeepOriginal)
                         {
@@ -239,7 +256,7 @@ namespace DropWebP.Service
             }
             await controller.CloseAsync();
 
-            await Shell.ShowMessageAsync("Finish.", count.ToString() + " files are converted.");
+            await Shell.ShowMessageAsync(LocalizerService.GetLocalizedString("DialogFinishText"), string.Format(LocalizerService.GetLocalizedString("DialogFinishText"), count.ToString()));
         }
 
         /// <summary>

@@ -1,7 +1,6 @@
 ﻿using DropWebP.Interfaces;
 using DropWebP.Utility;
 using MahApps.Metro.Controls;
-using MahApps.Metro.Controls.Dialogs;
 using Prism.Commands;
 using Prism.Mvvm;
 using System.Diagnostics;
@@ -30,16 +29,6 @@ namespace DropWebP.ViewModels
         /// ファイルブラウザボタンのコマンド.
         /// </summary>
         public DelegateCommand BrowseCommand { get; }
-
-        /// <summary>
-        /// ブラウズボタン.
-        /// </summary>
-        public string BrowseText { get; } = "Select Foldar...";
-
-        /// <summary>
-        /// ドラッグ・アンド・ドロップで画像ファイルをWebPに変換.
-        /// </summary>
-        public string Message { get; } = "Drag and drop image file(s) to convert WebP.";
 
         /// <summary>
         /// コンストラクタ

@@ -3,66 +3,54 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
+    xmlns:lex="http://wpflocalizeextension.codeplex.com"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
     xmlns:viewmodels="clr-namespace:DropWebP.ViewModels"
     Padding="5"
+    d:Background="White"
     d:DataContext="{d:DesignInstance Type=viewmodels:ConfigFlyoutViewModel}"
     d:Height="480"
     d:Width="200"
+    lex:LocalizeDictionary.DesignCulture="en"
+    lex:ResxLocalizationProvider.DefaultAssembly="DropWebP"
+    lex:ResxLocalizationProvider.DefaultDictionary="Resources"
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
     <StackPanel>
-        <GroupBox Header="{Binding QualityText}">
-            <StackPanel>
-                <mah:ToggleSwitch
-                    x:Name="LosslessToggleSwitch"
-                    Content="{Binding LosslessText}"
-                    ContentDirection="RightToLeft"
-                    IsOn="{Binding ToggleLossless}"
-                    Toggled="LosslessToggleSwitch_Toggled" />
-                <StackPanel
-                    x:Name="QualityGroup"
-                    IsEnabled="False"
-                    Orientation="Horizontal">
-                    <Slider
-                        x:Name="QualitySlider"
-                        Width="100"
-                        Margin="5,0,5,0"
-                        Maximum="100"
-                        ValueChanged="QualitySlider_ValueChanged"
-                        Value="{Binding QualityValue}" />
-                    <TextBlock
-                        x:Name="QualityValueText"
-                        Width="50"
-                        HorizontalAlignment="Right"
-                        Text="{Binding QualityValue}">
-                        <TextBlock.Style>
-                            <Style TargetType="{x:Type TextBlock}">
-                                <Style.Triggers>
-                                    <Trigger Property="IsEnabled" Value="False">
-                                        <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.Gray}" />
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
-                </StackPanel>
-            </StackPanel>
-        </GroupBox>
-        <mah:ToggleSwitch Content="{Binding KeepOriginalText}" IsOn="{Binding ToggleKeepOriginal}" />
-        <mah:ToggleSwitch Content="{Binding IgnoreJpegText}" IsOn="{Binding ToggleIgnoreJpeg}" />
-        <TextBlock
-            Grid.Row="4"
-            Grid.Column="0"
-            VerticalAlignment="Center"
-            Text="Language" />
-        <ComboBox
-            Grid.Row="4"
-            Grid.Column="2"
-            DisplayMemberPath="DisplayName"
-            ItemsSource="{Binding Path=SupportedLanguages, UpdateSourceTrigger=PropertyChanged}"
-            SelectedItem="{Binding Path=SelectedLanguage, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+        <mah:ToggleSwitch
+            x:Name="LosslessToggleSwitch"
+            Content="{lex:Loc LosslessText}"
+            IsOn="{Binding ToggleLossless}"
+            Toggled="LosslessToggleSwitch_Toggled" />
+        <mah:MetroHeader
+            x:Name="QualityGroup"
+            Margin="55,0,0,0"
+            Header="{lex:Loc QualityText}">
+            <mah:NumericUpDown
+                mah:TextBoxHelper.ClearTextButton="True"
+                Maximum="100"
+                Minimum="0"
+                ToolTip="{lex:Loc QualityTooltip}"
+                Value="{Binding QualityValue}" />
+        </mah:MetroHeader>
+        <mah:ToggleSwitch
+            Content="{lex:Loc KeepOriginalText}"
+            IsOn="{Binding ToggleKeepOriginal}"
+            ToolTip="{lex:Loc KeepOriginalTooltip}" />
+        <mah:ToggleSwitch
+            Content="{lex:Loc IgnoreJpegText}"
+            IsOn="{Binding ToggleIgnoreJpeg}"
+            ToolTip="{lex:Loc ToggleIgnoreJpegTooltip}" />
+        <StackPanel Orientation="Horizontal">
+            <TextBlock VerticalAlignment="Center" Text="{lex:Loc LanguageText}" />
+            <ComboBox
+                Margin="5,0,0,0"
+                DisplayMemberPath="DisplayName"
+                ItemsSource="{Binding Path=SupportedLanguages, UpdateSourceTrigger=PropertyChanged}"
+                SelectedItem="{Binding Path=SelectedLanguage, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+        </StackPanel>
     </StackPanel>
 </UserControl>

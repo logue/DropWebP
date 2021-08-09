@@ -14,18 +14,11 @@ namespace DropWebP.Views
         public ConfigFlyout()
         {
             InitializeComponent();
-        }
 
-        /// <summary>
-        /// スライダーが変化したときに値を表示されている値を変更する.
-        /// </summary>
-        /// <param name="sender">.</param>
-        /// <param name="e">.</param>
-        private void QualitySlider_ValueChanged(object sender, System.Windows.RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (QualityGroup != null && QualityGroup.IsEnabled)
+            if (LosslessToggleSwitch != null && QualityGroup != null)
             {
-                QualityValueText.Text = QualitySlider.Value.ToString();
+                // 可逆圧縮が無効化されているときは品質オプションを操作可能にする
+                QualityGroup.IsEnabled = !LosslessToggleSwitch.IsOn;
             }
         }
 

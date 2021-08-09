@@ -14,14 +14,14 @@ namespace DropWebP.ViewModels
     /// </summary>
     public class ConfigFlyoutViewModel : BindableBase, INavigationAware
     {
+
+
         /// <summary>
         /// 多言語化サービス
         /// </summary>
         private readonly ILocalizerService LocalizerService;
 
-        /// <summary>
-        /// Flyoutの題名.
-        /// </summary>
+
         public string Header { get; set; } = "Config";
 
         /// <summary>
@@ -43,15 +43,14 @@ namespace DropWebP.ViewModels
         /// </summary>
         public Position Position { get; set; } = Position.Right;
 
+        public int Width { get; set; } = 200;
+
+        public FlyoutTheme Theme { get; set; } = FlyoutTheme.Dark;
+
         /// <summary>
         /// Flyoutの閉じるボタン.
         /// </summary>
         public DelegateCommand CloseFlyoutCommand { get; private set; }
-
-        /// <summary>
-        /// 可逆圧縮.
-        /// </summary>
-        public string LosslessText { get; set; } = "Lossless";
 
         /// <summary>
         /// 可逆圧縮スイッチ.
@@ -59,29 +58,14 @@ namespace DropWebP.ViewModels
         public bool ToggleLossless { get => Properties.Settings.Default.Lossless; set => Properties.Settings.Default.Lossless = value; }
 
         /// <summary>
-        /// 圧縮レベル.
-        /// </summary>
-        public string QualityText { get; set; } = "Quality";
-
-        /// <summary>
         /// 圧縮レベルスライダー.
         /// </summary>
         public long QualityValue { get => Properties.Settings.Default.Quality; set => Properties.Settings.Default.Quality = value; }
 
         /// <summary>
-        /// 変換前のファイルを残す.
-        /// </summary>
-        public string KeepOriginalText { get; set; } = "Keep Original";
-
-        /// <summary>
         /// 変換前のファイルを残すチェックボックス.
         /// </summary>
         public bool ToggleKeepOriginal { get => Properties.Settings.Default.KeepOriginal; set => Properties.Settings.Default.KeepOriginal = value; }
-
-        /// <summary>
-        /// Jpegを無視.
-        /// </summary>
-        public string IgnoreJpegText { get; set; } = "Ignore JPEG image";
 
         /// <summary>
         /// Jpegを無視のチェックボックス.
@@ -117,6 +101,8 @@ namespace DropWebP.ViewModels
         {
             CloseFlyoutCommand = new DelegateCommand(ExecuteSaveButtonCommand);
             // SelectedLanguage = SupportedLanguages.FirstOrDefault(c => c.Name.Equals(Properties.Settings.Default.Language, System.StringComparison.Ordinal));
+
+            Header = localizerService.GetLocalizedString("ConfigText");
 
             LocalizerService = localizerService;
         }

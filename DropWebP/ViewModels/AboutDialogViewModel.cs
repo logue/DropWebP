@@ -33,16 +33,6 @@ namespace DropWebP.ViewModels
         public string Title => "About";
 
         /// <summary>
-        /// プロジェクトサイト閲覧ボタン.
-        /// </summary>
-        public string VisitText { get; set; } = "Visit project site";
-
-        /// <summary>
-        /// 閉じるボタン
-        /// </summary>
-        public string CloseText { get; set; } = "Close";
-
-        /// <summary>
         /// ロゴ画像
         /// </summary>
         public ImageSource Logo { get; set; }
