@@ -1,27 +1,34 @@
-﻿using DropWebP.Interfaces;
-using MahApps.Metro.Controls;
-using Prism.Commands;
-using Prism.Mvvm;
-using Prism.Regions;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
+﻿// -----------------------------------------------------------------------
+// <copyright file="ConfigFlyoutViewModel.cs" company="Logue">
+// Copyright (c) 2021 Masashi Yoshikawa All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+// -----------------------------------------------------------------------
 
 namespace DropWebP.ViewModels
 {
+    using DropWebP.Interfaces;
+    using MahApps.Metro.Controls;
+    using Prism.Commands;
+    using Prism.Mvvm;
+    using Prism.Regions;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Globalization;
+
     /// <summary>
-    /// 設定フライアウトのViewModel
+    /// 設定フライアウトのViewModel.
     /// </summary>
     public class ConfigFlyoutViewModel : BindableBase, INavigationAware
     {
-
+        /// <summary>
+        /// 多言語化サービス.
+        /// </summary>
+        private readonly ILocalizerService localizerService;
 
         /// <summary>
-        /// 多言語化サービス
+        /// Flyoutのヘッダ.
         /// </summary>
-        private readonly ILocalizerService LocalizerService;
-
-
         public string Header { get; set; } = "Config";
 
         /// <summary>
@@ -30,21 +37,23 @@ namespace DropWebP.ViewModels
         private bool isOpen;
 
         /// <summary>
-        /// 開閉フラグ
+        /// 開閉フラグ.
         /// </summary>
-        public bool IsOpen
-        {
-            get => isOpen;
-            set => SetProperty(ref isOpen, value);
-        }
+        public bool IsOpen { get => isOpen; set => SetProperty(ref isOpen, value); }
 
         /// <summary>
         /// Flyoutの位置.
         /// </summary>
         public Position Position { get; set; } = Position.Right;
 
+        /// <summary>
+        /// Flyoutの幅.
+        /// </summary>
         public int Width { get; set; } = 200;
 
+        /// <summary>
+        /// Flyoutの幅.
+        /// </summary>
         public FlyoutTheme Theme { get; set; } = FlyoutTheme.Dark;
 
         /// <summary>
@@ -55,56 +64,60 @@ namespace DropWebP.ViewModels
         /// <summary>
         /// 可逆圧縮スイッチ.
         /// </summary>
-        public bool ToggleLossless { get => Properties.Settings.Default.Lossless; set => Properties.Settings.Default.Lossless = value; }
+        public static bool ToggleLossless { get => Properties.Settings.Default.Lossless; set => Properties.Settings.Default.Lossless = value; }
 
         /// <summary>
         /// 圧縮レベルスライダー.
         /// </summary>
-        public long QualityValue { get => Properties.Settings.Default.Quality; set => Properties.Settings.Default.Quality = value; }
+        public static long QualityValue { get => Properties.Settings.Default.Quality; set => Properties.Settings.Default.Quality = value; }
 
         /// <summary>
         /// 変換前のファイルを残すチェックボックス.
         /// </summary>
-        public bool ToggleKeepOriginal { get => Properties.Settings.Default.KeepOriginal; set => Properties.Settings.Default.KeepOriginal = value; }
+        public static bool ToggleKeepOriginal { get => Properties.Settings.Default.KeepOriginal; set => Properties.Settings.Default.KeepOriginal = value; }
 
         /// <summary>
         /// Jpegを無視のチェックボックス.
         /// </summary>
-        public bool ToggleIgnoreJpeg { get => Properties.Settings.Default.IgnoreJpeg; set => Properties.Settings.Default.IgnoreJpeg = value; }
+        public static bool ToggleIgnoreJpeg { get => Properties.Settings.Default.IgnoreJpeg; set => Properties.Settings.Default.IgnoreJpeg = value; }
 
         /// <summary>
-        /// Supported languages
+        /// 対応言語.
         /// </summary>
-        public IList<CultureInfo> SupportedLanguages => LocalizerService?.SupportedLanguages;
+        public IList<CultureInfo> SupportedLanguages => localizerService.SupportedLanguages;
 
         /// <summary>
-        /// The selected language
+        /// 選択されている言語.
         /// </summary>
         public CultureInfo SelectedLanguage
         {
-            get => LocalizerService != null ? LocalizerService.SelectedLanguage : null;
+            get => localizerService != null ? localizerService.SelectedLanguage : null;
             set
             {
-                if (LocalizerService != null && value != null && value != LocalizerService.SelectedLanguage)
+                if (localizerService != null && value != null && value != localizerService.SelectedLanguage)
                 {
-                    LocalizerService.SelectedLanguage = value;
+                    localizerService.SelectedLanguage = value;
                     Properties.Settings.Default.Language = value.ToString();
                 }
             }
         }
 
-
         /// <summary>
         /// コンストラクタ.
         /// </summary>
+        /// <param name="localizerService">多言語化サービス.</param>
         public ConfigFlyoutViewModel(ILocalizerService localizerService)
         {
+            // 多言語化サービスのインジェクション
+            this.localizerService = localizerService;
+
+            Debug.WriteLine(SupportedLanguages);
+
+            // フライアウトを閉じる
             CloseFlyoutCommand = new DelegateCommand(ExecuteSaveButtonCommand);
-            // SelectedLanguage = SupportedLanguages.FirstOrDefault(c => c.Name.Equals(Properties.Settings.Default.Language, System.StringComparison.Ordinal));
 
+            // フライアウトのヘッダー  
             Header = localizerService.GetLocalizedString("ConfigText");
-
-            LocalizerService = localizerService;
         }
 
         /// <summary>
@@ -113,6 +126,7 @@ namespace DropWebP.ViewModels
         private void ExecuteSaveButtonCommand()
         {
             Debug.WriteLine("保存しました");
+
             // 設定を保存
             Properties.Settings.Default.Save();
             IsOpen = false;
@@ -122,7 +136,7 @@ namespace DropWebP.ViewModels
         /// イベントを受け取った.
         /// </summary>
         /// <param name="obj">.</param>
-        private void OnMesageReceieved(string obj)
+        private static void OnMesageReceieved(string obj)
         {
             Debug.WriteLine("OnMesageReceieved", obj);
         }

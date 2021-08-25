@@ -2,14 +2,14 @@
   <PropertyGroup>
     <ApplicationIcon>Resources\vise.ico</ApplicationIcon>
     <AssemblyName>DropWebP</AssemblyName>
-    <AssemblyVersion>0.4.0.8</AssemblyVersion>
+    <AssemblyVersion>0.5.0.9</AssemblyVersion>
     <Authors>Masashi Yoshikawa</Authors>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Company>Logue</Company>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Copyright>(c) 2021 Logue</Copyright>
     <Description>Encode image file to WebP.</Description>
-    <FileVersion>0.4.0.8</FileVersion>
+    <FileVersion>0.5.0.9</FileVersion>
     <OutputType>WinExe</OutputType>
     <PackageIcon>vise.png</PackageIcon>
     <PackageIconUrl />
@@ -26,31 +26,12 @@
     <UseWPF>true</UseWPF>
     <Version>0.4.0-beta</Version>
   </PropertyGroup>
-  <PropertyGroup>
-    <EnableTypeInfoReflection>false</EnableTypeInfoReflection>
-    <EnableXBindDiagnostics>false</EnableXBindDiagnostics>
-    <PackageReleaseNotes>オリジナルを保持しないオプション追加
-Jpegを無視するオプション追加
-多言語化対応</PackageReleaseNotes>
-    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-  </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="DropWebP %28Package%29\**" />
-    <EmbeddedResource Remove="DropWebP %28Package%29\**" />
-    <None Remove="DropWebP %28Package%29\**" />
-    <Page Remove="DropWebP %28Package%29\**" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="Utility\AcrylicBase.cs" />
-    <Compile Remove="Utility\MetroAcrylicWindow.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="FluentWPF" Version="0.9.0" />
+    <PackageReference Include="FluentWPF" Version="0.10.0" />
     <PackageReference Include="MahApps.Metro" Version="2.4.7" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
-    <PackageReference Include="ObjectDumper.NET" Version="3.1.21178.1" />
     <PackageReference Include="Prism.DryIoc" Version="8.1.97" />
-    <PackageReference Include="ReactiveProperty.WPF" Version="7.11.0" />
+    <PackageReference Include="ReactiveProperty.WPF" Version="7.12.0" />
     <PackageReference Include="SharpEXR" Version="1.0.0.19" />
     <PackageReference Include="WpfClipboardMonitor" Version="1.2.0" />
     <PackageReference Include="WPFLocalizeExtension" Version="3.8.0" />
@@ -58,11 +39,10 @@ Jpegを無視するオプション追加
   <ItemGroup>
     <None Include="..\LICENSE">
       <Pack>True</Pack>
-      <PackagePath></PackagePath>
     </None>
+    <AdditionalFiles Include="stylecop.json" />
     <None Include="Resources\vise.png">
       <Pack>True</Pack>
-      <PackagePath></PackagePath>
     </None>
   </ItemGroup>
   <ItemGroup>

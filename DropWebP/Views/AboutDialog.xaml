@@ -7,9 +7,14 @@
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
+    xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
     xmlns:viewmodels="clr-namespace:DropWebP.ViewModels"
+    lex:LocalizeDictionary.DesignCulture="en"
+    lex:ResxLocalizationProvider.DefaultAssembly="DropWebP"
+    lex:ResxLocalizationProvider.DefaultDictionary="Resources"
     Width="320"
     Height="160"
+    d:Background="White"
     d:DataContext="{d:DesignInstance Type=viewmodels:AboutDialogViewModel}"
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
@@ -18,17 +23,21 @@
             <Setter Property="prism:Dialog.WindowStartupLocation" Value="CenterOwner" />
             <Setter Property="Title" Value="{lex:Loc AboutText}" />
             <Setter Property="ResizeMode" Value="NoResize" />
-            <!--  Setter Property="ShowTitleBar" Value="False" /  -->
+            <!--Setter Property="ShowTitleBar" Value="False" /-->
             <Setter Property="ShowInTaskbar" Value="False" />
             <Setter Property="SizeToContent" Value="WidthAndHeight" />
+            <!--Setter Property="fw:AcrylicWindow.AcrylicWindowStyle" Value="None" />
+            <Setter Property="fw:AcrylicWindow.Enabled" Value="True" />
+            <Setter Property="fw:PointerTracker.Enabled" Value="True" /-->
         </Style>
     </prism:Dialog.WindowStyle>
     <DockPanel Margin="5">
         <WrapPanel HorizontalAlignment="Right" DockPanel.Dock="Bottom">
             <Button
                 Margin="0,0,5,0"
+                Padding="5,5,5,5"
                 Command="{Binding VisitCommand}"
-                Style="{DynamicResource MahApps.Styles.Button}">
+                Style="{StaticResource ButtonRevealStyle}">
                 <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                     <TextBlock
                         Margin="0,0,5,0"
@@ -41,7 +50,8 @@
             <Button
                 Command="{Binding CloseCommand}"
                 IsDefault="True"
-                Style="{DynamicResource MahApps.Styles.Button}">
+                Padding="5,5,5,5"
+                Style="{StaticResource ButtonRevealStyle}">
                 <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                     <TextBlock
                         Margin="0,0,5,0"

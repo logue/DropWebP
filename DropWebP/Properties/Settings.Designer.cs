@@ -8,77 +8,117 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace DropWebP.Properties {
-    
-    
+namespace DropWebP.Properties
+{
+    /// <summary>
+    /// Defines the <see cref="Settings" />.
+    /// </summary>
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.10.0.0")]
-    internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
-        
+    internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase
+    {
+        /// <summary>
+        /// Defines the defaultInstance.
+        /// </summary>
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
-        
-        public static Settings Default {
-            get {
+
+        /// <summary>
+        /// Gets the Default.
+        /// </summary>
+        public static Settings Default
+        {
+            get
+            {
                 return defaultInstance;
             }
         }
-        
+
+        /// <summary>
+        /// Gets or sets a value indicating whether Lossless.
+        /// </summary>
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool Lossless {
-            get {
+        public bool Lossless
+        {
+            get
+            {
                 return ((bool)(this["Lossless"]));
             }
-            set {
+            set
+            {
                 this["Lossless"] = value;
             }
         }
-        
+
+        /// <summary>
+        /// Gets or sets the Quality.
+        /// </summary>
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("95")]
-        public long Quality {
-            get {
+        public long Quality
+        {
+            get
+            {
                 return ((long)(this["Quality"]));
             }
-            set {
+            set
+            {
                 this["Quality"] = value;
             }
         }
-        
+
+        /// <summary>
+        /// Gets or sets a value indicating whether KeepOriginal.
+        /// </summary>
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool KeepOriginal {
-            get {
+        public bool KeepOriginal
+        {
+            get
+            {
                 return ((bool)(this["KeepOriginal"]));
             }
-            set {
+            set
+            {
                 this["KeepOriginal"] = value;
             }
         }
-        
+
+        /// <summary>
+        /// Gets or sets a value indicating whether IgnoreJpeg.
+        /// </summary>
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool IgnoreJpeg {
-            get {
+        public bool IgnoreJpeg
+        {
+            get
+            {
                 return ((bool)(this["IgnoreJpeg"]));
             }
-            set {
+            set
+            {
                 this["IgnoreJpeg"] = value;
             }
         }
-        
+
+        /// <summary>
+        /// Gets or sets the Language.
+        /// </summary>
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string Language {
-            get {
+        public string Language
+        {
+            get
+            {
                 return ((string)(this["Language"]));
             }
-            set {
+            set
+            {
                 this["Language"] = value;
             }
         }

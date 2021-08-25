@@ -1,51 +1,59 @@
-﻿using DropWebP.Models;
-using DropWebP.Utility;
-using Prism.Commands;
-using Prism.Mvvm;
-using Prism.Services.Dialogs;
-using System;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Windows.Media;
-using WebP.Net;
+﻿// -----------------------------------------------------------------------
+// <copyright file="AboutDialogViewModel.cs" company="Logue">
+// Copyright (c) 2021 Masashi Yoshikawa All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+// -----------------------------------------------------------------------
 
 namespace DropWebP.ViewModels
 {
+    using DropWebP.Models;
+    using DropWebP.Utility;
+    using Prism.Commands;
+    using Prism.Mvvm;
+    using Prism.Services.Dialogs;
+    using System;
+    using System.Diagnostics;
+    using System.Runtime.InteropServices;
+    using System.Windows.Media;
+    using WebP.Net;
+
     /// <summary>
-    /// アバウト画面のビューモデル.
+    /// バージョン情報ダイアログのビューモデル.
     /// </summary>
     public class AboutDialogViewModel : BindableBase, IDialogAware
     {
         /// <summary>
-        /// 閉じるコマンド
+        /// Gets the CloseCommand
+        /// 閉じるコマンド..
         /// </summary>
         public DelegateCommand CloseCommand { get; }
 
         /// <summary>
-        /// プロジェクトサイト閲覧ボタンのコマンド.
+        /// Gets the VisitCommand
+        /// プロジェクトサイト閲覧ボタンのコマンド...
         /// </summary>
         public DelegateCommand VisitCommand { get; }
 
         /// <summary>
-        /// Gets or sets the Name
-        /// タブ名.
+        /// タブ名..
         /// </summary>
         public string Title => "About";
 
         /// <summary>
-        /// ロゴ画像
+        /// ロゴ画像.
         /// </summary>
         public ImageSource Logo { get; set; }
 
         /// <summary>
-        /// アセンブリ情報モデル
+        /// アセンブリ情報モデル.
         /// </summary>
-        public AppAssembly Assembly { get; }
+        public AppAssemblyModel Assembly { get; }
 
         /// <summary>
-        /// 使用しているLibWebPのバージョン
+        /// 使用しているLibWebPのバージョン.
         /// </summary>
-        public string WebPVersion { get => "libwebp Version: " + WebPLibrary.GetVersion().ToString(); }
+        public static string WebPVersion => "libwebp Version: " + WebPLibrary.GetVersion().ToString();
 
         /// <summary>
         /// ダイアログのCloseを要求するAction。.
@@ -53,13 +61,13 @@ namespace DropWebP.ViewModels
         public event Action<IDialogResult> RequestClose;
 
         /// <summary>
-        /// コンストラクタ
+        /// Initializes a new instance of the <see cref="AboutDialogViewModel"/> class.
         /// </summary>
         public AboutDialogViewModel()
         {
             VisitCommand = new DelegateCommand(ExecuteVisitCommand);
             CloseCommand = new DelegateCommand(ExecuteCloseCommand);
-            Assembly = new AppAssembly();
+            Assembly = new AppAssemblyModel();
 
             Logo = BitmapToImageSource.Convert(Properties.Resources.AppIcon);
         }
@@ -96,7 +104,7 @@ namespace DropWebP.ViewModels
             string url = "https://github.com/logue/DropWebP";
             try
             {
-                Process.Start(url);
+                _ = Process.Start(url);
             }
             catch
             {
@@ -122,8 +130,9 @@ namespace DropWebP.ViewModels
                 }
             }
         }
+
         /// <summary>
-        /// 閉じるボタン
+        /// 閉じるボタン.
         /// </summary>
         private void ExecuteCloseCommand()
         {

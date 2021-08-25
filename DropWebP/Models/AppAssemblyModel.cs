@@ -1,11 +1,18 @@
-﻿using System.Reflection;
+﻿// -----------------------------------------------------------------------
+// <copyright file="AppAssemblyModel.cs" company="Logue">
+// Copyright (c) 2021 Masashi Yoshikawa All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+// -----------------------------------------------------------------------
 
 namespace DropWebP.Models
 {
+    using System.Reflection;
+
     /// <summary>
     /// バージョン情報.
     /// </summary>
-    public class AppAssembly
+    public class AppAssemblyModel
     {
         /// <summary>
         /// Gets the Title.
@@ -26,7 +33,6 @@ namespace DropWebP.Models
                 return System.IO.Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().Location);
             }
         }
-
 
         /// <summary>
         /// Gets the Version.

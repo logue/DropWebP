@@ -1,86 +1,98 @@
-﻿using DropWebP.Interfaces;
-using DropWebP.Views;
-using MahApps.Metro.Controls;
-using Prism.Commands;
-using Prism.Events;
-using Prism.Mvvm;
-using Prism.Regions;
-using Prism.Services.Dialogs;
-using Reactive.Bindings;
-using Reactive.Bindings.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Linq;
-using System.Reactive.Disposables;
-using System.Runtime.InteropServices;
-using System.Windows;
-using System.Windows.Interop;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using Windows.Storage;
-using Windows.Storage.Pickers;
-using WinRT;
+﻿// -----------------------------------------------------------------------
+// <copyright file="ShellWindowViewModel.cs" company="Logue">
+// Copyright (c) 2021 Masashi Yoshikawa All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+// -----------------------------------------------------------------------
 
 namespace DropWebP.ViewModels
 {
+    using DropWebP.Interfaces;
+    using DropWebP.Utility;
+    using DropWebP.Views;
+    using MahApps.Metro.Controls;
+    using Prism.Commands;
+    using Prism.Events;
+    using Prism.Mvvm;
+    using Prism.Regions;
+    using Prism.Services.Dialogs;
+    using Reactive.Bindings;
+    using Reactive.Bindings.Extensions;
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Drawing;
+    using System.Drawing.Imaging;
+    using System.IO;
+    using System.Linq;
+    using System.Reactive.Disposables;
+    using System.Reactive.Linq;
+    using System.Runtime.InteropServices;
+    using System.Windows;
+    using System.Windows.Media;
+    using System.Windows.Media.Imaging;
+    using Windows.Storage;
+    using Windows.Storage.Pickers;
+    using WinRT;
+
     /// <summary>
     /// シェル画面.
     /// </summary>
     public class ShellWindowViewModel : BindableBase
     {
         /// <summary>
-        /// イベントアグリエイター
+        /// イベントアグリエイター..
         /// </summary>
         private readonly IEventAggregator EventAggregator;
 
         /// <summary>
-        /// リージョンマネージャー
+        /// リージョンマネージャー..
         /// </summary>
         private readonly IRegionManager RegionManager;
 
         /// <summary>
-        /// ダイアログサービス
+        /// ダイアログサービス..
         /// </summary>
         private readonly IDialogService DialogService;
 
         /// <summary>
-        /// WebPサービス.
+        /// WebPサービス...
         /// </summary>
-        private readonly IWebPService WebPService;
+        private readonly IWebPService webPService;
 
         /// <summary>
         /// Gets or sets the Shell
-        /// MetroWindow.
+        /// MetroWindow...
         /// </summary>
         public MetroWindow Shell { get; set; } = Application.Current.MainWindow as MetroWindow;
 
         /// <summary>
-        /// クリップボード更新の監視.
+        /// Gets the ClipboardUpdateCommand
+        /// クリップボード更新の監視...
         /// </summary>
         public DelegateCommand ClipboardUpdateCommand { get; private set; }
 
         /// <summary>
-        /// MainWindowのCloseイベント.
+        /// Gets the ClosedCommand
+        /// MainWindowのCloseイベント...
         /// </summary>
         public ReactiveCommand ClosedCommand { get; } = new ReactiveCommand();
 
         /// <summary>
-        /// Disposeが必要な処理をまとめてやる.
+        /// Gets the Disposable
+        /// Disposeが必要な処理をまとめてやる...
         /// </summary>
         private CompositeDisposable Disposable { get; } = new CompositeDisposable();
 
         /// <summary>
         /// Gets or sets the Title
-        /// タイトル.
+        /// タイトル...
         /// </summary>
         public string Title { get; set; } = "DropWebP";
 
         /// <summary>
         /// Gets or sets the AboutButtonCommand
-        /// アバウトボタンクリック時のコマンド.
+        /// アバウトボタンクリック時のコマンド...
         /// </summary>
         public DelegateCommand AboutCommand { get; set; }
 
@@ -90,45 +102,59 @@ namespace DropWebP.ViewModels
         public bool IsImage { get; set; }
 
         /// <summary>
-        /// 設定ボタンクリック時のコマンド.
+        /// Gets or sets the ConfigCommand
+        /// 設定ボタンクリック時のコマンド...
         /// </summary>
         public DelegateCommand ConfigCommand { get; set; }
 
         /// <summary>
-        /// 画像を開くコマンド.
+        /// Gets or sets the OpenCommand
+        /// 画像を開くコマンド...
         /// </summary>
         public DelegateCommand OpenCommand { get; set; }
 
         /// <summary>
-        /// ペーストコマンド.
+        /// Gets or sets the OpenFolderCommand
+        /// フォルダを開くコマンド...
+        /// </summary>
+        public DelegateCommand OpenFolderCommand { get; set; }
+
+        /// <summary>
+        /// Gets or sets the PasteCommand
+        /// ペーストコマンド...
         /// </summary>
         public DelegateCommand PasteCommand { get; set; }
 
         /// <summary>
-        /// 終了コマンド.
+        /// Gets or sets the ExitCommand
+        /// 終了コマンド...
         /// </summary>
         public DelegateCommand ExitCommand { get; set; }
 
         /// <summary>
-        /// 表示するイメージのファイル名.
+        /// Gets the ViewImage
+        /// 表示するイメージのファイル名...
         /// </summary>
         public ReactivePropertySlim<string> ViewImage { get; } = new ReactivePropertySlim<string>();
 
         /// <summary>
-        /// ImageのPreviewDragOverイベントのコマンド.
+        /// Gets the PreviewDragOverCommand
+        /// ImageのPreviewDragOverイベントのコマンド...
         /// </summary>
         public ReactiveCommand<DragEventArgs> PreviewDragOverCommand { get; } = new ReactiveCommand<DragEventArgs>();
 
         /// <summary>
-        /// Imageのイベントのコマンド.
+        /// Gets the DropCommand
+        /// Imageのイベントのコマンド...
         /// </summary>
         public ReactiveCommand<DragEventArgs> DropCommand { get; } = new ReactiveCommand<DragEventArgs>();
 
         /// <summary>
-        /// コンストラクタ.
+        /// Initializes a new instance of the <see cref="ShellWindowViewModel"/> class.
         /// </summary>
         /// <param name="eventAggregator">The eventAggregator<see cref="IEventAggregator"/>.</param>
         /// <param name="regionManager">インジェクションするIRegionManager。.</param>
+        /// <param name="dialogService">The dialogService<see cref="IDialogService"/>.</param>
         /// <param name="webPService">The webPService<see cref="IWebPService"/>.</param>
         public ShellWindowViewModel(IEventAggregator eventAggregator, IRegionManager regionManager, IDialogService dialogService, IWebPService webPService)
         {
@@ -141,16 +167,28 @@ namespace DropWebP.ViewModels
             _ = PreviewDragOverCommand.Subscribe(ImagePreviewDragOver).AddTo(Disposable);
             _ = DropCommand.Subscribe(ImageDrop).AddTo(Disposable);
 
-            // クリップボードが更新されれた時のハンドラ
-            ClipboardUpdateCommand = new DelegateCommand(OnClipboardUpdate);
+            IDisposable watcher = Observable
+                .Timer(TimeSpan.FromMilliseconds(200))  // 200ms毎に               
+                .Where(_ => Clipboard.ContainsImage())   // クリップボードに画像データがあるかを確認
+                .Repeat()                               // 上記の監視を何度も繰り返す     
+                .DistinctUntilChanged()                 // 以前の結果と違う場合のみ
+                .Subscribe(OnClipboardUpdate);
+
             // ペースト  
             PasteCommand = new DelegateCommand(ExecutePasteCommand);
+
             // 画像ファイルを開く（未実装）
             OpenCommand = new DelegateCommand(ExecuteOpenCommand);
+
+            // 画像ファイルを開く（未実装）
+            OpenFolderCommand = new DelegateCommand(ExecuteOpenFolderCommand);
+
             // 終了
             ExitCommand = new DelegateCommand(ExecuteExitCommand);
+
             // アバウトボタンイベントハンドラ
             AboutCommand = new DelegateCommand(ShowAboutDialog);
+
             // 設定ボタンイベントハンドラ
             ConfigCommand = new DelegateCommand(ShowConfigFloyout);
 
@@ -159,10 +197,15 @@ namespace DropWebP.ViewModels
             EventAggregator = eventAggregator;
             RegionManager = regionManager;
             DialogService = dialogService;
-            WebPService = webPService;
+            this.webPService = webPService;
         }
 
-        public ShellWindowViewModel() { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ShellWindowViewModel"/> class.
+        /// </summary>
+        public ShellWindowViewModel()
+        {
+        }
 
         /// <summary>
         /// ウィンドウが閉じられるイベント.
@@ -180,6 +223,7 @@ namespace DropWebP.ViewModels
         {
             // マウスカーソルをコピーにする。
             e.Effects = DragDropEffects.Copy;
+
             // ドラッグされてきたものがFileDrop形式の場合だけ、このイベントを処理済みにする。
             e.Handled = e.Data.GetDataPresent(DataFormats.FileDrop);
         }
@@ -192,7 +236,7 @@ namespace DropWebP.ViewModels
         {
             // ドロップされたものがFileDrop形式の場合は、各ファイルのパス文字列を文字列配列に格納する。
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            WebPService.Convert(files, Shell);
+            webPService.Convert(files, Shell);
         }
 
         /// <summary>
@@ -210,6 +254,7 @@ namespace DropWebP.ViewModels
         private void ShowConfigFloyout()
         {
             Debug.WriteLine("設定ボタンクリック");
+
             // eventAggregator.GetEvent<MessageService>().Publish("Top");
             RegionManager.RequestNavigate("FlyoutRegion", "ConfigFlyOut");
         }
@@ -217,14 +262,16 @@ namespace DropWebP.ViewModels
         /// <summary>
         /// クリップボード監視.
         /// </summary>
-        private void OnClipboardUpdate()
+        /// <param name="obj">The obj<see cref="long"/>.</param>
+        private void OnClipboardUpdate(long obj)
         {
-            IsImage = Clipboard.ContainsImage();
-            Debug.WriteLine(IsImage);
+            Debug.WriteLine("clipboard changed");
+            Windows.ApplicationModel.DataTransfer.DataPackageView content = Windows.ApplicationModel.DataTransfer.Clipboard.GetContent();
+            IsImage = content.Contains(Windows.ApplicationModel.DataTransfer.StandardDataFormats.Bitmap);
         }
 
         /// <summary>
-        /// ファイルを開くときのメソッド
+        /// ファイルを開くときのメソッド.
         /// </summary>
         private async void ExecuteOpenCommand()
         {
@@ -238,6 +285,7 @@ namespace DropWebP.ViewModels
                 // string codecName = c.CodecName.Substring(8).Replace("Codec", "Files").Trim();
                 // mfolderPicker.FileTypeFilter.Add(codecName, new List<string>() { c.FilenameExtension });
                 Debug.WriteLine(c.FilenameExtension);
+
                 //mfolderPicker.FileTypeFilter.Add(c.FilenameExtension);
             }
 
@@ -248,18 +296,46 @@ namespace DropWebP.ViewModels
             };
 
             // ウィンドウバンドルを取得
-            IntPtr hwnd = GetActiveWindow();
-            IInitializeWithWindow withWindow = picker.As<IInitializeWithWindow>();
-            withWindow.Initialize(hwnd);
+            IntPtr hwnd = WinRT.Interop.WindowNative.GetWindowHandle(Application.Current.MainWindow);
+            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
 
-            IReadOnlyList<StorageFile> selectedFiles = await picker.PickMultipleFilesAsync();
-            if (selectedFiles.Count() == 0)
+            // var hwnd = GetActiveWindow();
+            // var withWindow = picker.As<IInitializeWithWindow>();
+            // withWindow.Initialize(hwnd);
+
+            StorageFile selectedFile = await picker.PickSingleFileAsync();
+            if (selectedFile == null)
             {
                 // 選択個数が0のとき中止
                 return;
             }
-            string[] files = selectedFiles.Select(s => s.Path).ToArray();
-            WebPService.Convert(files, Shell);
+
+            // エンコード
+            webPService.ConvertWebP(selectedFile.Path, Properties.Settings.Default.Lossless ? -1 : Properties.Settings.Default.Quality);
+        }
+
+        /// <summary>
+        /// ファイルブラウザボタンが押された.
+        /// </summary>
+        private void ExecuteOpenFolderCommand()
+        {
+            IntPtr hwnd = WinRT.Interop.WindowNative.GetWindowHandle(Application.Current.MainWindow);
+            FolderPicker folderPicker = new Windows.Storage.Pickers.FolderPicker();
+            WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, hwnd);
+
+            // ダイアログを定義
+            FolderPickerEx picker = new();
+
+            // ファイルダイアログを表示
+            StorageFolder folder = picker.PickSingleFolder();
+
+            if (folder == null)
+            {
+                return;
+            }
+
+            // 変換処理
+            webPService.Convert(Directory.GetFiles(folder.Path), Shell);
         }
 
         /// <summary>
@@ -277,7 +353,7 @@ namespace DropWebP.ViewModels
                 return;
             }
 
-            System.IO.MemoryStream ms = data.GetData("DeviceIndependentBitmap") as System.IO.MemoryStream;
+            MemoryStream ms = data.GetData("DeviceIndependentBitmap") as System.IO.MemoryStream;
             if (ms == null)
             {
                 return;
@@ -316,9 +392,11 @@ namespace DropWebP.ViewModels
                 SuggestedStartLocation = PickerLocationId.PicturesLibrary,
                 FileTypeChoices = { { "WebP Image", new List<string>() { ".webp" } } }
             };
+
             // ウィンドウバンドルを取得
+            IntPtr hwnd = GetActiveWindow();
             IInitializeWithWindow withWindow = picker.As<IInitializeWithWindow>();
-            withWindow.Initialize(new WindowInteropHelper(Application.Current.MainWindow).Handle);
+            withWindow.Initialize(hwnd);
 
             // ファイルダイアログを表示4
             StorageFile file = await picker.PickSaveFileAsync();
@@ -326,23 +404,26 @@ namespace DropWebP.ViewModels
             {
                 return;
             }
+
             // エンコード
-            byte[] bytes = WebPService.EncodeWebP(bitmap, Properties.Settings.Default.Lossless ? -1 : Properties.Settings.Default.Quality);
+            byte[] bytes = webPService.EncodeWebP(bitmap, Properties.Settings.Default.Lossless ? -1 : Properties.Settings.Default.Quality);
+
             // 書き出し
             await FileIO.WriteBytesAsync(file, bytes);
         }
+
         /// <summary>
-        /// 終了コマンド
+        /// 終了コマンド.
         /// </summary>
-        public void ExecuteExitCommand()
+        public static void ExecuteExitCommand()
         {
             Application.Current.Shutdown();
         }
 
         /// <summary>
-        /// アクティブなウィンドウのハンドルを取得
+        /// アクティブなウィンドウのハンドルを取得.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>.</returns>
         [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
         private static extern IntPtr GetActiveWindow();
     }

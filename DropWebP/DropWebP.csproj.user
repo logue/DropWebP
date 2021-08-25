@@ -2,6 +2,7 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <_LastSelectedProfileId>C:\Users\logue\source\repos\DropWebP_\DropWebP\Properties\PublishProfiles\ClickOnceProfile.pubxml</_LastSelectedProfileId>
+    <RunAnalyzersDuringLiveAnalysis>true</RunAnalyzersDuringLiveAnalysis>
   </PropertyGroup>
   <ItemGroup>
     <ApplicationDefinition Update="App.xaml">

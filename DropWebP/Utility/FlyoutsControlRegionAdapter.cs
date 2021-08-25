@@ -1,10 +1,17 @@
-﻿using MahApps.Metro.Controls;
-using Prism.Regions;
-using System.Collections.Specialized;
-using System.Windows;
+﻿// -----------------------------------------------------------------------
+// <copyright file="FlyoutsControlRegionAdapter.cs" company="Logue">
+// Copyright (c) 2021 Masashi Yoshikawa All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+// -----------------------------------------------------------------------
 
 namespace DropWebP.Utility
 {
+    using MahApps.Metro.Controls;
+    using Prism.Regions;
+    using System.Collections.Specialized;
+    using System.Windows;
+
     /// <summary>
     /// Defines the <see cref="FlyoutsControlRegionAdapter" />.
     /// </summary>
@@ -34,9 +41,11 @@ namespace DropWebP.Utility
                 }
                 foreach (FrameworkElement element in e.NewItems)
                 {
-                    Flyout flyout = new Flyout();
-                    flyout.Content = element;
-                    flyout.DataContext = element.DataContext;
+                    Flyout flyout = new Flyout
+                    {
+                        Content = element,
+                        DataContext = element.DataContext
+                    };
                     _ = regionTarget.Items.Add(flyout);
                 }
             };
