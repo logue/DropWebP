@@ -2,14 +2,14 @@
   <PropertyGroup>
     <ApplicationIcon>Resources\vise.ico</ApplicationIcon>
     <AssemblyName>DropWebP</AssemblyName>
-    <AssemblyVersion>0.4.0.10</AssemblyVersion>
+    <AssemblyVersion>0.4.1.11</AssemblyVersion>
     <Authors>Masashi Yoshikawa</Authors>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Company>Logue</Company>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Copyright>(c) 2021 Logue</Copyright>
     <Description>Encode image file to WebP.</Description>
-    <FileVersion>0.4.0.10</FileVersion>
+    <FileVersion>0.4.1.11</FileVersion>
     <OutputType>WinExe</OutputType>
     <PackageIcon>vise.png</PackageIcon>
     <PackageIconUrl />
@@ -24,7 +24,7 @@
     <StartupObject>DropWebP.App</StartupObject>
     <TargetFramework>net5.0-windows10.0.19041.0</TargetFramework>
     <UseWPF>true</UseWPF>
-    <Version>0.4.0-beta</Version>
+    <Version>0.4.1-beta</Version>
     <PackageReleaseNotes>メッセージ表記の変更
 完了時の通知をディスクトップ通知にした。（無効化も可能）</PackageReleaseNotes>
   </PropertyGroup>
