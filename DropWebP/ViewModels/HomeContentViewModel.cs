@@ -22,17 +22,19 @@ namespace DropWebP.ViewModels
     public class HomeContentViewModel : BindableBase
     {
         /// <summary>
-        /// WebPサービス.
+        /// WebPサービス..
         /// </summary>
         private readonly IWebPService webPService;
 
         /// <summary>
-        /// 現在のウィンドウ
+        /// Gets or sets the Shell
+        /// 現在のウィンドウ.
         /// </summary>
         private MetroWindow Shell { get; set; } = Application.Current.MainWindow as MetroWindow;
 
         /// <summary>
-        /// ファイルブラウザボタンのコマンド.
+        /// Gets the BrowseCommand
+        /// ファイルブラウザボタンのコマンド..
         /// </summary>
         public DelegateCommand BrowseCommand { get; }
 

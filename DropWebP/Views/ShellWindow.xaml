@@ -116,5 +116,6 @@
     </Window.ContextMenu>
     <Grid fw:PointerTracker.Enabled="True" Background="#66FFFFFF">
         <ContentControl prism:RegionManager.RegionName="ContentRegion" />
+        <mah:ProgressRing Visibility="{Binding ProgressRing}" />
     </Grid>
 </mah:MetroWindow>

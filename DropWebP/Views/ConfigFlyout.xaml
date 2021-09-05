@@ -14,7 +14,7 @@
     d:DataContext="{d:DesignInstance Type=viewmodels:ConfigFlyoutViewModel}"
     d:Height="480"
     d:Width="200"
-    lex:LocalizeDictionary.DesignCulture="en"
+    lex:LocalizeDictionary.DesignCulture="ja"
     lex:ResxLocalizationProvider.DefaultAssembly="DropWebP"
     lex:ResxLocalizationProvider.DefaultDictionary="Resources"
     prism:ViewModelLocator.AutoWireViewModel="True"
@@ -43,7 +43,7 @@
         <mah:ToggleSwitch
             Content="{lex:Loc IgnoreJpegText}"
             IsOn="{Binding ToggleIgnoreJpeg}"
-            ToolTip="{lex:Loc ToggleIgnoreJpegTooltip}" />
+            ToolTip="{lex:Loc IgnoreJpegTooltip}" />
         <StackPanel Orientation="Horizontal">
             <TextBlock VerticalAlignment="Center" Text="{lex:Loc LanguageText}" />
             <ComboBox
@@ -52,5 +52,9 @@
                 ItemsSource="{Binding Path=SupportedLanguages, UpdateSourceTrigger=PropertyChanged}"
                 SelectedItem="{Binding Path=SelectedLanguage, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
         </StackPanel>
+        <mah:ToggleSwitch
+            Content="{lex:Loc NotifyCompleteText}"
+            IsOn="{Binding ToggleNotifyComplete}"
+            ToolTip="{lex:Loc NotifyCompleteTooltip}" />
     </StackPanel>
 </UserControl>

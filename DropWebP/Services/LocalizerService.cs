@@ -20,19 +20,17 @@ namespace DropWebP.Services
     public class LocalizerService : ILocalizerService
     {
         /// <summary>
-        /// Gets the SupportedLanguages
-        /// List with supported languages..
+        /// サポートされている言語.
         /// </summary>
         public IList<CultureInfo> SupportedLanguages { get; private set; }
 
         /// <summary>
-        /// Gets or sets the SelectedLanguage
-        /// The current selected language..
+        /// 現在選択されている言語.
         /// </summary>
         public CultureInfo SelectedLanguage { get => LocalizeDictionary.Instance.Culture; set => SetLocale(value); }
 
         /// <summary>
-        /// コンストラクタ
+        /// Initializes a new instance of the <see cref="LocalizerService"/> class.
         /// </summary>
         /// <param name="locale">The locale<see cref="string"/>.</param>
         public LocalizerService(string locale = null)
@@ -42,10 +40,12 @@ namespace DropWebP.Services
                 locale = CultureInfo.CurrentCulture.ToString();
             }
 
+            System.Diagnostics.Debug.WriteLine(CultureInfo.GetCultures(CultureTypes.AllCultures));
+
             SupportedLanguages = CultureInfo.GetCultures(CultureTypes.AllCultures).Where(
                 c =>
-                    c.IetfLanguageTag.Equals("en", System.StringComparison.Ordinal) ||
-                    c.IetfLanguageTag.Equals("ja", System.StringComparison.Ordinal)
+                    c.IetfLanguageTag.Equals("en-US", System.StringComparison.Ordinal) ||
+                    c.IetfLanguageTag.Equals("ja-JP", System.StringComparison.Ordinal)
             )
                 .ToList();
             SetLocale(locale);

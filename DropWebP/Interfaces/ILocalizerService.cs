@@ -35,14 +35,12 @@ namespace DropWebP.Interfaces
         string GetLocalizedString(string key);
 
         /// <summary>
-        /// Gets the SupportedLanguages
-        /// Supported languages..
+        /// Supported languages.
         /// </summary>
         IList<CultureInfo> SupportedLanguages { get; }
 
         /// <summary>
-        /// Gets or sets the SelectedLanguage
-        /// The current selected language..
+        /// The current selected language.
         /// </summary>
         CultureInfo SelectedLanguage { get; set; }
     }

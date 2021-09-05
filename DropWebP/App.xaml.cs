@@ -39,7 +39,7 @@ namespace DropWebP
         /// <summary>
         /// The ShowWindowAsync.
         /// </summary>
-        /// <param name="hwnd">The hWnd<see cref="IntPtr"/>.</param>
+        /// <param name="hWnd">The hWnd<see cref="IntPtr"/>.</param>
         /// <param name="nCmdShow">The nCmdShow<see cref="int"/>.</param>
         /// <returns>The <see cref="bool"/>.</returns>
         [DllImport("user32.dll")]
@@ -54,7 +54,7 @@ namespace DropWebP
         private static extern bool IsIconic(IntPtr hwnd);
 
         /// <summary>
-        /// ShowWindowAsync関数のパラメータに渡す定義値(画面を元の大きさに戻す).
+        /// ShowWindowAsync関数のパラメータに渡す定義値(画面を元の大きさに戻す)..
         /// </summary>
         private const int SW_RESTORE = 9;
 
@@ -101,7 +101,7 @@ namespace DropWebP
         /// <summary>
         /// コンテナを登録.
         /// </summary>
-        /// <param name="containerRegistry">インジェクションするコンテナのレジストリ</param>
+        /// <param name="containerRegistry">インジェクションするコンテナのレジストリ.</param>
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
             // _= containerRegistry.RegisterInstance<Window>(Container.Resolve<ShellWindow>());

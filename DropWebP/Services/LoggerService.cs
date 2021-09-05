@@ -17,7 +17,7 @@ namespace DropWebP.Services
     internal class LoggerService : ILoggerService
     {
         /// <summary>
-        /// Defines the Logger.
+        /// Defines the logger.
         /// </summary>
         private readonly ILogger logger;
 

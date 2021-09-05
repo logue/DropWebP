@@ -87,7 +87,12 @@ namespace DropWebP.ViewModels
         public IList<CultureInfo> SupportedLanguages => localizerService.SupportedLanguages;
 
         /// <summary>
-        /// 選択されている言語.
+        /// 完了時に通知を出す.
+        /// </summary>
+        public static bool ToggleNotifyComplete { get => Properties.Settings.Default.NotifyComplete; set => Properties.Settings.Default.NotifyComplete = value; }
+
+        /// <summary>
+        /// 選択されている言語..
         /// </summary>
         public CultureInfo SelectedLanguage
         {

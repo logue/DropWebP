@@ -161,7 +161,7 @@ CTRL + Vでクリップボード内の画像を直接WebPに変換すること�
   <data name="IgnoreJpegText" xml:space="preserve">
     <value>JPEG画像を無視する</value>
   </data>
-  <data name="ToggleIgnoreJpegTooltip" xml:space="preserve">
+  <data name="IgnoreJpegTooltip" xml:space="preserve">
     <value>JPEG画像は元々圧縮されているため、WebPで圧縮すると容量が逆に増えてしまう可能性があります。
 このトグルをオンにすることでJPEGの圧縮処理をスキップすることができます。</value>
   </data>
@@ -187,12 +187,24 @@ CTRL + Vでクリップボード内の画像を直接WebPに変換すること�
     <value>WebPに変換しています...</value>
   </data>
   <data name="DialogInitializingText" xml:space="preserve">
-    <value>初期化しています…。</value>
+    <value>初期化しています...</value>
   </data>
-  <data name="DialogFinishText" xml:space="preserve">
-    <value>完了しました。</value>
+  <data name="DialogCompleteText" xml:space="preserve">
+    <value>処理が完了しました。</value>
   </data>
-  <data name="DialogResultText" xml:space="preserve">
-    <value>{0}件のファイルを変換しました。</value>
+  <data name="CompleteMessage" xml:space="preserve">
+    <value>{0}件のファイルの変換が完了しました。</value>
+  </data>
+  <data name="NotifyCompleteText" xml:space="preserve">
+    <value>完了時に通知を出す</value>
+  </data>
+  <data name="NotifyCompleteTooltip" xml:space="preserve">
+    <value>処理完了時にディスクトップ通知を出します。</value>
+  </data>
+  <data name="ConvertingMessage" xml:space="preserve">
+    <value>{0}を変換しています...</value>
+  </data>
+  <data name="CompleteMessageSingle" xml:space="preserve">
+    <value>ファイルの変換が完了しました。</value>
   </data>
 </root>

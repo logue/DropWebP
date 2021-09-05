@@ -12,7 +12,6 @@ namespace DropWebP.ViewModels
     using DropWebP.Views;
     using MahApps.Metro.Controls;
     using Prism.Commands;
-    using Prism.Events;
     using Prism.Mvvm;
     using Prism.Regions;
     using Prism.Services.Dialogs;
@@ -41,122 +40,107 @@ namespace DropWebP.ViewModels
     public class ShellWindowViewModel : BindableBase
     {
         /// <summary>
-        /// イベントアグリエイター..
-        /// </summary>
-        private readonly IEventAggregator EventAggregator;
-
-        /// <summary>
-        /// リージョンマネージャー..
+        /// リージョンマネージャー.
         /// </summary>
         private readonly IRegionManager RegionManager;
 
         /// <summary>
-        /// ダイアログサービス..
+        /// ダイアログサービス.
         /// </summary>
         private readonly IDialogService DialogService;
 
         /// <summary>
-        /// WebPサービス...
+        /// WebPサービス.
         /// </summary>
         private readonly IWebPService webPService;
 
         /// <summary>
-        /// Gets or sets the Shell
-        /// MetroWindow...
+        /// MetroWindow.
         /// </summary>
         public MetroWindow Shell { get; set; } = Application.Current.MainWindow as MetroWindow;
 
         /// <summary>
-        /// Gets the ClipboardUpdateCommand
-        /// クリップボード更新の監視...
+        /// クリップボード更新の監視.
         /// </summary>
         public DelegateCommand ClipboardUpdateCommand { get; private set; }
 
         /// <summary>
-        /// Gets the ClosedCommand
-        /// MainWindowのCloseイベント...
+        /// MainWindowのCloseイベント.
         /// </summary>
         public ReactiveCommand ClosedCommand { get; } = new ReactiveCommand();
 
         /// <summary>
-        /// Gets the Disposable
-        /// Disposeが必要な処理をまとめてやる...
+        /// Disposeが必要な処理をまとめてやる.
         /// </summary>
         private CompositeDisposable Disposable { get; } = new CompositeDisposable();
 
         /// <summary>
-        /// Gets or sets the Title
-        /// タイトル...
+        /// タイトル.
         /// </summary>
         public string Title { get; set; } = "DropWebP";
 
         /// <summary>
-        /// Gets or sets the AboutButtonCommand
-        /// アバウトボタンクリック時のコマンド...
-        /// </summary>
-        public DelegateCommand AboutCommand { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether IsImage.
+        /// クリップボードに格納されているデータが画像であるか.
         /// </summary>
         public bool IsImage { get; set; }
 
         /// <summary>
-        /// Gets or sets the ConfigCommand
-        /// 設定ボタンクリック時のコマンド...
+        /// ローディングリング
+        /// </summary>
+        public Visibility ProgressRing { get; set; } = Visibility.Hidden;
+
+        /// <summary>
+        /// アバウトボタンクリック時のコマンド.
+        /// </summary>
+        public DelegateCommand AboutCommand { get; set; }
+
+        /// <summary>
+        /// 設定ボタンクリック時のコマンド.
         /// </summary>
         public DelegateCommand ConfigCommand { get; set; }
 
         /// <summary>
-        /// Gets or sets the OpenCommand
-        /// 画像を開くコマンド...
+        /// 画像を開くコマンド.
         /// </summary>
         public DelegateCommand OpenCommand { get; set; }
 
         /// <summary>
-        /// Gets or sets the OpenFolderCommand
-        /// フォルダを開くコマンド...
+        /// フォルダを開くコマンド.
         /// </summary>
         public DelegateCommand OpenFolderCommand { get; set; }
 
         /// <summary>
-        /// Gets or sets the PasteCommand
-        /// ペーストコマンド...
+        /// ペーストコマンド.
         /// </summary>
         public DelegateCommand PasteCommand { get; set; }
 
         /// <summary>
-        /// Gets or sets the ExitCommand
-        /// 終了コマンド...
+        /// 終了コマンド.
         /// </summary>
         public DelegateCommand ExitCommand { get; set; }
 
         /// <summary>
-        /// Gets the ViewImage
-        /// 表示するイメージのファイル名...
+        /// 表示するイメージのファイル名.
         /// </summary>
         public ReactivePropertySlim<string> ViewImage { get; } = new ReactivePropertySlim<string>();
 
         /// <summary>
-        /// Gets the PreviewDragOverCommand
-        /// ImageのPreviewDragOverイベントのコマンド...
+        /// ImageのPreviewDragOverイベントのコマンド.
         /// </summary>
         public ReactiveCommand<DragEventArgs> PreviewDragOverCommand { get; } = new ReactiveCommand<DragEventArgs>();
 
         /// <summary>
-        /// Gets the DropCommand
-        /// Imageのイベントのコマンド...
+        /// Imageのイベントのコマンド.
         /// </summary>
         public ReactiveCommand<DragEventArgs> DropCommand { get; } = new ReactiveCommand<DragEventArgs>();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ShellWindowViewModel"/> class.
+        /// コンストラクタ
         /// </summary>
-        /// <param name="eventAggregator">The eventAggregator<see cref="IEventAggregator"/>.</param>
         /// <param name="regionManager">インジェクションするIRegionManager。.</param>
         /// <param name="dialogService">The dialogService<see cref="IDialogService"/>.</param>
         /// <param name="webPService">The webPService<see cref="IWebPService"/>.</param>
-        public ShellWindowViewModel(IEventAggregator eventAggregator, IRegionManager regionManager, IDialogService dialogService, IWebPService webPService)
+        public ShellWindowViewModel(IRegionManager regionManager, IDialogService dialogService, IWebPService webPService)
         {
             // リージョン登録
             _ = regionManager.RegisterViewWithRegion("ContentRegion", typeof(HomeContent));
@@ -193,8 +177,6 @@ namespace DropWebP.ViewModels
             ConfigCommand = new DelegateCommand(ShowConfigFloyout);
 
             Debug.WriteLine("イベント割当");
-
-            EventAggregator = eventAggregator;
             RegionManager = regionManager;
             DialogService = dialogService;
             this.webPService = webPService;

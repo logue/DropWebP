@@ -38,7 +38,7 @@ namespace DropWebP.Properties
 
         /// <summary>
         /// Gets the ResourceManager
-        /// このクラスで使用されているキャッシュされた ResourceManager インスタンスを返します。...
+        /// このクラスで使用されているキャッシュされた ResourceManager インスタンスを返します。.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
         public static global::System.Resources.ResourceManager ResourceManager
@@ -57,7 +57,7 @@ namespace DropWebP.Properties
         /// <summary>
         /// Gets or sets the Culture
         /// すべてについて、現在のスレッドの CurrentUICulture プロパティをオーバーライドします
-        ///   現在のスレッドの CurrentUICulture プロパティをオーバーライドします。...
+        ///   現在のスレッドの CurrentUICulture プロパティをオーバーライドします。.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
         public static global::System.Globalization.CultureInfo Culture
@@ -74,7 +74,7 @@ namespace DropWebP.Properties
 
         /// <summary>
         /// Gets the AboutText
-        /// About に類似しているローカライズされた文字列を検索します。...
+        /// About に類似しているローカライズされた文字列を検索します。.
         /// </summary>
         public static string AboutText
         {
@@ -86,7 +86,7 @@ namespace DropWebP.Properties
 
         /// <summary>
         /// Gets the AppIcon
-        /// 型 System.Drawing.Bitmap のローカライズされたリソースを検索します。...
+        /// 型 System.Drawing.Bitmap のローカライズされたリソースを検索します。.
         /// </summary>
         public static System.Drawing.Bitmap AppIcon
         {
@@ -99,7 +99,7 @@ namespace DropWebP.Properties
 
         /// <summary>
         /// Gets the BrowseFolderText
-        /// Select Folder... に類似しているローカライズされた文字列を検索します。...
+        /// Select Folder... に類似しているローカライズされた文字列を検索します。.
         /// </summary>
         public static string BrowseFolderText
         {
@@ -111,7 +111,7 @@ namespace DropWebP.Properties
 
         /// <summary>
         /// Gets the BrowseFolderTooltip
-        /// Batch convert images in the selected folder. に類似しているローカライズされた文字列を検索します。...
+        /// Batch convert images in the selected folder. に類似しているローカライズされた文字列を検索します。.
         /// </summary>
         public static string BrowseFolderTooltip
         {
@@ -123,7 +123,7 @@ namespace DropWebP.Properties
 
         /// <summary>
         /// Gets the CloseText
-        /// Close に類似しているローカライズされた文字列を検索します。...
+        /// Close に類似しているローカライズされた文字列を検索します。.
         /// </summary>
         public static string CloseText
         {
@@ -134,8 +134,32 @@ namespace DropWebP.Properties
         }
 
         /// <summary>
+        /// Gets the CompleteMessage
+        /// Conversion of {0} files is complete. に類似しているローカライズされた文字列を検索します。.
+        /// </summary>
+        public static string CompleteMessage
+        {
+            get
+            {
+                return ResourceManager.GetString("CompleteMessage", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        /// Gets the CompleteMessageSingle
+        /// File conversion is complete. に類似しているローカライズされた文字列を検索します。.
+        /// </summary>
+        public static string CompleteMessageSingle
+        {
+            get
+            {
+                return ResourceManager.GetString("CompleteMessageSingle", resourceCulture);
+            }
+        }
+
+        /// <summary>
         /// Gets the ConfigText
-        /// Config に類似しているローカライズされた文字列を検索します。...
+        /// Config に類似しているローカライズされた文字列を検索します。.
         /// </summary>
         public static string ConfigText
         {
@@ -147,7 +171,7 @@ namespace DropWebP.Properties
 
         /// <summary>
         /// Gets the ConvertFromClipboardText
-        /// Convert from Clipboard... (_V) に類似しているローカライズされた文字列を検索します。...
+        /// Convert from Clipboard... (_V) に類似しているローカライズされた文字列を検索します。.
         /// </summary>
         public static string ConvertFromClipboardText
         {
@@ -159,7 +183,7 @@ namespace DropWebP.Properties
 
         /// <summary>
         /// Gets the ConvertFromFileText
-        /// Convert from File(s)... (_O) に類似しているローカライズされた文字列を検索します。...
+        /// Convert from File(s)... (_O) に類似しているローカライズされた文字列を検索します。.
         /// </summary>
         public static string ConvertFromFileText
         {
@@ -170,8 +194,20 @@ namespace DropWebP.Properties
         }
 
         /// <summary>
+        /// Gets the ConvertingMessage
+        /// Converting {0}... に類似しているローカライズされた文字列を検索します。.
+        /// </summary>
+        public static string ConvertingMessage
+        {
+            get
+            {
+                return ResourceManager.GetString("ConvertingMessage", resourceCulture);
+            }
+        }
+
+        /// <summary>
         /// Gets the DialogCancel
-        /// Cancel に類似しているローカライズされた文字列を検索します。...
+        /// Cancel に類似しているローカライズされた文字列を検索します。.
         /// </summary>
         public static string DialogCancel
         {
@@ -182,8 +218,20 @@ namespace DropWebP.Properties
         }
 
         /// <summary>
+        /// Gets the DialogCompleteText
+        /// Processing has been completed. に類似しているローカライズされた文字列を検索します。.
+        /// </summary>
+        public static string DialogCompleteText
+        {
+            get
+            {
+                return ResourceManager.GetString("DialogCompleteText", resourceCulture);
+            }
+        }
+
+        /// <summary>
         /// Gets the DialogConvertingText
-        /// Converting WebP... に類似しているローカライズされた文字列を検索します。...
+        /// Converting WebP... に類似しているローカライズされた文字列を検索します。.
         /// </summary>
         public static string DialogConvertingText
         {
@@ -194,20 +242,8 @@ namespace DropWebP.Properties
         }
 
         /// <summary>
-        /// Gets the DialogFinishText
-        /// Finish. に類似しているローカライズされた文字列を検索します。...
-        /// </summary>
-        public static string DialogFinishText
-        {
-            get
-            {
-                return ResourceManager.GetString("DialogFinishText", resourceCulture);
-            }
-        }
-
-        /// <summary>
         /// Gets the DialogInitializingText
-        /// initializing... に類似しているローカライズされた文字列を検索します。...
+        /// initializing... に類似しているローカライズされた文字列を検索します。.
         /// </summary>
         public static string DialogInitializingText
         {
@@ -219,7 +255,7 @@ namespace DropWebP.Properties
 
         /// <summary>
         /// Gets the DialogOk
-        /// OK に類似しているローカライズされた文字列を検索します。...
+        /// OK に類似しているローカライズされた文字列を検索します。.
         /// </summary>
         public static string DialogOk
         {
@@ -230,20 +266,8 @@ namespace DropWebP.Properties
         }
 
         /// <summary>
-        /// Gets the DialogResultText
-        /// {0} file(s) are converted. に類似しているローカライズされた文字列を検索します。...
-        /// </summary>
-        public static string DialogResultText
-        {
-            get
-            {
-                return ResourceManager.GetString("DialogResultText", resourceCulture);
-            }
-        }
-
-        /// <summary>
         /// Gets the ExitText
-        /// E_xit に類似しているローカライズされた文字列を検索します。...
+        /// E_xit に類似しているローカライズされた文字列を検索します。.
         /// </summary>
         public static string ExitText
         {
@@ -256,7 +280,7 @@ namespace DropWebP.Properties
         /// <summary>
         /// Gets the HomeMessage
         /// Drag and drop image file(s) to convert WebP.
-        ///You can also use CTRL + V to convert the image in the clipboard directly to WebP. に類似しているローカライズされた文字列を検索します。...
+        ///You can also use CTRL + V to convert the image in the clipboard directly to WebP. に類似しているローカライズされた文字列を検索します。.
         /// </summary>
         public static string HomeMessage
         {
@@ -268,7 +292,7 @@ namespace DropWebP.Properties
 
         /// <summary>
         /// Gets the IgnoreJpegText
-        /// Ignore JPEG images に類似しているローカライズされた文字列を検索します。...
+        /// Ignore JPEG images に類似しているローカライズされた文字列を検索します。.
         /// </summary>
         public static string IgnoreJpegText
         {
@@ -279,8 +303,21 @@ namespace DropWebP.Properties
         }
 
         /// <summary>
+        /// Gets the IgnoreJpegTooltip
+        /// Since JPEG images are originally compressed, compressing them with WebP may increase the capacity.
+        ///You can skip the JPEG compression process by turning on this toggle. に類似しているローカライズされた文字列を検索します。.
+        /// </summary>
+        public static string IgnoreJpegTooltip
+        {
+            get
+            {
+                return ResourceManager.GetString("IgnoreJpegTooltip", resourceCulture);
+            }
+        }
+
+        /// <summary>
         /// Gets the KeepOriginalText
-        /// Keep original image に類似しているローカライズされた文字列を検索します。...
+        /// Keep original image に類似しているローカライズされた文字列を検索します。.
         /// </summary>
         public static string KeepOriginalText
         {
@@ -292,7 +329,7 @@ namespace DropWebP.Properties
 
         /// <summary>
         /// Gets the KeepOriginalTooltip
-        /// Turn on this toggle if you want to keep the unconverted image. に類似しているローカライズされた文字列を検索します。...
+        /// Turn on this toggle if you want to keep the unconverted image. に類似しているローカライズされた文字列を検索します。.
         /// </summary>
         public static string KeepOriginalTooltip
         {
@@ -304,7 +341,7 @@ namespace DropWebP.Properties
 
         /// <summary>
         /// Gets the LanguageText
-        /// Display Language に類似しているローカライズされた文字列を検索します。...
+        /// Display Language に類似しているローカライズされた文字列を検索します。.
         /// </summary>
         public static string LanguageText
         {
@@ -316,7 +353,7 @@ namespace DropWebP.Properties
 
         /// <summary>
         /// Gets the LosslessText
-        /// Lossless に類似しているローカライズされた文字列を検索します。...
+        /// Lossless に類似しているローカライズされた文字列を検索します。.
         /// </summary>
         public static string LosslessText
         {
@@ -328,7 +365,7 @@ namespace DropWebP.Properties
 
         /// <summary>
         /// Gets the LosslessTooltip
-        /// Turn on this toggle for lossless compression. に類似しているローカライズされた文字列を検索します。...
+        /// Turn on this toggle for lossless compression. に類似しているローカライズされた文字列を検索します。.
         /// </summary>
         public static string LosslessTooltip
         {
@@ -339,8 +376,32 @@ namespace DropWebP.Properties
         }
 
         /// <summary>
+        /// Gets the NotifyCompleteText
+        /// Notify when completed に類似しているローカライズされた文字列を検索します。.
+        /// </summary>
+        public static string NotifyCompleteText
+        {
+            get
+            {
+                return ResourceManager.GetString("NotifyCompleteText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        /// Gets the NotifyCompleteTooltip
+        /// A desktop notification is issued when the process is completed. に類似しているローカライズされた文字列を検索します。.
+        /// </summary>
+        public static string NotifyCompleteTooltip
+        {
+            get
+            {
+                return ResourceManager.GetString("NotifyCompleteTooltip", resourceCulture);
+            }
+        }
+
+        /// <summary>
         /// Gets the QualityText
-        /// Quality に類似しているローカライズされた文字列を検索します。...
+        /// Quality に類似しているローカライズされた文字列を検索します。.
         /// </summary>
         public static string QualityText
         {
@@ -353,7 +414,7 @@ namespace DropWebP.Properties
         /// <summary>
         /// Gets the QualityTooltip
         /// Specifies the quality of lossy compression of images.
-        ///Normally, select 95. に類似しているローカライズされた文字列を検索します。...
+        ///Normally, select 95. に類似しているローカライズされた文字列を検索します。.
         /// </summary>
         public static string QualityTooltip
         {
@@ -364,21 +425,8 @@ namespace DropWebP.Properties
         }
 
         /// <summary>
-        /// Gets the ToggleIgnoreJpegTooltip
-        /// Since JPEG images are originally compressed, compressing them with WebP may increase the capacity.
-        ///You can skip the JPEG compression process by turning on this toggle. に類似しているローカライズされた文字列を検索します。...
-        /// </summary>
-        public static string ToggleIgnoreJpegTooltip
-        {
-            get
-            {
-                return ResourceManager.GetString("ToggleIgnoreJpegTooltip", resourceCulture);
-            }
-        }
-
-        /// <summary>
         /// Gets the vise
-        /// (アイコン) に類似した型 System.Drawing.Icon のローカライズされたリソースを検索します。...
+        /// (アイコン) に類似した型 System.Drawing.Icon のローカライズされたリソースを検索します。.
         /// </summary>
         public static System.Drawing.Icon vise
         {
@@ -391,7 +439,7 @@ namespace DropWebP.Properties
 
         /// <summary>
         /// Gets the VisitText
-        /// Visit Project site に類似しているローカライズされた文字列を検索します。...
+        /// Visit Project site に類似しているローカライズされた文字列を検索します。.
         /// </summary>
         public static string VisitText
         {

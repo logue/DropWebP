@@ -122,5 +122,23 @@ namespace DropWebP.Properties
                 this["Language"] = value;
             }
         }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether NotifyComplete.
+        /// </summary>
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool NotifyComplete
+        {
+            get
+            {
+                return ((bool)(this["NotifyComplete"]));
+            }
+            set
+            {
+                this["NotifyComplete"] = value;
+            }
+        }
     }
 }

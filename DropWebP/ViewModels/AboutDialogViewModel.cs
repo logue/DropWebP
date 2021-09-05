@@ -25,18 +25,18 @@ namespace DropWebP.ViewModels
     {
         /// <summary>
         /// Gets the CloseCommand
-        /// 閉じるコマンド..
+        /// 閉じるコマンド...
         /// </summary>
         public DelegateCommand CloseCommand { get; }
 
         /// <summary>
         /// Gets the VisitCommand
-        /// プロジェクトサイト閲覧ボタンのコマンド...
+        /// プロジェクトサイト閲覧ボタンのコマンド....
         /// </summary>
         public DelegateCommand VisitCommand { get; }
 
         /// <summary>
-        /// タブ名..
+        /// タイトル.
         /// </summary>
         public string Title => "About";
 
@@ -56,12 +56,12 @@ namespace DropWebP.ViewModels
         public static string WebPVersion => "libwebp Version: " + WebPLibrary.GetVersion().ToString();
 
         /// <summary>
-        /// ダイアログのCloseを要求するAction。.
+        /// ダイアログのCloseを要求するAction.
         /// </summary>
         public event Action<IDialogResult> RequestClose;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AboutDialogViewModel"/> class.
+        /// コンストラクタ.
         /// </summary>
         public AboutDialogViewModel()
         {
@@ -73,7 +73,7 @@ namespace DropWebP.ViewModels
         }
 
         /// <summary>
-        /// The CanCloseDialog.
+        /// ダイアログを閉じることができるか.
         /// </summary>
         /// <returns>.</returns>
         public bool CanCloseDialog()
@@ -91,7 +91,7 @@ namespace DropWebP.ViewModels
         /// <summary>
         /// The OnDialogOpened.
         /// </summary>
-        /// <param name="parameters">IDialogServiceに設定されたパラメータを表すIDialogParameters。.</param>
+        /// <param name="parameters">IDialogServiceに設定されたパラメータを表すIDialogParameters.</param>
         public void OnDialogOpened(IDialogParameters parameters)
         {
         }

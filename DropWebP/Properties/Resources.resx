@@ -168,7 +168,7 @@ Normally, select 95.</value>
   <data name="IgnoreJpegText" xml:space="preserve">
     <value>Ignore JPEG images</value>
   </data>
-  <data name="ToggleIgnoreJpegTooltip" xml:space="preserve">
+  <data name="IgnoreJpegTooltip" xml:space="preserve">
     <value>Since JPEG images are originally compressed, compressing them with WebP may increase the capacity.
 You can skip the JPEG compression process by turning on this toggle.</value>
   </data>
@@ -196,10 +196,22 @@ You can skip the JPEG compression process by turning on this toggle.</value>
   <data name="DialogInitializingText" xml:space="preserve">
     <value>initializing...</value>
   </data>
-  <data name="DialogFinishText" xml:space="preserve">
-    <value>Finish.</value>
+  <data name="DialogCompleteText" xml:space="preserve">
+    <value>Processing has been completed.</value>
   </data>
-  <data name="DialogResultText" xml:space="preserve">
-    <value>{0} file(s) are converted.</value>
+  <data name="CompleteMessage" xml:space="preserve">
+    <value>Conversion of {0} files is complete.</value>
+  </data>
+  <data name="NotifyCompleteText" xml:space="preserve">
+    <value>Notify when completed</value>
+  </data>
+  <data name="NotifyCompleteTooltip" xml:space="preserve">
+    <value>A desktop notification is issued when the process is completed.</value>
+  </data>
+  <data name="CompleteMessageSingle" xml:space="preserve">
+    <value>File conversion is complete.</value>
+  </data>
+  <data name="ConvertingMessage" xml:space="preserve">
+    <value>Converting {0}...</value>
   </data>
 </root>

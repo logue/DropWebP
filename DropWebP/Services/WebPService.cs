@@ -10,6 +10,7 @@ namespace DropWebP.Services
     using DropWebP.Interfaces;
     using MahApps.Metro.Controls;
     using MahApps.Metro.Controls.Dialogs;
+    using Microsoft.Toolkit.Uwp.Notifications;
     using SharpEXR;
     using System;
     using System.Collections.Generic;
@@ -29,7 +30,7 @@ namespace DropWebP.Services
     public class WebPService : IWebPService
     {
         /// <summary>
-        /// 多言語化サービス..
+        /// 多言語化サービス.
         /// </summary>
         private readonly ILocalizerService localizerService;
 
@@ -181,11 +182,7 @@ namespace DropWebP.Services
         private static string GetFileName(string path)
         {
             string extension = Path.GetExtension(path);
-            if (string.IsNullOrEmpty(extension))
-            {
-                return path;
-            }
-            return path.Replace(extension, string.Empty);
+            return string.IsNullOrEmpty(extension) ? path : path.Replace(extension, string.Empty);
         }
 
         /// <summary>
@@ -246,8 +243,8 @@ namespace DropWebP.Services
         /// 変換処理.
         /// </summary>
         /// <param name="files">変換対象のファイル.</param>
-        /// <param name="Shell">親画面.</param>
-        public async void Convert(string[] files, MetroWindow Shell)
+        /// <param name="shell">親画面.</param>
+        public async void Convert(string[] files, MetroWindow shell)
         {
             // 全ファイル数
             int count = files.Length;
@@ -260,7 +257,7 @@ namespace DropWebP.Services
             };
 
             // プログレスコントローラー
-            ProgressDialogController controller = await Shell.ShowProgressAsync(
+            ProgressDialogController controller = await shell.ShowProgressAsync(
                 localizerService.GetLocalizedString("DialogConvertingText"),
                 localizerService.GetLocalizedString("DialogInitializingText"), false, metroDialogSettings);
 
@@ -270,13 +267,16 @@ namespace DropWebP.Services
                 await controller.CloseAsync();
                 return;
             };
+
+            // ダイアログの進捗を中間状態にする
             controller.SetIndeterminate();
 
             Debug.Write(files);
 
             if (count == 1)
             {
-                controller.SetMessage(Path.GetFileName(files[0]));
+                // ファイルが一つしかない場合
+                controller.SetMessage(string.Format(localizerService.GetLocalizedString("ConvertingMessage"), Path.GetFileName(files[0])));
                 ConvertWebP(files[0], Properties.Settings.Default.Lossless ? -1 : Properties.Settings.Default.Quality);
             }
             else
@@ -288,6 +288,7 @@ namespace DropWebP.Services
                 CancellationTokenSource tokenSource = new CancellationTokenSource();
                 CancellationToken ct = tokenSource.Token;
 
+                // 変換処理
                 Task task = Task.Run(async () =>
                 {
                     // キャンセル可能
@@ -306,7 +307,7 @@ namespace DropWebP.Services
                             localizerService.GetLocalizedString("DialogConvertingText") + string.Format(" ({0}/{1})", i, count)
                         );
                         controller.SetProgress(i);
-                        controller.SetMessage(Path.GetFileName(files[i]));
+                        controller.SetMessage(string.Format(localizerService.GetLocalizedString("ConvertingMessage"), Path.GetFileName(files[i])));
 
                         // 変換処理
                         await ConvertWebPAsync(files[i], Properties.Settings.Default.Lossless ? -1 : Properties.Settings.Default.Quality);
@@ -334,15 +335,23 @@ namespace DropWebP.Services
             }
             await controller.CloseAsync();
 
-            await Shell.ShowMessageAsync(
-                localizerService.GetLocalizedString("DialogFinishText"),
-                string.Format(localizerService.GetLocalizedString("DialogFinishText"), count.ToString())
-            );
+            if (Properties.Settings.Default.NotifyComplete)
+            {
+                // トースト通知
+                new ToastContentBuilder()
+             .AddText(localizerService.GetLocalizedString("DialogCompleteText"))
+             .AddText(string.Format(localizerService.GetLocalizedString("CompleteMessage"), count.ToString()))
+             .Show();
 
-            Utility.Notify.Invoke(
-                localizerService.GetLocalizedString("DialogFinishText"),
-                string.Format(localizerService.GetLocalizedString("DialogFinishText"), count.ToString())
-            );
+            }
+            else
+            {
+                // ダイアログによる通知
+                _ = await shell.ShowMessageAsync(
+                    localizerService.GetLocalizedString("DialogCompleteText"),
+                    string.Format(localizerService.GetLocalizedString("CompleteMessage"), count.ToString())
+                );
+            }
         }
 
         /// <summary>
