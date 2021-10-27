@@ -5,9 +5,9 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using DropWebP.Helpers;
 using DropWebP.Interfaces;
 using DropWebP.Services;
-using DropWebP.Utility;
 using DropWebP.ViewModels;
 using DropWebP.Views;
 using MahApps.Metro.Controls;

@@ -5,8 +5,8 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using DropWebP.Helpers;
 using DropWebP.Models;
-using DropWebP.Utility;
 using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;

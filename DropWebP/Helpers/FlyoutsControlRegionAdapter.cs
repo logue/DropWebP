@@ -10,7 +10,7 @@ using Prism.Regions;
 using System.Collections.Specialized;
 using System.Windows;
 
-namespace DropWebP.Utility
+namespace DropWebP.Helpers
 {
     /// <summary>
     /// Defines the <see cref="FlyoutsControlRegionAdapter" />.

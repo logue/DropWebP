@@ -13,7 +13,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace DropWebP.Utility
+namespace DropWebP.Helpers
 {
     /// <summary>
     /// ビットマップをImageSourceにするクラス.

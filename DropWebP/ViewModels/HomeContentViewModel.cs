@@ -5,11 +5,12 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using DropWebP.Helpers;
 using DropWebP.Interfaces;
-using DropWebP.Utility;
 using MahApps.Metro.Controls;
 using Prism.Commands;
 using Prism.Mvvm;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
@@ -34,7 +35,7 @@ namespace DropWebP.ViewModels
 
         /// <summary>
         /// Gets the BrowseCommand
-        /// ファイルブラウザボタンのコマンド..
+        /// ファイルブラウザボタンのコマンド.
         /// </summary>
         public DelegateCommand BrowseCommand { get; }
 
@@ -56,19 +57,19 @@ namespace DropWebP.ViewModels
         {
             Debug.WriteLine("ブラウズボタン");
 
-            // ダイアログを定義
-            FolderPickerEx picker = new();
+            // フォルダ選択ダイアログ
+            FolderPicker picker = new();
+            picker.Title = "Select Directory";
+            picker.InputPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
 
-            // ファイルダイアログを表示
-            Windows.Storage.StorageFolder folder = picker.PickSingleFolder();
-
-            if (folder == null)
+            // ダイアログを表示
+            if (picker.ShowDialog() != true)
             {
                 return;
             }
 
             // 変換処理
-            webPService.Convert(Directory.GetFiles(folder.Path), Shell);
+            webPService.Convert(Directory.GetFiles(picker.ResultPath), Shell);
         }
     }
 }

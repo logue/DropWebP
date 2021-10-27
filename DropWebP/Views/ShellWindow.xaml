@@ -85,13 +85,11 @@
         </i:EventTrigger>
     </i:Interaction.Triggers>
     <Window.InputBindings>
-        <!--
-             KeyBinding
-             Key="O"
-             Command="{Binding OpenCommand}"
-             Gesture="Ctrl+O"
-             Modifiers="Ctrl" /
-        -->
+        <KeyBinding
+            Key="O"
+            Command="{Binding OpenCommand}"
+            Gesture="Ctrl+O"
+            Modifiers="Ctrl" />
         <KeyBinding
             Key="V"
             Command="{Binding PasteCommand}"
@@ -105,10 +103,7 @@
     </Window.InputBindings>
     <Window.ContextMenu>
         <fw:AcrylicContextMenu>
-            <MenuItem
-                Command="{Binding OpenCommand}"
-                Header="{lex:Loc ConvertFromFileText}"
-                IsEnabled="False" />
+            <MenuItem Command="{Binding OpenCommand}" Header="{lex:Loc ConvertFromFileText}" />
             <MenuItem Command="{Binding PasteCommand}" Header="{lex:Loc ConvertFromClipboardText}" />
             <Separator />
             <MenuItem Command="{Binding ExitCommand}" Header="{lex:Loc ExitText}" />

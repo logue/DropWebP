@@ -6,7 +6,6 @@
 // -----------------------------------------------------------------------
 
 using DropWebP.Interfaces;
-using DropWebP.Utility;
 using DropWebP.Views;
 using MahApps.Metro.Controls;
 using Prism.Commands;
@@ -257,43 +256,41 @@ namespace DropWebP.ViewModels
         /// </summary>
         private async void ExecuteOpenCommand()
         {
-            // TODO: 動きません！
-            // メモ：https://github.com/microsoft/WindowsAppSDK/issues/466
-
             Debug.WriteLine("開く");
-            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageEncoders();
-            foreach (ImageCodecInfo c in codecs)
+
+            FileOpenPicker picker = new();
+            picker.ViewMode = PickerViewMode.Thumbnail;
+            picker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
+
+            foreach (ImageCodecInfo c in ImageCodecInfo.GetImageEncoders())
             {
                 // string codecName = c.CodecName.Substring(8).Replace("Codec", "Files").Trim();
-                // mfolderPicker.FileTypeFilter.Add(codecName, new List<string>() { c.FilenameExtension });
                 Debug.WriteLine(c.FilenameExtension);
-
-                //mfolderPicker.FileTypeFilter.Add(c.FilenameExtension);
+                foreach (string ext in c.FilenameExtension.Split(';'))
+                {
+                    picker.FileTypeFilter.Add(ext.Remove(0, 1).ToLower());
+                }
             }
-
-            FileOpenPicker picker = new()
-            {
-                ViewMode = PickerViewMode.Thumbnail,
-                SuggestedStartLocation = PickerLocationId.PicturesLibrary,
-            };
+            // EXRフォーマットを追加
+            picker.FileTypeFilter.Add(".exr");
 
             // ウィンドウバンドルを取得
-            IntPtr hwnd = WinRT.Interop.WindowNative.GetWindowHandle(Application.Current.MainWindow);
-            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+            IntPtr hwnd = GetActiveWindow();
+            IInitializeWithWindow withWindow = picker.As<IInitializeWithWindow>();
+            withWindow.Initialize(hwnd);
 
-            // var hwnd = GetActiveWindow();
-            // var withWindow = picker.As<IInitializeWithWindow>();
-            // withWindow.Initialize(hwnd);
-
-            StorageFile selectedFile = await picker.PickSingleFileAsync();
-            if (selectedFile == null)
+            var selectedFiles = await picker.PickMultipleFilesAsync();
+            if (selectedFiles.Count == 0)
             {
                 // 選択個数が0のとき中止
                 return;
             }
 
+            // ファイル一覧
+            string[] files = selectedFiles.Select(f => f.Path).ToArray();
+
             // エンコード
-            webPService.ConvertWebP(selectedFile.Path, Properties.Settings.Default.Lossless ? -1 : Properties.Settings.Default.Quality);
+            webPService.Convert(files, Shell);
         }
 
         /// <summary>
@@ -301,23 +298,18 @@ namespace DropWebP.ViewModels
         /// </summary>
         private void ExecuteOpenFolderCommand()
         {
-            IntPtr hwnd = WinRT.Interop.WindowNative.GetWindowHandle(Application.Current.MainWindow);
-            FolderPicker folderPicker = new Windows.Storage.Pickers.FolderPicker();
-            WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, hwnd);
-
-            // ダイアログを定義
-            FolderPickerEx picker = new();
-
+            // フォルダ選択ダイアログ
+            Helpers.FolderPicker picker = new();
+            picker.Title = "Select Folder";
+            picker.InputPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
             // ファイルダイアログを表示
-            StorageFolder folder = picker.PickSingleFolder();
-
-            if (folder == null)
+            if (picker.ShowDialog() != true)
             {
                 return;
             }
 
             // 変換処理
-            webPService.Convert(Directory.GetFiles(folder.Path), Shell);
+            webPService.Convert(Directory.GetFiles(picker.ResultPath), Shell);
         }
 
         /// <summary>

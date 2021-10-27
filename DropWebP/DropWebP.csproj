@@ -13,31 +13,36 @@
     <PackageIconUrl></PackageIconUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/logue/DropWebP</PackageProjectUrl>
+    <PackageReleaseNotes>Win11でウィンドウ移動時にもたつく問題を解消
+WebP.netを外部パッケージ化し1.1.0に更新
+ファイル選択ダイアログが正常に動くように
+</PackageReleaseNotes>
     <PackageTags>WebP</PackageTags>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <Platforms>AnyCPU;x64;x86</Platforms>
-    <RepositoryType>Git</RepositoryType>
+    <RepositoryType>git</RepositoryType>
     <RepositoryUrl>git@github.com:logue/DropWebP.git</RepositoryUrl>
     <SignAssembly>false</SignAssembly>
     <StartupObject>DropWebP.App</StartupObject>
     <TargetFramework>net5.0-windows10.0.20348.0</TargetFramework>
     <UseWPF>true</UseWPF>
-    <Version>0.4.2-beta</Version>
-    <PackageReleaseNotes>メッセージ表記の変更
-完了時の通知をディスクトップ通知にした。（無効化も可能）</PackageReleaseNotes>
+    <Version>0.4.2</Version>
     <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="FluentWPF" Version="0.10.2" />
+    <PackageReference Include="FluentWPF" Version="0.10.2">
+      <TreatAsUsed>true</TreatAsUsed>
+    </PackageReference>
     <PackageReference Include="MahApps.Metro" Version="2.4.9" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
     <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.1.1" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.196" />
     <PackageReference Include="Prism.DryIoc" Version="8.1.97" />
     <PackageReference Include="ReactiveProperty.WPF" Version="7.12.0" />
     <PackageReference Include="SharpEXR" Version="1.0.0.19" />
-    <PackageReference Include="WebP_Net" Version="1.1.0" />
-    <PackageReference Include="WpfClipboardMonitor" Version="1.2.0" />
     <PackageReference Include="WPFLocalizeExtension" Version="3.9.0" />
+    <PackageReference Include="WebP_Net" Version="1.1.0" />
+    <PackageReference Include="WpfClipboardMonitor" Version="1.2.0">
+      <TreatAsUsed>true</TreatAsUsed>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\LICENSE">
