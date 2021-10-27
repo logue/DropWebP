@@ -86,11 +86,11 @@
     </i:Interaction.Triggers>
     <Window.InputBindings>
         <!--
-            KeyBinding
-            Key="O"
-            Command="{Binding OpenCommand}"
-            Gesture="Ctrl+O"
-            Modifiers="Ctrl" /
+             KeyBinding
+             Key="O"
+             Command="{Binding OpenCommand}"
+             Gesture="Ctrl+O"
+             Modifiers="Ctrl" /
         -->
         <KeyBinding
             Key="V"
@@ -114,7 +114,12 @@
             <MenuItem Command="{Binding ExitCommand}" Header="{lex:Loc ExitText}" />
         </fw:AcrylicContextMenu>
     </Window.ContextMenu>
-    <Grid fw:PointerTracker.Enabled="True" Background="#66FFFFFF">
+    <Window.Resources>
+        <Style x:Key="TabHeaderStyle" TargetType="{x:Type TabItem}">
+            <Setter Property="Header" Value="{Binding RelativeSource={RelativeSource Self}, Path=Content.DataContext.ContentTitle}" />
+        </Style>
+    </Window.Resources>
+    <Grid fw:PointerTracker.Enabled="True">
         <ContentControl prism:RegionManager.RegionName="ContentRegion" />
         <mah:ProgressRing Visibility="{Binding ProgressRing}" />
     </Grid>

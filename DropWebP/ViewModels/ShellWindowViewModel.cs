@@ -1,39 +1,39 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="ShellWindowViewModel.cs" company="Logue">
 // Copyright (c) 2021 Masashi Yoshikawa All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 // -----------------------------------------------------------------------
 
+using DropWebP.Interfaces;
+using DropWebP.Utility;
+using DropWebP.Views;
+using MahApps.Metro.Controls;
+using Prism.Commands;
+using Prism.Mvvm;
+using Prism.Regions;
+using Prism.Services.Dialogs;
+using Reactive.Bindings;
+using Reactive.Bindings.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Linq;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using System.Runtime.InteropServices;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using Windows.Storage;
+using Windows.Storage.Pickers;
+using WinRT;
+
 namespace DropWebP.ViewModels
 {
-    using DropWebP.Interfaces;
-    using DropWebP.Utility;
-    using DropWebP.Views;
-    using MahApps.Metro.Controls;
-    using Prism.Commands;
-    using Prism.Mvvm;
-    using Prism.Regions;
-    using Prism.Services.Dialogs;
-    using Reactive.Bindings;
-    using Reactive.Bindings.Extensions;
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Drawing;
-    using System.Drawing.Imaging;
-    using System.IO;
-    using System.Linq;
-    using System.Reactive.Disposables;
-    using System.Reactive.Linq;
-    using System.Runtime.InteropServices;
-    using System.Windows;
-    using System.Windows.Media;
-    using System.Windows.Media.Imaging;
-    using Windows.Storage;
-    using Windows.Storage.Pickers;
-    using WinRT;
-
     /// <summary>
     /// シェル画面.
     /// </summary>
@@ -152,13 +152,13 @@ namespace DropWebP.ViewModels
             _ = DropCommand.Subscribe(ImageDrop).AddTo(Disposable);
 
             IDisposable watcher = Observable
-                .Timer(TimeSpan.FromMilliseconds(200))  // 200ms毎に               
+                .Timer(TimeSpan.FromMilliseconds(200))  // 200ms毎に
                 .Where(_ => Clipboard.ContainsImage())   // クリップボードに画像データがあるかを確認
-                .Repeat()                               // 上記の監視を何度も繰り返す     
+                .Repeat()                               // 上記の監視を何度も繰り返す
                 .DistinctUntilChanged()                 // 以前の結果と違う場合のみ
                 .Subscribe(OnClipboardUpdate);
 
-            // ペースト  
+            // ペースト
             PasteCommand = new DelegateCommand(ExecutePasteCommand);
 
             // 画像ファイルを開く（未実装）

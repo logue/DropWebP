@@ -1,28 +1,28 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="App.xaml.cs" company="Logue">
 // Copyright (c) 2021 Masashi Yoshikawa All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 // -----------------------------------------------------------------------
 
+using DropWebP.Interfaces;
+using DropWebP.Services;
+using DropWebP.Utility;
+using DropWebP.ViewModels;
+using DropWebP.Views;
+using MahApps.Metro.Controls;
+using Prism.DryIoc;
+using Prism.Ioc;
+using Prism.Regions;
+using System;
+using System.Diagnostics;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Windows;
+
 namespace DropWebP
 {
-    using DropWebP.Interfaces;
-    using DropWebP.Services;
-    using DropWebP.Utility;
-    using DropWebP.ViewModels;
-    using DropWebP.Views;
-    using MahApps.Metro.Controls;
-    using Prism.DryIoc;
-    using Prism.Ioc;
-    using Prism.Regions;
-    using System;
-    using System.Diagnostics;
-    using System.Reflection;
-    using System.Runtime.InteropServices;
-    using System.Threading;
-    using System.Windows;
-
     /// <summary>
     /// Interaction logic for App.xaml.
     /// </summary>
@@ -134,5 +134,16 @@ namespace DropWebP
 
             base.ConfigureRegionAdapterMappings(regionAdapterMappings);
         }
+
+        /// <summary>
+        /// モジュール登録
+        /// </summary>
+        /// <returns></returns>
+        /*
+        protected override IModuleCatalog CreateModuleCatalog()
+        {
+            // return new DirectoryModuleCatalog() { ModulePath = @".\Modules" };
+        }
+        */
     }
 }

@@ -199,7 +199,7 @@ CTRL + Vでクリップボード内の画像を直接WebPに変換すること�
     <value>完了時に通知を出す</value>
   </data>
   <data name="NotifyCompleteTooltip" xml:space="preserve">
-    <value>処理完了時にディスクトップ通知を出します。</value>
+    <value>処理完了時にデスクトップ通知を出します。</value>
   </data>
   <data name="ConvertingMessage" xml:space="preserve">
     <value>{0}を変換しています...</value>

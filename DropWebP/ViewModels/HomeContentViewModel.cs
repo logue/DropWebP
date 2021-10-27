@@ -1,21 +1,21 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="HomeContentViewModel.cs" company="Logue">
 // Copyright (c) 2021 Masashi Yoshikawa All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 // -----------------------------------------------------------------------
 
+using DropWebP.Interfaces;
+using DropWebP.Utility;
+using MahApps.Metro.Controls;
+using Prism.Commands;
+using Prism.Mvvm;
+using System.Diagnostics;
+using System.IO;
+using System.Windows;
+
 namespace DropWebP.ViewModels
 {
-    using DropWebP.Interfaces;
-    using DropWebP.Utility;
-    using MahApps.Metro.Controls;
-    using Prism.Commands;
-    using Prism.Mvvm;
-    using System.Diagnostics;
-    using System.IO;
-    using System.Windows;
-
     /// <summary>
     /// ホーム画面のビューモデル.
     /// </summary>

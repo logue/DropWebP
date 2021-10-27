@@ -1,15 +1,15 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="ILoggerService.cs" company="Logue">
 // Copyright (c) 2021 Masashi Yoshikawa All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 // -----------------------------------------------------------------------
 
+using Microsoft.Extensions.Logging;
+using System;
+
 namespace DropWebP.Interfaces
 {
-    using Microsoft.Extensions.Logging;
-    using System;
-
     /// <summary>
     /// Defines the <see cref="ILoggerService" />.
     /// </summary>

@@ -1,13 +1,22 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31613.86
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31808.319
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DropWebP", "DropWebP\DropWebP.csproj", "{C621B76F-EAA6-43BE-9636-99554DA0B64B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebP.Net", "WebP.Net\WebP.Net.csproj", "{BB5133E5-0FA0-4504-BE94-F5E2D01FB3DD}"
-EndProject
 Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "DropWebP (Package)", "DropWebP (Package)\DropWebP (Package).wapproj", "{80A2D444-7696-4456-91B1-486B66984136}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{34BE3639-FF12-4B1B-821C-27E23CD4BF6E}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		.gitmodules = .gitmodules
+		appveyor.yml = appveyor.yml
+		LICENSE = LICENSE
+		ReadMe.md = ReadMe.md
+		stylecop.json = stylecop.json
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,26 +52,6 @@ Global
 		{C621B76F-EAA6-43BE-9636-99554DA0B64B}.Release|x64.Build.0 = Release|x64
 		{C621B76F-EAA6-43BE-9636-99554DA0B64B}.Release|x86.ActiveCfg = Release|x86
 		{C621B76F-EAA6-43BE-9636-99554DA0B64B}.Release|x86.Build.0 = Release|x86
-		{BB5133E5-0FA0-4504-BE94-F5E2D01FB3DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BB5133E5-0FA0-4504-BE94-F5E2D01FB3DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BB5133E5-0FA0-4504-BE94-F5E2D01FB3DD}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{BB5133E5-0FA0-4504-BE94-F5E2D01FB3DD}.Debug|ARM.Build.0 = Debug|Any CPU
-		{BB5133E5-0FA0-4504-BE94-F5E2D01FB3DD}.Debug|ARM64.ActiveCfg = Debug|Any CPU
-		{BB5133E5-0FA0-4504-BE94-F5E2D01FB3DD}.Debug|ARM64.Build.0 = Debug|Any CPU
-		{BB5133E5-0FA0-4504-BE94-F5E2D01FB3DD}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{BB5133E5-0FA0-4504-BE94-F5E2D01FB3DD}.Debug|x64.Build.0 = Debug|Any CPU
-		{BB5133E5-0FA0-4504-BE94-F5E2D01FB3DD}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{BB5133E5-0FA0-4504-BE94-F5E2D01FB3DD}.Debug|x86.Build.0 = Debug|Any CPU
-		{BB5133E5-0FA0-4504-BE94-F5E2D01FB3DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BB5133E5-0FA0-4504-BE94-F5E2D01FB3DD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BB5133E5-0FA0-4504-BE94-F5E2D01FB3DD}.Release|ARM.ActiveCfg = Release|Any CPU
-		{BB5133E5-0FA0-4504-BE94-F5E2D01FB3DD}.Release|ARM.Build.0 = Release|Any CPU
-		{BB5133E5-0FA0-4504-BE94-F5E2D01FB3DD}.Release|ARM64.ActiveCfg = Release|Any CPU
-		{BB5133E5-0FA0-4504-BE94-F5E2D01FB3DD}.Release|ARM64.Build.0 = Release|Any CPU
-		{BB5133E5-0FA0-4504-BE94-F5E2D01FB3DD}.Release|x64.ActiveCfg = Release|Any CPU
-		{BB5133E5-0FA0-4504-BE94-F5E2D01FB3DD}.Release|x64.Build.0 = Release|Any CPU
-		{BB5133E5-0FA0-4504-BE94-F5E2D01FB3DD}.Release|x86.ActiveCfg = Release|Any CPU
-		{BB5133E5-0FA0-4504-BE94-F5E2D01FB3DD}.Release|x86.Build.0 = Release|Any CPU
 		{80A2D444-7696-4456-91B1-486B66984136}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{80A2D444-7696-4456-91B1-486B66984136}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{80A2D444-7696-4456-91B1-486B66984136}.Debug|Any CPU.Deploy.0 = Debug|Any CPU

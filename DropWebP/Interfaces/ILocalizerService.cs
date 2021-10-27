@@ -1,15 +1,15 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="ILocalizerService.cs" company="Logue">
 // Copyright (c) 2021 Masashi Yoshikawa All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System.Collections.Generic;
+using System.Globalization;
+
 namespace DropWebP.Interfaces
 {
-    using System.Collections.Generic;
-    using System.Globalization;
-
     /// <summary>
     /// 多言語化サービスのインターフェース.
     /// </summary>

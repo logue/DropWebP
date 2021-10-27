@@ -1,17 +1,17 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="IWebPService.cs" company="Logue">
 // Copyright (c) 2021 Masashi Yoshikawa All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 // -----------------------------------------------------------------------
 
+using MahApps.Metro.Controls;
+using System.Drawing;
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace DropWebP.Interfaces
 {
-    using MahApps.Metro.Controls;
-    using System.Drawing;
-    using System.Threading;
-    using System.Threading.Tasks;
-
     /// <summary>
     /// WebPサービスのインターフェース.
     /// </summary>

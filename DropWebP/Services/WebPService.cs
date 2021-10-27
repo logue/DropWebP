@@ -1,29 +1,29 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="WebPService.cs" company="Logue">
 // Copyright (c) 2021 Masashi Yoshikawa All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 // -----------------------------------------------------------------------
 
+using DropWebP.Interfaces;
+using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
+using Microsoft.Toolkit.Uwp.Notifications;
+using SharpEXR;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
+using WebP.Net;
+
 namespace DropWebP.Services
 {
-    using DropWebP.Interfaces;
-    using MahApps.Metro.Controls;
-    using MahApps.Metro.Controls.Dialogs;
-    using Microsoft.Toolkit.Uwp.Notifications;
-    using SharpEXR;
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Drawing;
-    using System.Drawing.Imaging;
-    using System.IO;
-    using System.Linq;
-    using System.Runtime.InteropServices;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using WebP.Net;
-
     /// <summary>
     /// WebPに変換するサービス.
     /// </summary>
@@ -52,24 +52,26 @@ namespace DropWebP.Services
         /// <returns>WebPに圧縮したバイト配列.</returns>
         public byte[] EncodeWebP(Bitmap bitmap, long quality = -1)
         {
+            using WebPObject WebP = new(bitmap);
             // TODO: BGRとABGRの判定と、それに応じた圧縮処理
             if (quality < 0)
             {
-                return WebPEncoder.EncodeLossless(bitmap);
+                return WebP.GetWebPLossless();
             }
 
-            return WebPEncoder.EncodeLossy(bitmap, quality);
+            return WebP.GetWebPLossy(quality);
         }
 
         /// <summary>
-        /// WebPからビットマップに変換する.
+        /// WebPからImageに変換する.
         /// </summary>
         /// <param name="bytes">WebP画像のバイト配列.</param>
         /// <returns>ビットマップ.</returns>
         public Bitmap DecodeWebP(byte[] bytes)
         {
+            using WebPObject WebP = new(bytes);
             // WebPに変換
-            return WebPDecoder.Decode(bytes);
+            return (Bitmap)WebP.GetImage();
         }
 
         /// <summary>

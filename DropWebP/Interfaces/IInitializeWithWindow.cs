@@ -1,15 +1,14 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="IInitializeWithWindow.cs" company="Logue">
 // Copyright (c) 2021 Masashi Yoshikawa All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 // -----------------------------------------------------------------------
+using System;
+using System.Runtime.InteropServices;
 
 namespace DropWebP.Interfaces
 {
-    using System;
-    using System.Runtime.InteropServices;
-
     /// <summary>
     /// WPFからMessageDialogを呼ぶ場合のおまじない
     /// https://qiita.com/okazuki/items/227f8d19e38a67099006.

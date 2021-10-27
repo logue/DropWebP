@@ -1,17 +1,17 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="FlyoutsControlRegionAdapter.cs" company="Logue">
 // Copyright (c) 2021 Masashi Yoshikawa All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 // -----------------------------------------------------------------------
 
+using MahApps.Metro.Controls;
+using Prism.Regions;
+using System.Collections.Specialized;
+using System.Windows;
+
 namespace DropWebP.Utility
 {
-    using MahApps.Metro.Controls;
-    using Prism.Regions;
-    using System.Collections.Specialized;
-    using System.Windows;
-
     /// <summary>
     /// Defines the <see cref="FlyoutsControlRegionAdapter" />.
     /// </summary>

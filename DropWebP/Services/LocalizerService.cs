@@ -1,19 +1,19 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="LocalizerService.cs" company="Logue">
 // Copyright (c) 2021 Masashi Yoshikawa All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 // -----------------------------------------------------------------------
 
+using DropWebP.Interfaces;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using WPFLocalizeExtension.Engine;
+using WPFLocalizeExtension.Extensions;
+
 namespace DropWebP.Services
 {
-    using DropWebP.Interfaces;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Linq;
-    using WPFLocalizeExtension.Engine;
-    using WPFLocalizeExtension.Extensions;
-
     /// <summary>
     /// 多言語化サービス.
     /// </summary>
