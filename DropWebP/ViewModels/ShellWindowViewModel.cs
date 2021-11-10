@@ -296,20 +296,30 @@ namespace DropWebP.ViewModels
         /// <summary>
         /// ファイルブラウザボタンが押された.
         /// </summary>
-        private void ExecuteOpenFolderCommand()
+        private async void ExecuteOpenFolderCommand()
         {
             // フォルダ選択ダイアログ
-            Helpers.FolderPicker picker = new();
-            picker.Title = "Select Folder";
-            picker.InputPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-            // ファイルダイアログを表示
-            if (picker.ShowDialog() != true)
+            // ダイアログを定義
+            FolderPicker picker = new()
+            {
+                SuggestedStartLocation = PickerLocationId.PicturesLibrary,
+                ViewMode = PickerViewMode.List,
+            };
+
+            // ウィンドウバンドルを取得
+            IntPtr hwnd = GetActiveWindow();
+            IInitializeWithWindow withWindow = picker.As<IInitializeWithWindow>();
+            withWindow.Initialize(hwnd);
+
+            // ファイルダイアログを表示4
+            StorageFolder folder = await picker.PickSingleFolderAsync();
+            if (folder == null)
             {
                 return;
             }
 
             // 変換処理
-            webPService.Convert(Directory.GetFiles(picker.ResultPath), Shell);
+            webPService.Convert(Directory.GetFiles(folder.Path), Shell);
         }
 
         /// <summary>

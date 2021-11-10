@@ -15,7 +15,8 @@
     <PackageProjectUrl>https://github.com/logue/DropWebP</PackageProjectUrl>
     <PackageReleaseNotes>Win11でウィンドウ移動時にもたつく問題を解消
 WebP.netを外部パッケージ化し1.1.0に更新
-ファイル選択ダイアログが正常に動くように</PackageReleaseNotes>
+ファイル選択ダイアログが正常に動くように
+Dotnet6に移行</PackageReleaseNotes>
     <PackageTags>WebP</PackageTags>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>git@github.com:logue/DropWebP.git</RepositoryUrl>
@@ -27,7 +28,9 @@ WebP.netを外部パッケージ化し1.1.0に更新
     <PackageReadmeFile>ReadMe.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="FluentWPF" Version="0.10.2" />
+    <PackageReference Include="FluentWPF" Version="0.10.2">
+      <TreatAsUsed>true</TreatAsUsed>
+    </PackageReference>
     <PackageReference Include="MahApps.Metro" Version="2.4.9" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
     <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.1.1" />
@@ -36,7 +39,9 @@ WebP.netを外部パッケージ化し1.1.0に更新
     <PackageReference Include="SharpEXR" Version="1.0.0.19" />
     <PackageReference Include="WPFLocalizeExtension" Version="3.9.0" />
     <PackageReference Include="WebP_Net" Version="1.1.0" />
-    <PackageReference Include="WpfClipboardMonitor" Version="1.2.0" />
+    <PackageReference Include="WpfClipboardMonitor" Version="1.2.0" >
+      <TreatAsUsed>true</TreatAsUsed>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\LICENSE">

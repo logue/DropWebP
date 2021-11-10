@@ -5,7 +5,6 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using DropWebP.Helpers;
 using DropWebP.Interfaces;
 using MahApps.Metro.Controls;
 using Prism.Commands;
@@ -13,7 +12,11 @@ using Prism.Mvvm;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows;
+using Windows.Storage;
+using Windows.Storage.Pickers;
+using WinRT;
 
 namespace DropWebP.ViewModels
 {
@@ -53,23 +56,38 @@ namespace DropWebP.ViewModels
         /// <summary>
         /// ファイルブラウザボタンが押された.
         /// </summary>
-        public void ExecuteBrowseButtonCommand()
+        public async void ExecuteBrowseButtonCommand()
         {
             Debug.WriteLine("ブラウズボタン");
 
             // フォルダ選択ダイアログ
-            FolderPicker picker = new();
-            picker.Title = "Select Directory";
-            picker.InputPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+            // ダイアログを定義
+            FolderPicker picker = new()
+            {
+                SuggestedStartLocation = PickerLocationId.PicturesLibrary,
+                ViewMode = PickerViewMode.List
+            };
 
-            // ダイアログを表示
-            if (picker.ShowDialog() != true)
+            // ウィンドウバンドルを取得
+            IntPtr hwnd = GetActiveWindow();
+            IInitializeWithWindow withWindow = picker.As<IInitializeWithWindow>();
+            withWindow.Initialize(hwnd);
+
+            // ファイルダイアログを表示
+            StorageFolder folder = await picker.PickSingleFolderAsync();
+            if (folder == null)
             {
                 return;
             }
 
             // 変換処理
-            webPService.Convert(Directory.GetFiles(picker.ResultPath), Shell);
+            webPService.Convert(Directory.GetFiles(folder.Path), Shell);
         }
+        /// <summary>
+        /// アクティブなウィンドウのハンドルを取得.
+        /// </summary>
+        /// <returns>.</returns>
+        [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
+        private static extern IntPtr GetActiveWindow();
     }
 }
