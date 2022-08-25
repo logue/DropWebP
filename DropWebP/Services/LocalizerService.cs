@@ -45,8 +45,7 @@ namespace DropWebP.Services
             SupportedLanguages = CultureInfo.GetCultures(CultureTypes.AllCultures).Where(
                 c =>
                     c.IetfLanguageTag.Equals("en-US", System.StringComparison.Ordinal) ||
-                    c.IetfLanguageTag.Equals("ja-JP", System.StringComparison.Ordinal)
-            )
+                    c.IetfLanguageTag.Equals("ja-JP", System.StringComparison.Ordinal))
                 .ToList();
             SetLocale(locale);
         }

@@ -52,14 +52,15 @@ namespace DropWebP.Services
         /// <returns>WebPに圧縮したバイト配列.</returns>
         public byte[] EncodeWebP(Bitmap bitmap, long quality = -1)
         {
-            using WebPObject WebP = new(bitmap);
+            using WebPObject webP = new(bitmap);
+
             // TODO: BGRとABGRの判定と、それに応じた圧縮処理
             if (quality < 0)
             {
-                return WebP.GetWebPLossless();
+                return webP.GetWebPLossless();
             }
 
-            return WebP.GetWebPLossy(quality);
+            return webP.GetWebPLossy(quality);
         }
 
         /// <summary>
@@ -69,9 +70,10 @@ namespace DropWebP.Services
         /// <returns>ビットマップ.</returns>
         public Bitmap DecodeWebP(byte[] bytes)
         {
-            using WebPObject WebP = new(bytes);
+            using WebPObject webP = new(bytes);
+
             // WebPに変換
-            return (Bitmap)WebP.GetImage();
+            return (Bitmap)webP.GetImage();
         }
 
         /// <summary>
@@ -177,71 +179,6 @@ namespace DropWebP.Services
         }
 
         /// <summary>
-        /// 指定されたパス文字列から拡張子を削除して返します.
-        /// </summary>
-        /// <param name="path">ファイルのパス.</param>
-        /// <returns>拡張子を抜いたファイルのパス.</returns>
-        private static string GetFileName(string path)
-        {
-            string extension = Path.GetExtension(path);
-            return string.IsNullOrEmpty(extension) ? path : path.Replace(extension, string.Empty);
-        }
-
-        /// <summary>
-        /// 画像ファイルをBitmapに変換.
-        /// </summary>
-        /// <param name="path">画像のパス.</param>
-        /// <returns>ビットマップ.</returns>
-        private static Bitmap LoadBitmap(string path)
-        {
-            if (!File.Exists(path))
-            {
-                throw new FileNotFoundException(path);
-            }
-
-            // ビットマップ
-            Bitmap bmp = null;
-
-            if (ImageFileExtensions().Contains(Path.GetExtension(path).ToLower()))
-            {
-                //Open file in read only mode
-                using FileStream stream = new(path, FileMode.Open, FileAccess.Read);
-
-                //Get a binary reader for the file stream
-                using BinaryReader reader = new(stream);
-
-                //copy the content of the file into a memory stream
-                using MemoryStream ms = new(reader.ReadBytes((int)stream.Length));
-
-                //make a new Bitmap object the owner of the MemoryStream
-                _ = ms.Seek(0, SeekOrigin.Begin);
-                bmp = new(ms);
-            }
-            else if (Path.GetExtension(path) == ".exr")
-            {
-                // HDR画像の場合（Cyberpunk2077対策）
-                EXRFile exrFile = EXRFile.FromFile(path);
-                EXRPart part = exrFile.Parts[0];
-
-                // EXRファイルを開く
-                part.OpenParallel(path);
-
-                // 画像サイズを割り当てる
-                bmp = new(part.DataWindow.Width, part.DataWindow.Height);
-                BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
-                byte[] destBytes = part.GetBytes(ImageDestFormat.BGRA8, GammaEncoding.sRGB, data.Stride);
-
-                // Bitmapに画像をコピー
-                Marshal.Copy(destBytes, 0, data.Scan0, destBytes.Length);
-                bmp.UnlockBits(data);
-
-                // EXRファイルを閉じる
-                part.Close();
-            }
-            return bmp;
-        }
-
-        /// <summary>
         /// 変換処理.
         /// </summary>
         /// <param name="files">変換対象のファイル.</param>
@@ -255,7 +192,7 @@ namespace DropWebP.Services
             MetroDialogSettings metroDialogSettings = new()
             {
                 AffirmativeButtonText = localizerService.GetLocalizedString("DialogOk"),
-                NegativeButtonText = localizerService.GetLocalizedString("DialogCancel")
+                NegativeButtonText = localizerService.GetLocalizedString("DialogCancel"),
             };
 
             // プログレスコントローラー
@@ -287,11 +224,12 @@ namespace DropWebP.Services
                 controller.Minimum = 0;
                 controller.Maximum = count;
 
-                CancellationTokenSource tokenSource = new CancellationTokenSource();
+                CancellationTokenSource tokenSource = new();
                 CancellationToken ct = tokenSource.Token;
 
                 // 変換処理
-                Task task = Task.Run(async () =>
+                Task task = Task.Run(
+                    async () =>
                 {
                     // キャンセル可能
                     controller.SetCancelable(true);
@@ -305,9 +243,9 @@ namespace DropWebP.Services
                             controller.SetIndeterminate();
                             break;
                         }
+
                         controller.SetTitle(
-                            localizerService.GetLocalizedString("DialogConvertingText") + string.Format(" ({0}/{1})", i, count)
-                        );
+                            localizerService.GetLocalizedString("DialogConvertingText") + string.Format(" ({0}/{1})", i, count));
                         controller.SetProgress(i);
                         controller.SetMessage(string.Format(localizerService.GetLocalizedString("ConvertingMessage"), Path.GetFileName(files[i])));
 
@@ -335,6 +273,7 @@ namespace DropWebP.Services
                     tokenSource.Dispose();
                 }
             }
+
             await controller.CloseAsync();
 
             if (Properties.Settings.Default.NotifyComplete)
@@ -351,8 +290,7 @@ namespace DropWebP.Services
                 // ダイアログによる通知
                 _ = await shell.ShowMessageAsync(
                     localizerService.GetLocalizedString("DialogCompleteText"),
-                    string.Format(localizerService.GetLocalizedString("CompleteMessage"), count.ToString())
-                );
+                    string.Format(localizerService.GetLocalizedString("CompleteMessage"), count.ToString()));
             }
         }
 
@@ -365,7 +303,7 @@ namespace DropWebP.Services
             List<string> imageFileExtensions = ImageCodecInfo.GetImageEncoders()
                                       .Select(c => c.FilenameExtension)
                                       .SelectMany(e => e.Split(';'))
-                                      .Select(e => e.Replace("*", "").ToLower())
+                                      .Select(e => e.Replace("*", string.Empty).ToLower())
                                       .ToList();
 
             // EXRフォーマットに独自対応
@@ -380,7 +318,74 @@ namespace DropWebP.Services
                 imageFileExtensions.Remove(".jpg");
                 imageFileExtensions.Remove(".jpeg");
             }
+
             return imageFileExtensions;
+        }
+
+        /// <summary>
+        /// 指定されたパス文字列から拡張子を削除して返します.
+        /// </summary>
+        /// <param name="path">ファイルのパス.</param>
+        /// <returns>拡張子を抜いたファイルのパス.</returns>
+        private static string GetFileName(string path)
+        {
+            string extension = Path.GetExtension(path);
+            return string.IsNullOrEmpty(extension) ? path : path.Replace(extension, string.Empty);
+        }
+
+        /// <summary>
+        /// 画像ファイルをBitmapに変換.
+        /// </summary>
+        /// <param name="path">画像のパス.</param>
+        /// <returns>ビットマップ.</returns>
+        private static Bitmap LoadBitmap(string path)
+        {
+            if (!File.Exists(path))
+            {
+                throw new FileNotFoundException(path);
+            }
+
+            // ビットマップ
+            Bitmap bmp = null;
+
+            if (ImageFileExtensions().Contains(Path.GetExtension(path).ToLower()))
+            {
+                // Open file in read only mode
+                using FileStream stream = new(path, FileMode.Open, FileAccess.Read);
+
+                // Get a binary reader for the file stream
+                using BinaryReader reader = new(stream);
+
+                // copy the content of the file into a memory stream
+                using MemoryStream ms = new(reader.ReadBytes((int)stream.Length));
+
+                // make a new Bitmap object the owner of the MemoryStream
+                _ = ms.Seek(0, SeekOrigin.Begin);
+                bmp = new(ms);
+            }
+            else if (Path.GetExtension(path) == ".exr")
+            {
+                // HDR画像の場合（Cyberpunk2077対策）
+                EXRFile exrFile = EXRFile.FromFile(path);
+                EXRPart part = exrFile.Parts[0];
+
+                // EXRファイルを開く
+                part.OpenParallel(path);
+
+                // 画像サイズを割り当てる
+                bmp = new(part.DataWindow.Width, part.DataWindow.Height);
+                BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+                byte[] destBytes = part.GetBytes(ImageDestFormat.BGRA8, GammaEncoding.sRGB, data.Stride);
+
+                // Bitmapに画像をコピー
+                Marshal.Copy(destBytes, 0, data.Scan0, destBytes.Length);
+                bmp.UnlockBits(data);
+
+                // EXRファイルを閉じる
+                part.Close();
+            }
+
+            return bmp;
         }
     }
 }

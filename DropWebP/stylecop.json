@@ -7,10 +7,16 @@
       "variables": {
         "licenseName": "MIT",
         "licenseFile": "LICENSE",
-        "Year": "2021"
+        "Year": "2021-2022"
       },
       "headerDecoration": "-----------------------------------------------------------------------",
       "documentationCulture": "ja-JP"
+    },
+    "namingRules": {
+      "allowedHungarianPrefixes": [
+        "h",
+        "n"
+      ]
     }
   }
 }

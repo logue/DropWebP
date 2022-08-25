@@ -31,16 +31,16 @@ namespace DropWebP.ViewModels
         private readonly IWebPService webPService;
 
         /// <summary>
-        /// Gets or sets the Shell
-        /// 現在のウィンドウ.
-        /// </summary>
-        private MetroWindow Shell { get; set; } = Application.Current.MainWindow as MetroWindow;
-
-        /// <summary>
         /// Gets the BrowseCommand
         /// ファイルブラウザボタンのコマンド.
         /// </summary>
         public DelegateCommand BrowseCommand { get; }
+
+        /// <summary>
+        /// Gets or sets the Shell
+        /// 現在のウィンドウ.
+        /// </summary>
+        private MetroWindow Shell { get; set; } = Application.Current.MainWindow as MetroWindow;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HomeContentViewModel"/> class.
@@ -65,7 +65,7 @@ namespace DropWebP.ViewModels
             FolderPicker picker = new()
             {
                 SuggestedStartLocation = PickerLocationId.PicturesLibrary,
-                ViewMode = PickerViewMode.List
+                ViewMode = PickerViewMode.List,
             };
 
             // ウィンドウバンドルを取得
@@ -83,6 +83,7 @@ namespace DropWebP.ViewModels
             // 変換処理
             webPService.Convert(Directory.GetFiles(folder.Path), Shell);
         }
+
         /// <summary>
         /// アクティブなウィンドウのハンドルを取得.
         /// </summary>

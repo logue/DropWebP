@@ -39,12 +39,13 @@ namespace DropWebP.Helpers
                 {
                     return;
                 }
+
                 foreach (FrameworkElement element in e.NewItems)
                 {
-                    Flyout flyout = new Flyout
+                    Flyout flyout = new()
                     {
                         Content = element,
-                        DataContext = element.DataContext
+                        DataContext = element.DataContext,
                     };
                     _ = regionTarget.Items.Add(flyout);
                 }

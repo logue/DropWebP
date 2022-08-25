@@ -41,12 +41,12 @@ namespace DropWebP.ViewModels
         /// <summary>
         /// リージョンマネージャー.
         /// </summary>
-        private readonly IRegionManager RegionManager;
+        private readonly IRegionManager regionManager;
 
         /// <summary>
         /// ダイアログサービス.
         /// </summary>
-        private readonly IDialogService DialogService;
+        private readonly IDialogService dialogService;
 
         /// <summary>
         /// WebPサービス.
@@ -134,7 +134,7 @@ namespace DropWebP.ViewModels
         public ReactiveCommand<DragEventArgs> DropCommand { get; } = new ReactiveCommand<DragEventArgs>();
 
         /// <summary>
-        /// コンストラクタ
+        /// Initializes a new instance of the <see cref="ShellWindowViewModel"/> class.
         /// </summary>
         /// <param name="regionManager">インジェクションするIRegionManager。.</param>
         /// <param name="dialogService">The dialogService<see cref="IDialogService"/>.</param>
@@ -151,10 +151,10 @@ namespace DropWebP.ViewModels
             _ = DropCommand.Subscribe(ImageDrop).AddTo(Disposable);
 
             IDisposable watcher = Observable
-                .Timer(TimeSpan.FromMilliseconds(200))  // 200ms毎に
-                .Where(_ => Clipboard.ContainsImage())   // クリップボードに画像データがあるかを確認
-                .Repeat()                               // 上記の監視を何度も繰り返す
-                .DistinctUntilChanged()                 // 以前の結果と違う場合のみ
+                .Timer(TimeSpan.FromMilliseconds(200)) // 200ms毎に
+                .Where(_ => Clipboard.ContainsImage()) // クリップボードに画像データがあるかを確認
+                .Repeat() // 上記の監視を何度も繰り返す
+                .DistinctUntilChanged() // 以前の結果と違う場合のみ
                 .Subscribe(OnClipboardUpdate);
 
             // ペースト
@@ -176,8 +176,8 @@ namespace DropWebP.ViewModels
             ConfigCommand = new DelegateCommand(ShowConfigFloyout);
 
             Debug.WriteLine("イベント割当");
-            RegionManager = regionManager;
-            DialogService = dialogService;
+            this.regionManager = regionManager;
+            this.dialogService = dialogService;
             this.webPService = webPService;
         }
 
@@ -186,6 +186,14 @@ namespace DropWebP.ViewModels
         /// </summary>
         public ShellWindowViewModel()
         {
+        }
+
+        /// <summary>
+        /// 終了コマンド.
+        /// </summary>
+        public static void ExecuteExitCommand()
+        {
+            Application.Current.Shutdown();
         }
 
         /// <summary>
@@ -226,7 +234,7 @@ namespace DropWebP.ViewModels
         private void ShowAboutDialog()
         {
             Debug.WriteLine("アバウトクリック");
-            DialogService.ShowDialog("AboutDialog");
+            dialogService.ShowDialog("AboutDialog");
         }
 
         /// <summary>
@@ -237,7 +245,7 @@ namespace DropWebP.ViewModels
             Debug.WriteLine("設定ボタンクリック");
 
             // eventAggregator.GetEvent<MessageService>().Publish("Top");
-            RegionManager.RequestNavigate("FlyoutRegion", "ConfigFlyOut");
+            regionManager.RequestNavigate("FlyoutRegion", "ConfigFlyOut");
         }
 
         /// <summary>
@@ -271,6 +279,7 @@ namespace DropWebP.ViewModels
                     picker.FileTypeFilter.Add(ext.Remove(0, 1).ToLower());
                 }
             }
+
             // EXRフォーマットを追加
             picker.FileTypeFilter.Add(".exr");
 
@@ -354,19 +363,16 @@ namespace DropWebP.ViewModels
             Bitmap bitmap = new(
                 bitmapSource.PixelWidth,
                 bitmapSource.PixelHeight,
-                System.Drawing.Imaging.PixelFormat.Format32bppPArgb
-            );
+                System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
             BitmapData bitmapData = bitmap.LockBits(
                 new Rectangle(System.Drawing.Point.Empty, bitmap.Size),
                 ImageLockMode.WriteOnly,
-                System.Drawing.Imaging.PixelFormat.Format32bppPArgb
-            );
+                System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
             bitmapSource.CopyPixels(
                 Int32Rect.Empty,
                 bitmapData.Scan0,
                 bitmapData.Height * bitmapData.Stride,
-                bitmapData.Stride
-            );
+                bitmapData.Stride);
             bitmap.UnlockBits(bitmapData);
 
             // ダイアログを定義
@@ -374,7 +380,7 @@ namespace DropWebP.ViewModels
             {
                 SuggestedFileName = "image",
                 SuggestedStartLocation = PickerLocationId.PicturesLibrary,
-                FileTypeChoices = { { "WebP Image", new List<string>() { ".webp" } } }
+                FileTypeChoices = { { "WebP Image", new List<string>() { ".webp" } } },
             };
 
             // ウィンドウバンドルを取得
@@ -394,14 +400,6 @@ namespace DropWebP.ViewModels
 
             // 書き出し
             await FileIO.WriteBytesAsync(file, bytes);
-        }
-
-        /// <summary>
-        /// 終了コマンド.
-        /// </summary>
-        public static void ExecuteExitCommand()
-        {
-            Application.Current.Shutdown();
         }
 
         /// <summary>

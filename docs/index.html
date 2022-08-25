@@ -1,174 +1,253 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en" class="h-100">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="DropWebP is a drag-and-drop tool for converting image files to WebP format." />
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="DropWebP is a drag-and-drop tool for converting image files to WebP format."
+    />
     <meta name="author" content="Masashi Yoshikawa (Logue)" />
     <title>DropWebP</title>
     <!-- ogp -->
     <meta property="og:title" content="DropWebP" />
     <meta property="og:type" content="article" />
     <meta property="og:url" content="https://logue.github.io/DropWebP/" />
-    <meta property="og:image" content="https://github.com/logue/DropWebP/raw/master/DropWebP/Resources/vise.png" />
+    <meta
+      property="og:image"
+      content="https://github.com/logue/DropWebP/raw/master/DropWebP/Resources/vise.png"
+    />
     <meta property="og:site_name" content="Logue's Lab" />
-    <meta property="og:description"
-        content="DropWebP is a drag-and-drop tool for converting image files to WebP format." />
+    <meta
+      property="og:description"
+      content="DropWebP is a drag-and-drop tool for converting image files to WebP format."
+    />
     <meta property="fb:app_id" content="129144050466298" />
-    <meta property="article:publisher" content="https://www.facebook.com/logue256" />
+    <meta
+      property="article:publisher"
+      content="https://www.facebook.com/logue256"
+    />
     <meta name="twitter:card" content="Summary" />
     <meta name="twitter:site" content="@logue256" />
     <meta name="twitter:title" content="DropWebP" />
-    <meta name="twitter:url" content="https://https://logue.github.io/DropWebP/" />
-    <meta name="twitter:description"
-        content="DropWebP is a drag-and-drop tool for converting image files to WebP format. #webp #dropwebp" />
-    <meta name="twitter:image" content="https://github.com/logue/DropWebP/raw/master/DropWebP/Resources/vise.png" />
+    <meta
+      name="twitter:url"
+      content="https://https://logue.github.io/DropWebP/"
+    />
+    <meta
+      name="twitter:description"
+      content="DropWebP is a drag-and-drop tool for converting image files to WebP format. #webp #dropwebp"
+    />
+    <meta
+      name="twitter:image"
+      content="https://github.com/logue/DropWebP/raw/master/DropWebP/Resources/vise.png"
+    />
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script>
-        window.dataLayer = window.dataLayer || [];
+      window.dataLayer = window.dataLayer || [];
 
-        function gtag() {
-            dataLayer.push(arguments);
-        }
-        gtag("js", new Date());
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag('js', new Date());
 
-        gtag("config", "UA-33600926-1");
+      gtag('config', 'UA-33600926-1');
     </script>
     <link rel="canonical" href="https://logue.github.io/DropWebP/" />
 
     <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
-        integrity="sha256-djO3wMl9GeaC/u6K+ic4Uj/LKhRUSlUFcsruzS7v5ms=" crossorigin="anonymous"
-        referrerpolicy="no-referrer">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css"
+      integrity="sha256-7ZWbZUAi97rkirk4DcEp4GWDPkWpRMcNaEyXGsNXjLg="
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css"
+      integrity="sha256-8M+b2Hj+vy/2J5tZ9pYDHeuPD59KsaEZn1XXj3xVhjg="
+      crossorigin="anonymous"
+    />
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-images-compare@0.2.5/build/images-compare.min.css"
-        integrity="sha256-3Uv2bal2k1jzwFozxefglEflUmdJADHYWZ/K+fTVXt4=" crossorigin="anonymous"
-        referrerpolicy="no-referrer">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/jquery-images-compare@0.2.5/build/images-compare.min.css"
+      integrity="sha256-3Uv2bal2k1jzwFozxefglEflUmdJADHYWZ/K+fTVXt4="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
 
     <!-- Favicons -->
-    <meta name="theme-color" content="#7952b3">
-    <link rel="shortcuticon"
-        href="https://github.com/logue/DropWebP/blob/master/DropWebP/Resources/vise.ico?raw=true" />
-</head>
+    <meta name="theme-color" content="#7952b3" />
+    <link
+      rel="shortcuticon"
+      href="https://github.com/logue/DropWebP/blob/master/DropWebP/Resources/vise.ico?raw=true"
+    />
+  </head>
 
-<body class="d-flex flex-column h-100">
-
+  <body class="d-flex flex-column h-100">
     <header>
-        <!-- Fixed navbar -->
-        <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="#">DropWebP</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
-                    aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarCollapse">
-                    <ul class="navbar-nav ml-auto">
-                        <li class="nav-item active">
-                            <a class="nav-link" href="#">Document
-                                <span class="sr-only">(current)</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="https://github.com/logue/DropWebP/">DropWebP</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
+      <!-- Fixed navbar -->
+      <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <div class="container-fluid d-flex justify-content-between">
+          <a class="navbar-brand" href="#">Vue CodeMirror6</a>
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarCollapse"
+            aria-controls="navbarCollapse"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div id="navbarCollapse" class="collapse navbar-collapse flex-grow-0">
+            <ul class="navbar-nav">
+              <li class="nav-item active">
+                <a class="nav-link" href="#"
+                  >Document
+                  <span class="sr-only">(current)</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="https://github.com/logue/DropWebP/"
+                  ><i class="bi bi-github"></i
+                ></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
     </header>
 
     <!-- Begin page content -->
-    <main class="flex-shrink-0">
-        <div class="container">
-            <h1 class="mt-5">DropWebP</h1>
-            <p class="lead">DropWebP is a drag-and-drop tool for converting image files to WebP format.</p>
+    <main class="flex-shrink-0 pt-4">
+      <div class="container">
+        <h1>DropWebP</h1>
+        <p class="lead">
+          DropWebP is a drag-and-drop tool for converting image files to WebP
+          format.
+        </p>
 
-            <article>
-                <h2>What is WebP?</h2>
-                <p>WebP is a next-generation image format developed by Google and is compatible with all current
-                    browsers as
-                    of 2021.
-                    Google, the developer of WebP, has announced that it can be about 26% lighter than PNG and 25-34%
-                    lighter than JPG with
-                    almost the same image quality.</p>
-                <p>When I tried it, I converted an uncompressed 4K quality PNG file that was originally 12.9M to
-                    non-degraded WebP, and I
-                    was able to reduce it to 7.85MB. The recommended value is 95% lossy compression, but in that case it
-                    will be around
-                    1.32M.</p>
-            </article>
-            <article>
-                <h2>Sample</h2>
-                <p>The sample used here is a PNG image with a resolution of 3860x2160.</p>
-                <section>
-                    <h3>Original and Lossless</h3>
-                    <p>Lossless compression of an image halves its capacity.</p>
-                    <figure class="compare">
-                        <div class="d-none">
-                            <img src="assets/original.png" alt="Original PNG (3860x2160 10.7M)" />
-                        </div>
-                        <div>
-                            <img src="assets/lossless.webp" alt="WebP Lossless (6.49M)" />
-                        </div>
-                    </figure>
-                </section>
-                <section>
-                    <h3>Original and Lossy WebP (95%)</h3>
-                    <p>In the case of lossy compression, even if the quality is 95%, the capacity is about 1/10.</p>
-                    <figure class="compare">
-                        <div class="d-none">
-                            <img src="assets/original.png" alt="Original PNG (3860x2160 10.7M)" />
-                        </div>
-                        <div>
-                            <img src="assets/compressed.webp" alt="WebP Lossy 95% (1.15M)" />
-                        </div>
-                    </figure>
-                </section>
-                <section>
-                    <h3>Lossy WebP and JPEG highest</h3>
-                    <p>The capacity of WebP at the time of lossless compression is almost the same as the capacity at
-                        the time of the highest
-                        quality of JPEG.</p>
-                    <figure class="compare">
-                        <div class="d-none">
-                            <img src="assets/compressed.jpg" alt="Jpeg Highest (6.24M)" />
-                        </div>
-                        <div>
-                            <img src="assets/compressed.webp" alt="WebP Lossy 95% (1.15M)" />
-                        </div>
-                    </figure>
-                </section>
-            </article>
-        </div>
+        <article>
+          <h2>What is WebP?</h2>
+          <p>
+            WebP is a next-generation image format developed by Google and is
+            compatible with all current browsers as of 2021. Google, the
+            developer of WebP, has announced that it can be about 26% lighter
+            than PNG and 25-34% lighter than JPG with almost the same image
+            quality.
+          </p>
+          <p>
+            When I tried it, I converted an uncompressed 4K quality PNG file
+            that was originally 12.9M to non-degraded WebP, and I was able to
+            reduce it to 7.85MB. The recommended value is 95% lossy compression,
+            but in that case it will be around 1.32M.
+          </p>
+        </article>
+        <article>
+          <h2>Sample</h2>
+          <p>
+            The sample used here is a PNG image with a resolution of 3860x2160.
+          </p>
+          <section>
+            <h3>Original and Lossless</h3>
+            <p>Lossless compression of an image halves its capacity.</p>
+            <figure class="compare">
+              <div class="d-none">
+                <img
+                  src="assets/original.png"
+                  alt="Original PNG (3860x2160 10.7M)"
+                />
+              </div>
+              <div>
+                <img src="assets/lossless.webp" alt="WebP Lossless (6.49M)" />
+              </div>
+            </figure>
+          </section>
+          <section>
+            <h3>Original and Lossy WebP (95%)</h3>
+            <p>
+              In the case of lossy compression, even if the quality is 95%, the
+              capacity is about 1/10.
+            </p>
+            <figure class="compare">
+              <div class="d-none">
+                <img
+                  src="assets/original.png"
+                  alt="Original PNG (3860x2160 10.7M)"
+                />
+              </div>
+              <div>
+                <img
+                  src="assets/compressed.webp"
+                  alt="WebP Lossy 95% (1.15M)"
+                />
+              </div>
+            </figure>
+          </section>
+          <section>
+            <h3>Lossy WebP and JPEG highest</h3>
+            <p>
+              The capacity of WebP at the time of lossless compression is almost
+              the same as the capacity at the time of the highest quality of
+              JPEG.
+            </p>
+            <figure class="compare">
+              <div class="d-none">
+                <img src="assets/compressed.jpg" alt="Jpeg Highest (6.24M)" />
+              </div>
+              <div>
+                <img
+                  src="assets/compressed.webp"
+                  alt="WebP Lossy 95% (1.15M)"
+                />
+              </div>
+            </figure>
+          </section>
+        </article>
+      </div>
     </main>
 
-    <footer class="footer mt-auto py-3 bg-light">
-        <div class="container">
-            <span class="text-muted">&copy;2021 By Logue</span>
-        </div>
+    <footer class="footer mt-auto py-3 mb-0 bg-light">
+      <div class="container mb-0">
+        &copy; 2021-2022 by
+        <a href="http://logue.dev/">Logue</a>
+        . Licensed under the
+        <a href="http://opensource.org/licenses/mit-license.php">MIT License</a>
+        .
+      </div>
     </footer>
 
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
-        integrity="sha256-XDbijJp72GS2c+Ij234ZNJIyJ1Nv+9+HH1i28JuayMk=" crossorigin="anonymous"
-        referrerpolicy="no-referrer"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery@2.2.4/dist/jquery.min.js"
-        integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"
-        referrerpolicy="no-referrer"></script>
-    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"
-        integrity="sha256-eVNjHw5UeU0jUqPPpZHAkU1z4U+QFBBY488WvueTm88=" crossorigin="anonymous"
-        referrerpolicy="no-referrer"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery-images-compare@0.2.5/build/jquery.images-compare.min.js"
-        integrity="sha256-5H6A49FEgr4gDqYcGm0YWjytIg/3XQOkFR/tRWQv0tA=" crossorigin="anonymous"
-        referrerpolicy="no-referrer"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"
+      integrity="sha256-wMCQIK229gKxbUg3QWa544ypI4OoFlC2qQl8Q8xD8x8="
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/jquery@2.2.4/dist/jquery.min.js"
+      integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"
+      integrity="sha256-eVNjHw5UeU0jUqPPpZHAkU1z4U+QFBBY488WvueTm88="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/jquery-images-compare@0.2.5/build/jquery.images-compare.min.js"
+      integrity="sha256-5H6A49FEgr4gDqYcGm0YWjytIg/3XQOkFR/tRWQv0tA="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
 
     <script>
-        $(document).ready(() => {
-            $('.compare').imagesCompare();
-        })
+      $(document).ready(() => {
+        $('.compare').imagesCompare();
+      });
     </script>
-</body>
-
+  </body>
 </html>

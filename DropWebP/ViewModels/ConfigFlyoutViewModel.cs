@@ -27,6 +27,40 @@ namespace DropWebP.ViewModels
         private readonly ILocalizerService localizerService;
 
         /// <summary>
+        /// 可逆圧縮スイッチ.
+        /// </summary>
+        public static bool ToggleLossless { get => Properties.Settings.Default.Lossless; set => Properties.Settings.Default.Lossless = value; }
+
+        /// <summary>
+        /// 圧縮レベルスライダー.
+        /// </summary>
+        public static long QualityValue { get => Properties.Settings.Default.Quality; set => Properties.Settings.Default.Quality = value; }
+
+        /// <summary>
+        /// 変換前のファイルを残すチェックボックス.
+        /// </summary>
+        public static bool ToggleKeepOriginal { get => Properties.Settings.Default.KeepOriginal; set => Properties.Settings.Default.KeepOriginal = value; }
+
+        /// <summary>
+        /// Jpegを無視のチェックボックス.
+        /// </summary>
+        public static bool ToggleIgnoreJpeg { get => Properties.Settings.Default.IgnoreJpeg; set => Properties.Settings.Default.IgnoreJpeg = value; }
+
+        /// <summary>
+        /// 完了時に通知を出す.
+        /// </summary>
+        public static bool ToggleNotifyComplete { get => Properties.Settings.Default.NotifyComplete; set => Properties.Settings.Default.NotifyComplete = value; }
+
+        /// <summary>
+        /// イベントを受け取った.
+        /// </summary>
+        /// <param name="obj">.</param>
+        private static void OnMesageReceieved(string obj)
+        {
+            Debug.WriteLine("OnMesageReceieved", obj);
+        }
+
+        /// <summary>
         /// Flyoutのヘッダ.
         /// </summary>
         public string Header { get; set; } = "Config";
@@ -62,34 +96,9 @@ namespace DropWebP.ViewModels
         public DelegateCommand CloseFlyoutCommand { get; private set; }
 
         /// <summary>
-        /// 可逆圧縮スイッチ.
-        /// </summary>
-        public static bool ToggleLossless { get => Properties.Settings.Default.Lossless; set => Properties.Settings.Default.Lossless = value; }
-
-        /// <summary>
-        /// 圧縮レベルスライダー.
-        /// </summary>
-        public static long QualityValue { get => Properties.Settings.Default.Quality; set => Properties.Settings.Default.Quality = value; }
-
-        /// <summary>
-        /// 変換前のファイルを残すチェックボックス.
-        /// </summary>
-        public static bool ToggleKeepOriginal { get => Properties.Settings.Default.KeepOriginal; set => Properties.Settings.Default.KeepOriginal = value; }
-
-        /// <summary>
-        /// Jpegを無視のチェックボックス.
-        /// </summary>
-        public static bool ToggleIgnoreJpeg { get => Properties.Settings.Default.IgnoreJpeg; set => Properties.Settings.Default.IgnoreJpeg = value; }
-
-        /// <summary>
         /// 対応言語.
         /// </summary>
         public IList<CultureInfo> SupportedLanguages => localizerService.SupportedLanguages;
-
-        /// <summary>
-        /// 完了時に通知を出す.
-        /// </summary>
-        public static bool ToggleNotifyComplete { get => Properties.Settings.Default.NotifyComplete; set => Properties.Settings.Default.NotifyComplete = value; }
 
         /// <summary>
         /// 選択されている言語..
@@ -108,7 +117,7 @@ namespace DropWebP.ViewModels
         }
 
         /// <summary>
-        /// コンストラクタ.
+        /// Initializes a new instance of the <see cref="ConfigFlyoutViewModel"/> class.
         /// </summary>
         /// <param name="localizerService">多言語化サービス.</param>
         public ConfigFlyoutViewModel(ILocalizerService localizerService)
@@ -123,27 +132,6 @@ namespace DropWebP.ViewModels
 
             // フライアウトのヘッダー
             Header = localizerService.GetLocalizedString("ConfigText");
-        }
-
-        /// <summary>
-        /// 設定保存.
-        /// </summary>
-        private void ExecuteSaveButtonCommand()
-        {
-            Debug.WriteLine("保存しました");
-
-            // 設定を保存
-            Properties.Settings.Default.Save();
-            IsOpen = false;
-        }
-
-        /// <summary>
-        /// イベントを受け取った.
-        /// </summary>
-        /// <param name="obj">.</param>
-        private static void OnMesageReceieved(string obj)
-        {
-            Debug.WriteLine("OnMesageReceieved", obj);
         }
 
         /// <summary>
@@ -176,6 +164,18 @@ namespace DropWebP.ViewModels
             // flyoutを開く
             Properties.Settings.Default.Reload();
             IsOpen = true;
+        }
+
+        /// <summary>
+        /// 設定保存.
+        /// </summary>
+        private void ExecuteSaveButtonCommand()
+        {
+            Debug.WriteLine("保存しました");
+
+            // 設定を保存
+            Properties.Settings.Default.Save();
+            IsOpen = false;
         }
     }
 }

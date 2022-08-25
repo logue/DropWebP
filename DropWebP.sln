@@ -15,6 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		appveyor.yml = appveyor.yml
 		LICENSE = LICENSE
 		ReadMe.md = ReadMe.md
+		StyleCop.Analyzers.ruleset = StyleCop.Analyzers.ruleset
 		stylecop.json = stylecop.json
 	EndProjectSection
 EndProject

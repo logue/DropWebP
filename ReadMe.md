@@ -30,6 +30,8 @@ WebPの開発元であるGoogleは、ほぼ同等の画質でPNGよりも約26�
 
 使用できるWebサービスは、Discord、LINE、Twitter、Facebookのみです。Mixiおよび、Lobiは対応していません。
 
+なお、[WebpCodecSetup.exe](https://storage.googleapis.com/downloads.webmproject.org/releases/webp/WebpCodecSetup.exe)を用いることでエクスプローラーからサムネイルを表示することができます。
+
 ### 圧縮サンプル
 
 |圧縮形式|容量
@@ -45,4 +47,4 @@ WebPの開発元であるGoogleは、ほぼ同等の画質でPNGよりも約26�
 
 Licensed under the [MIT](LICENSE) License.
 
-Copyright © 2021 [Logue](https://logue.dev/)
+Copyright © 2021-2022 [Logue](https://logue.dev/)

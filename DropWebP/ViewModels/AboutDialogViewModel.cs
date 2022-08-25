@@ -52,7 +52,11 @@ namespace DropWebP.ViewModels
         /// <summary>
         /// 使用しているLibWebPのバージョン.
         /// </summary>
-        public static string WebPVersion => "libwebp Version: " + WebPObject.GetVersion().ToString();
+        /// <returns>LibWepPのバージョン</returns>
+        public static string WebPVersion()
+        {
+            return "libwebp Version: " + WebPObject.GetVersion().ToString();
+        }
 
         /// <summary>
         /// ダイアログのCloseを要求するAction.
@@ -60,6 +64,7 @@ namespace DropWebP.ViewModels
         public event Action<IDialogResult> RequestClose;
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="AboutDialogViewModel"/> class.
         /// コンストラクタ.
         /// </summary>
         public AboutDialogViewModel()
@@ -109,18 +114,18 @@ namespace DropWebP.ViewModels
             {
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    //Windowsのとき
+                    // Windowsのとき
                     url = url.Replace("&", "^&");
                     _ = Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
-                    //Linuxのとき
+                    // Linuxのとき
                     _ = Process.Start("xdg-open", url);
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
-                    //Macのとき
+                    // Macのとき
                     _ = Process.Start("open", url);
                 }
                 else

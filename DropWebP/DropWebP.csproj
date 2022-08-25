@@ -6,7 +6,7 @@
     <Authors>Masashi Yoshikawa</Authors>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Company>Logue</Company>
-    <Copyright>(c) 2021 Logue</Copyright>
+    <Copyright>(c) 2021-2022 Logue</Copyright>
     <Description>Encode image file to WebP.</Description>
     <OutputType>WinExe</OutputType>
     <PackageIcon>vise.png</PackageIcon>
@@ -21,25 +21,36 @@ Dotnet6に移行</PackageReleaseNotes>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>git@github.com:logue/DropWebP.git</RepositoryUrl>
     <StartupObject>DropWebP.App</StartupObject>
-    <TargetFramework>net6.0-windows10.0.22000.0</TargetFramework>
+    <TargetFramework>net6.0-windows10.0.22621.0</TargetFramework>
     <UseWPF>true</UseWPF>
-    <Version>0.4.3</Version>
+    <Version>0.4.5</Version>
     <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
     <PackageReadmeFile>ReadMe.md</PackageReadmeFile>
   </PropertyGroup>
+  <PropertyGroup>
+    <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)..\StyleCop.Analyzers.ruleset</CodeAnalysisRuleSet>
+    <GenerateDocumentationFile>False</GenerateDocumentationFile>
+  </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="FluentWPF" Version="0.10.2">
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)..\stylecop.json" Link="stylecop.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FluentWPF" Version="0.9.0">
       <TreatAsUsed>true</TreatAsUsed>
     </PackageReference>
     <PackageReference Include="MahApps.Metro" Version="2.4.9" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.1.1" />
+    <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.1.2" />
     <PackageReference Include="Prism.DryIoc" Version="8.1.97" />
-    <PackageReference Include="ReactiveProperty.WPF" Version="8.0.0" />
+    <PackageReference Include="ReactiveProperty.WPF" Version="8.1.2" />
     <PackageReference Include="SharpEXR" Version="1.0.0.19" />
-    <PackageReference Include="WPFLocalizeExtension" Version="3.9.0" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="WPFLocalizeExtension" Version="3.9.4" />
     <PackageReference Include="WebP_Net" Version="1.1.0" />
-    <PackageReference Include="WpfClipboardMonitor" Version="1.2.0" >
+    <PackageReference Include="WpfClipboardMonitor" Version="1.2.0">
       <TreatAsUsed>true</TreatAsUsed>
     </PackageReference>
   </ItemGroup>
