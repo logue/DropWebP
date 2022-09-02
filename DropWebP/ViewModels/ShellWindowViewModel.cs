@@ -1,19 +1,10 @@
 // -----------------------------------------------------------------------
 // <copyright file="ShellWindowViewModel.cs" company="Logue">
-// Copyright (c) 2021 Masashi Yoshikawa All rights reserved.
+// Copyright (c) 2021-2022 Masashi Yoshikawa All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 // -----------------------------------------------------------------------
 
-using DropWebP.Interfaces;
-using DropWebP.Views;
-using MahApps.Metro.Controls;
-using Prism.Commands;
-using Prism.Mvvm;
-using Prism.Regions;
-using Prism.Services.Dialogs;
-using Reactive.Bindings;
-using Reactive.Bindings.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -27,6 +18,15 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using DropWebP.Interfaces;
+using DropWebP.Views;
+using MahApps.Metro.Controls;
+using Prism.Commands;
+using Prism.Mvvm;
+using Prism.Regions;
+using Prism.Services.Dialogs;
+using Reactive.Bindings;
+using Reactive.Bindings.Extensions;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using WinRT;
@@ -38,6 +38,13 @@ namespace DropWebP.ViewModels
     /// </summary>
     public class ShellWindowViewModel : BindableBase
     {
+        /// <summary>
+        /// アクティブなウィンドウのハンドルを取得.
+        /// </summary>
+        /// <returns>.</returns>
+        [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
+        private static extern IntPtr GetActiveWindow();
+
         /// <summary>
         /// リージョンマネージャー.
         /// </summary>
@@ -67,11 +74,6 @@ namespace DropWebP.ViewModels
         /// MainWindowのCloseイベント.
         /// </summary>
         public ReactiveCommand ClosedCommand { get; } = new ReactiveCommand();
-
-        /// <summary>
-        /// Disposeが必要な処理をまとめてやる.
-        /// </summary>
-        private CompositeDisposable Disposable { get; } = new CompositeDisposable();
 
         /// <summary>
         /// タイトル.
@@ -132,6 +134,11 @@ namespace DropWebP.ViewModels
         /// Imageのイベントのコマンド.
         /// </summary>
         public ReactiveCommand<DragEventArgs> DropCommand { get; } = new ReactiveCommand<DragEventArgs>();
+
+        /// <summary>
+        /// Disposeが必要な処理をまとめてやる.
+        /// </summary>
+        private CompositeDisposable Disposable { get; } = new CompositeDisposable();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ShellWindowViewModel"/> class.
@@ -266,9 +273,11 @@ namespace DropWebP.ViewModels
         {
             Debug.WriteLine("開く");
 
-            FileOpenPicker picker = new();
-            picker.ViewMode = PickerViewMode.Thumbnail;
-            picker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
+            FileOpenPicker picker = new ()
+            {
+                ViewMode = PickerViewMode.Thumbnail,
+                SuggestedStartLocation = PickerLocationId.PicturesLibrary,
+            };
 
             foreach (ImageCodecInfo c in ImageCodecInfo.GetImageEncoders())
             {
@@ -309,7 +318,7 @@ namespace DropWebP.ViewModels
         {
             // フォルダ選択ダイアログ
             // ダイアログを定義
-            FolderPicker picker = new()
+            FolderPicker picker = new ()
             {
                 SuggestedStartLocation = PickerLocationId.PicturesLibrary,
                 ViewMode = PickerViewMode.List,
@@ -346,8 +355,7 @@ namespace DropWebP.ViewModels
                 return;
             }
 
-            MemoryStream ms = data.GetData("DeviceIndependentBitmap") as System.IO.MemoryStream;
-            if (ms == null)
+            if (data.GetData("DeviceIndependentBitmap") is not System.IO.MemoryStream ms)
             {
                 return;
             }
@@ -360,7 +368,7 @@ namespace DropWebP.ViewModels
             BitmapSource bitmapSource = (dib[14] < 32) ? new FormatConvertedBitmap(Clipboard.GetImage(), PixelFormats.Bgr32, null, 0) : Clipboard.GetImage();
 
             // Bitmap型に変換
-            Bitmap bitmap = new(
+            Bitmap bitmap = new (
                 bitmapSource.PixelWidth,
                 bitmapSource.PixelHeight,
                 System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
@@ -376,7 +384,7 @@ namespace DropWebP.ViewModels
             bitmap.UnlockBits(bitmapData);
 
             // ダイアログを定義
-            FileSavePicker picker = new()
+            FileSavePicker picker = new ()
             {
                 SuggestedFileName = "image",
                 SuggestedStartLocation = PickerLocationId.PicturesLibrary,
@@ -401,12 +409,5 @@ namespace DropWebP.ViewModels
             // 書き出し
             await FileIO.WriteBytesAsync(file, bytes);
         }
-
-        /// <summary>
-        /// アクティブなウィンドウのハンドルを取得.
-        /// </summary>
-        /// <returns>.</returns>
-        [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
-        private static extern IntPtr GetActiveWindow();
     }
 }

@@ -1,19 +1,19 @@
 // -----------------------------------------------------------------------
 // <copyright file="HomeContentViewModel.cs" company="Logue">
-// Copyright (c) 2021 Masashi Yoshikawa All rights reserved.
+// Copyright (c) 2021-2022 Masashi Yoshikawa All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 // -----------------------------------------------------------------------
 
-using DropWebP.Interfaces;
-using MahApps.Metro.Controls;
-using Prism.Commands;
-using Prism.Mvvm;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
+using DropWebP.Interfaces;
+using MahApps.Metro.Controls;
+using Prism.Commands;
+using Prism.Mvvm;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using WinRT;
@@ -25,6 +25,13 @@ namespace DropWebP.ViewModels
     /// </summary>
     public class HomeContentViewModel : BindableBase
     {
+        /// <summary>
+        /// アクティブなウィンドウのハンドルを取得.
+        /// </summary>
+        /// <returns>.</returns>
+        [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
+        private static extern IntPtr GetActiveWindow();
+
         /// <summary>
         /// WebPサービス..
         /// </summary>
@@ -62,7 +69,7 @@ namespace DropWebP.ViewModels
 
             // フォルダ選択ダイアログ
             // ダイアログを定義
-            FolderPicker picker = new()
+            FolderPicker picker = new ()
             {
                 SuggestedStartLocation = PickerLocationId.PicturesLibrary,
                 ViewMode = PickerViewMode.List,
@@ -83,12 +90,5 @@ namespace DropWebP.ViewModels
             // 変換処理
             webPService.Convert(Directory.GetFiles(folder.Path), Shell);
         }
-
-        /// <summary>
-        /// アクティブなウィンドウのハンドルを取得.
-        /// </summary>
-        /// <returns>.</returns>
-        [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
-        private static extern IntPtr GetActiveWindow();
     }
 }

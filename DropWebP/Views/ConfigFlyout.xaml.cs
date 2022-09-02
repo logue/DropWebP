@@ -1,11 +1,11 @@
 // -----------------------------------------------------------------------
 // <copyright file="ConfigFlyout.xaml.cs" company="Logue">
-// Copyright (c) 2021 Masashi Yoshikawa All rights reserved.
+// Copyright (c) 2021-2022 Masashi Yoshikawa All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 // -----------------------------------------------------------------------
-using MahApps.Metro.Controls;
 using System.Windows.Controls;
+using MahApps.Metro.Controls;
 
 namespace DropWebP.Views
 {
@@ -35,9 +35,7 @@ namespace DropWebP.Views
         /// <param name="e">.</param>
         private void LosslessToggleSwitch_Toggled(object sender, System.Windows.RoutedEventArgs e)
         {
-            ToggleSwitch toggleSwitch = sender as ToggleSwitch;
-
-            if (toggleSwitch != null && QualityGroup != null)
+            if (sender is ToggleSwitch toggleSwitch && QualityGroup != null)
             {
                 // 可逆圧縮が無効化されているときは品質オプションを操作可能にする
                 QualityGroup.IsEnabled = !toggleSwitch.IsOn;

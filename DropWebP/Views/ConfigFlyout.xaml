@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
     x:Class="DropWebP.Views.ConfigFlyout"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -12,9 +12,9 @@
     Padding="5"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=viewmodels:ConfigFlyoutViewModel}"
-    d:Height="480"
-    d:Width="200"
-    lex:LocalizeDictionary.DesignCulture="ja"
+    d:Height="300"
+    d:Width="240"
+    lex:LocalizeDictionary.DesignCulture="en"
     lex:ResxLocalizationProvider.DefaultAssembly="DropWebP"
     lex:ResxLocalizationProvider.DefaultDictionary="Resources"
     prism:ViewModelLocator.AutoWireViewModel="True"
@@ -44,17 +44,16 @@
             Content="{lex:Loc IgnoreJpegText}"
             IsOn="{Binding ToggleIgnoreJpeg}"
             ToolTip="{lex:Loc IgnoreJpegTooltip}" />
-        <StackPanel Orientation="Horizontal">
-            <TextBlock VerticalAlignment="Center" Text="{lex:Loc LanguageText}" />
+        <mah:ToggleSwitch
+            Content="{lex:Loc NotifyCompleteText}"
+            IsOn="{Binding ToggleNotifyComplete}"
+            ToolTip="{lex:Loc NotifyCompleteTooltip}" />
+        <mah:MetroHeader Margin="55,0,0,0" Header="{lex:Loc LanguageText}">
             <ComboBox
                 Margin="5,0,0,0"
                 DisplayMemberPath="DisplayName"
                 ItemsSource="{Binding Path=SupportedLanguages, UpdateSourceTrigger=PropertyChanged}"
                 SelectedItem="{Binding Path=SelectedLanguage, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
-        </StackPanel>
-        <mah:ToggleSwitch
-            Content="{lex:Loc NotifyCompleteText}"
-            IsOn="{Binding ToggleNotifyComplete}"
-            ToolTip="{lex:Loc NotifyCompleteTooltip}" />
+        </mah:MetroHeader>
     </StackPanel>
 </UserControl>

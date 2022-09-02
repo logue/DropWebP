@@ -8,28 +8,30 @@
     <Company>Logue</Company>
     <Copyright>(c) 2021-2022 Logue</Copyright>
     <Description>Encode image file to WebP.</Description>
+    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>False</GenerateDocumentationFile>
     <OutputType>WinExe</OutputType>
     <PackageIcon>vise.png</PackageIcon>
     <PackageIconUrl></PackageIconUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/logue/DropWebP</PackageProjectUrl>
-    <PackageReleaseNotes>Win11でウィンドウ移動時にもたつく問題を解消
-WebP.netを外部パッケージ化し1.1.0に更新
-ファイル選択ダイアログが正常に動くように
-Dotnet6に移行</PackageReleaseNotes>
+    <PackageReadmeFile>..\ReadMe.md</PackageReadmeFile>
+    <PackageReleaseNotes>Jpegを除外オプションが効かないバグ修正
+ファイルが存在したときに削除する処理を追加
+WebPだった場合上書きしないように
+設定画面が英語のときにはみ出てしまうのを修正</PackageReleaseNotes>
     <PackageTags>WebP</PackageTags>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>git@github.com:logue/DropWebP.git</RepositoryUrl>
     <StartupObject>DropWebP.App</StartupObject>
-    <TargetFramework>net6.0-windows10.0.22621.0</TargetFramework>
-    <UseWPF>true</UseWPF>
-    <Version>0.4.5</Version>
     <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
-    <PackageReadmeFile>ReadMe.md</PackageReadmeFile>
+    <TargetFramework>net6.0-windows10.0.22621.0</TargetFramework>
+    <Title>DropWebP</Title>
+    <UseWPF>true</UseWPF>
+    <Version>0.4.6</Version>
   </PropertyGroup>
   <PropertyGroup>
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)..\StyleCop.Analyzers.ruleset</CodeAnalysisRuleSet>
-    <GenerateDocumentationFile>False</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)..\stylecop.json" Link="stylecop.json" />

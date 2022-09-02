@@ -1,19 +1,19 @@
 // -----------------------------------------------------------------------
 // <copyright file="AboutDialogViewModel.cs" company="Logue">
-// Copyright (c) 2021 Masashi Yoshikawa All rights reserved.
+// Copyright (c) 2021-2022 Masashi Yoshikawa All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Windows.Media;
 using DropWebP.Helpers;
 using DropWebP.Models;
 using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
-using System;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Windows.Media;
 using WebP.Net;
 
 namespace DropWebP.ViewModels

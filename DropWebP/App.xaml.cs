@@ -1,10 +1,16 @@
 // -----------------------------------------------------------------------
 // <copyright file="App.xaml.cs" company="Logue">
-// Copyright (c) 2021 Masashi Yoshikawa All rights reserved.
+// Copyright (c) 2021-2022 Masashi Yoshikawa All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System;
+using System.Diagnostics;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Windows;
 using DropWebP.Helpers;
 using DropWebP.Interfaces;
 using DropWebP.Services;
@@ -14,12 +20,6 @@ using MahApps.Metro.Controls;
 using Prism.DryIoc;
 using Prism.Ioc;
 using Prism.Regions;
-using System;
-using System.Diagnostics;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Windows;
 
 namespace DropWebP
 {
@@ -56,7 +56,9 @@ namespace DropWebP
         /// <summary>
         /// ShowWindowAsync関数のパラメータに渡す定義値(画面を元の大きさに戻す)..
         /// </summary>
+#pragma warning disable SA1310 // Field names should not contain underscore
         private const int SW_RESTORE = 9;
+#pragma warning restore SA1310 // Field names should not contain underscore
 
         /// <summary>
         /// The CreateShell.
