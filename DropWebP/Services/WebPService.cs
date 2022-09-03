@@ -118,6 +118,15 @@ namespace DropWebP.Services
         /// <param name="quality">品質。負数で無劣化圧縮.</param>
         public void ConvertWebP(string path, string outputPath, long quality = -1)
         {
+            // 拡張子（小文字に統一）
+            string extension = Path.GetExtension(path).ToLower();
+
+            if (extension == ".webp" || !ImageFileExtensions().Contains(extension))
+            {
+                // すでにWebPのファイルと処理しない拡張子を除外
+                return;
+            }
+
             Bitmap bitmap = LoadBitmap(path);
 
             // 読み込めなかったファイルは処理しない
@@ -126,8 +135,20 @@ namespace DropWebP.Services
                 return;
             }
 
+            if (File.Exists(outputPath))
+            {
+                // ファイルが存在する場合は上書き
+                File.Delete(outputPath);
+            }
+
             // ファイルに書き出し
             File.WriteAllBytes(outputPath, EncodeWebP(bitmap, quality));
+
+            if (!Properties.Settings.Default.KeepOriginal)
+            {
+                // オリジナルを保持しない場合
+                File.Delete(path);
+            }
         }
 
         /// <summary>

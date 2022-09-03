@@ -17,6 +17,7 @@ using Prism.Mvvm;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using WinRT;
+using WinRT.Interop;
 
 namespace DropWebP.ViewModels
 {

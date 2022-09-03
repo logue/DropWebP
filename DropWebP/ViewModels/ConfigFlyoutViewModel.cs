@@ -83,7 +83,7 @@ namespace DropWebP.ViewModels
         /// <summary>
         /// Flyoutの幅.
         /// </summary>
-        public int Width { get; set; } = 200;
+        public int Width { get; set; } = 240;
 
         /// <summary>
         /// Flyoutの幅.
@@ -105,7 +105,7 @@ namespace DropWebP.ViewModels
         /// </summary>
         public CultureInfo SelectedLanguage
         {
-            get => localizerService != null ? localizerService.SelectedLanguage : null;
+            get => localizerService?.SelectedLanguage;
             set
             {
                 if (localizerService != null && value != null && value != localizerService.SelectedLanguage)
