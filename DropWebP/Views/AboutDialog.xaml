@@ -21,7 +21,7 @@
     <prism:Dialog.WindowStyle>
         <Style TargetType="mah:MetroWindow">
             <Setter Property="prism:Dialog.WindowStartupLocation" Value="CenterOwner" />
-            <Setter Property="Title" Value="{lex:Loc AboutText}" />
+            <Setter Property="Title" Value="{lex:Loc About}" />
             <Setter Property="ResizeMode" Value="NoResize" />
             <!--  Setter Property="ShowTitleBar" Value="False" /  -->
             <Setter Property="ShowInTaskbar" Value="False" />

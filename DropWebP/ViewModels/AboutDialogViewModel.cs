@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows.Media;
 using DropWebP.Helpers;
+using DropWebP.Interfaces;
 using DropWebP.Models;
 using Prism.Commands;
 using Prism.Mvvm;
@@ -24,6 +25,11 @@ namespace DropWebP.ViewModels
     public class AboutDialogViewModel : BindableBase, IDialogAware
     {
         /// <summary>
+        /// 多言語化サービス.
+        /// </summary>
+        private readonly ILocalizerService localizerService;
+
+        /// <summary>
         /// 閉じるコマンド.
         /// </summary>
         public DelegateCommand CloseCommand { get; }
@@ -37,12 +43,12 @@ namespace DropWebP.ViewModels
         /// <summary>
         /// タイトル.
         /// </summary>
-        public string Title => "About";
+        public string Title { get; private set; } = "About";
 
         /// <summary>
         /// ロゴ画像.
         /// </summary>
-        public ImageSource Logo { get; set; }
+        public ImageSource Logo { get; private set; }
 
         /// <summary>
         /// アセンブリ情報モデル.
@@ -53,10 +59,7 @@ namespace DropWebP.ViewModels
         /// 使用しているLibWebPのバージョン.
         /// </summary>
         /// <returns>LibWepPのバージョン</returns>
-        public static string WebPVersion()
-        {
-            return "libwebp Version: " + WebPObject.GetVersion().ToString();
-        }
+        public string WebPVersion { get; } = "libwebp Version: " + WebPObject.GetVersion().ToString();
 
         /// <summary>
         /// ダイアログのCloseを要求するAction.
@@ -65,14 +68,15 @@ namespace DropWebP.ViewModels
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AboutDialogViewModel"/> class.
-        /// コンストラクタ.
         /// </summary>
-        public AboutDialogViewModel()
+        /// <param name="localizerService">多言語化サービス.</param>
+        public AboutDialogViewModel(ILocalizerService localizerService)
         {
+            // 多言語化サービスのインジェクション
+            this.localizerService = localizerService;
             VisitCommand = new DelegateCommand(ExecuteVisitCommand);
             CloseCommand = new DelegateCommand(ExecuteCloseCommand);
             Assembly = new AppAssemblyModel();
-
             Logo = BitmapToImageSource.Convert(Properties.Resources.AppIcon);
         }
 

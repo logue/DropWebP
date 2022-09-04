@@ -207,4 +207,10 @@ CTRL + Vでクリップボード内の画像を直接WebPに変換すること�
   <data name="CompleteMessageSingle" xml:space="preserve">
     <value>ファイルの変換が完了しました。</value>
   </data>
+  <data name="About" xml:space="preserve">
+    <value>DropWebPについて</value>
+  </data>
+  <data name="FailureMessage" xml:space="preserve">
+    <value>{1}件中{0}件のファイルの変換に失敗しました。</value>
+  </data>
 </root>

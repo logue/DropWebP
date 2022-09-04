@@ -15,6 +15,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using DropWebP.Exceptions;
 using DropWebP.Interfaces;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
@@ -102,12 +103,13 @@ namespace DropWebP.Services
         /// </summary>
         /// <param name="path">ファイルの入力パス.</param>
         /// <param name="quality">品質。負数で無劣化圧縮.</param>
-        public void ConvertWebP(string path, long quality = -1)
+        /// <returns>成否.</returns>
+        public bool ConvertWebP(string path, long quality = -1)
         {
             // 出力ファイル名
             string outputPath = GetFileName(path) + ".webp";
 
-            ConvertWebP(path, outputPath, quality);
+            return ConvertWebP(path, outputPath, quality);
         }
 
         /// <summary>
@@ -116,7 +118,8 @@ namespace DropWebP.Services
         /// <param name="path">ファイルの入力パス.</param>
         /// <param name="outputPath">ファイルの出力先.</param>
         /// <param name="quality">品質。負数で無劣化圧縮.</param>
-        public void ConvertWebP(string path, string outputPath, long quality = -1)
+        /// <returns>成否.</returns>
+        public bool ConvertWebP(string path, string outputPath, long quality = -1)
         {
             // 拡張子（小文字に統一）
             string extension = Path.GetExtension(path).ToLower();
@@ -124,7 +127,7 @@ namespace DropWebP.Services
             if (extension == ".webp" || !ImageFileExtensions().Contains(extension))
             {
                 // すでにWebPのファイルと処理しない拡張子を除外
-                return;
+                return true;
             }
 
             Bitmap bitmap = LoadBitmap(path);
@@ -132,7 +135,7 @@ namespace DropWebP.Services
             // 読み込めなかったファイルは処理しない
             if (bitmap == null)
             {
-                return;
+                return false;
             }
 
             if (File.Exists(outputPath))
@@ -142,13 +145,22 @@ namespace DropWebP.Services
             }
 
             // ファイルに書き出し
-            File.WriteAllBytes(outputPath, EncodeWebP(bitmap, quality));
+            try
+            {
+                File.WriteAllBytes(outputPath, EncodeWebP(bitmap, quality));
+            }
+            catch (Exception)
+            {
+                return false;
+            }
 
             if (!Properties.Settings.Default.KeepOriginal)
             {
                 // オリジナルを保持しない場合
                 File.Delete(path);
             }
+
+            return true;
         }
 
         /// <summary>
@@ -157,12 +169,12 @@ namespace DropWebP.Services
         /// <param name="path">ファイルの入力パス.</param>
         /// <param name="quality">品質。負数で無劣化圧縮.</param>
         /// <returns>The <see cref="Task"/>.</returns>
-        public async Task ConvertWebPAsync(string path, long quality = -1)
+        public async Task<bool> ConvertWebPAsync(string path, long quality = -1)
         {
             // 出力ファイル名
             string outputPath = GetFileName(path) + ".webp";
 
-            await ConvertWebPAsync(path, outputPath, quality);
+            return await ConvertWebPAsync(path, outputPath, quality);
         }
 
         /// <summary>
@@ -172,9 +184,9 @@ namespace DropWebP.Services
         /// <param name="outputPath">ファイルの出力パス.</param>
         /// <param name="quality">品質。負数で無劣化圧縮.</param>
         /// <returns>.</returns>
-        public async Task ConvertWebPAsync(string path, string outputPath, long quality)
+        public async Task<bool> ConvertWebPAsync(string path, string outputPath, long quality)
         {
-            await ConvertWebPAsync(path, outputPath, quality, default);
+            return await ConvertWebPAsync(path, outputPath, quality, default);
         }
 
         /// <summary>
@@ -185,7 +197,7 @@ namespace DropWebP.Services
         /// <param name="quality">品質。負数で無劣化圧縮.</param>
         /// <param name="token">中断トークン.</param>
         /// <returns>The <see cref="Task"/>.</returns>
-        public async Task ConvertWebPAsync(string path, string outputPath, long quality = -1, CancellationToken token = default)
+        public async Task<bool> ConvertWebPAsync(string path, string outputPath, long quality = -1, CancellationToken token = default)
         {
             // 拡張子（小文字に統一）
             string extension = Path.GetExtension(path).ToLower();
@@ -193,7 +205,7 @@ namespace DropWebP.Services
             if (extension == ".webp" || !ImageFileExtensions().Contains(extension))
             {
                 // すでにWebPのファイルと処理しない拡張子を除外
-                return;
+                return true;
             }
 
             Bitmap bitmap = LoadBitmap(path);
@@ -201,7 +213,7 @@ namespace DropWebP.Services
             // 読み込めなかったファイルは処理しない
             if (bitmap == null)
             {
-                return;
+                return false;
             }
 
             if (File.Exists(outputPath))
@@ -218,6 +230,8 @@ namespace DropWebP.Services
                 // オリジナルを保持しない場合
                 File.Delete(path);
             }
+
+            return true;
         }
 
         /// <summary>
@@ -230,8 +244,11 @@ namespace DropWebP.Services
             // 全ファイル数
             int count = files.Length;
 
+            // 失敗したファイル
+            List<string> failures = new();
+
             // Metroダイアログのデフォルト設定
-            MetroDialogSettings metroDialogSettings = new ()
+            MetroDialogSettings metroDialogSettings = new()
             {
                 // 優先ボタン
                 AffirmativeButtonText = localizerService.GetLocalizedString("DialogOk"),
@@ -257,13 +274,15 @@ namespace DropWebP.Services
             // ダイアログの進捗を中間状態にする
             controller.SetIndeterminate();
 
-            Debug.Write(files);
-
             if (count == 1)
             {
                 // ファイルが一つしかない場合
                 controller.SetMessage(string.Format(localizerService.GetLocalizedString("ConvertingMessage"), Path.GetFileName(files[0])));
-                ConvertWebP(files[0], Properties.Settings.Default.Lossless ? -1 : Properties.Settings.Default.Quality);
+                bool result = ConvertWebP(files[0], Properties.Settings.Default.Lossless ? -1 : Properties.Settings.Default.Quality);
+                if (!result)
+                {
+                    failures.Add(files[0]);
+                }
             }
             else
             {
@@ -271,7 +290,7 @@ namespace DropWebP.Services
                 controller.Minimum = 0;
                 controller.Maximum = count;
 
-                CancellationTokenSource tokenSource = new ();
+                CancellationTokenSource tokenSource = new();
                 CancellationToken ct = tokenSource.Token;
 
                 // 変換処理
@@ -305,7 +324,12 @@ namespace DropWebP.Services
                         controller.SetMessage(string.Format(localizerService.GetLocalizedString("ConvertingMessage"), Path.GetFileName(item.file)));
 
                         // 変換処理
-                        await ConvertWebPAsync(item.file, Properties.Settings.Default.Lossless ? -1 : Properties.Settings.Default.Quality);
+                        bool result = await ConvertWebPAsync(item.file, Properties.Settings.Default.Lossless ? -1 : Properties.Settings.Default.Quality);
+
+                        if (!result)
+                        {
+                            failures.Add(item.file);
+                        }
                     }
                 }, tokenSource.Token);
 
@@ -325,12 +349,20 @@ namespace DropWebP.Services
 
             await controller.CloseAsync();
 
+            string message = string.Format(localizerService.GetLocalizedString("CompleteMessage"), count.ToString());
+
+            if (failures.Count != 0)
+            {
+                // 処理できなかったファイルがある場合
+                message = string.Format(localizerService.GetLocalizedString("FailureMessage"), count.ToString(), failures.Count);
+            }
+
             if (Properties.Settings.Default.NotifyComplete)
             {
                 // トースト通知
                 new ToastContentBuilder()
                     .AddText(localizerService.GetLocalizedString("DialogCompleteText"))
-                    .AddText(string.Format(localizerService.GetLocalizedString("CompleteMessage"), count.ToString()))
+                    .AddText(message)
                     .Show();
             }
             else
@@ -338,14 +370,14 @@ namespace DropWebP.Services
                 // ダイアログによる通知
                 _ = await shell.ShowMessageAsync(
                     localizerService.GetLocalizedString("DialogCompleteText"),
-                    string.Format(localizerService.GetLocalizedString("CompleteMessage"), count.ToString()));
+                    message);
             }
         }
 
         /// <summary>
         /// 対応フォーマット.
         /// </summary>
-        /// <returns>.</returns>
+        /// <returns>拡張子一覧.</returns>
         private static List<string> ImageFileExtensions()
         {
             List<string> imageFileExtensions = ImageCodecInfo.GetImageEncoders()

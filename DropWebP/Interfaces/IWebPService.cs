@@ -5,6 +5,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System;
 using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
@@ -52,7 +53,8 @@ namespace DropWebP.Interfaces
         /// </summary>
         /// <param name="path">ファイルの入力パス.</param>
         /// <param name="quality">品質。負数で無劣化圧縮.</param>
-        public void ConvertWebP(string path, long quality);
+        /// <returns>成否.</returns>
+        public bool ConvertWebP(string path, long quality);
 
         /// <summary>
         /// WebPで変換する.
@@ -60,7 +62,8 @@ namespace DropWebP.Interfaces
         /// <param name="path">ファイルの入力パス.</param>
         /// <param name="outputPath">ファイルの出力先.</param>
         /// <param name="quality">品質。負数で無劣化圧縮.</param>
-        public void ConvertWebP(string path, string outputPath, long quality);
+        /// <returns>成否.</returns>
+        public bool ConvertWebP(string path, string outputPath, long quality);
 
         /// <summary>
         /// WebPで変換する（非同期版）.
@@ -68,7 +71,7 @@ namespace DropWebP.Interfaces
         /// <param name="path">ファイルの入力パス.</param>
         /// <param name="quality">品質。負数で無劣化圧縮.</param>
         /// <returns>The <see cref="Task"/>.</returns>
-        public Task ConvertWebPAsync(string path, long quality);
+        public Task<bool> ConvertWebPAsync(string path, long quality);
 
         /// <summary>
         /// WebPで変換する（非同期版）.
@@ -77,7 +80,7 @@ namespace DropWebP.Interfaces
         /// <param name="outputPath">ファイルの出力先.</param>
         /// <param name="quality">品質。負数で無劣化圧縮.</param>
         /// <returns>The <see cref="Task"/>.</returns>
-        public Task ConvertWebPAsync(string path, string outputPath, long quality);
+        public Task<bool> ConvertWebPAsync(string path, string outputPath, long quality);
 
         /// <summary>
         /// ファイルをWebPに変換する（非同期版）.
@@ -87,7 +90,7 @@ namespace DropWebP.Interfaces
         /// <param name="quality">品質。負数で無劣化圧縮.</param>
         /// <param name="token">中断トークン.</param>
         /// <returns>The <see cref="Task"/>.</returns>
-        public Task ConvertWebPAsync(string path, string outputPath, long quality = -1, CancellationToken token = default);
+        public Task<bool> ConvertWebPAsync(string path, string outputPath, long quality = -1, CancellationToken token = default);
 
         /// <summary>
         /// 変換処理.
