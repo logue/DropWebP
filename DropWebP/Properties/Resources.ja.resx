@@ -150,7 +150,7 @@ CTRL + Vでクリップボード内の画像を直接WebPに変換すること�
 通常は、95を選択してください。</value>
   </data>
   <data name="LosslessTooltip" xml:space="preserve">
-    <value>ロスレス圧縮をする場合はこのトグルをオンにしてください。</value>
+    <value>無劣化（可逆）圧縮をする場合はこのトグルをオンにしてください。</value>
   </data>
   <data name="KeepOriginalText" xml:space="preserve">
     <value>元画像を保持する</value>

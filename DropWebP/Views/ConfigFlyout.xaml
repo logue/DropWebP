@@ -24,7 +24,8 @@
             x:Name="LosslessToggleSwitch"
             Content="{lex:Loc LosslessText}"
             IsOn="{Binding ToggleLossless}"
-            Toggled="LosslessToggleSwitch_Toggled" />
+            Toggled="LosslessToggleSwitch_Toggled"
+            ToolTip="{lex:Loc LosslessTooltip}" />
         <mah:MetroHeader
             x:Name="QualityGroup"
             Margin="55,0,0,0"
