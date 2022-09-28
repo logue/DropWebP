@@ -1,0 +1,10 @@
+﻿{
+    "profiles": {
+      "DropWebP (Package)": {
+        "commandName": "MsixPackage"
+      },
+      "DropWebP (Unpackaged)": {
+        "commandName": "Project"
+      }
+    }
+}

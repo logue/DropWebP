@@ -5,21 +5,10 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
-using DropWebP.Exceptions;
-using DropWebP.Interfaces;
-using MahApps.Metro.Controls;
-using MahApps.Metro.Controls.Dialogs;
-using Microsoft.Toolkit.Uwp.Notifications;
+using DropWebP.Contracts.Services;
 using SharpEXR;
 using WebP.Net;
 
@@ -31,18 +20,29 @@ namespace DropWebP.Services
     public class WebPService : IWebPService
     {
         /// <summary>
-        /// 多言語化サービス.
+        /// 設定サービス
         /// </summary>
-        private readonly ILocalizerService localizerService;
+        private readonly LocalSettingsService settingsService;
+
+        /// <summary>
+        /// 指定されたパス文字列から拡張子を削除して返します.
+        /// </summary>
+        /// <param name="path">ファイルのパス.</param>
+        /// <returns>拡張子を抜いたファイルのパス.</returns>
+        private static string GetFileName(string path)
+        {
+            string extension = Path.GetExtension(path);
+            return string.IsNullOrEmpty(extension) ? path : path.Replace(extension, string.Empty);
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WebPService"/> class.
         /// </summary>
-        /// <param name="localizerService">.</param>
-        public WebPService(ILocalizerService localizerService)
+        /// <param name="settingsService">設定サービス</param>
+
+        public WebPService(LocalSettingsService settingsService)
         {
-            // 多言語化サービスをインジェクション
-            this.localizerService = localizerService;
+            this.settingsService = settingsService;
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace DropWebP.Services
         /// <returns>WebPに圧縮したバイト配列.</returns>
         public byte[] EncodeWebP(Bitmap bitmap, long quality = -1)
         {
-            using WebPObject webP = new (bitmap);
+            using WebPObject webP = new(bitmap);
 
             // TODO: BGRとABGRの判定と、それに応じた圧縮処理
             if (quality < 0)
@@ -71,7 +71,7 @@ namespace DropWebP.Services
         /// <returns>ビットマップ.</returns>
         public Bitmap DecodeWebP(byte[] bytes)
         {
-            using WebPObject webP = new (bytes);
+            using WebPObject webP = new(bytes);
 
             // WebPに変換
             return (Bitmap)webP.GetImage();
@@ -154,7 +154,7 @@ namespace DropWebP.Services
                 return false;
             }
 
-            if (!Properties.Settings.Default.KeepOriginal)
+            if (!settingsService.ReadSettingAsync<bool>("KeepOriginal").Result)
             {
                 // オリジナルを保持しない場合
                 File.Delete(path);
@@ -208,7 +208,7 @@ namespace DropWebP.Services
                 return true;
             }
 
-            Bitmap bitmap = LoadBitmap(path);
+            Bitmap? bitmap = LoadBitmap(path);
 
             // 読み込めなかったファイルは処理しない
             if (bitmap == null)
@@ -225,7 +225,7 @@ namespace DropWebP.Services
             // ファイルに書き出し
             await File.WriteAllBytesAsync(outputPath, await EncodeWebPAsync(bitmap, quality), token);
 
-            if (!Properties.Settings.Default.KeepOriginal)
+            if (!settingsService.ReadSettingAsync<bool>("KeepOriginal").Result)
             {
                 // オリジナルを保持しない場合
                 File.Delete(path);
@@ -234,6 +234,7 @@ namespace DropWebP.Services
             return true;
         }
 
+        /*
         /// <summary>
         /// 変換処理.
         /// </summary>
@@ -251,16 +252,16 @@ namespace DropWebP.Services
             MetroDialogSettings metroDialogSettings = new()
             {
                 // 優先ボタン
-                AffirmativeButtonText = localizerService.GetLocalizedString("DialogOk"),
+                AffirmativeButtonText = ResourceExtensions.GetLocalized("DialogOk"),
 
                 // キャンセルボタン
-                NegativeButtonText = localizerService.GetLocalizedString("DialogCancel"),
+                NegativeButtonText = ResourceExtensions.GetLocalized("DialogCancel"),
             };
 
             // プログレスモーダルのコントローラー
             ProgressDialogController controller = await shell.ShowProgressAsync(
-                localizerService.GetLocalizedString("DialogConvertingText"),
-                localizerService.GetLocalizedString("DialogInitializingText"),
+                ResourceExtensions.GetLocalized("DialogConvertingText"),
+                ResourceExtensions.GetLocalized("DialogInitializingText"),
                 false,
                 metroDialogSettings);
 
@@ -277,8 +278,11 @@ namespace DropWebP.Services
             if (count == 1)
             {
                 // ファイルが一つしかない場合
-                controller.SetMessage(string.Format(localizerService.GetLocalizedString("ConvertingMessage"), Path.GetFileName(files[0])));
-                bool result = ConvertWebP(files[0], Properties.Settings.Default.Lossless ? -1 : Properties.Settings.Default.Quality);
+                controller.SetMessage(string.Format(ResourceExtensions.GetLocalized("ConvertingMessage"), Path.GetFileName(files[0])));
+                bool result = ConvertWebP(
+                    files[0],
+                    settingsService.ReadSettingAsync<bool>("Lossless").Result ? -1 : settingsService.ReadSettingAsync<int>("Quality").Result
+                );
                 if (!result)
                 {
                     failures.Add(files[0]);
@@ -315,16 +319,17 @@ namespace DropWebP.Services
 
                         // モーダルのタイトル
                         controller.SetTitle(
-                            localizerService.GetLocalizedString("DialogConvertingText") + string.Format(" ({0}/{1})", item.index, count));
+                            ResourceExtensions.GetLocalized("DialogConvertingText") + string.Format(" ({0}/{1})", item.index, count));
 
                         // モーダルの進捗
                         controller.SetProgress(item.index);
 
                         // モーダルのメッセージ
-                        controller.SetMessage(string.Format(localizerService.GetLocalizedString("ConvertingMessage"), Path.GetFileName(item.file)));
+                        controller.SetMessage(string.Format(ResourceExtensions.GetLocalized("ConvertingMessage"), Path.GetFileName(item.file)));
 
                         // 変換処理
-                        bool result = await ConvertWebPAsync(item.file, Properties.Settings.Default.Lossless ? -1 : Properties.Settings.Default.Quality);
+                        bool result = await ConvertWebPAsync(item.file,
+                            settingsService.ReadSettingAsync<bool>("Lossless").Result ? -1 : settingsService.ReadSettingAsync<int>("Quality").Result);
 
                         if (!result)
                         {
@@ -349,12 +354,12 @@ namespace DropWebP.Services
 
             await controller.CloseAsync();
 
-            string message = string.Format(localizerService.GetLocalizedString("CompleteMessage"), count.ToString());
+            string message = string.Format(ResourceExtensions.GetLocalized("CompleteMessage"), count.ToString());
 
             if (failures.Count != 0)
             {
                 // 処理できなかったファイルがある場合
-                message = string.Format(localizerService.GetLocalizedString("FailureMessage"), count.ToString(), failures.Count);
+                message = string.Format(ResourceExtensions.GetLocalized("FailureMessage"), count.ToString(), failures.Count);
             }
 
             if (Properties.Settings.Default.NotifyComplete)
@@ -373,12 +378,13 @@ namespace DropWebP.Services
                     message);
             }
         }
+        */
 
         /// <summary>
         /// 対応フォーマット.
         /// </summary>
         /// <returns>拡張子一覧.</returns>
-        private static List<string> ImageFileExtensions()
+        private List<string> ImageFileExtensions()
         {
             List<string> imageFileExtensions = ImageCodecInfo.GetImageEncoders()
                                       .Select(c => c.FilenameExtension)
@@ -393,7 +399,7 @@ namespace DropWebP.Services
             imageFileExtensions.Remove(".tif");
             imageFileExtensions.Remove(".tiff");
 
-            if (Properties.Settings.Default.IgnoreJpeg)
+            if (settingsService.ReadSettingAsync<bool>("IgnoreJpeg").Result)
             {
                 // Jpegを無視する場合
                 imageFileExtensions.Remove(".jpg");
@@ -404,22 +410,11 @@ namespace DropWebP.Services
         }
 
         /// <summary>
-        /// 指定されたパス文字列から拡張子を削除して返します.
-        /// </summary>
-        /// <param name="path">ファイルのパス.</param>
-        /// <returns>拡張子を抜いたファイルのパス.</returns>
-        private static string GetFileName(string path)
-        {
-            string extension = Path.GetExtension(path);
-            return string.IsNullOrEmpty(extension) ? path : path.Replace(extension, string.Empty);
-        }
-
-        /// <summary>
         /// 画像ファイルをBitmapに変換.
         /// </summary>
         /// <param name="path">画像のパス.</param>
         /// <returns>ビットマップ.</returns>
-        private static Bitmap LoadBitmap(string path)
+        private Bitmap? LoadBitmap(string path)
         {
             if (!File.Exists(path))
             {
@@ -427,22 +422,22 @@ namespace DropWebP.Services
             }
 
             // ビットマップ
-            Bitmap bmp = null;
+            Bitmap? bmp = null;
 
             if (ImageFileExtensions().Contains(Path.GetExtension(path).ToLower()))
             {
                 // Open file in read only mode
-                using FileStream stream = new (path, FileMode.Open, FileAccess.Read);
+                using FileStream stream = new(path, FileMode.Open, FileAccess.Read);
 
                 // Get a binary reader for the file stream
-                using BinaryReader reader = new (stream);
+                using BinaryReader reader = new(stream);
 
                 // copy the content of the file into a memory stream
-                using MemoryStream ms = new (reader.ReadBytes((int)stream.Length));
+                using MemoryStream ms = new(reader.ReadBytes((int)stream.Length));
 
                 // make a new Bitmap object the owner of the MemoryStream
                 _ = ms.Seek(0, SeekOrigin.Begin);
-                bmp = new (ms);
+                bmp = new(ms);
             }
             else if (Path.GetExtension(path) == ".exr")
             {
@@ -454,7 +449,7 @@ namespace DropWebP.Services
                 part.OpenParallel(path);
 
                 // 画像サイズを割り当てる
-                bmp = new (part.DataWindow.Width, part.DataWindow.Height);
+                bmp = new(part.DataWindow.Width, part.DataWindow.Height);
                 BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
                 byte[] destBytes = part.GetBytes(ImageDestFormat.BGRA8, GammaEncoding.sRGB, data.Stride);
 

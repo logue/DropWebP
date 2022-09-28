@@ -5,147 +5,123 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using System;
-using System.Diagnostics;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Windows;
-using DropWebP.Helpers;
-using DropWebP.Interfaces;
+using DropWebP.Activation;
+using DropWebP.Contracts.Services;
+using DropWebP.Core.Contracts.Services;
+using DropWebP.Core.Services;
+using DropWebP.Models;
 using DropWebP.Services;
 using DropWebP.ViewModels;
 using DropWebP.Views;
-using MahApps.Metro.Controls;
-using Prism.DryIoc;
-using Prism.Ioc;
-using Prism.Regions;
 
-namespace DropWebP
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.UI.Xaml;
+
+namespace DropWebP;
+
+// To learn more about WinUI 3, see https://docs.microsoft.com/windows/apps/winui/winui3/.
+
+/// <summary>
+/// アプリケーションクラス
+/// </summary>
+public partial class App : Application
 {
-    /// <summary>
-    /// Interaction logic for App.xaml.
-    /// </summary>
-    public partial class App : PrismApplication
+    // The .NET Generic Host provides dependency injection, configuration, logging, and other services.
+    // https://docs.microsoft.com/dotnet/core/extensions/generic-host
+    // https://docs.microsoft.com/dotnet/core/extensions/dependency-injection
+    // https://docs.microsoft.com/dotnet/core/extensions/configuration
+    // https://docs.microsoft.com/dotnet/core/extensions/logging
+    public IHost Host
     {
-        /// <summary>
-        /// 外部プロセスのメイン・ウィンドウを起動するためのWin32 API.
-        /// </summary>
-        /// <param name="hwnd">The hWnd<see cref="IntPtr"/>.</param>
-        /// <returns>The <see cref="bool"/>.</returns>
-        [DllImport("user32.dll")]
-        private static extern bool SetForegroundWindow(IntPtr hwnd);
-
-        /// <summary>
-        /// The ShowWindowAsync.
-        /// </summary>
-        /// <param name="hWnd">The hWnd<see cref="IntPtr"/>.</param>
-        /// <param name="nCmdShow">The nCmdShow<see cref="int"/>.</param>
-        /// <returns>The <see cref="bool"/>.</returns>
-        [DllImport("user32.dll")]
-        private static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
-
-        /// <summary>
-        /// 最小化状態か.
-        /// </summary>
-        /// <param name="hwnd">The hWnd<see cref="IntPtr"/>.</param>
-        /// <returns>The <see cref="bool"/>.</returns>
-        [DllImport("user32.dll")]
-        private static extern bool IsIconic(IntPtr hwnd);
-
-        /// <summary>
-        /// ShowWindowAsync関数のパラメータに渡す定義値(画面を元の大きさに戻す)..
-        /// </summary>
-#pragma warning disable SA1310 // Field names should not contain underscore
-        private const int SW_RESTORE = 9;
-#pragma warning restore SA1310 // Field names should not contain underscore
-
-        /// <summary>
-        /// The CreateShell.
-        /// </summary>
-        /// <returns>.</returns>
-        protected override Window CreateShell()
-        {
-            // 複数インスタンスが動かないようにするための処理
-            _ = new Semaphore(1, 1, Assembly.GetExecutingAssembly().GetName().Name, out bool createdNew);
-
-            // まだアプリが起動してなければ
-            if (createdNew)
-            {
-                return Container.Resolve<ShellWindow>();
-            }
-
-            // 既にアプリが起動していればそのアプリを前面に出す
-            foreach (Process p in Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName))
-            {
-                // 自分自身のプロセスIDは無視する
-                if (p.Id != Environment.ProcessId)
-                {
-                    // プロセスのフルパス名を比較して同じアプリケーションか検証
-                    if (p.MainModule.FileName == Process.GetCurrentProcess().MainModule.FileName)
-                    {
-                        // メイン・ウィンドウが最小化されていれば元に戻す
-                        if (IsIconic(p.MainWindowHandle))
-                        {
-                            _ = ShowWindowAsync(p.MainWindowHandle, SW_RESTORE);
-                        }
-
-                        // メイン・ウィンドウを最前面に表示する
-                        _ = SetForegroundWindow(p.MainWindowHandle);
-                    }
-                }
-            }
-
-            Current.Shutdown();
-            return null;
-        }
-
-        /// <summary>
-        /// コンテナを登録.
-        /// </summary>
-        /// <param name="containerRegistry">インジェクションするコンテナのレジストリ.</param>
-        protected override void RegisterTypes(IContainerRegistry containerRegistry)
-        {
-            // _= containerRegistry.RegisterInstance<Window>(Container.Resolve<ShellWindow>());
-            // アプリケーションコマンド
-            // _ = containerRegistry.RegisterSingleton<IApplicationCommands, ApplicationCommandsProxy>();
-            // 多言語化
-            _ = containerRegistry.RegisterInstance<ILocalizerService>(Container.Resolve<LocalizerService>());
-
-            // エンコーダー
-            _ = containerRegistry.RegisterSingleton<IWebPService, WebPService>();
-
-            // ログ
-            _ = containerRegistry.RegisterSingleton<ILoggerService, LoggerService>();
-
-            // ダイアログのデザインを揃える
-            containerRegistry.RegisterDialogWindow<MetroDialogService>();
-
-            // 情報ダイアログ
-            containerRegistry.RegisterDialog<AboutDialog, AboutDialogViewModel>();
-        }
-
-        /// <summary>
-        /// The ConfigureRegionAdapterMappings.
-        /// </summary>
-        /// <param name="regionAdapterMappings">The regionAdapterMappings<see cref="RegionAdapterMappings"/>.</param>
-        protected override void ConfigureRegionAdapterMappings(RegionAdapterMappings regionAdapterMappings)
-        {
-            // 設定フライアウト
-            regionAdapterMappings.RegisterMapping(typeof(FlyoutsControl), Container.Resolve<FlyoutsControlRegionAdapter>());
-
-            base.ConfigureRegionAdapterMappings(regionAdapterMappings);
-        }
-
-        /// <summary>
-        /// モジュール登録
-        /// </summary>
-        /// <returns></returns>
-        /*
-        protected override IModuleCatalog CreateModuleCatalog()
-        {
-            // return new DirectoryModuleCatalog() { ModulePath = @".\Modules" };
-        }
-        */
+        get;
     }
+
+    /// <summary>
+    /// サービス取得
+    /// </summary>
+    /// <typeparam name="T">サービスのデータ型</typeparam>
+    /// <returns>サービス</returns>
+    /// <exception cref="ArgumentException">引数例外</exception>
+    public static T GetService<T>()
+        where T : class
+    {
+        if ((App.Current as App)!.Host.Services.GetService(typeof(T)) is not T service)
+        {
+            throw new ArgumentException($"{typeof(T)} needs to be registered in ConfigureServices within App.xaml.cs.");
+        }
+
+        return service;
+    }
+
+    /// <summary>
+    /// メイン画面
+    /// </summary>
+    public static WindowEx MainWindow { get; } = new MainWindow();
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="App"/> class.
+    /// </summary>
+    public App()
+    {
+        InitializeComponent();
+
+        Host = Microsoft.Extensions.Hosting.Host.
+        CreateDefaultBuilder().
+        UseContentRoot(AppContext.BaseDirectory).
+        ConfigureServices((context, services) =>
+        {
+            // Default Activation Handler
+            services.AddTransient<ActivationHandler<LaunchActivatedEventArgs>, DefaultActivationHandler>();
+
+            // Other Activation Handlers
+
+            // Services
+            services.AddSingleton<ILocalSettingsService, LocalSettingsService>();
+            services.AddSingleton<IThemeSelectorService, ThemeSelectorService>();
+            services.AddTransient<INavigationViewService, NavigationViewService>();
+
+            services.AddSingleton<IActivationService, ActivationService>();
+            services.AddSingleton<IPageService, PageService>();
+            services.AddSingleton<INavigationService, NavigationService>();
+
+            // Core Services
+            services.AddSingleton<IFileService, FileService>();
+
+            // Views and ViewModels
+            services.AddTransient<SettingsViewModel>();
+            services.AddTransient<SettingsPage>();
+            services.AddTransient<MainViewModel>();
+            services.AddTransient<MainPage>();
+            services.AddTransient<ShellPage>();
+            services.AddTransient<ShellViewModel>();
+
+            // Configuration
+            services.Configure<LocalSettingsOptions>(context.Configuration.GetSection(nameof(LocalSettingsOptions)));
+        }).
+        Build();
+
+        UnhandledException += App_UnhandledException;
+    }
+
+    /// <inheritdoc/>
+    protected async override void OnLaunched(LaunchActivatedEventArgs args)
+    {
+        base.OnLaunched(args);
+
+        await App.GetService<IActivationService>().ActivateAsync(args);
+    }
+
+    /// <summary>
+    /// 例外発生時
+    /// </summary>
+    /// <param name="sender">呼び出し元</param>
+    /// <param name="e">例外の引数</param>
+    private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
+    {
+        // TODO: Log and handle exceptions as appropriate.
+        // https://docs.microsoft.com/windows/windows-app-sdk/api/winrt/microsoft.ui.xaml.application.unhandledexception.
+    }
+
+
 }
