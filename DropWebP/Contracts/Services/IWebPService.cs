@@ -34,14 +34,14 @@ public interface IWebPService
     /// </summary>
     /// <param name="bitmap">ビットマップ.</param>
     /// <param name="quality">圧縮レベル（-1～100）.</param>
-    /// <returns>WebP画像のバイト配列.</returns>
+    /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
     public Task<byte[]> EncodeWebPAsync(Bitmap bitmap, long quality = -1);
 
     /// <summary>
     /// WebPからビットマップに変換（非同期版）.
     /// </summary>
     /// <param name="bytes">WebP画像のバイト配列.</param>
-    /// <returns>ビットマップ.</returns>
+    /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
     public Task<Bitmap> DecodeWebPAsync(byte[] bytes);
 
     /// <summary>
@@ -66,7 +66,7 @@ public interface IWebPService
     /// </summary>
     /// <param name="path">ファイルの入力パス.</param>
     /// <param name="quality">品質。負数で無劣化圧縮.</param>
-    /// <returns>The <see cref="Task"/>.</returns>
+    /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
     public Task<bool> ConvertWebPAsync(string path, long quality);
 
     /// <summary>
@@ -75,7 +75,7 @@ public interface IWebPService
     /// <param name="path">ファイルの入力パス.</param>
     /// <param name="outputPath">ファイルの出力先.</param>
     /// <param name="quality">品質。負数で無劣化圧縮.</param>
-    /// <returns>The <see cref="Task"/>.</returns>
+    /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
     public Task<bool> ConvertWebPAsync(string path, string outputPath, long quality);
 
     /// <summary>
@@ -85,7 +85,6 @@ public interface IWebPService
     /// <param name="outputPath">ファイルの出力先.</param>
     /// <param name="quality">品質。負数で無劣化圧縮.</param>
     /// <param name="token">中断トークン.</param>
-    /// <returns>The <see cref="Task"/>.</returns>
+    /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
     public Task<bool> ConvertWebPAsync(string path, string outputPath, long quality = -1, CancellationToken token = default);
-
 }

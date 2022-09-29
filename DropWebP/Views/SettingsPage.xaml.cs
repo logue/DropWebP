@@ -12,6 +12,7 @@ using Microsoft.UI.Xaml.Controls;
 namespace DropWebP.Views;
 
 // TODO: Set the URL for your privacy policy by updating SettingsPage_PrivacyTermsLink.NavigateUri in Resources.resw.
+
 /// <summary>
 /// 設定ページ
 /// </summary>

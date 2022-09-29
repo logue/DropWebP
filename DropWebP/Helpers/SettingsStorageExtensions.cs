@@ -42,11 +42,11 @@ public static class SettingsStorageExtensions
     /// <param name="folder">保存先フォルダ</param>
     /// <param name="name">ファイル名</param>
     /// <param name="content">内容</param>
-    /// <returns>実行結果</returns>
+    /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
     public static async Task SaveAsync<T>(this StorageFolder folder, string name, T content)
     {
-        var file = await folder.CreateFileAsync(GetFileName(name), CreationCollisionOption.ReplaceExisting);
-        var fileContent = await Json.StringifyAsync(content);
+        StorageFile file = await folder.CreateFileAsync(GetFileName(name), CreationCollisionOption.ReplaceExisting);
+        string fileContent = await Json.StringifyAsync(content);
 
         await FileIO.WriteTextAsync(file, fileContent);
     }
@@ -57,7 +57,7 @@ public static class SettingsStorageExtensions
     /// <typeparam name="T">設定の型</typeparam>
     /// <param name="folder">保存先フォルダ</param>
     /// <param name="name">ファイル名</param>
-    /// <returns>実行結果</returns>
+    /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
     public static async Task<T?> ReadAsync<T>(this StorageFolder folder, string name)
     {
         if (!File.Exists(Path.Combine(folder.Path, GetFileName(name))))
@@ -65,20 +65,20 @@ public static class SettingsStorageExtensions
             return default;
         }
 
-        var file = await folder.GetFileAsync($"{name}.json");
-        var fileContent = await FileIO.ReadTextAsync(file);
+        StorageFile file = await folder.GetFileAsync($"{name}.json");
+        string fileContent = await FileIO.ReadTextAsync(file);
 
         return await Json.ToObjectAsync<T>(fileContent);
     }
 
     /// <summary>
-    /// 
+    /// 設定を保存
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="settings"></param>
-    /// <param name="key"></param>
-    /// <param name="value"></param>
-    /// <returns></returns>
+    /// <typeparam name="T">型</typeparam>
+    /// <param name="settings">設定名</param>
+    /// <param name="key">キー</param>
+    /// <param name="value">値</param>
+    /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
     public static async Task SaveAsync<T>(this ApplicationDataContainer settings, string key, T value)
     {
         settings.SaveString(key, await Json.StringifyAsync(value));
@@ -101,29 +101,22 @@ public static class SettingsStorageExtensions
     /// <typeparam name="T">データ型</typeparam>
     /// <param name="settings">設定</param>
     /// <param name="key">キー</param>
-    /// <returns>値</returns>
+    /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
     public static async Task<T?> ReadAsync<T>(this ApplicationDataContainer settings, string key)
     {
-        object? obj;
-
-        if (settings.Values.TryGetValue(key, out obj))
-        {
-            return await Json.ToObjectAsync<T>((string)obj);
-        }
-
-        return default;
+        return settings.Values.TryGetValue(key, out object? obj) ? await Json.ToObjectAsync<T>((string)obj) : default;
     }
 
     /// <summary>
-    /// 
+    /// 設定を保存
     /// </summary>
-    /// <param name="folder"></param>
-    /// <param name="content"></param>
-    /// <param name="fileName"></param>
-    /// <param name="options"></param>
-    /// <returns></returns>
-    /// <exception cref="ArgumentNullException"></exception>
-    /// <exception cref="ArgumentException"></exception>
+    /// <param name="folder">保存先</param>
+    /// <param name="content">内容</param>
+    /// <param name="fileName">ファイル名</param>
+    /// <param name="options">オプション</param>
+    /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+    /// <exception cref="ArgumentNullException">引数がNull</exception>
+    /// <exception cref="ArgumentException">無効な引数</exception>
     public static async Task<StorageFile> SaveFileAsync(this StorageFolder folder, byte[] content, string fileName, CreationCollisionOption options = CreationCollisionOption.ReplaceExisting)
     {
         if (content == null)
@@ -136,25 +129,25 @@ public static class SettingsStorageExtensions
             throw new ArgumentException("File name is null or empty. Specify a valid file name", nameof(fileName));
         }
 
-        var storageFile = await folder.CreateFileAsync(fileName, options);
+        StorageFile storageFile = await folder.CreateFileAsync(fileName, options);
         await FileIO.WriteBytesAsync(storageFile, content);
         return storageFile;
     }
 
     /// <summary>
-    /// 
+    /// 設定ファイルを取得
     /// </summary>
-    /// <param name="folder"></param>
-    /// <param name="fileName"></param>
-    /// <returns></returns>
-    public static async Task<byte[]?> ReadFileAsync(this StorageFolder folder, string fileName)
+    /// <param name="folder">フォルダ</param>
+    /// <param name="fileName">ファイル名</param>
+    /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+    public static async Task<byte[] ?> ReadFileAsync(this StorageFolder folder, string fileName)
     {
-        var item = await folder.TryGetItemAsync(fileName).AsTask().ConfigureAwait(false);
+        IStorageItem item = await folder.TryGetItemAsync(fileName).AsTask().ConfigureAwait(false);
 
         if ((item != null) && item.IsOfType(StorageItemTypes.File))
         {
-            var storageFile = await folder.GetFileAsync(fileName);
-            var content = await storageFile.ReadBytesAsync();
+            StorageFile storageFile = await folder.GetFileAsync(fileName);
+            byte[] ? content = await storageFile.ReadBytesAsync();
             return content;
         }
 
@@ -165,15 +158,15 @@ public static class SettingsStorageExtensions
     /// バイトでファイルから読み込む
     /// </summary>
     /// <param name="file">ファイル</param>
-    /// <returns>バイト</returns>
-    public static async Task<byte[]?> ReadBytesAsync(this StorageFile file)
+    /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+    public static async Task<byte[] ?> ReadBytesAsync(this StorageFile file)
     {
         if (file != null)
         {
             using IRandomAccessStream stream = await file.OpenReadAsync();
-            using var reader = new DataReader(stream.GetInputStreamAt(0));
-            await reader.LoadAsync((uint)stream.Size);
-            var bytes = new byte[stream.Size];
+            using DataReader reader = new (stream.GetInputStreamAt(0));
+            _ = await reader.LoadAsync((uint)stream.Size);
+            byte[] bytes = new byte[stream.Size];
             reader.ReadBytes(bytes);
             return bytes;
         }

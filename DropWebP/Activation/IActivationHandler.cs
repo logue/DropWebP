@@ -23,6 +23,6 @@ public interface IActivationHandler
     /// ハンドル実行
     /// </summary>
     /// <param name="args">引数</param>
-    /// <returns>実行結果</returns>
+    /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
     Task HandleAsync(object args);
 }

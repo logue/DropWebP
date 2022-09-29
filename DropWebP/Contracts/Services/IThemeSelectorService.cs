@@ -25,19 +25,19 @@ public interface IThemeSelectorService
     /// <summary>
     /// 初期化
     /// </summary>
-    /// <returns>実行結果</returns>
+    /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
     Task InitializeAsync();
 
     /// <summary>
     /// テーマ設定
     /// </summary>
     /// <param name="theme">テーマ</param>
-    /// <returns>実行結果</returns>
+    /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
     Task SetThemeAsync(ElementTheme theme);
 
     /// <summary>
     /// 要求されたテーマを設定
     /// </summary>
-    /// <returns>実行結果</returns>
+    /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
     Task SetRequestedThemeAsync();
 }

@@ -17,7 +17,7 @@ public interface ILocalSettingsService
     /// </summary>
     /// <typeparam name="T">設定の型</typeparam>
     /// <param name="key">設定のキー名</param>
-    /// <returns>値</returns>
+    /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
     Task<T?> ReadSettingAsync<T>(string key);
 
     /// <summary>
@@ -26,6 +26,6 @@ public interface ILocalSettingsService
     /// <typeparam name="T">設定の型</typeparam>
     /// <param name="key">保存する設定のキー</param>
     /// <param name="value">保存する設定の値</param>
-    /// <returns>成否</returns>
+    /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
     Task SaveSettingAsync<T>(string key, T value);
 }

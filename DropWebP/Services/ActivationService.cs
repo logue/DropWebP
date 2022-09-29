@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="ActivationService.cs" company="Logue">
 // Copyright (c) 2021-2022 Masashi Yoshikawa All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
@@ -14,6 +14,9 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace DropWebP.Services;
 
+/// <summary>
+/// アクティベーションサービス
+/// </summary>
 public class ActivationService : IActivationService
 {
     private readonly ActivationHandler<LaunchActivatedEventArgs> defaultHandler;
@@ -21,6 +24,12 @@ public class ActivationService : IActivationService
     private readonly IThemeSelectorService themeSelectorService;
     private UIElement? shell = null;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ActivationService"/> class.
+    /// </summary>
+    /// <param name="defaultHandler">デフォルトのハンドラ</param>
+    /// <param name="activationHandlers">アクティベーション時のハンドラ</param>
+    /// <param name="themeSelectorService">テーマ選択サービス</param>
     public ActivationService(ActivationHandler<LaunchActivatedEventArgs> defaultHandler, IEnumerable<IActivationHandler> activationHandlers, IThemeSelectorService themeSelectorService)
     {
         this.defaultHandler = defaultHandler;
@@ -51,9 +60,14 @@ public class ActivationService : IActivationService
         await StartupAsync();
     }
 
+    /// <summary>
+    /// アクティベーションサービスのハンドル
+    /// </summary>
+    /// <param name="activationArgs">引数</param>
+    /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
     private async Task HandleActivationAsync(object activationArgs)
     {
-        var activationHandler = activationHandlers.FirstOrDefault(h => h.CanHandle(activationArgs));
+        IActivationHandler? activationHandler = activationHandlers.FirstOrDefault(h => h.CanHandle(activationArgs));
 
         if (activationHandler != null)
         {
@@ -66,12 +80,20 @@ public class ActivationService : IActivationService
         }
     }
 
+    /// <summary>
+    /// 初期化
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
     private async Task InitializeAsync()
     {
         await themeSelectorService.InitializeAsync().ConfigureAwait(false);
         await Task.CompletedTask;
     }
 
+    /// <summary>
+    /// スタートアップ
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
     private async Task StartupAsync()
     {
         await themeSelectorService.SetRequestedThemeAsync();

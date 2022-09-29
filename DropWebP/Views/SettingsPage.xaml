@@ -18,17 +18,27 @@
             <StackPanel Margin="{StaticResource SmallTopBottomMargin}">
                 <ToggleSwitch
                     x:Name="LosslessToggleSwitch"
+                    x:Uid="Settings_Lossless"
                     Header="Lossless"
                     IsOn="{Binding ToggleLossless}" />
                 <TextBlock x:Uid="QualityGroup" Style="{ThemeResource SubtitleTextBlockStyle}" />
                 <NumberBox
-                    x:Name="Quality"
+                    x:Uid="Settings_Quality"
                     Maximum="100"
                     Minimum="0"
                     Value="{Binding QualityValue}" />
-                <ToggleSwitch x:Uid="KeepOriginalText" IsOn="{Binding ToggleKeepOriginal}" />
-                <ToggleSwitch x:Uid="IgnoreJpegText" IsOn="{Binding ToggleIgnoreJpeg}" />
-                <ToggleSwitch x:Uid="NotifyCompleteText" IsOn="{Binding ToggleNotifyComplete}" />
+                <ToggleSwitch
+                    x:Name="KeepOriginalText"
+                    x:Uid="Settings_KeepOriginal"
+                    IsOn="{Binding ToggleKeepOriginal}" />
+                <ToggleSwitch
+                    x:Name="IgnoreJpegText"
+                    x:Uid="Settings_IgnoreJpeg"
+                    IsOn="{Binding ToggleIgnoreJpeg}" />
+                <ToggleSwitch
+                    x:Name="NotifyCompleteText"
+                    x:Uid="Settings_NotifyComplete"
+                    IsOn="{Binding ToggleNotifyComplete}" />
             </StackPanel>
             <TextBlock x:Uid="Settings_Personalization" Style="{ThemeResource SubtitleTextBlockStyle}" />
             <StackPanel Margin="{StaticResource SmallTopBottomMargin}">

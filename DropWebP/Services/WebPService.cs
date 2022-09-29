@@ -39,7 +39,6 @@ namespace DropWebP.Services
         /// Initializes a new instance of the <see cref="WebPService"/> class.
         /// </summary>
         /// <param name="settingsService">設定サービス</param>
-
         public WebPService(LocalSettingsService settingsService)
         {
             this.settingsService = settingsService;
@@ -53,15 +52,10 @@ namespace DropWebP.Services
         /// <returns>WebPに圧縮したバイト配列.</returns>
         public byte[] EncodeWebP(Bitmap bitmap, long quality = -1)
         {
-            using WebPObject webP = new(bitmap);
+            using WebPObject webP = new (bitmap);
 
             // TODO: BGRとABGRの判定と、それに応じた圧縮処理
-            if (quality < 0)
-            {
-                return webP.GetWebPLossless();
-            }
-
-            return webP.GetWebPLossy(quality);
+            return quality < 0 ? webP.GetWebPLossless() : webP.GetWebPLossy(quality);
         }
 
         /// <summary>
@@ -71,7 +65,7 @@ namespace DropWebP.Services
         /// <returns>ビットマップ.</returns>
         public Bitmap DecodeWebP(byte[] bytes)
         {
-            using WebPObject webP = new(bytes);
+            using WebPObject webP = new (bytes);
 
             // WebPに変換
             return (Bitmap)webP.GetImage();
@@ -82,7 +76,7 @@ namespace DropWebP.Services
         /// </summary>
         /// <param name="bitmap">ビットマップ.</param>
         /// <param name="quality">圧縮レベル（-1～100）.</param>
-        /// <returns>WebP画像のバイト配列.</returns>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public Task<byte[]> EncodeWebPAsync(Bitmap bitmap, long quality = -1)
         {
             return Task.Run(() => EncodeWebP(bitmap, quality));
@@ -92,7 +86,7 @@ namespace DropWebP.Services
         /// WebPからビットマップに変換（非同期版）.
         /// </summary>
         /// <param name="bytes">WebP画像のバイト配列.</param>
-        /// <returns>ビットマップ.</returns>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public Task<Bitmap> DecodeWebPAsync(byte[] bytes)
         {
             return Task.Run(() => DecodeWebP(bytes));
@@ -196,7 +190,7 @@ namespace DropWebP.Services
         /// <param name="outputPath">ファイルの出力先.</param>
         /// <param name="quality">品質。負数で無劣化圧縮.</param>
         /// <param name="token">中断トークン.</param>
-        /// <returns>The <see cref="Task"/>.</returns>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public async Task<bool> ConvertWebPAsync(string path, string outputPath, long quality = -1, CancellationToken token = default)
         {
             // 拡張子（小文字に統一）
@@ -396,14 +390,14 @@ namespace DropWebP.Services
             imageFileExtensions.Add(".exr");
 
             // なんかエラーが起きるファイル形式
-            imageFileExtensions.Remove(".tif");
-            imageFileExtensions.Remove(".tiff");
+            _ = imageFileExtensions.Remove(".tif");
+            _ = imageFileExtensions.Remove(".tiff");
 
             if (settingsService.ReadSettingAsync<bool>("IgnoreJpeg").Result)
             {
                 // Jpegを無視する場合
-                imageFileExtensions.Remove(".jpg");
-                imageFileExtensions.Remove(".jpeg");
+                _ = imageFileExtensions.Remove(".jpg");
+                _ = imageFileExtensions.Remove(".jpeg");
             }
 
             return imageFileExtensions;
@@ -427,17 +421,17 @@ namespace DropWebP.Services
             if (ImageFileExtensions().Contains(Path.GetExtension(path).ToLower()))
             {
                 // Open file in read only mode
-                using FileStream stream = new(path, FileMode.Open, FileAccess.Read);
+                using FileStream stream = new (path, FileMode.Open, FileAccess.Read);
 
                 // Get a binary reader for the file stream
-                using BinaryReader reader = new(stream);
+                using BinaryReader reader = new (stream);
 
                 // copy the content of the file into a memory stream
-                using MemoryStream ms = new(reader.ReadBytes((int)stream.Length));
+                using MemoryStream ms = new (reader.ReadBytes((int)stream.Length));
 
                 // make a new Bitmap object the owner of the MemoryStream
                 _ = ms.Seek(0, SeekOrigin.Begin);
-                bmp = new(ms);
+                bmp = new (ms);
             }
             else if (Path.GetExtension(path) == ".exr")
             {
@@ -449,7 +443,7 @@ namespace DropWebP.Services
                 part.OpenParallel(path);
 
                 // 画像サイズを割り当てる
-                bmp = new(part.DataWindow.Width, part.DataWindow.Height);
+                bmp = new (part.DataWindow.Width, part.DataWindow.Height);
                 BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
                 byte[] destBytes = part.GetBytes(ImageDestFormat.BGRA8, GammaEncoding.sRGB, data.Stride);
 

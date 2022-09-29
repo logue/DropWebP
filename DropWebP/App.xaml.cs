@@ -46,12 +46,9 @@ public partial class App : Application
     public static T GetService<T>()
         where T : class
     {
-        if ((App.Current as App)!.Host.Services.GetService(typeof(T)) is not T service)
-        {
-            throw new ArgumentException($"{typeof(T)} needs to be registered in ConfigureServices within App.xaml.cs.");
-        }
-
-        return service;
+        return (App.Current as App)!.Host.Services.GetService(typeof(T)) is not T service
+            ? throw new ArgumentException($"{typeof(T)} needs to be registered in ConfigureServices within App.xaml.cs.")
+            : service;
     }
 
     /// <summary>
@@ -72,32 +69,32 @@ public partial class App : Application
         ConfigureServices((context, services) =>
         {
             // Default Activation Handler
-            services.AddTransient<ActivationHandler<LaunchActivatedEventArgs>, DefaultActivationHandler>();
+            _ = services.AddTransient<ActivationHandler<LaunchActivatedEventArgs>, DefaultActivationHandler>();
 
             // Other Activation Handlers
 
             // Services
-            services.AddSingleton<ILocalSettingsService, LocalSettingsService>();
-            services.AddSingleton<IThemeSelectorService, ThemeSelectorService>();
-            services.AddTransient<INavigationViewService, NavigationViewService>();
+            _ = services.AddSingleton<ILocalSettingsService, LocalSettingsService>();
+            _ = services.AddSingleton<IThemeSelectorService, ThemeSelectorService>();
+            _ = services.AddTransient<INavigationViewService, NavigationViewService>();
 
-            services.AddSingleton<IActivationService, ActivationService>();
-            services.AddSingleton<IPageService, PageService>();
-            services.AddSingleton<INavigationService, NavigationService>();
+            _ = services.AddSingleton<IActivationService, ActivationService>();
+            _ = services.AddSingleton<IPageService, PageService>();
+            _ = services.AddSingleton<INavigationService, NavigationService>();
 
             // Core Services
-            services.AddSingleton<IFileService, FileService>();
+            _ = services.AddSingleton<IFileService, FileService>();
 
             // Views and ViewModels
-            services.AddTransient<SettingsViewModel>();
-            services.AddTransient<SettingsPage>();
-            services.AddTransient<MainViewModel>();
-            services.AddTransient<MainPage>();
-            services.AddTransient<ShellPage>();
-            services.AddTransient<ShellViewModel>();
+            _ = services.AddTransient<SettingsViewModel>();
+            _ = services.AddTransient<SettingsPage>();
+            _ = services.AddTransient<MainViewModel>();
+            _ = services.AddTransient<MainPage>();
+            _ = services.AddTransient<ShellPage>();
+            _ = services.AddTransient<ShellViewModel>();
 
             // Configuration
-            services.Configure<LocalSettingsOptions>(context.Configuration.GetSection(nameof(LocalSettingsOptions)));
+            _ = services.Configure<LocalSettingsOptions>(context.Configuration.GetSection(nameof(LocalSettingsOptions)));
         }).
         Build();
 
@@ -105,7 +102,7 @@ public partial class App : Application
     }
 
     /// <inheritdoc/>
-    protected async override void OnLaunched(LaunchActivatedEventArgs args)
+    protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
         base.OnLaunched(args);
 
@@ -122,6 +119,4 @@ public partial class App : Application
         // TODO: Log and handle exceptions as appropriate.
         // https://docs.microsoft.com/windows/windows-app-sdk/api/winrt/microsoft.ui.xaml.application.unhandledexception.
     }
-
-
 }

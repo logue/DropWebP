@@ -17,12 +17,15 @@ public static class ResourceExtensions
     /// <summary>
     /// リソースローダー
     /// </summary>
-    private static readonly ResourceLoader ResourceLoader = new();
+    private static readonly ResourceLoader ResourceLoader = new ();
 
     /// <summary>
     /// 翻訳文を取得
     /// </summary>
     /// <param name="resourceKey">翻訳キー</param>
     /// <returns>翻訳文</returns>
-    public static string GetLocalized(this string resourceKey) => ResourceLoader.GetString(resourceKey);
+    public static string GetLocalized(this string resourceKey)
+    {
+        return ResourceLoader.GetString(resourceKey);
+    }
 }

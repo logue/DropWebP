@@ -33,7 +33,7 @@ public sealed partial class ShellPage : Page
     /// <returns>入力されたキー</returns>
     private static KeyboardAccelerator BuildKeyboardAccelerator(VirtualKey key, VirtualKeyModifiers? modifiers = null)
     {
-        var keyboardAccelerator = new KeyboardAccelerator() { Key = key };
+        KeyboardAccelerator keyboardAccelerator = new () { Key = key };
 
         if (modifiers.HasValue)
         {
@@ -52,9 +52,9 @@ public sealed partial class ShellPage : Page
     /// <param name="args">引数</param>
     private static void OnKeyboardAcceleratorInvoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
     {
-        var navigationService = App.GetService<INavigationService>();
+        INavigationService navigationService = App.GetService<INavigationService>();
 
-        var result = navigationService.GoBack();
+        bool result = navigationService.GoBack();
 
         args.Handled = result;
     }
@@ -108,7 +108,7 @@ public sealed partial class ShellPage : Page
     /// <param name="args">イベント引数</param>
     private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
     {
-        var resource = args.WindowActivationState == WindowActivationState.Deactivated ? "WindowCaptionForegroundDisabled" : "WindowCaptionForeground";
+        string resource = args.WindowActivationState == WindowActivationState.Deactivated ? "WindowCaptionForegroundDisabled" : "WindowCaptionForeground";
 
         AppTitleBarText.Foreground = (SolidColorBrush)App.Current.Resources[resource];
     }

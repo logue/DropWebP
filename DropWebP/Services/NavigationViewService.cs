@@ -72,12 +72,9 @@ public class NavigationViewService : INavigationViewService
     /// <inheritdoc/>
     public NavigationViewItem? GetSelectedItem(Type pageType)
     {
-        if (navigationView != null)
-        {
-            return GetSelectedItem(navigationView.MenuItems, pageType) ?? GetSelectedItem(navigationView.FooterMenuItems, pageType);
-        }
-
-        return null;
+        return navigationView != null
+            ? GetSelectedItem(navigationView.MenuItems, pageType) ?? GetSelectedItem(navigationView.FooterMenuItems, pageType)
+            : null;
     }
 
     /// <summary>
@@ -85,7 +82,10 @@ public class NavigationViewService : INavigationViewService
     /// </summary>
     /// <param name="sender">送信元</param>
     /// <param name="args">引数</param>
-    private void OnBackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args) => navigationService.GoBack();
+    private void OnBackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
+    {
+        _ = navigationService.GoBack();
+    }
 
     /// <summary>
     /// メニュー内の項目がクリックやタップなどの操作を受け取った
@@ -96,15 +96,15 @@ public class NavigationViewService : INavigationViewService
     {
         if (args.IsSettingsInvoked)
         {
-            navigationService.NavigateTo(typeof(SettingsViewModel).FullName!);
+            _ = navigationService.NavigateTo(typeof(SettingsViewModel).FullName!);
         }
         else
         {
-            var selectedItem = args.InvokedItemContainer as NavigationViewItem;
+            NavigationViewItem? selectedItem = args.InvokedItemContainer as NavigationViewItem;
 
             if (selectedItem?.GetValue(NavigationHelper.NavigateToProperty) is string pageKey)
             {
-                navigationService.NavigateTo(pageKey);
+                _ = navigationService.NavigateTo(pageKey);
             }
         }
     }
@@ -117,14 +117,14 @@ public class NavigationViewService : INavigationViewService
     /// <returns>選択されたナビゲーションビューの項目</returns>
     private NavigationViewItem? GetSelectedItem(IEnumerable<object> menuItems, Type pageType)
     {
-        foreach (var item in menuItems.OfType<NavigationViewItem>())
+        foreach (NavigationViewItem item in menuItems.OfType<NavigationViewItem>())
         {
             if (IsMenuItemForPageType(item, pageType))
             {
                 return item;
             }
 
-            var selectedChild = GetSelectedItem(item.MenuItems, pageType);
+            NavigationViewItem? selectedChild = GetSelectedItem(item.MenuItems, pageType);
             if (selectedChild != null)
             {
                 return selectedChild;
@@ -142,11 +142,7 @@ public class NavigationViewService : INavigationViewService
     /// <returns>真偽</returns>
     private bool IsMenuItemForPageType(NavigationViewItem menuItem, Type sourcePageType)
     {
-        if (menuItem.GetValue(NavigationHelper.NavigateToProperty) is string pageKey)
-        {
-            return pageService.GetPageType(pageKey) == sourcePageType;
-        }
-
-        return false;
+        return menuItem.GetValue(NavigationHelper.NavigateToProperty) is string pageKey
+&& pageService.GetPageType(pageKey) == sourcePageType;
     }
 }

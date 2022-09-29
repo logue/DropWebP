@@ -16,6 +16,6 @@ public interface IActivationService
     /// アクティベート時の処理
     /// </summary>
     /// <param name="activationArgs">アクティベート時の引数</param>
-    /// <returns>実行結果</returns>
+    /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
     Task ActivateAsync(object activationArgs);
 }

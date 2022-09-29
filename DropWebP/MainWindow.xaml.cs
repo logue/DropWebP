@@ -11,6 +11,9 @@ namespace DropWebP;
 
 public sealed partial class MainWindow : WindowEx
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MainWindow"/> class.
+    /// </summary>
     public MainWindow()
     {
         InitializeComponent();

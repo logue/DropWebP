@@ -21,18 +21,49 @@ namespace DropWebP.Services;
 /// </summary>
 public class LocalSettingsService : ILocalSettingsService
 {
+    /// <summary>
+    /// デフォルトのアプリケーションのデータディレクトリ
+    /// </summary>
     private const string DefaultApplicationDataFolder = "DropWebP/ApplicationData";
+
+    /// <summary>
+    /// デフォルトの設定ファイル名
+    /// </summary>
     private const string DefaultLocalSettingsFile = "LocalSettings.json";
 
+    /// <summary>
+    /// ファイルサービス
+    /// </summary>
     private readonly IFileService fileService;
+
+    /// <summary>
+    /// オプション
+    /// </summary>
     private readonly LocalSettingsOptions options;
 
+    /// <summary>
+    /// ローカルのアプリケーションデータのディレクトリ
+    /// </summary>
     private readonly string localApplicationData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+
+    /// <summary>
+    /// アプリケーションデータのディレクトリ
+    /// </summary>
     private readonly string applicationDataFolder;
+
+    /// <summary>
+    /// 設定ファイル
+    /// </summary>
     private readonly string localsettingsFile;
 
+    /// <summary>
+    /// 設定
+    /// </summary>
     private IDictionary<string, object> settings;
 
+    /// <summary>
+    /// 初期化されているか
+    /// </summary>
     private bool isInitialized;
 
     /// <summary>
@@ -56,7 +87,7 @@ public class LocalSettingsService : ILocalSettingsService
     {
         if (RuntimeHelper.IsMSIX)
         {
-            if (ApplicationData.Current.LocalSettings.Values.TryGetValue(key, out var obj))
+            if (ApplicationData.Current.LocalSettings.Values.TryGetValue(key, out object? obj))
             {
                 return await Json.ToObjectAsync<T>((string)obj);
             }
@@ -65,7 +96,7 @@ public class LocalSettingsService : ILocalSettingsService
         {
             await InitializeAsync();
 
-            if (settings != null && settings.TryGetValue(key, out var obj))
+            if (settings != null && settings.TryGetValue(key, out object? obj))
             {
                 return await Json.ToObjectAsync<T>((string)obj);
             }
@@ -94,7 +125,7 @@ public class LocalSettingsService : ILocalSettingsService
     /// <summary>
     /// ハンドラーを初期化し、オプションを解決して検証します。
     /// </summary>
-    /// <returns>タスク</returns>
+    /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
     private async Task InitializeAsync()
     {
         if (!isInitialized)

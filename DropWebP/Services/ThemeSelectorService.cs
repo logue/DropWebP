@@ -71,14 +71,9 @@ public class ThemeSelectorService : IThemeSelectorService
     /// <returns>テーマ設定</returns>
     private async Task<ElementTheme> LoadThemeFromSettingsAsync()
     {
-        var themeName = await localSettingsService.ReadSettingAsync<string>(SettingsKey);
+        string? themeName = await localSettingsService.ReadSettingAsync<string>(SettingsKey);
 
-        if (Enum.TryParse(themeName, out ElementTheme cacheTheme))
-        {
-            return cacheTheme;
-        }
-
-        return ElementTheme.Default;
+        return Enum.TryParse(themeName, out ElementTheme cacheTheme) ? cacheTheme : ElementTheme.Default;
     }
 
     /// <summary>

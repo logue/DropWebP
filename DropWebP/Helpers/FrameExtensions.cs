@@ -19,5 +19,8 @@ public static class FrameExtensions
     /// </summary>
     /// <param name="frame">フレーム</param>
     /// <returns>オブジェクト</returns>
-    public static object? GetPageViewModel(this Frame frame) => frame?.Content?.GetType().GetProperty("ViewModel")?.GetValue(frame.Content, null);
+    public static object? GetPageViewModel(this Frame frame)
+    {
+        return frame?.Content?.GetType().GetProperty("ViewModel")?.GetValue(frame.Content, null);
+    }
 }

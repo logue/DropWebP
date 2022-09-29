@@ -16,22 +16,31 @@ public abstract class ActivationHandler<T> : IActivationHandler
     where T : class
 {
     /// <inheritdoc/>
-    public bool CanHandle(object args) => args is T && CanHandleInternal((args as T)!);
+    public bool CanHandle(object args)
+    {
+        return args is T && CanHandleInternal((args as T)!);
+    }
 
     /// <inheritdoc/>
-    public async Task HandleAsync(object args) => await HandleInternalAsync((args as T)!);
+    public async Task HandleAsync(object args)
+    {
+        await HandleInternalAsync((args as T)!);
+    }
 
     /// <summary>
     /// Override this method to add the logic for whether to handle the activation.
     /// </summary>
     /// <param name="args">引数</param>
     /// <returns>成否</returns>
-    protected virtual bool CanHandleInternal(T args) => true;
+    protected virtual bool CanHandleInternal(T args)
+    {
+        return true;
+    }
 
     /// <summary>
     /// Override this method to add the logic for your activation handler.
     /// </summary>
-    /// <param name="args"></param>
-    /// <returns></returns>
+    /// <param name="args">引数</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     protected abstract Task HandleInternalAsync(T args);
 }

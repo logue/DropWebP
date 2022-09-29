@@ -28,14 +28,20 @@ public class NavigationHelper
     /// </summary>
     /// <param name="item">ナビゲーション項目</param>
     /// <returns>項目の値</returns>
-    public static string GetNavigateTo(NavigationViewItem item) => (string)item.GetValue(NavigateToProperty);
+    public static string GetNavigateTo(NavigationViewItem item)
+    {
+        return (string)item.GetValue(NavigateToProperty);
+    }
 
     /// <summary>
     /// ナビゲーション元を取得
     /// </summary>
     /// <param name="item">ナビゲーション項目</param>
     /// <param name="value">値</param>
-    public static void SetNavigateTo(NavigationViewItem item, string value) => item.SetValue(NavigateToProperty, value);
+    public static void SetNavigateTo(NavigationViewItem item, string value)
+    {
+        item.SetValue(NavigateToProperty, value);
+    }
 
     /// <summary>
     /// ナビゲーション元のプロパティ

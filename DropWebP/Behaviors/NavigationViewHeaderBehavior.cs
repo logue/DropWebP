@@ -57,14 +57,20 @@ public class NavigationViewHeaderBehavior : Behavior<NavigationView>
     /// </summary>
     /// <param name="item">項目</param>
     /// <returns>項目の値</returns>
-    public static NavigationViewHeaderMode GetHeaderMode(Page item) => (NavigationViewHeaderMode)item.GetValue(HeaderModeProperty);
+    public static NavigationViewHeaderMode GetHeaderMode(Page item)
+    {
+        return (NavigationViewHeaderMode)item.GetValue(HeaderModeProperty);
+    }
 
     /// <summary>
     /// ヘッダーのモードを設定
     /// </summary>
     /// <param name="item">ページ</param>
     /// <param name="value">値</param>
-    public static void SetHeaderMode(Page item, NavigationViewHeaderMode value) => item.SetValue(HeaderModeProperty, value);
+    public static void SetHeaderMode(Page item, NavigationViewHeaderMode value)
+    {
+        item.SetValue(HeaderModeProperty, value);
+    }
 
     /// <summary>
     /// ヘッダーのモードのプロパティ
@@ -77,14 +83,20 @@ public class NavigationViewHeaderBehavior : Behavior<NavigationView>
     /// </summary>
     /// <param name="item">ページ</param>
     /// <returns>項目の値</returns>
-    public static object GetHeaderContext(Page item) => item.GetValue(HeaderContextProperty);
+    public static object GetHeaderContext(Page item)
+    {
+        return item.GetValue(HeaderContextProperty);
+    }
 
     /// <summary>
     /// ヘッダーのコンテキストを設定
     /// </summary>
     /// <param name="item">ページ</param>
     /// <param name="value">値</param>
-    public static void SetHeaderContext(Page item, object value) => item.SetValue(HeaderContextProperty, value);
+    public static void SetHeaderContext(Page item, object value)
+    {
+        item.SetValue(HeaderContextProperty, value);
+    }
 
     /// <summary>
     /// ヘッダーのコンテキストのプロパティ
@@ -97,14 +109,20 @@ public class NavigationViewHeaderBehavior : Behavior<NavigationView>
     /// </summary>
     /// <param name="item">ページ</param>
     /// <returns>テンプレート</returns>
-    public static DataTemplate GetHeaderTemplate(Page item) => (DataTemplate)item.GetValue(HeaderTemplateProperty);
+    public static DataTemplate GetHeaderTemplate(Page item)
+    {
+        return (DataTemplate)item.GetValue(HeaderTemplateProperty);
+    }
 
     /// <summary>
     /// ヘッダー
     /// </summary>
     /// <param name="item">ページ</param>
     /// <param name="value">値</param>
-    public static void SetHeaderTemplate(Page item, DataTemplate value) => item.SetValue(HeaderTemplateProperty, value);
+    public static void SetHeaderTemplate(Page item, DataTemplate value)
+    {
+        item.SetValue(HeaderTemplateProperty, value);
+    }
 
     /// <summary>
     /// ヘッダーのテンプレートのプロパティ
@@ -117,7 +135,7 @@ public class NavigationViewHeaderBehavior : Behavior<NavigationView>
     {
         base.OnAttached();
 
-        var navigationService = App.GetService<INavigationService>();
+        INavigationService navigationService = App.GetService<INavigationService>();
         navigationService.Navigated += OnNavigated;
 
         current = this;
@@ -128,7 +146,7 @@ public class NavigationViewHeaderBehavior : Behavior<NavigationView>
     {
         base.OnDetaching();
 
-        var navigationService = App.GetService<INavigationService>();
+        INavigationService navigationService = App.GetService<INavigationService>();
         navigationService.Navigated -= OnNavigated;
     }
 
@@ -155,7 +173,7 @@ public class NavigationViewHeaderBehavior : Behavior<NavigationView>
     {
         if (currentPage != null)
         {
-            var headerMode = GetHeaderMode(currentPage);
+            NavigationViewHeaderMode headerMode = GetHeaderMode(currentPage);
             if (headerMode == NavigationViewHeaderMode.Never)
             {
                 AssociatedObject.Header = null;
@@ -163,24 +181,10 @@ public class NavigationViewHeaderBehavior : Behavior<NavigationView>
             }
             else
             {
-                var headerFromPage = GetHeaderContext(currentPage);
-                if (headerFromPage != null)
-                {
-                    AssociatedObject.Header = headerFromPage;
-                }
-                else
-                {
-                    AssociatedObject.Header = DefaultHeader;
-                }
+                object headerFromPage = GetHeaderContext(currentPage);
+                AssociatedObject.Header = headerFromPage ?? DefaultHeader;
 
-                if (headerMode == NavigationViewHeaderMode.Always)
-                {
-                    AssociatedObject.AlwaysShowHeader = true;
-                }
-                else
-                {
-                    AssociatedObject.AlwaysShowHeader = false;
-                }
+                AssociatedObject.AlwaysShowHeader = headerMode == NavigationViewHeaderMode.Always;
             }
         }
     }
@@ -192,7 +196,7 @@ public class NavigationViewHeaderBehavior : Behavior<NavigationView>
     {
         if (currentPage != null)
         {
-            var headerTemplate = GetHeaderTemplate(currentPage);
+            DataTemplate headerTemplate = GetHeaderTemplate(currentPage);
             AssociatedObject.HeaderTemplate = headerTemplate ?? DefaultHeaderTemplate;
         }
     }

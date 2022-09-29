@@ -80,7 +80,7 @@ public class NavigationService : INavigationService
     {
         if (CanGoBack)
         {
-            var vmBeforeNavigation = frame.GetPageViewModel();
+            object? vmBeforeNavigation = frame.GetPageViewModel();
             frame.GoBack();
             if (vmBeforeNavigation is INavigationAware navigationAware)
             {
@@ -96,13 +96,13 @@ public class NavigationService : INavigationService
     /// <inheritdoc/>
     public bool NavigateTo(string pageKey, object? parameter = null, bool clearNavigation = false)
     {
-        var pageType = pageService.GetPageType(pageKey);
+        Type pageType = pageService.GetPageType(pageKey);
 
         if (frame != null && (frame.Content?.GetType() != pageType || (parameter != null && !parameter.Equals(lastParameterUsed))))
         {
             frame.Tag = clearNavigation;
-            var vmBeforeNavigation = frame.GetPageViewModel();
-            var navigated = frame.Navigate(pageType, parameter);
+            object? vmBeforeNavigation = frame.GetPageViewModel();
+            bool navigated = frame.Navigate(pageType, parameter);
             if (navigated)
             {
                 lastParameterUsed = parameter;
@@ -149,7 +149,7 @@ public class NavigationService : INavigationService
     {
         if (sender is Frame frame)
         {
-            var clearNavigation = (bool)frame.Tag;
+            bool clearNavigation = (bool)frame.Tag;
             if (clearNavigation)
             {
                 frame.BackStack.Clear();

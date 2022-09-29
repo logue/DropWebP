@@ -23,7 +23,7 @@ public class PageService : IPageService
     /// <summary>
     /// ページ一覧
     /// </summary>
-    private readonly Dictionary<string, Type> pages = new();
+    private readonly Dictionary<string, Type> pages = new ();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PageService"/> class.
@@ -61,13 +61,13 @@ public class PageService : IPageService
     {
         lock (pages)
         {
-            var key = typeof(VM).FullName!;
+            string key = typeof(VM).FullName!;
             if (pages.ContainsKey(key))
             {
                 throw new ArgumentException($"The key {key} is already configured in PageService");
             }
 
-            var type = typeof(V);
+            Type type = typeof(V);
             if (pages.Any(p => p.Value == type))
             {
                 throw new ArgumentException($"This type is already configured with key {pages.First(p => p.Value == type).Key}");
