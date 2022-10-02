@@ -20,25 +20,32 @@
                     x:Name="LosslessToggleSwitch"
                     x:Uid="Settings_Lossless"
                     Header="Lossless"
-                    IsOn="{Binding ToggleLossless}" />
-                <TextBlock x:Uid="QualityGroup" Style="{ThemeResource SubtitleTextBlockStyle}" />
-                <NumberBox
+                    IsOn="{x:Bind ViewModel.ToggleLossless, Mode=TwoWay}"
+                    Toggled="LosslessToggleSwitch_Toggled" />
+                <Slider
+                    x:Name="QualitySlider"
                     x:Uid="Settings_Quality"
+                    Header="Quality"
                     Maximum="100"
                     Minimum="0"
-                    Value="{Binding QualityValue}" />
+                    TickFrequency="10"
+                    TickPlacement="Outside"
+                    Value="{x:Bind ViewModel.QualityValue, Mode=TwoWay}" />
                 <ToggleSwitch
                     x:Name="KeepOriginalText"
                     x:Uid="Settings_KeepOriginal"
-                    IsOn="{Binding ToggleKeepOriginal}" />
+                    Header="KeepOriginal"
+                    IsOn="{x:Bind ViewModel.ToggleKeepOriginal, Mode=TwoWay}" />
                 <ToggleSwitch
                     x:Name="IgnoreJpegText"
                     x:Uid="Settings_IgnoreJpeg"
-                    IsOn="{Binding ToggleIgnoreJpeg}" />
+                    Header="IgonoreJpeg"
+                    IsOn="{x:Bind ViewModel.ToggleIgnoreJpeg, Mode=TwoWay}" />
                 <ToggleSwitch
                     x:Name="NotifyCompleteText"
                     x:Uid="Settings_NotifyComplete"
-                    IsOn="{Binding ToggleNotifyComplete}" />
+                    Header="NotifyComplete"
+                    IsOn="{x:Bind ViewModel.ToggleNotifyComplete, Mode=TwoWay}" />
             </StackPanel>
             <TextBlock x:Uid="Settings_Personalization" Style="{ThemeResource SubtitleTextBlockStyle}" />
             <StackPanel Margin="{StaticResource SmallTopBottomMargin}">

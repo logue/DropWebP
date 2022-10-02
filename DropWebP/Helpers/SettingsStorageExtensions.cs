@@ -140,14 +140,14 @@ public static class SettingsStorageExtensions
     /// <param name="folder">フォルダ</param>
     /// <param name="fileName">ファイル名</param>
     /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-    public static async Task<byte[] ?> ReadFileAsync(this StorageFolder folder, string fileName)
+    public static async Task<byte[]?> ReadFileAsync(this StorageFolder folder, string fileName)
     {
         IStorageItem item = await folder.TryGetItemAsync(fileName).AsTask().ConfigureAwait(false);
 
         if ((item != null) && item.IsOfType(StorageItemTypes.File))
         {
             StorageFile storageFile = await folder.GetFileAsync(fileName);
-            byte[] ? content = await storageFile.ReadBytesAsync();
+            byte[]? content = await storageFile.ReadBytesAsync();
             return content;
         }
 
@@ -159,7 +159,7 @@ public static class SettingsStorageExtensions
     /// </summary>
     /// <param name="file">ファイル</param>
     /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-    public static async Task<byte[] ?> ReadBytesAsync(this StorageFile file)
+    public static async Task<byte[]?> ReadBytesAsync(this StorageFile file)
     {
         if (file != null)
         {

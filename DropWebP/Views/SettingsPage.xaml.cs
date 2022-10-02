@@ -6,7 +6,7 @@
 // -----------------------------------------------------------------------
 
 using DropWebP.ViewModels;
-
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
 namespace DropWebP.Views;
@@ -33,5 +33,25 @@ public sealed partial class SettingsPage : Page
     {
         ViewModel = App.GetService<SettingsViewModel>();
         InitializeComponent();
+
+        if (LosslessToggleSwitch != null && QualitySlider != null)
+        {
+            // 可逆圧縮が無効化されているときは品質オプションを操作可能にする
+            QualitySlider.IsEnabled = !LosslessToggleSwitch.IsOn;
+        }
+    }
+
+    /// <summary>
+    /// 可逆圧縮トグル.
+    /// </summary>
+    /// <param name="sender">送信元</param>
+    /// <param name="e">イベント</param>
+    private void LosslessToggleSwitch_Toggled(object sender, RoutedEventArgs e)
+    {
+        if (sender is ToggleSwitch toggleSwitch && QualitySlider != null)
+        {
+            // 可逆圧縮が無効化されているときは品質オプションを操作可能にする
+            QualitySlider.IsEnabled = !toggleSwitch.IsOn;
+        }
     }
 }

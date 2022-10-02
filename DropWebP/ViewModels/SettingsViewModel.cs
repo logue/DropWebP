@@ -27,6 +27,36 @@ public class SettingsViewModel : ObservableRecipient
     private readonly IThemeSelectorService themeSelectorService;
 
     /// <summary>
+    /// 設定サービス
+    /// </summary>
+    private readonly ILocalSettingsService localSettingsService;
+
+    /// <summary>
+    /// 可逆圧縮するか
+    /// </summary>
+    private bool lossless;
+
+    /// <summary>
+    /// 品質
+    /// </summary>
+    private double quality;
+
+    /// <summary>
+    /// オリジナルを保持
+    /// </summary>
+    private bool keepOriginal;
+
+    /// <summary>
+    /// Jpegを無視
+    /// </summary>
+    private bool ignoreJpeg;
+
+    /// <summary>
+    /// 完了時に通知
+    /// </summary>
+    private bool notifyComplete;
+
+    /// <summary>
     /// テーマ
     /// </summary>
     private ElementTheme elementTheme;
@@ -35,6 +65,51 @@ public class SettingsViewModel : ObservableRecipient
     /// バージョン情報
     /// </summary>
     private string versionDescription;
+
+    /// <summary>
+    /// 可逆圧縮スイッチ.
+    /// </summary>
+    public bool ToggleLossless
+    {
+        get => lossless;
+        set => SetProperty(ref lossless, value);
+    }
+
+    /// <summary>
+    /// 圧縮レベルスライダー.
+    /// </summary>
+    public double QualityValue
+    {
+        get => quality;
+        set => SetProperty(ref quality, value);
+    }
+
+    /// <summary>
+    /// 変換前のファイルを残すチェックボックス.
+    /// </summary>
+    public bool ToggleKeepOriginal
+    {
+        get => keepOriginal;
+        set => SetProperty(ref keepOriginal, value);
+    }
+
+    /// <summary>
+    /// Jpegを無視のチェックボックス.
+    /// </summary>
+    public bool ToggleIgnoreJpeg
+    {
+        get => ignoreJpeg;
+        set => SetProperty(ref ignoreJpeg, value);
+    }
+
+    /// <summary>
+    /// 完了時に通知を出す.
+    /// </summary>
+    public bool ToggleNotifyComplete
+    {
+        get => notifyComplete;
+        set => SetProperty(ref notifyComplete, value);
+    }
 
     /// <summary>
     /// テーマ
@@ -66,9 +141,12 @@ public class SettingsViewModel : ObservableRecipient
     /// Initializes a new instance of the <see cref="SettingsViewModel"/> class.
     /// </summary>
     /// <param name="themeSelectorService">テーマ選択サービス</param>
-    public SettingsViewModel(IThemeSelectorService themeSelectorService)
+    /// <param name="localSettingsService">設定サービス</param>
+    public SettingsViewModel(IThemeSelectorService themeSelectorService, ILocalSettingsService localSettingsService)
     {
         this.themeSelectorService = themeSelectorService;
+        this.localSettingsService = localSettingsService;
+
         elementTheme = this.themeSelectorService.Theme;
         versionDescription = GetVersionDescription();
 
