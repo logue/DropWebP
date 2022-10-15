@@ -5,6 +5,7 @@
     <AssemblyName>DropWebP</AssemblyName>
     <Authors>Masashi Yoshikawa</Authors>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)..\StyleCop.Analyzers.ruleset</CodeAnalysisRuleSet>
     <Company>Logue</Company>
     <Copyright>(c) 2021-2022 Logue</Copyright>
     <Description>Encode image file to WebP.</Description>
@@ -28,18 +29,13 @@ WebPだった場合上書きしないように
     <TargetFramework>net6.0-windows10.0.22621.0</TargetFramework>
     <Title>DropWebP</Title>
     <UseWPF>true</UseWPF>
-    <Version>0.4.6</Version>
-  </PropertyGroup>
-  <PropertyGroup>
-    <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)..\StyleCop.Analyzers.ruleset</CodeAnalysisRuleSet>
+    <Version>0.5.0</Version>
+    <Platforms>x64;x86</Platforms>
   </PropertyGroup>
   <ItemGroup>
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)..\stylecop.json" Link="stylecop.json" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="FluentWPF" Version="0.9.0">
-      <TreatAsUsed>true</TreatAsUsed>
-    </PackageReference>
     <PackageReference Include="MahApps.Metro" Version="2.4.9" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
     <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.1.2" />
@@ -90,6 +86,11 @@ WebPだった場合上書きしないように
     <None Update="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 </Project>

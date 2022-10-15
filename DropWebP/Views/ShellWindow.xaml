@@ -4,7 +4,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:lex="http://wpflocalizeextension.codeplex.com"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
@@ -19,15 +18,12 @@
     MinHeight="320"
     Dialog:DialogParticipation.Register="{Binding}"
     d:DataContext="{d:DesignInstance Type=viewmodels:ShellWindowViewModel}"
-    fw:AcrylicWindow.AcrylicWindowStyle="None"
-    fw:AcrylicWindow.Enabled="True"
-    fw:PointerTracker.Enabled="True"
     lex:LocalizeDictionary.DesignCulture="en"
     lex:ResxLocalizationProvider.DefaultAssembly="DropWebP"
     lex:ResxLocalizationProvider.DefaultDictionary="Resources"
     prism:ViewModelLocator.AutoWireViewModel="True"
     AllowDrop="True"
-    Background="{DynamicResource MahApps.Brushes.Accent4}"
+    Background="White"
     BorderThickness="1"
     GlowBrush="{DynamicResource MahApps.Brushes.Accent}"
     NonActiveGlowBrush="{DynamicResource MahApps.Brushes.Border.NonActive}"
@@ -102,19 +98,19 @@
             Modifiers="Ctrl" />
     </Window.InputBindings>
     <Window.ContextMenu>
-        <fw:AcrylicContextMenu>
+        <ContextMenu>
             <MenuItem Command="{Binding OpenCommand}" Header="{lex:Loc ConvertFromFileText}" />
             <MenuItem Command="{Binding PasteCommand}" Header="{lex:Loc ConvertFromClipboardText}" />
             <Separator />
             <MenuItem Command="{Binding ExitCommand}" Header="{lex:Loc ExitText}" />
-        </fw:AcrylicContextMenu>
+        </ContextMenu>
     </Window.ContextMenu>
     <Window.Resources>
         <Style x:Key="TabHeaderStyle" TargetType="{x:Type TabItem}">
             <Setter Property="Header" Value="{Binding RelativeSource={RelativeSource Self}, Path=Content.DataContext.ContentTitle}" />
         </Style>
     </Window.Resources>
-    <Grid fw:PointerTracker.Enabled="True">
+    <Grid>
         <ContentControl prism:RegionManager.RegionName="ContentRegion" />
         <mah:ProgressRing Visibility="{Binding ProgressRing}" />
     </Grid>

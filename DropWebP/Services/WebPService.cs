@@ -7,7 +7,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -15,7 +14,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using DropWebP.Exceptions;
 using DropWebP.Interfaces;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
@@ -245,10 +243,10 @@ namespace DropWebP.Services
             int count = files.Length;
 
             // 失敗したファイル
-            List<string> failures = new();
+            List<string> failures = new ();
 
             // Metroダイアログのデフォルト設定
-            MetroDialogSettings metroDialogSettings = new()
+            MetroDialogSettings metroDialogSettings = new ()
             {
                 // 優先ボタン
                 AffirmativeButtonText = localizerService.GetLocalizedString("DialogOk"),
@@ -290,7 +288,7 @@ namespace DropWebP.Services
                 controller.Minimum = 0;
                 controller.Maximum = count;
 
-                CancellationTokenSource tokenSource = new();
+                CancellationTokenSource tokenSource = new ();
                 CancellationToken ct = tokenSource.Token;
 
                 // 変換処理

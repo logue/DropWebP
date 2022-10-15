@@ -252,7 +252,7 @@ namespace DropWebP.ViewModels
             Debug.WriteLine("設定ボタンクリック");
 
             // eventAggregator.GetEvent<MessageService>().Publish("Top");
-            regionManager.RequestNavigate("FlyoutRegion", "ConfigFlyOut");
+            regionManager.RequestNavigate("FlyoutRegion", "ConfigFlyout");
         }
 
         /// <summary>
