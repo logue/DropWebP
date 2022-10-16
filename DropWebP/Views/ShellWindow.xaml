@@ -23,7 +23,6 @@
     lex:ResxLocalizationProvider.DefaultDictionary="Resources"
     prism:ViewModelLocator.AutoWireViewModel="True"
     AllowDrop="True"
-    Background="White"
     BorderThickness="1"
     GlowBrush="{DynamicResource MahApps.Brushes.Accent}"
     NonActiveGlowBrush="{DynamicResource MahApps.Brushes.Border.NonActive}"

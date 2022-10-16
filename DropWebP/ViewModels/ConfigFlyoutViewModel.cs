@@ -52,6 +52,11 @@ namespace DropWebP.ViewModels
         public static bool ToggleNotifyComplete { get => Properties.Settings.Default.NotifyComplete; set => Properties.Settings.Default.NotifyComplete = value; }
 
         /// <summary>
+        /// ダークモード.
+        /// </summary>
+        public static bool ToggleDarkMode { get => Properties.Settings.Default.DarkMode; set => Properties.Settings.Default.DarkMode = value; }
+
+        /// <summary>
         /// イベントを受け取った.
         /// </summary>
         /// <param name="obj">.</param>

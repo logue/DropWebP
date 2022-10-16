@@ -14,9 +14,9 @@ namespace DropWebP.Properties
     /// Defines the <see cref="Settings" />.
     /// </summary>
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.10.0.0")]
-    internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase
-    {
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.3.0.0")]
+    internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
+
         /// <summary>
         /// Defines the defaultInstance.
         /// </summary>
@@ -25,10 +25,8 @@ namespace DropWebP.Properties
         /// <summary>
         /// Gets the Default.
         /// </summary>
-        public static Settings Default
-        {
-            get
-            {
+        public static Settings Default {
+            get {
                 return defaultInstance;
             }
         }
@@ -39,14 +37,11 @@ namespace DropWebP.Properties
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool Lossless
-        {
-            get
-            {
+        public bool Lossless {
+            get {
                 return ((bool)(this["Lossless"]));
             }
-            set
-            {
+            set {
                 this["Lossless"] = value;
             }
         }
@@ -57,14 +52,11 @@ namespace DropWebP.Properties
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("95")]
-        public long Quality
-        {
-            get
-            {
+        public long Quality {
+            get {
                 return ((long)(this["Quality"]));
             }
-            set
-            {
+            set {
                 this["Quality"] = value;
             }
         }
@@ -75,14 +67,11 @@ namespace DropWebP.Properties
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool KeepOriginal
-        {
-            get
-            {
+        public bool KeepOriginal {
+            get {
                 return ((bool)(this["KeepOriginal"]));
             }
-            set
-            {
+            set {
                 this["KeepOriginal"] = value;
             }
         }
@@ -93,14 +82,11 @@ namespace DropWebP.Properties
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool IgnoreJpeg
-        {
-            get
-            {
+        public bool IgnoreJpeg {
+            get {
                 return ((bool)(this["IgnoreJpeg"]));
             }
-            set
-            {
+            set {
                 this["IgnoreJpeg"] = value;
             }
         }
@@ -111,14 +97,11 @@ namespace DropWebP.Properties
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string Language
-        {
-            get
-            {
+        public string Language {
+            get {
                 return ((string)(this["Language"]));
             }
-            set
-            {
+            set {
                 this["Language"] = value;
             }
         }
@@ -129,15 +112,27 @@ namespace DropWebP.Properties
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool NotifyComplete
-        {
-            get
-            {
+        public bool NotifyComplete {
+            get {
                 return ((bool)(this["NotifyComplete"]));
             }
-            set
-            {
+            set {
                 this["NotifyComplete"] = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether DarkMode.
+        /// </summary>
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool DarkMode {
+            get {
+                return ((bool)(this["DarkMode"]));
+            }
+            set {
+                this["DarkMode"] = value;
             }
         }
     }

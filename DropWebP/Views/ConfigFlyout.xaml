@@ -55,5 +55,6 @@
                 ItemsSource="{Binding Path=SupportedLanguages, UpdateSourceTrigger=PropertyChanged}"
                 SelectedItem="{Binding Path=SelectedLanguage, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
         </mah:MetroHeader>
+        <!--  mah:ToggleSwitch Content="{lex:Loc DarkModeText}" IsOn="{Binding ToggleDarkMode}" /  -->
     </StackPanel>
 </UserControl>

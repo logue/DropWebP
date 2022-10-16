@@ -17,10 +17,7 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/logue/DropWebP</PackageProjectUrl>
     <PackageReadmeFile>..\ReadMe.md</PackageReadmeFile>
-    <PackageReleaseNotes>Jpegを除外オプションが効かないバグ修正
-ファイルが存在したときに削除する処理を追加
-WebPだった場合上書きしないように
-設定画面が英語のときにはみ出てしまうのを修正</PackageReleaseNotes>
+    <PackageReleaseNotes>Win11で表示がバグるのを修正</PackageReleaseNotes>
     <PackageTags>WebP</PackageTags>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>git@github.com:logue/DropWebP.git</RepositoryUrl>
@@ -30,7 +27,7 @@ WebPだった場合上書きしないように
     <Title>DropWebP</Title>
     <UseWPF>true</UseWPF>
     <Version>0.5.0</Version>
-    <Platforms>x64;x86</Platforms>
+    <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
   <ItemGroup>
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)..\stylecop.json" Link="stylecop.json" />
