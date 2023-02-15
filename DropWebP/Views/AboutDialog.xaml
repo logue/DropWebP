@@ -7,11 +7,11 @@
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prism="http://prismlibrary.com/"
-    xmlns:viewmodels="clr-namespace:DropWebP.ViewModels"
+    xmlns:vm="clr-namespace:DropWebP.ViewModels"
     Width="320"
     Height="160"
     d:Background="White"
-    d:DataContext="{d:DesignInstance Type=viewmodels:AboutDialogViewModel}"
+    d:DataContext="{d:DesignInstance Type=vm:AboutDialogViewModel}"
     lex:LocalizeDictionary.DesignCulture="en"
     lex:ResxLocalizationProvider.DefaultAssembly="DropWebP"
     lex:ResxLocalizationProvider.DefaultDictionary="Resources"
@@ -61,8 +61,8 @@
         </WrapPanel>
         <WrapPanel Orientation="Horizontal">
             <Image
-                Width="96"
-                Height="96"
+                Width="64"
+                Height="64"
                 Margin="10,0,10,0"
                 Source="{Binding Logo}" />
             <StackPanel Orientation="Vertical">

@@ -1,18 +1,17 @@
 // -----------------------------------------------------------------------
 // <copyright file="MessageService.cs" company="Logue">
-// Copyright (c) 2021-2022 Masashi Yoshikawa All rights reserved.
+// Copyright (c) 2021-2023 Masashi Yoshikawa All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 // -----------------------------------------------------------------------
 
 using Prism.Events;
 
-namespace DropWebP.Services
+namespace DropWebP.Services;
+
+/// <summary>
+///     Defines the <see cref="MessageService" />.
+/// </summary>
+public class MessageService : PubSubEvent<string>
 {
-    /// <summary>
-    /// Defines the <see cref="MessageService" />.
-    /// </summary>
-    public class MessageService : PubSubEvent<string>
-    {
-    }
 }
