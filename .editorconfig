@@ -1,5 +1,5 @@
-root = true
 # Remove the line below if you want to inherit .editorconfig settings from higher directories
+root = true
 
 [*]
 charset = utf-8
@@ -56,9 +56,6 @@ dotnet_style_require_accessibility_modifiers = for_non_interface_members:suggest
 
 # ReSharper properties
 resharper_autodetect_indent_settings = true
-resharper_csharp_naming_rule.private_constants = AaBb
-resharper_csharp_naming_rule.private_static_fields = _ + aaBb
-resharper_csharp_naming_rule.private_static_readonly = AaBb
 resharper_enforce_line_ending_style = true
 
 # ReSharper inspection severities
@@ -91,7 +88,7 @@ insert_final_newline = true
 # Organize usings
 dotnet_separate_import_directive_groups = false
 dotnet_sort_system_directives_first = false
-file_header_template =
+file_header_template = 
 
 # this. and Me. preferences
 dotnet_style_qualification_for_event = false:silent
@@ -261,25 +258,15 @@ dotnet_naming_symbols.non_field_members.applicable_accessibilities = public, int
 
 # Naming styles
 
-dotnet_naming_style.pascal_case.required_prefix =
-dotnet_naming_style.pascal_case.required_suffix =
-dotnet_naming_style.pascal_case.word_separator =
+dotnet_naming_style.pascal_case.required_prefix = 
+dotnet_naming_style.pascal_case.required_suffix = 
+dotnet_naming_style.pascal_case.word_separator = 
 dotnet_naming_style.pascal_case.capitalization = pascal_case
 
 dotnet_naming_style.begins_with_i.required_prefix = I
-dotnet_naming_style.begins_with_i.required_suffix =
-dotnet_naming_style.begins_with_i.word_separator =
+dotnet_naming_style.begins_with_i.required_suffix = 
+dotnet_naming_style.begins_with_i.word_separator = 
 dotnet_naming_style.begins_with_i.capitalization = pascal_case
 
 [*.csproj, *.json, *.md]
 indent_size = 2
-
-# [*.{appxmanifest,axml,build,c,c++,cc,cginc,compute,config,cp,cpp,cshtml,csproj,cu,cuh,cxx,dbml,discomap,dtd,fx,fxh,h,hh,hlsl,hlsli,hlslinc,hpp,htm,html,hxx,inc,inl,ino,ipp,ixx,jsproj,lsproj,mpp,mq4,mq5,mqh,njsproj,nuspec,proj,props,razor,resw,resx,StyleCop,targets,tasks,tpp,usf,ush,vbproj,xml,xsd}]
-# indent_style = tab
-# indent_size = tab
-# tab_width = 4
-
-# [*.{asax,ascx,aspx,axaml,cs,css,master,paml,skin,vb,xaml,xamlx,xoml}]
-# indent_style = space
-# indent_size = 4
-# tab_width = 4
