@@ -3,7 +3,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<Title>DropWebP</Title>
-		<Version>0.6.0</Version>
+		<Version>0.6.1</Version>
 		<ApplicationIcon>Resources\vise.ico</ApplicationIcon>
 		<AssemblyName>DropWebP</AssemblyName>
 		<Authors>Masashi Yoshikawa</Authors>
@@ -20,8 +20,8 @@
 		<PackageProjectUrl>https://github.com/logue/DropWebP</PackageProjectUrl>
 		<PackageReadmeFile>..\ReadMe.md</PackageReadmeFile>
 		<PackageTags>WebP,Image Compression</PackageTags>
-		<PackageReleaseNotes>リファクタリング。
-各種ライブラリをバージョンアップ。</PackageReleaseNotes>
+		<PackageReleaseNotes>各種ライブラリをバージョンアップ。
+Typo修正</PackageReleaseNotes>
 		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>https://github.com/logue/DropWebP.git</RepositoryUrl>
 		<RootNamespace>DropWebP</RootNamespace>
@@ -30,6 +30,13 @@
 		<TargetFramework>net6.0-windows10.0.22621.0</TargetFramework>
 		<AnalysisLevel>6.0-recommended</AnalysisLevel>
 		<UseWPF>true</UseWPF>
+		<PublishReadyToRun>true</PublishReadyToRun>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <WarningLevel>6</WarningLevel>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <WarningLevel>6</WarningLevel>
 	</PropertyGroup>
 	<ItemGroup>
 		<AdditionalFiles Include="$(MSBuildThisFileDirectory)..\stylecop.json" Link="stylecop.json" />
@@ -39,14 +46,14 @@
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.1.3" />
 		<PackageReference Include="Prism.DryIoc" Version="8.1.97" />
-		<PackageReference Include="ReactiveProperty.WPF" Version="9.0.0" />
+		<PackageReference Include="ReactiveProperty.WPF" Version="9.1.2" />
 		<PackageReference Include="SharpEXR" Version="1.0.0.19" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="WPFLocalizeExtension" Version="3.9.4" />
-		<PackageReference Include="WebP_Net" Version="1.1.0" />
+		<PackageReference Include="WPFLocalizeExtension" Version="3.10.0" />
+		<PackageReference Include="WebP_Net" Version="1.1.1" />
 	</ItemGroup>
 	<ItemGroup>
 		<None Include="..\LICENSE">

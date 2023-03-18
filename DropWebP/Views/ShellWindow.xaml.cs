@@ -8,8 +8,10 @@
 using ControlzEx.Theming;
 using MahApps.Metro.Controls;
 using System;
-using System.Runtime.InteropServices;
+using System.Windows;
 using System.Windows.Interop;
+using System.Windows.Media;
+using static DropWebP.Helpers.DwmApi;
 
 namespace DropWebP.Views;
 
@@ -27,50 +29,72 @@ public partial class ShellWindow : MetroWindow
         ThemeManager.Current.SyncTheme();
 
         InitializeComponent();
-
-        IntPtr hWnd = new WindowInteropHelper(GetWindow(this)).EnsureHandle();
-        DWMWINDOWATTRIBUTE attribute =
-            DWMWINDOWATTRIBUTE.DWMWA_WINDOW_CORNER_PREFERENCE & DWMWINDOWATTRIBUTE.DWMWA_MICA_EFFECT;
-        DWM_WINDOW_CORNER_PREFERENCE preference = DWM_WINDOW_CORNER_PREFERENCE.DWMWCP_ROUND;
-        DwmSetWindowAttribute(hWnd, attribute, ref preference, sizeof(uint));
     }
 
     /// <summary>
-    ///     デスクトップ ウィンドウ マネージャーのP/in Voke
+    ///     スタイルを適用
     /// </summary>
-    /// <param name="hwnd">ハンドラ</param>
-    /// <param name="dwAttribute">DWMWINDOWATTRIBUTE 列挙型の値として指定された、設定する値を示すフラグ。</param>
-    /// <param name="pvAttribute">設定する属性値を含むオブジェクトへのポインター。</param>
-    /// <param name="cbAttribute">pvAttribute パラメーターを使用して設定される属性値のサイズ</param>
-    /// <returns>HRESULT値</returns>
-    [DllImport("dwmapi.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    private static extern long DwmSetWindowAttribute(
-        IntPtr hwnd,
-        DWMWINDOWATTRIBUTE dwAttribute,
-        ref DWM_WINDOW_CORNER_PREFERENCE pvAttribute,
-        uint cbAttribute);
-
-#pragma warning disable SA1602 // Enumeration items should be documented
-    /// <summary>
-    ///     DWMWINDOWATTRIBUTE 列挙型
-    /// </summary>
-    [Flags]
-    public enum DWMWINDOWATTRIBUTE
+    /// <param name="hWnd">ウィンドウハンドル</param>
+    public static void UpdateStyleAttributes(HwndSource hWnd)
     {
-        DWMWA_USE_IMMERSIVE_DARK_MODE = 20,
-        DWMWA_WINDOW_CORNER_PREFERENCE = 33,
-        DWMWA_MICA_EFFECT = 1029
+        int trueValue = 0x01;
+        int falseValue = 0x00;
+
+        // ダークモードの切り替え
+        if (ThemeManager.Current.DetectTheme().BaseColorScheme == ThemeManager.BaseColorDark)
+        {
+            DwmSetWindowAttribute(
+                hWnd.Handle,
+                DWMWINDOWATTRIBUTE.DWMWA_USE_IMMERSIVE_DARK_MODE,
+                ref trueValue,
+                sizeof(uint));
+        }
+        else
+        {
+            DwmSetWindowAttribute(
+                hWnd.Handle,
+                DWMWINDOWATTRIBUTE.DWMWA_USE_IMMERSIVE_DARK_MODE,
+                ref falseValue,
+                sizeof(uint));
+        }
+
+        // ウィンドウの角を丸くする
+        int rounded = (int)DWM_WINDOW_CORNER_PREFERENCE.DWMWCP_ROUND;
+
+        DwmSetWindowAttribute(
+            hWnd.Handle,
+            DWMWINDOWATTRIBUTE.DWMWA_WINDOW_CORNER_PREFERENCE,
+            ref rounded,
+            sizeof(uint));
+
+        // ウィンドウの背景を半透過にする
+        int bg = (int)DWM_SYSTEMBACKDROP_TYPE.DWMSBT_TABBEDWINDOW;
+
+        DwmSetWindowAttribute(
+            hWnd.Handle,
+            DWMWINDOWATTRIBUTE.DWMWA_SYSTEMBACKDROP_TYPE,
+            ref bg,
+            sizeof(uint));
     }
 
-    /// <summary>
-    ///     DWM_WINDOW_CORNER_PREFERENCE 列挙型
-    /// </summary>
-    public enum DWM_WINDOW_CORNER_PREFERENCE
+    private void Window_ContentRendered(object sender, EventArgs e)
     {
-        DWMWCP_DEFAULT = 0,
-        DWMWCP_DONOTROUND = 1,
-        DWMWCP_ROUND = 2,
-        DWMWCP_ROUNDSMALL = 3
+        // Get current hWnd
+        HwndSource source = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
+
+        // Apply Mica brush and ImmersiveDarkMode if needed
+        UpdateStyleAttributes(source);
+
+        // Hook to Windows theme change to reapply the brushes when needed
+        ThemeManager.Current.ThemeChanged += (s, ev) => UpdateStyleAttributes(source);
     }
-#pragma warning restore SA1602 // Enumeration items should be documented
+
+    private void Window_Loaded(object sender, RoutedEventArgs e)
+    {
+        // Get PresentationSource
+        PresentationSource presentationSource = PresentationSource.FromVisual((Visual)sender);
+
+        // Subscribe to PresentationSource's ContentRendered event
+        presentationSource.ContentRendered += Window_ContentRendered;
+    }
 }

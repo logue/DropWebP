@@ -35,11 +35,11 @@ public class ConfigFlyoutViewModel : BindableBase, INavigationAware
     /// <summary>
     ///     Initializes a new instance of the <see cref="ConfigFlyoutViewModel" /> class.
     /// </summary>
-    /// <param name="localizerService">多言語化サービス.</param>
-    public ConfigFlyoutViewModel(ILocalizeService localizerService)
+    /// <param name="localizeService">多言語化サービス.</param>
+    public ConfigFlyoutViewModel(ILocalizeService localizeService)
     {
         // 多言語化サービスのインジェクション
-        localizeService = localizerService;
+        this.localizeService = localizeService;
 
         Debug.WriteLine(SupportedLanguages);
 
@@ -47,7 +47,7 @@ public class ConfigFlyoutViewModel : BindableBase, INavigationAware
         CloseFlyoutCommand = new DelegateCommand(ExecuteSaveButtonCommand);
 
         // フライアウトのヘッダー
-        Header = localizerService.GetLocalizedString("ConfigText");
+        Header = localizeService.GetLocalizedString("ConfigText");
     }
 
     /// <summary>
@@ -95,7 +95,7 @@ public class ConfigFlyoutViewModel : BindableBase, INavigationAware
     /// <summary>
     ///     Flyoutのヘッダ.
     /// </summary>
-    public string Header { get; set; } = "Config";
+    public string Header { get; set; }
 
     /// <summary>
     ///     開閉フラグ.
