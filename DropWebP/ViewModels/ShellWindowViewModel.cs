@@ -121,7 +121,7 @@ public class ShellWindowViewModel : BindableBase
     /// <summary>
     ///     クリップボード更新の監視.
     /// </summary>
-    public DelegateCommand ClipboardUpdateCommand { get; private set; }
+    public DelegateCommand ClipboardUpdateCommand { get; }
 
     /// <summary>
     ///     MainWindowのCloseイベント.

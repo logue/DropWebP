@@ -3,7 +3,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<Title>DropWebP</Title>
-		<Version>0.6.1</Version>
+		<Version>0.7.0</Version>
 		<ApplicationIcon>Resources\vise.ico</ApplicationIcon>
 		<AssemblyName>DropWebP</AssemblyName>
 		<Authors>Masashi Yoshikawa</Authors>
@@ -20,23 +20,22 @@
 		<PackageProjectUrl>https://github.com/logue/DropWebP</PackageProjectUrl>
 		<PackageReadmeFile>..\ReadMe.md</PackageReadmeFile>
 		<PackageTags>WebP,Image Compression</PackageTags>
-		<PackageReleaseNotes>各種ライブラリをバージョンアップ。
-Typo修正</PackageReleaseNotes>
+		<PackageReleaseNotes>.net7に移行</PackageReleaseNotes>
 		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>https://github.com/logue/DropWebP.git</RepositoryUrl>
 		<RootNamespace>DropWebP</RootNamespace>
 		<StartupObject>DropWebP.App</StartupObject>
-		<SupportedOSPlatformVersion>10.0.20348.0</SupportedOSPlatformVersion>
-		<TargetFramework>net6.0-windows10.0.22621.0</TargetFramework>
+		<TargetFramework>net7.0-windows10.0.22621.0</TargetFramework>
 		<AnalysisLevel>6.0-recommended</AnalysisLevel>
 		<UseWPF>true</UseWPF>
 		<PublishReadyToRun>true</PublishReadyToRun>
+		<SupportedOSPlatformVersion>10.0.20348.0</SupportedOSPlatformVersion>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-	  <WarningLevel>6</WarningLevel>
+	  <WarningLevel>7</WarningLevel>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-	  <WarningLevel>6</WarningLevel>
+	  <WarningLevel>7</WarningLevel>
 	</PropertyGroup>
 	<ItemGroup>
 		<AdditionalFiles Include="$(MSBuildThisFileDirectory)..\stylecop.json" Link="stylecop.json" />
