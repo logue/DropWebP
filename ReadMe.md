@@ -2,49 +2,48 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/e0l46jgjh5lv2evh/branch/master?svg=true)](https://ci.appveyor.com/project/logue/dropwebp/branch/master)
 
-このソフトウェアは、ドラッグアンドドップで画像ファイルをWebPに圧縮するアプリケーションです。
+このソフトウェアは、ドラッグアンドドップで画像ファイルを WebP に圧縮するアプリケーションです。
 
-動作には.net6.0ランタイムが必要です。下記サイトからダウンロードしてください。
+動作には.net7.0 ランタイムが必要です。下記サイトからダウンロードしてください。
 <https://dotnet.microsoft.com/download/dotnet>
 
 ## 使用方法
 
-WebP画像に圧縮したい画像ファイルをドラッグアンドロップしてください。
+WebP 画像に圧縮したい画像ファイルをドラッグアンドロップしてください。
 同じディレクトリに保存されます。
 
-また、クリップボードに保存されている画像をこのアプリの画面上でペーストすることにより、直接WebP画像を出力することができます。
+また、クリップボードに保存されている画像をこのアプリの画面上でペーストすることにより、直接 WebP 画像を出力することができます。
 
 ## 今後の予定
 
-* %%ディレクトリ選択で一括圧縮%%
-* ディレクトリ内監視（ファイルが追加されると自動圧縮）
-* Discordに直接投稿
+- ディレクトリ内監視（ファイルが追加されると自動圧縮）
+- Discord に直接投稿
 
-## WebPとは？
+## WebP とは？
 
-WebPは、Googleが開発した次世代の画像形式で、2021年現在の現行のブラウザすべてが対応しています。
-WebPの開発元であるGoogleは、ほぼ同等の画質でPNGよりも約26％、JPGより約25〜34％軽くできると発表しています。
+WebP は、Google が開発した次世代の画像形式で、2021 年現在の現行のブラウザすべてが対応しています。
+WebP の開発元である Google は、ほぼ同等の画質で PNG よりも約 26％、JPG より約 25〜34％軽くできると発表しています。
 
-自分が試したところ、もともと12.9Mあった無圧縮の4K画質のPNGファイルを無劣化WebPに変換したところ、7.85MBまで落とすことができました。
-推奨値は95%の不可逆圧縮ですが、その場合1.32M程度になります。
+自分が試したところ、もともと 12.9M あった無圧縮の 4K 画質の PNG ファイルを無劣化 WebP に変換したところ、7.85MB まで落とすことができました。
+推奨値は 95%の不可逆圧縮ですが、その場合 1.32M 程度になります。
 
-使用できるWebサービスは、Discord、LINE、Twitter、Facebookのみです。Mixiおよび、Lobiは対応していません。
+使用できる Web サービスは、Discord、LINE、Twitter、Facebook のみです。Mixi および、Lobi は対応していません。
 
 なお、[WebpCodecSetup.exe](https://storage.googleapis.com/downloads.webmproject.org/releases/webp/WebpCodecSetup.exe)を用いることでエクスプローラーからサムネイルを表示することができます。
 
 ### 圧縮サンプル
 
-|圧縮形式|容量
-|--|--
-|[オリジナル画像](https://logue.github.io/DropWebP/assets/original.png)|10.7M
-|[WebP無劣化圧縮](https://logue.github.io/DropWebP/assets/lossless.webp)|6.33M
-|[WebP不可逆圧縮（推奨設定）](https://logue.github.io/DropWebP/assets/compressed.webp)|1.15M
-|[JPEG最高品質（参考）](https://logue.github.io/DropWebP/assets/compressed.jpg)|6.24M
+| 圧縮形式                                                                               | 容量  |
+| -------------------------------------------------------------------------------------- | ----- |
+| [オリジナル画像](https://logue.github.io/DropWebP/assets/original.png)                 | 10.7M |
+| [WebP 無劣化圧縮](https://logue.github.io/DropWebP/assets/lossless.webp)               | 6.33M |
+| [WebP 不可逆圧縮（推奨設定）](https://logue.github.io/DropWebP/assets/compressed.webp) | 1.15M |
+| [JPEG 最高品質（参考）](https://logue.github.io/DropWebP/assets/compressed.jpg)        | 6.24M |
 
-※[PSO2NGS](https://pso2.jp/)の4Kスクリーンショットです。
+※[PSO2NGS](https://pso2.jp/)の 4K スクリーンショットです。
 
 ## ライセンス
 
 Licensed under the [MIT](LICENSE) License.
 
-Copyright © 2021-2022 [Logue](https://logue.dev/)
+Copyright © 2021-2023 [Logue](https://logue.dev/)

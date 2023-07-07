@@ -34,7 +34,6 @@ public partial class ConfigFlyout : UserControl
     ///     可逆圧縮トグル.
     /// </summary>
     /// <param name="sender">.</param>
-    /// <param name="e">.</param>
     private void LosslessToggleSwitch_Toggled(object sender, RoutedEventArgs e)
     {
         if (sender is ToggleSwitch toggleSwitch && QualityGroup != null)

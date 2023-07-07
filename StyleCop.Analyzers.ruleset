@@ -1,14 +1,21 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <RuleSet Name="Rules for StyleCop.Analyzers internal-only projects" Description="Code analysis rules for StyleCop.Analyzers internal-only projects." ToolsVersion="17.0">
   <Include Path="stylecop.analyzers.ruleset" Action="Default" />
+  <Rules AnalyzerId="Microsoft.CodeAnalysis.NetAnalyzers" RuleNamespace="Microsoft.CodeAnalysis.NetAnalyzers">
+    <Rule Id="CA1304" Action="None" />
+    <Rule Id="CA1305" Action="None" />
+  </Rules>
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
     <Rule Id="SA1000" Action="Hidden" />
     <Rule Id="SA1101" Action="Hidden" />
     <Rule Id="SA1117" Action="Hidden" />
+    <Rule Id="SA1123" Action="Hidden" />
+    <Rule Id="SA1124" Action="None" />
     <Rule Id="SA1200" Action="Hidden" />
     <Rule Id="SA1201" Action="Hidden" />
     <Rule Id="SA1208" Action="Hidden" />
     <Rule Id="SA1305" Action="Hidden" />
+    <Rule Id="SA1310" Action="Hidden" />
     <Rule Id="SA1412" Action="Hidden" />
     <Rule Id="SA1413" Action="Hidden" />
     <Rule Id="SA1609" Action="Hidden" />

@@ -8,6 +8,7 @@
 using DropWebP.Interfaces;
 using DropWebP.Properties;
 using DropWebP.Views;
+using ImTools;
 using MahApps.Metro.Controls;
 using Prism.Commands;
 using Prism.Mvvm;
@@ -41,7 +42,7 @@ namespace DropWebP.ViewModels;
 /// <summary>
 ///     シェル画面.
 /// </summary>
-public class ShellWindowViewModel : BindableBase
+public partial class ShellWindowViewModel : BindableBase
 {
     /// <summary>
     ///     ダイアログサービス.
@@ -62,7 +63,7 @@ public class ShellWindowViewModel : BindableBase
     ///     Initializes a new instance of the <see cref="ShellWindowViewModel" /> class.
     /// </summary>
     /// <param name="regionManager">インジェクションするIRegionManager。.</param>
-    /// <param name="dialogService">The dialogService<see cref="IDialogService" />.</param>
+    /// <param name="dialogService">The _dialogService<see cref="IDialogService" />.</param>
     /// <param name="webPService">The webPService<see cref="IWebPService" />.</param>
     public ShellWindowViewModel(IRegionManager regionManager, IDialogService dialogService, IWebPService webPService)
     {
@@ -107,21 +108,9 @@ public class ShellWindowViewModel : BindableBase
     }
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="ShellWindowViewModel" /> class.
-    /// </summary>
-    public ShellWindowViewModel()
-    {
-    }
-
-    /// <summary>
     ///     MetroWindow.
     /// </summary>
     public MetroWindow Shell { get; set; } = Application.Current.MainWindow as MetroWindow;
-
-    /// <summary>
-    ///     クリップボード更新の監視.
-    /// </summary>
-    public DelegateCommand ClipboardUpdateCommand { get; }
 
     /// <summary>
     ///     MainWindowのCloseイベント.
@@ -174,11 +163,6 @@ public class ShellWindowViewModel : BindableBase
     public DelegateCommand ExitCommand { get; set; }
 
     /// <summary>
-    ///     表示するイメージのファイル名.
-    /// </summary>
-    public ReactivePropertySlim<string> ViewImage { get; } = new();
-
-    /// <summary>
     ///     ImageのPreviewDragOverイベントのコマンド.
     /// </summary>
     public ReactiveCommand<DragEventArgs> PreviewDragOverCommand { get; } = new();
@@ -197,15 +181,28 @@ public class ShellWindowViewModel : BindableBase
     ///     アクティブなウィンドウのハンドルを取得.
     /// </summary>
     /// <returns>.</returns>
-    [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
-    private static extern IntPtr GetActiveWindow();
+    [LibraryImport("user32.dll", SetLastError = false)]
+    private static partial IntPtr GetActiveWindow();
 
     /// <summary>
     ///     終了コマンド.
     /// </summary>
-    public static void ExecuteExitCommand()
+    private static void ExecuteExitCommand()
     {
         Application.Current.Shutdown();
+    }
+
+    /// <summary>
+    ///     ImageのPreviewDragOverイベントに対する処理.
+    /// </summary>
+    /// <param name="e">.</param>
+    private static void ImagePreviewDragOver(DragEventArgs e)
+    {
+        // マウスカーソルをコピーにする。
+        e.Effects = DragDropEffects.Copy;
+
+        // ドラッグされてきたものがFileDrop形式の場合だけ、このイベントを処理済みにする。
+        e.Handled = e.Data.GetDataPresent(DataFormats.FileDrop);
     }
 
     /// <summary>
@@ -214,19 +211,6 @@ public class ShellWindowViewModel : BindableBase
     private void Close()
     {
         Disposable.Dispose();
-    }
-
-    /// <summary>
-    ///     ImageのPreviewDragOverイベントに対する処理.
-    /// </summary>
-    /// <param name="e">.</param>
-    private void ImagePreviewDragOver(DragEventArgs e)
-    {
-        // マウスカーソルをコピーにする。
-        e.Effects = DragDropEffects.Copy;
-
-        // ドラッグされてきたものがFileDrop形式の場合だけ、このイベントを処理済みにする。
-        e.Handled = e.Data.GetDataPresent(DataFormats.FileDrop);
     }
 
     /// <summary>
@@ -287,19 +271,16 @@ public class ShellWindowViewModel : BindableBase
         {
             // string codecName = c.CodecName.Substring(8).Replace("Codec", "Files").Trim();
             Debug.WriteLine(c.FilenameExtension);
-            foreach (string ext in c.FilenameExtension.Split(';'))
-            {
-                picker.FileTypeFilter.Add(ext.Remove(0, 1).ToLower());
-            }
+            c.FilenameExtension?.Split(';').ForEach(ext => picker.FileTypeFilter.Add(ext.Remove(0, 1).ToLower()));
         }
 
         // EXRフォーマットを追加
         picker.FileTypeFilter.Add(".exr");
 
         // ウィンドウバンドルを取得
-        IntPtr hwnd = GetActiveWindow();
+        IntPtr hWnd = GetActiveWindow();
         IInitializeWithWindow withWindow = picker.As<IInitializeWithWindow>();
-        withWindow.Initialize(hwnd);
+        withWindow.Initialize(hWnd);
 
         IReadOnlyList<StorageFile> selectedFiles = await picker.PickMultipleFilesAsync();
         if (selectedFiles.Count == 0)
@@ -328,9 +309,9 @@ public class ShellWindowViewModel : BindableBase
         };
 
         // ウィンドウバンドルを取得
-        IntPtr hwnd = GetActiveWindow();
+        IntPtr hWnd = GetActiveWindow();
         IInitializeWithWindow withWindow = picker.As<IInitializeWithWindow>();
-        withWindow.Initialize(hwnd);
+        withWindow.Initialize(hWnd);
 
         // ファイルダイアログを表示4
         StorageFolder folder = await picker.PickSingleFolderAsync();
@@ -372,6 +353,11 @@ public class ShellWindowViewModel : BindableBase
             ? new FormatConvertedBitmap(Clipboard.GetImage(), PixelFormats.Bgr32, null, 0)
             : Clipboard.GetImage();
 
+        if (bitmapSource == null)
+        {
+            return;
+        }
+
         // Bitmap型に変換
         Bitmap bitmap = new(
             bitmapSource.PixelWidth,
@@ -397,9 +383,9 @@ public class ShellWindowViewModel : BindableBase
         };
 
         // ウィンドウバンドルを取得
-        IntPtr hwnd = GetActiveWindow();
+        IntPtr hWnd = GetActiveWindow();
         IInitializeWithWindow withWindow = picker.As<IInitializeWithWindow>();
-        withWindow.Initialize(hwnd);
+        withWindow.Initialize(hWnd);
 
         // ファイルダイアログを表示4
         StorageFile file = await picker.PickSaveFileAsync();

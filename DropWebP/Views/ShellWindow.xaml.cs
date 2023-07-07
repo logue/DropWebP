@@ -41,7 +41,7 @@ public partial class ShellWindow : MetroWindow
         int falseValue = 0x00;
 
         // ダークモードの切り替え
-        if (ThemeManager.Current.DetectTheme().BaseColorScheme == ThemeManager.BaseColorDark)
+        if (ThemeManager.Current.DetectTheme()?.BaseColorScheme == ThemeManager.BaseColorDark)
         {
             DwmSetWindowAttribute(
                 hWnd.Handle,

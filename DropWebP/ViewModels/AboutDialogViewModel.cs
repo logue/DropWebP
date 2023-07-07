@@ -6,7 +6,6 @@
 // -----------------------------------------------------------------------
 
 using DropWebP.Helpers;
-using DropWebP.Interfaces;
 using DropWebP.Models;
 using DropWebP.Properties;
 using Prism.Commands;
@@ -26,18 +25,10 @@ namespace DropWebP.ViewModels;
 public class AboutDialogViewModel : BindableBase, IDialogAware
 {
     /// <summary>
-    ///     多言語化サービス.
-    /// </summary>
-    private readonly ILocalizeService localizeService;
-
-    /// <summary>
     ///     Initializes a new instance of the <see cref="AboutDialogViewModel" /> class.
     /// </summary>
-    /// <param name="localizeService">多言語化サービス.</param>
-    public AboutDialogViewModel(ILocalizeService localizeService)
+    public AboutDialogViewModel()
     {
-        // 多言語化サービスのインジェクション
-        this.localizeService = localizeService;
         VisitCommand = new DelegateCommand(ExecuteVisitCommand);
         CloseCommand = new DelegateCommand(ExecuteCloseCommand);
         Assembly = new AppAssemblyModel();

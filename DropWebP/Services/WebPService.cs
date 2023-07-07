@@ -211,7 +211,7 @@ public class WebPService : IWebPService
         Bitmap bitmap = LoadBitmap(path);
 
         // 読み込めなかったファイルは処理しない
-        if (bitmap == null)
+        if (bitmap == null || outputPath == null)
         {
             return false;
         }
@@ -276,7 +276,8 @@ public class WebPService : IWebPService
         if (count == 1)
         {
             // ファイルが一つしかない場合
-            controller.SetMessage(string.Format(localizeService.GetLocalizedString("ConvertingMessage"),
+            controller.SetMessage(string.Format(
+                localizeService.GetLocalizedString("ConvertingMessage"),
                 Path.GetFileName(files[0])));
             bool result = ConvertWebP(files[0], Settings.Default.Lossless ? -1 : Settings.Default.Quality);
             if (!result)
@@ -326,7 +327,8 @@ public class WebPService : IWebPService
                             localizeService.GetLocalizedString("ConvertingMessage"), Path.GetFileName(item.file)));
 
                         // 変換処理
-                        bool result = await ConvertWebPAsync(item.file,
+                        bool result = await ConvertWebPAsync(
+                            item.file,
                             Settings.Default.Lossless ? -1 : Settings.Default.Quality);
 
                         if (!result)

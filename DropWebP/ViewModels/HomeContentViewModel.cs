@@ -54,13 +54,6 @@ public class HomeContentViewModel : BindableBase
     private MetroWindow Shell { get; } = Application.Current.MainWindow as MetroWindow;
 
     /// <summary>
-    ///     アクティブなウィンドウのハンドルを取得.
-    /// </summary>
-    /// <returns>.</returns>
-    [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
-    private static extern IntPtr GetActiveWindow();
-
-    /// <summary>
     ///     ファイルブラウザボタンが押された.
     /// </summary>
     public async void ExecuteBrowseButtonCommand()
@@ -75,9 +68,9 @@ public class HomeContentViewModel : BindableBase
         };
 
         // ウィンドウバンドルを取得
-        IntPtr hwnd = GetActiveWindow();
+        IntPtr hWnd = GetActiveWindow();
         IInitializeWithWindow withWindow = picker.As<IInitializeWithWindow>();
-        withWindow.Initialize(hwnd);
+        withWindow.Initialize(hWnd);
 
         // ファイルダイアログを表示
         StorageFolder folder = await picker.PickSingleFolderAsync();
@@ -89,4 +82,11 @@ public class HomeContentViewModel : BindableBase
         // 変換処理
         webPService.Convert(Directory.GetFiles(folder.Path), Shell);
     }
+
+    /// <summary>
+    ///     アクティブなウィンドウのハンドルを取得.
+    /// </summary>
+    /// <returns>.</returns>
+    [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto, PreserveSig = true, SetLastError = false)]
+    private static extern IntPtr GetActiveWindow();
 }

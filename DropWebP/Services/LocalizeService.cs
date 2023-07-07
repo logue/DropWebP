@@ -27,10 +27,7 @@ public class LocalizeService : ILocalizeService
     /// <param name="locale">The locale<see cref="string" />.</param>
     public LocalizeService(string locale = null)
     {
-        if (locale == null)
-        {
-            locale = CultureInfo.CurrentCulture.ToString();
-        }
+        locale ??= CultureInfo.CurrentCulture.ToString();
 
         Debug.WriteLine(CultureInfo.GetCultures(CultureTypes.AllCultures));
 
