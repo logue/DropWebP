@@ -170,7 +170,7 @@ namespace DropWebP.Properties {
         }
         
         /// <summary>
-        ///    に類似しているローカライズされた文字列を検索します。
+        ///   Dark Mode に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string DarkModeText {
             get {
@@ -343,8 +343,8 @@ namespace DropWebP.Properties {
         }
         
         /// <summary>
-        ///   Specifies the quality of lossy compression of images.
-        ///Normally, select 95. に類似しているローカライズされた文字列を検索します。
+        ///   Specifies the quality for lossy compression of images.
+        ///95 is the recommended value. に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string QualityTooltip {
             get {

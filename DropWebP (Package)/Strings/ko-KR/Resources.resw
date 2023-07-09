@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -117,110 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="AppIcon" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\vise.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="AppDescription" xml:space="preserve">
+    <value>드래그 앤 드롭으로 이미지를 WebP로 변환하는 프로그램입니다.</value>
   </data>
-  <data name="vise" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\vise.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="AboutText" xml:space="preserve">
-    <value>About</value>
-  </data>
-  <data name="ConfigText" xml:space="preserve">
-    <value>Config</value>
-  </data>
-  <data name="VisitText" xml:space="preserve">
-    <value>Visit Project site</value>
-  </data>
-  <data name="CloseText" xml:space="preserve">
-    <value>Close</value>
-  </data>
-  <data name="HomeMessage" xml:space="preserve">
-    <value>Drag and drop image file(s) to convert WebP.
-You can also use CTRL + V to convert the image in the clipboard directly to WebP.</value>
-  </data>
-  <data name="BrowseFolderText" xml:space="preserve">
-    <value>Select Folder...</value>
-  </data>
-  <data name="BrowseFolderTooltip" xml:space="preserve">
-    <value>Batch convert images in the selected folder.</value>
-  </data>
-  <data name="QualityText" xml:space="preserve">
-    <value>Quality</value>
-  </data>
-  <data name="LosslessText" xml:space="preserve">
-    <value>Lossless</value>
-  </data>
-  <data name="QualityTooltip" xml:space="preserve">
-    <value>Specifies the quality for lossy compression of images.
-95 is the recommended value.</value>
-  </data>
-  <data name="LosslessTooltip" xml:space="preserve">
-    <value>Turn on this toggle for lossless compression.</value>
-  </data>
-  <data name="KeepOriginalText" xml:space="preserve">
-    <value>Keep original image</value>
-  </data>
-  <data name="KeepOriginalTooltip" xml:space="preserve">
-    <value>Turn on this toggle if you want to keep the unconverted image.</value>
-  </data>
-  <data name="IgnoreJpegText" xml:space="preserve">
-    <value>Ignore JPEG images</value>
-  </data>
-  <data name="IgnoreJpegTooltip" xml:space="preserve">
-    <value>Since JPEG images are originally compressed, compressing them with WebP may increase the capacity.
-You can skip the JPEG compression process by turning on this toggle.</value>
-  </data>
-  <data name="LanguageText" xml:space="preserve">
-    <value>Display Language</value>
-  </data>
-  <data name="ConvertFromFileText" xml:space="preserve">
-    <value>Convert from File(s)... (_O)</value>
-  </data>
-  <data name="ConvertFromClipboardText" xml:space="preserve">
-    <value>Convert from Clipboard... (_V)</value>
-  </data>
-  <data name="ExitText" xml:space="preserve">
-    <value>E_xit</value>
-  </data>
-  <data name="DialogOk" xml:space="preserve">
-    <value>OK</value>
-  </data>
-  <data name="DialogCancel" xml:space="preserve">
-    <value>Cancel</value>
-  </data>
-  <data name="DialogConvertingText" xml:space="preserve">
-    <value>Converting WebP...</value>
-  </data>
-  <data name="DialogInitializingText" xml:space="preserve">
-    <value>initializing...</value>
-  </data>
-  <data name="DialogCompleteText" xml:space="preserve">
-    <value>Processing has been completed.</value>
-  </data>
-  <data name="CompleteMessage" xml:space="preserve">
-    <value>Conversion of {0} files is complete.</value>
-  </data>
-  <data name="NotifyCompleteText" xml:space="preserve">
-    <value>Notify when completed</value>
-  </data>
-  <data name="NotifyCompleteTooltip" xml:space="preserve">
-    <value>A desktop notification is issued when the process is completed.</value>
-  </data>
-  <data name="CompleteMessageSingle" xml:space="preserve">
-    <value>File conversion is complete.</value>
-  </data>
-  <data name="ConvertingMessage" xml:space="preserve">
-    <value>Converting {0}...</value>
-  </data>
-  <data name="About" xml:space="preserve">
-    <value>About DropWebP</value>
-  </data>
-  <data name="FailureMessage" xml:space="preserve">
-    <value>Failed to convert {0} out of {1} files.</value>
-  </data>
-  <data name="DarkModeText" xml:space="preserve">
-    <value>Dark Mode</value>
+  <data name="AppDisplayName" xml:space="preserve">
+    <value>DropWebP</value>
   </data>
 </root>

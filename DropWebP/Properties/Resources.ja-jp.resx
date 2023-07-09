@@ -131,7 +131,7 @@
   </data>
   <data name="HomeMessage" xml:space="preserve">
     <value>WebPに変換したい画像ファイルをドラッグ・アンド・ドロップしてください。
-CTRL + Vでクリップボード内の画像を直接WebPに変換することもできます。</value>
+CTRL＋ Vでクリップボード内の画像を直接WebPに変換することもできます。</value>
   </data>
   <data name="BrowseFolderText" xml:space="preserve">
     <value>フォルダを選択...</value>
@@ -147,7 +147,7 @@ CTRL + Vでクリップボード内の画像を直接WebPに変換すること�
   </data>
   <data name="QualityTooltip" xml:space="preserve">
     <value>画像を不可逆圧縮するときの品質を指定します。
-通常は、95を選択してください。</value>
+95が推奨値です。</value>
   </data>
   <data name="LosslessTooltip" xml:space="preserve">
     <value>無劣化（可逆）圧縮をする場合はこのトグルをオンにしてください。</value>
@@ -172,7 +172,7 @@ CTRL + Vでクリップボード内の画像を直接WebPに変換すること�
     <value>ファイルから変換...(_O)</value>
   </data>
   <data name="ConvertFromClipboardText" xml:space="preserve">
-    <value>クリップボードから変換...(_V)</value>
+    <value>クリップボードから変換…(_V)</value>
   </data>
   <data name="ExitText" xml:space="preserve">
     <value>終了(_X)</value>
@@ -184,10 +184,10 @@ CTRL + Vでクリップボード内の画像を直接WebPに変換すること�
     <value>キャンセル</value>
   </data>
   <data name="DialogConvertingText" xml:space="preserve">
-    <value>WebPに変換しています...</value>
+    <value>WebPに変換しています…</value>
   </data>
   <data name="DialogInitializingText" xml:space="preserve">
-    <value>初期化しています...</value>
+    <value>初期化しています…</value>
   </data>
   <data name="DialogCompleteText" xml:space="preserve">
     <value>処理が完了しました。</value>
@@ -202,7 +202,7 @@ CTRL + Vでクリップボード内の画像を直接WebPに変換すること�
     <value>処理完了時にデスクトップ通知を出します。</value>
   </data>
   <data name="ConvertingMessage" xml:space="preserve">
-    <value>{0}を変換しています...</value>
+    <value>{0}を変換しています…</value>
   </data>
   <data name="CompleteMessageSingle" xml:space="preserve">
     <value>ファイルの変換が完了しました。</value>

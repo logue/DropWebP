@@ -3,7 +3,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<Title>DropWebP</Title>
-		<Version>0.7.1</Version>
+		<Version>0.8.0</Version>
 		<ApplicationIcon>Resources\vise.ico</ApplicationIcon>
 		<AssemblyName>DropWebP</AssemblyName>
 		<Authors>Masashi Yoshikawa</Authors>
@@ -21,7 +21,8 @@
 		<PackageReadmeFile>..\ReadMe.md</PackageReadmeFile>
 		<PackageTags>WebP,Image Compression</PackageTags>
 		<PackageReleaseNotes>依存関係の更新
-  一部処理の最適化</PackageReleaseNotes>
+  一部処理の最適化
+  韓国語に対応</PackageReleaseNotes>
 		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>https://github.com/logue/DropWebP.git</RepositoryUrl>
 		<RootNamespace>DropWebP</RootNamespace>

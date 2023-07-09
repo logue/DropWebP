@@ -34,7 +34,8 @@ public class LocalizeService : ILocalizeService
         SupportedLanguages = CultureInfo.GetCultures(CultureTypes.AllCultures).Where(
                 c =>
                     c.IetfLanguageTag.Equals("en-US", StringComparison.Ordinal) ||
-                    c.IetfLanguageTag.Equals("ja-JP", StringComparison.Ordinal))
+                    c.IetfLanguageTag.Equals("ja-JP", StringComparison.Ordinal) ||
+                    c.IetfLanguageTag.Equals("ko-KR", StringComparison.Ordinal))
             .ToList();
         SetLocale(locale);
     }
