@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
 // <copyright file="ShellWindowViewModel.cs" company="Logue">
-// Copyright (c) 2021-2023 Masashi Yoshikawa All rights reserved.
+// Copyright (c) 2021-2024 Masashi Yoshikawa All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -8,12 +8,12 @@
 using DropWebP.Interfaces;
 using DropWebP.Properties;
 using DropWebP.Views;
-using ImTools;
+using DryIoc.ImTools;
 using MahApps.Metro.Controls;
 using Prism.Commands;
+using Prism.Dialogs;
 using Prism.Mvvm;
-using Prism.Regions;
-using Prism.Services.Dialogs;
+using Prism.Navigation.Regions;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 using System;

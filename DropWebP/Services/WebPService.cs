@@ -1,16 +1,10 @@
 // -----------------------------------------------------------------------
 // <copyright file="WebPService.cs" company="Logue">
-// Copyright (c) 2021-2023 Masashi Yoshikawa All rights reserved.
+// Copyright (c) 2021-2025 Masashi Yoshikawa All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 // -----------------------------------------------------------------------
 
-using DropWebP.Interfaces;
-using DropWebP.Properties;
-using MahApps.Metro.Controls;
-using MahApps.Metro.Controls.Dialogs;
-using Microsoft.Toolkit.Uwp.Notifications;
-using SharpEXR;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -20,6 +14,16 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using DropWebP.Interfaces;
+using DropWebP.Properties;
+using HeyRed.ImageSharp.Heif.Formats.Avif;
+using HeyRed.ImageSharp.Heif.Formats.Heif;
+using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
+using Microsoft.Toolkit.Uwp.Notifications;
+using SharpEXR;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
 using WebP.Net;
 
 namespace DropWebP.Services;
@@ -52,15 +56,14 @@ public class WebPService : IWebPService
     /// <returns>WebPに圧縮したバイト配列.</returns>
     public byte[] EncodeWebP(Bitmap bitmap, long quality = -1)
     {
-        using WebPObject webP = new(bitmap);
-
-        // TODO: BGRとABGRの判定と、それに応じた圧縮処理
+        WebPImage webpImage;
         if (quality < 0)
         {
-            return webP.GetWebPLossless();
+            webpImage = WebPEncoder.EncodeLossless(bitmap);
+        } else {
+            webpImage = WebPEncoder.EncodeLossy(bitmap, (int)quality);
         }
-
-        return webP.GetWebPLossy(quality);
+        return webpImage.AsSpan().ToArray();
     }
 
     /// <summary>
@@ -70,10 +73,8 @@ public class WebPService : IWebPService
     /// <returns>ビットマップ.</returns>
     public Bitmap DecodeWebP(byte[] bytes)
     {
-        using WebPObject webP = new(bytes);
-
         // WebPに変換
-        return (Bitmap)webP.GetImage();
+        return WebPDecoder.Decode(bytes);
     }
 
     /// <summary>
@@ -394,6 +395,9 @@ public class WebPService : IWebPService
 
         // EXRフォーマットに独自対応
         imageFileExtensions.Add(".exr");
+        // HEIF/AVIF形式（iOSのカメラ）
+        imageFileExtensions.Add(".heif");
+        imageFileExtensions.Add(".avif");
 
         // なんかエラーが起きるファイル形式
         imageFileExtensions.Remove(".tif");
@@ -461,7 +465,7 @@ public class WebPService : IWebPService
 
             // 画像サイズを割り当てる
             bmp = new Bitmap(part.DataWindow.Width, part.DataWindow.Height);
-            BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.WriteOnly,
+            BitmapData data = bmp.LockBits(new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.WriteOnly,
                 PixelFormat.Format32bppArgb);
             byte[] destBytes = part.GetBytes(ImageDestFormat.BGRA8, GammaEncoding.sRGB, data.Stride);
 
@@ -471,6 +475,18 @@ public class WebPService : IWebPService
 
             // EXRファイルを閉じる
             part.Close();
+        }
+        else if (Path.GetExtension(path) == ".heif" || Path.GetExtension(path) == ".avif")
+        {
+            DecoderOptions decoderOptions = new()
+            {
+                Configuration = new SixLabors.ImageSharp.Configuration(
+                new AvifConfigurationModule(),
+                new HeifConfigurationModule())
+            };
+
+            using SixLabors.ImageSharp.Image image = SixLabors.ImageSharp.Image.Load(decoderOptions, path);
+           //  bmp = new Image<Rgba32>(image.Width, image.Height);
         }
 
         return bmp;

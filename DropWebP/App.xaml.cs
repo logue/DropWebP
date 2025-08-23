@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
 // <copyright file="App.xaml.cs" company="Logue">
-// Copyright (c) 2021-2023 Masashi Yoshikawa All rights reserved.
+// Copyright (c) 2021-2024 Masashi Yoshikawa All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -13,7 +13,7 @@ using DropWebP.Views;
 using MahApps.Metro.Controls;
 using Prism.DryIoc;
 using Prism.Ioc;
-using Prism.Regions;
+using Prism.Navigation.Regions;
 using System;
 using System.Diagnostics;
 using System.Reflection;
@@ -131,7 +131,7 @@ public partial class App : PrismApplication
     protected override void ConfigureRegionAdapterMappings(RegionAdapterMappings regionAdapterMappings)
     {
         // 設定フライアウト
-        regionAdapterMappings.RegisterMapping(typeof(FlyoutsControl), Container.Resolve<FlyoutsControlRegionAdapter>());
+        regionAdapterMappings.RegisterMapping(typeof(FlyoutsControl), (IRegionAdapter)Container.Resolve<FlyoutsControlRegionAdapter>());
 
         base.ConfigureRegionAdapterMappings(regionAdapterMappings);
     }

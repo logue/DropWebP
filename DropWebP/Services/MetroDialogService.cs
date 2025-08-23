@@ -1,12 +1,12 @@
 // -----------------------------------------------------------------------
 // <copyright file="MetroDialogService.cs" company="Logue">
-// Copyright (c) 2021-2023 Masashi Yoshikawa All rights reserved.
+// Copyright (c) 2021-2025 Masashi Yoshikawa All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 // -----------------------------------------------------------------------
 
 using MahApps.Metro.Controls;
-using Prism.Services.Dialogs;
+using Prism.Dialogs;
 
 namespace DropWebP.Services;
 

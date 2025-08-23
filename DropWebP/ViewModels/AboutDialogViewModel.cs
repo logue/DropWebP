@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
 // <copyright file="AboutDialogViewModel.cs" company="Logue">
-// Copyright (c) 2021-2023 Masashi Yoshikawa All rights reserved.
+// Copyright (c) 2021-2025 Masashi Yoshikawa All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -9,8 +9,9 @@ using DropWebP.Helpers;
 using DropWebP.Models;
 using DropWebP.Properties;
 using Prism.Commands;
+using Prism.Dialogs;
 using Prism.Mvvm;
-using Prism.Services.Dialogs;
+
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -60,12 +61,14 @@ public class AboutDialogViewModel : BindableBase, IDialogAware
     ///     使用しているLibWebPのバージョン.
     /// </summary>
     /// <returns>LibWepPのバージョン</returns>
-    public string WebPVersion { get; } = "libwebp Version: " + WebPObject.GetVersion();
+    public string Version { get; } = "libwebp Version: " + WebPLibrary.GetVersion().ToString();
 
     /// <summary>
     ///     タイトル.
     /// </summary>
     public string Title { get; } = "About";
+
+    DialogCloseListener IDialogAware.RequestClose => throw new NotImplementedException();
 
     /// <summary>
     ///     ダイアログのCloseを要求するAction.
