@@ -1,6 +1,8 @@
+use std::{error::Error, io::Cursor};
+
+use exif::{In, Reader as ExifReader, Tag};
 use image::DynamicImage;
 use libwebp_sys::*;
-use std::error::Error;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -36,7 +38,7 @@ pub fn encode_webp(img: &DynamicImage, quality: i32) -> Result<Vec<u8>, Box<dyn 
     let width = img.width() as i32;
     let height = img.height() as i32;
 
-    // RGBA or RGB に揃える
+    // RGBA または RGB の判定と格納処理
     let (raw, is_rgba) = match img {
         DynamicImage::ImageRgba8(img) => (img.clone().into_raw(), true),
         DynamicImage::ImageRgb8(img) => (img.clone().into_raw(), false),
@@ -47,11 +49,23 @@ pub fn encode_webp(img: &DynamicImage, quality: i32) -> Result<Vec<u8>, Box<dyn 
     };
 
     unsafe {
+        // 出力バッファのポインタ
         let mut out_buf: *mut u8 = std::ptr::null_mut();
-        let stride = if is_rgba { width * 4 } else { width * 3 };
+        // ストライドの計算
+        let stride = if is_rgba {
+            width
+                .checked_mul(4)
+                .ok_or("Stride calculation overflowed")?
+        } else {
+            width
+                .checked_mul(3)
+                .ok_or("Stride calculation overflowed")?
+        };
 
         // WebP にエンコード
+        // qualityが100の場合はロスレスエンコードを使用
         let len = if is_rgba {
+            // RGBA圧縮
             if quality == 100 {
                 WebPEncodeLosslessRGBA(raw.as_ptr(), width, height, stride, &mut out_buf)
             } else {
@@ -65,6 +79,7 @@ pub fn encode_webp(img: &DynamicImage, quality: i32) -> Result<Vec<u8>, Box<dyn 
                 )
             }
         } else {
+            // RGB圧縮
             if quality == 100 {
                 WebPEncodeLosslessRGB(raw.as_ptr(), width, height, stride, &mut out_buf)
             } else {
@@ -93,4 +108,27 @@ pub fn encode_webp(img: &DynamicImage, quality: i32) -> Result<Vec<u8>, Box<dyn 
         Ok(result)
     }
 }
+
+/// EXIF Orientation をもとに画像を回転・反転
+pub fn correct_orientation(img: &image::RgbaImage, data: &[u8]) -> image::RgbaImage {
+    if let Ok(exif) = ExifReader::new().read_from_container(&mut Cursor::new(data)) {
+        if let Some(field) = exif.get_field(Tag::Orientation, In::PRIMARY) {
+            match field.value.get_uint(0) {
+                Some(2) => image::imageops::flip_horizontal(img),
+                Some(3) => image::imageops::rotate180(img),
+                Some(4) => image::imageops::flip_vertical(img),
+                Some(5) => image::imageops::rotate90(&image::imageops::flip_horizontal(img)),
+                Some(6) => image::imageops::rotate90(img),
+                Some(7) => image::imageops::rotate270(&image::imageops::flip_horizontal(img)),
+                Some(8) => image::imageops::rotate270(img),
+                _ => img.clone(),
+            }
+        } else {
+            img.clone()
+        }
+    } else {
+        img.clone()
+    }
+}
+
 // End of file src-tauri/src/lib.rs

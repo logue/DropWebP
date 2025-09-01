@@ -1,7 +1,6 @@
-use drop_webp_lib::encode_webp;
+use drop_webp_lib::{correct_orientation, encode_webp};
 use image::DynamicImage;
-use std::fs;
-use std::path::PathBuf;
+use std::{fs, io::Cursor, path::PathBuf};
 
 /// ディレクトリ内のファイル一覧を取得します。
 /// # 引数
@@ -38,27 +37,70 @@ pub fn list_full_paths(path: String) -> Result<Vec<String>, String> {
 /// - 成功した場合は `true` として返します。
 /// - 失敗した場合は `Box<dyn Error>` を返します。
 #[tauri::command]
-pub fn convert_image(
+pub async fn convert_image(
     input: PathBuf,
     output: Option<PathBuf>,
     quality: i32,
 ) -> Result<bool, String> {
-    // 画像を開く
-    let img: DynamicImage = image::open(&input).map_err(|e| e.to_string())?;
+    // ブロッキングタスクとして実行
+    tauri::async_runtime::spawn_blocking(move || -> Result<(), String> {
+        // 画像を開く
+        let img: DynamicImage = image::open(&input).map_err(|e| e.to_string())?; // PNG, JPEG, HEICなど自動判定
 
-    // WebP に変換
-    let encoded = encode_webp(&img, quality).map_err(|e| e.to_string())?;
+        // WebP に変換
+        let encoded = encode_webp(&img, quality).map_err(|e| e.to_string())?;
 
-    // 出力先: 元ファイルと同じディレクトリに保存
-    let parent = input.parent().ok_or("Invalid file path".to_string())?;
-    let filename = input
-        .file_stem()
-        .ok_or("Invalid file name".to_string())?
-        .to_string_lossy();
-    let out_path = output.unwrap_or(parent.join(format!("{}.webp", filename)));
+        // 出力先: 元ファイルと同じディレクトリに保存
+        let parent = input.parent().ok_or("Invalid file path".to_string())?;
+        let filename = input
+            .file_stem()
+            .ok_or("Invalid file name".to_string())?
+            .to_string_lossy();
+        let out_path = output.unwrap_or(parent.join(format!("{}.webp", filename)));
 
-    // 書き込み
-    std::fs::write(&out_path, &encoded).map_err(|e| e.to_string())?;
+        // 書き込み
+        std::fs::write(&out_path, &encoded).map_err(|e| e.to_string())?;
+        Ok(())
+    })
+    .await
+    .map_err(|e| e.to_string())??;
+    Ok(true)
+}
 
+/// Uint8Arrayバイナリデータを WebP にエンコードします。
+/// # 引数
+/// - `data`: 変換対象の画像データ
+/// - `output`: 出力先ファイルパス
+/// - `quality`: 品質 (0〜100)。100 の場合はロスレスになります。
+///
+/// # 戻り値
+/// - 成功した場合は WebP のバイト列を `Vec<u8>` として返します。
+/// - 失敗した場合は `Box<dyn Error>` を返します。
+#[tauri::command]
+pub async fn convert_u8i(data: Vec<u8>, output: PathBuf, quality: i32) -> Result<bool, String> {
+    // ブロッキングタスクとして実行
+    tauri::async_runtime::spawn_blocking(move || -> Result<(), String> {
+        // まずは image crate で読み込み
+        let img = image::ImageReader::new(Cursor::new(&data))
+            .with_guessed_format()
+            .map_err(|e| e.to_string())?
+            .decode()
+            .map_err(|e| e.to_string())?;
+
+        // ICCプロファイルがある場合はsRGBに変換（image crateでは自動変換されないので単純化）
+        let img = img.to_rgba8();
+
+        // EXIFのOrientationを補正（JPEG/HEIC向け）
+        let img = correct_orientation(&img, &data);
+
+        // WebP に変換
+        let encoded =
+            encode_webp(&DynamicImage::ImageRgba8(img), quality).map_err(|e| e.to_string())?;
+        // 書き込み
+        std::fs::write(&output, &encoded).map_err(|e| e.to_string())?;
+        Ok(())
+    })
+    .await
+    .map_err(|e| e.to_string())??;
     Ok(true)
 }

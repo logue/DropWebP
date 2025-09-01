@@ -1,11 +1,9 @@
 import configPrettier from '@vue/eslint-config-prettier';
 import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript';
 
-import pluginVitest from '@vitest/eslint-plugin';
 import { globalIgnores } from 'eslint/config';
 // @ts-ignore
 import pluginImport from 'eslint-plugin-import';
-import pluginPlaywright from 'eslint-plugin-playwright';
 import pluginVue from 'eslint-plugin-vue';
 import pluginVueA11y from 'eslint-plugin-vuejs-accessibility';
 // @ts-ignore
@@ -148,14 +146,6 @@ export default defineConfigWithVueTs(
       // Mitigate non-multiword component name errors to warnings.
       'vue/multi-word-component-names': 'warn'
     }
-  },
-  {
-    ...pluginVitest.configs.recommended,
-    files: ['src/**/__tests__/*']
-  },
-  {
-    ...pluginPlaywright.configs['flat/recommended'],
-    files: ['e2e/**/*.{test,spec}.{js,ts,jsx,tsx}']
   },
   configPrettier
 );
