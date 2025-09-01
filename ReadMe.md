@@ -1,11 +1,6 @@
 # DropWebP
 
-[![Build status](https://ci.appveyor.com/api/projects/status/e0l46jgjh5lv2evh/branch/master?svg=true)](https://ci.appveyor.com/project/logue/dropwebp/branch/master)
-
 このソフトウェアは、ドラッグアンドドップで画像ファイルを WebP に圧縮するアプリケーションです。
-
-動作には.net7.0 ランタイムが必要です。下記サイトからダウンロードしてください。
-<https://dotnet.microsoft.com/download/dotnet>
 
 ## 使用方法
 
@@ -46,4 +41,4 @@ WebP の開発元である Google は、ほぼ同等の画質で PNG よりも�
 
 Licensed under the [MIT](LICENSE) License.
 
-Copyright © 2021-2023 [Logue](https://logue.dev/)
+Copyright © 2021-2025 [Logue](https://logue.dev/)

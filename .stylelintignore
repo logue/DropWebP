@@ -1,0 +1,8 @@
+.husky/
+.vscode/
+.yarn/
+coverage/
+dist/
+public/assets/
+playwright-report/
+test-results/

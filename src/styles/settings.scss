@@ -1,0 +1,22 @@
+/**
+ * src/styles/settings.scss
+ *
+ * Configures SASS variables and Vuetify overwrites
+ */
+// https://next.vuetifyjs.com/features/sass-variables/
+@forward 'vuetify/settings' with (
+  // Place SASS variable overrides here
+  $body-font-family: ('Noto Sans JP Variable', sans-serif)
+);
+
+@use '@fontsource-variable/noto-sans-jp';
+
+// Fix for monospace Font.
+code,
+kbd,
+pre,
+samp,
+var {
+  font-family: 'Roboto Mono', monospace !important;
+  // font-family: 'Noto Sans Mono', monospace !important;
+}
