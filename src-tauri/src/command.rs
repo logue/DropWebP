@@ -1,4 +1,4 @@
-use drop_webp_lib::{correct_orientation, encode_webp};
+use drop_webp_lib::{correct_orientation, encode_webp, load_image};
 use image::DynamicImage;
 use std::{fs, io::Cursor, path::PathBuf};
 
@@ -45,7 +45,7 @@ pub async fn convert_image(
     // ブロッキングタスクとして実行
     tauri::async_runtime::spawn_blocking(move || -> Result<(), String> {
         // 画像を開く
-        let img: DynamicImage = image::open(&input).map_err(|e| e.to_string())?; // PNG, JPEG, HEICなど自動判定
+        let img: DynamicImage = load_image(&input).map_err(|e| e.to_string())?; // PNG, JPEG, HEICなど自動判定
 
         // WebP に変換
         let encoded = encode_webp(&img, quality).map_err(|e| e.to_string())?;

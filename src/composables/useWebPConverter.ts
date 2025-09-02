@@ -33,7 +33,7 @@ export function useWebPConverter() {
 
   // 拡張子のマッチパターン
   const imageRegExp = computed(() =>
-    ignoreJpeg.value ? /\.(png|gif|bmp|heic)$/i : /\.(jpe?g|png|gif|bmp|heic)$/i
+    ignoreJpeg.value ? /\.(png|gif|bmp|heic|heif)$/i : /\.(jpe?g|png|gif|bmp|heic|heif)$/i
   );
 
   // D&D
@@ -55,7 +55,7 @@ export function useWebPConverter() {
       filters: [
         {
           name: 'Image',
-          extensions: ['png', 'jpeg', 'jpg', 'tif', 'tiff', 'gif', 'bmp', 'heic']
+          extensions: ['png', 'jpeg', 'jpg', 'tif', 'tiff', 'gif', 'bmp', 'heic', 'heif']
         }
       ]
     });

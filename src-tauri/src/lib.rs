@@ -1,24 +1,76 @@
-use std::{error::Error, io::Cursor};
+use std::{
+    error::Error, ffi::c_void, io::Cursor, path::Path, ptr::null_mut, slice::from_raw_parts,
+};
 
 use exif::{In, Reader as ExifReader, Tag};
-use image::DynamicImage;
-use libwebp_sys::*;
+use image::{DynamicImage, ImageBuffer, Rgba, RgbaImage, imageops::*};
+use libheif_rs::{HeifContext, LibHeif};
+use libwebp_sys::{
+    WebPEncodeLosslessRGB, WebPEncodeLosslessRGBA, WebPEncodeRGB, WebPEncodeRGBA, WebPFree,
+};
 
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
-pub fn run() {
-    tauri::Builder::default()
-        .setup(|app| {
-            if cfg!(debug_assertions) {
-                app.handle().plugin(
-                    tauri_plugin_log::Builder::default()
-                        .level(log::LevelFilter::Info)
-                        .build(),
-                )?;
-            }
-            Ok(())
-        })
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+/// 画像を読み込んでDynamicImageに変換する
+/// # 引数
+/// - `path`: 画像ファイルのパス
+/// # 戻り値
+/// - 成功した場合はDynamicImageを返します。
+/// - 失敗した場合はエラーを返します。
+pub fn load_image(path: &Path) -> Result<DynamicImage, Box<dyn Error>> {
+    let ext = path
+        .extension()
+        .and_then(|e| e.to_str())
+        .map(|s| s.to_lowercase())
+        .unwrap_or_default();
+
+    match ext.as_str() {
+        "jpg" | "jpeg" | "png" | "gif" | "bmp" | "tiff" => Ok(image::open(path)?),
+        "heic" => heif_to_dynamic_image(path),
+        _ => Err("Unsupported format".into()),
+    }
+}
+
+/// HEIFファイルを読み込み、DynamicImageに変換する関数
+fn heif_to_dynamic_image<P: AsRef<Path>>(path: P) -> Result<DynamicImage, Box<dyn Error>> {
+    // 1. LibHeifのインスタンスを初期化
+    let lib_heif = LibHeif::new();
+
+    // 2. HEIFファイルを HeifContext に読み込む
+    let ctx = HeifContext::read_from_file(path.as_ref().to_str().unwrap())?;
+
+    // 3. プライマリイメージのハンドルを取得
+    let handle = ctx.primary_image_handle()?;
+
+    // 4. RGBA8フォーマットにデコード
+    //    デコード後の画像は、インターリーブされた（R,G,B,A,R,G,B,A...の順）ピクセルデータを持つ
+    let img = lib_heif.decode(
+        &handle,
+        libheif_rs::ColorSpace::Rgb(libheif_rs::RgbChroma::Rgba),
+        None,
+    )?;
+
+    // 5. 画像の幅と高さを取得
+    let width = handle.width();
+    let height = handle.height();
+
+    // 6. デコードされたピクセルデータを取得
+    //    planes() は画像のデータプレーン（R,G,B,Aなど）を返す
+    //    インターリーブされている場合、planesは1つだけ
+    let planes = img.planes();
+    let interleaved_plane = planes.interleaved.ok_or("Interleaved plane not found")?;
+
+    // ピクセルデータをベクタにコピー
+    let pixel_data = interleaved_plane.data.to_vec();
+
+    // 7. ImageBuffer::from_raw を使って、ピクセルデータからImageBufferを生成
+    //    この関数は、データが画像の次元と一致しない場合にNoneを返す
+    let image_buffer: ImageBuffer<Rgba<u8>, Vec<u8>> =
+        ImageBuffer::from_raw(width, height, pixel_data)
+            .ok_or("Failed to create ImageBuffer from raw data")?;
+
+    // 8. ImageBufferをDynamicImageに変換
+    let dynamic_image = DynamicImage::ImageRgba8(image_buffer);
+
+    Ok(dynamic_image)
 }
 
 /// 画像を WebP にエンコードします。
@@ -50,7 +102,7 @@ pub fn encode_webp(img: &DynamicImage, quality: i32) -> Result<Vec<u8>, Box<dyn 
 
     unsafe {
         // 出力バッファのポインタ
-        let mut out_buf: *mut u8 = std::ptr::null_mut();
+        let mut out_buf: *mut u8 = null_mut();
         // ストライドの計算
         let stride = if is_rgba {
             width
@@ -99,28 +151,28 @@ pub fn encode_webp(img: &DynamicImage, quality: i32) -> Result<Vec<u8>, Box<dyn 
         }
 
         // Rust Vec にコピー
-        let slice = std::slice::from_raw_parts(out_buf, len as usize);
+        let slice = from_raw_parts(out_buf, len as usize);
         let result = slice.to_vec();
 
         // C 側で確保されたメモリを解放
-        WebPFree(out_buf as *mut std::ffi::c_void);
+        WebPFree(out_buf as *mut c_void);
 
         Ok(result)
     }
 }
 
 /// EXIF Orientation をもとに画像を回転・反転
-pub fn correct_orientation(img: &image::RgbaImage, data: &[u8]) -> image::RgbaImage {
+pub fn correct_orientation(img: &RgbaImage, data: &[u8]) -> RgbaImage {
     if let Ok(exif) = ExifReader::new().read_from_container(&mut Cursor::new(data)) {
         if let Some(field) = exif.get_field(Tag::Orientation, In::PRIMARY) {
             match field.value.get_uint(0) {
-                Some(2) => image::imageops::flip_horizontal(img),
-                Some(3) => image::imageops::rotate180(img),
-                Some(4) => image::imageops::flip_vertical(img),
-                Some(5) => image::imageops::rotate90(&image::imageops::flip_horizontal(img)),
-                Some(6) => image::imageops::rotate90(img),
-                Some(7) => image::imageops::rotate270(&image::imageops::flip_horizontal(img)),
-                Some(8) => image::imageops::rotate270(img),
+                Some(2) => flip_horizontal(img),
+                Some(3) => rotate180(img),
+                Some(4) => flip_vertical(img),
+                Some(5) => rotate90(&flip_horizontal(img)),
+                Some(6) => rotate90(img),
+                Some(7) => rotate270(&flip_horizontal(img)),
+                Some(8) => rotate270(img),
                 _ => img.clone(),
             }
         } else {
