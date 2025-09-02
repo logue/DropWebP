@@ -20,6 +20,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 [build-dependencies]
 pkg-config = "0.3.32"
 tauri-build = { version = "2.4.0", features = [] }
+cc = "1.2.35" # FFIビルド用
 
 [dependencies]
 image = "0.25.6"

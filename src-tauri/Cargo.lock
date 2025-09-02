@@ -1050,6 +1050,7 @@ dependencies = [
 name = "drop-webp"
 version = "2.0.0"
 dependencies = [
+ "cc",
  "image",
  "kamadak-exif",
  "libheif-rs",
