@@ -13,7 +13,7 @@
   "app": {
     "windows": [
       {
-        "title": "DropWebP2",
+        "title": "DropWebP",
         "width": 640,
         "height": 480,
         "resizable": true,

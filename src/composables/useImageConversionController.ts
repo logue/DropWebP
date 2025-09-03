@@ -39,8 +39,8 @@ export function useImageConversionController(t: ComposerTranslation) {
   // 拡張子のマッチパターン
   const imageRegExp = computed(() =>
     ignoreJpeg.value
-      ? /\.(png|gif|tif?f|bmp|heic|heif)$/i
-      : /\.(jpe?g|png|gif|tif?f|bmp|heic|heif)$/i
+      ? /\.(png|gif|tif?f|bmp|heic|heif|jp2|j2k)$/i
+      : /\.(jpe?g|png|gif|tif?f|bmp|heic|heif|jp2|j2k)$/i
   );
   const browse = async () => {
     outputPath.value = await open({
@@ -107,7 +107,19 @@ export function useImageConversionController(t: ComposerTranslation) {
       filters: [
         {
           name: 'Image',
-          extensions: ['png', 'jpeg', 'jpg', 'tif', 'tiff', 'gif', 'bmp', 'heic', 'heif']
+          extensions: [
+            'png',
+            'jpeg',
+            'jpg',
+            'tif',
+            'tiff',
+            'gif',
+            'bmp',
+            'heic',
+            'heif',
+            'jp2',
+            'j2k'
+          ]
         }
       ]
     });

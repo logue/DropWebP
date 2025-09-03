@@ -1,10 +1,11 @@
+mod decoder;
+
 use std::{
     error::Error, ffi::c_void, io::Cursor, path::Path, ptr::null_mut, slice::from_raw_parts,
 };
 
 use exif::{In, Reader as ExifReader, Tag};
-use image::{DynamicImage, ImageBuffer, Rgba, RgbaImage, imageops::*};
-use libheif_rs::{HeifContext, LibHeif};
+use image::{DynamicImage, RgbaImage, imageops::*};
 use libwebp_sys::{
     WebPEncodeLosslessRGB, WebPEncodeLosslessRGBA, WebPEncodeRGB, WebPEncodeRGBA, WebPFree,
 };
@@ -23,54 +24,11 @@ pub fn load_image(path: &Path) -> Result<DynamicImage, Box<dyn Error>> {
         .unwrap_or_default();
 
     match ext.as_str() {
-        "jpg" | "jpeg" | "png" | "gif" | "bmp" | "tiff" => Ok(image::open(path)?),
-        "heic" => heif_to_dynamic_image(path),
+        "jpg" | "jpeg" | "png" | "gif" | "bmp" | "tif" | "tiff" => Ok(image::open(path)?),
+        "heic" | "heif" => decoder::heif_to_dynamic_image(path),
+        "jp2" | "j2k" => decoder::jpeg2000_to_dynamic_image(path),
         _ => Err("Unsupported format".into()),
     }
-}
-
-/// HEIFファイルを読み込み、DynamicImageに変換する関数
-fn heif_to_dynamic_image<P: AsRef<Path>>(path: P) -> Result<DynamicImage, Box<dyn Error>> {
-    // 1. LibHeifのインスタンスを初期化
-    let lib_heif = LibHeif::new();
-
-    // 2. HEIFファイルを HeifContext に読み込む
-    let ctx = HeifContext::read_from_file(path.as_ref().to_str().unwrap())?;
-
-    // 3. プライマリイメージのハンドルを取得
-    let handle = ctx.primary_image_handle()?;
-
-    // 4. RGBA8フォーマットにデコード
-    //    デコード後の画像は、インターリーブされた（R,G,B,A,R,G,B,A...の順）ピクセルデータを持つ
-    let img = lib_heif.decode(
-        &handle,
-        libheif_rs::ColorSpace::Rgb(libheif_rs::RgbChroma::Rgba),
-        None,
-    )?;
-
-    // 5. 画像の幅と高さを取得
-    let width = handle.width();
-    let height = handle.height();
-
-    // 6. デコードされたピクセルデータを取得
-    //    planes() は画像のデータプレーン（R,G,B,Aなど）を返す
-    //    インターリーブされている場合、planesは1つだけ
-    let planes = img.planes();
-    let interleaved_plane = planes.interleaved.ok_or("Interleaved plane not found")?;
-
-    // ピクセルデータをベクタにコピー
-    let pixel_data = interleaved_plane.data.to_vec();
-
-    // 7. ImageBuffer::from_raw を使って、ピクセルデータからImageBufferを生成
-    //    この関数は、データが画像の次元と一致しない場合にNoneを返す
-    let image_buffer: ImageBuffer<Rgba<u8>, Vec<u8>> =
-        ImageBuffer::from_raw(width, height, pixel_data)
-            .ok_or("Failed to create ImageBuffer from raw data")?;
-
-    // 8. ImageBufferをDynamicImageに変換
-    let dynamic_image = DynamicImage::ImageRgba8(image_buffer);
-
-    Ok(dynamic_image)
 }
 
 /// 画像を WebP にエンコードします。
