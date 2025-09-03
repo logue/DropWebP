@@ -141,7 +141,10 @@ export default defineConfig(({ command, mode }): UserConfig => {
     },
     esbuild: {
       // Drop console when production build.
-      drop: command === 'serve' ? [] : ['console']
+      drop: command === 'serve' ? [] : ['console'],
+      supported: {
+        'top-level-await': true //browsers can handle top-level-await features
+      }
     }
   };
 
