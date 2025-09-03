@@ -31,6 +31,7 @@ pub fn list_full_paths(path: String) -> Result<Vec<String>, String> {
 /// # 引数
 /// - `input`: 対象ファイルパス
 /// - `output`: 出力先ファイルパス (None の場合は元ファイルと同じディレクトリに保存されます)
+/// - `overwrite`: 上書きフラグ
 /// - `quality`: 品質 (0〜100)。100 の場合はロスレスになります。
 ///
 /// # 戻り値
@@ -40,30 +41,65 @@ pub fn list_full_paths(path: String) -> Result<Vec<String>, String> {
 pub async fn convert_image(
     input: PathBuf,
     output: Option<PathBuf>,
+    overwrite: bool,
     quality: i32,
 ) -> Result<bool, String> {
     // ブロッキングタスクとして実行
     tauri::async_runtime::spawn_blocking(move || -> Result<(), String> {
         // 画像を開く
-        let img: DynamicImage = load_image(&input).map_err(|e| e.to_string())?; // PNG, JPEG, HEICなど自動判定
+        let img: DynamicImage = load_image(&input).map_err(|e| e.to_string())?;
+
+        // 出力パス決定ロジック
+        let out_path = match output {
+            // Some(path) の場合: pathがファイルかディレクトリかを判定
+            Some(path) => {
+                if path.is_dir() {
+                    // pathがディレクトリの場合:
+                    // 元のファイル名を使って、そのディレクトリ内に保存するパスを生成
+                    let file_name = input
+                        .file_name()
+                        .ok_or_else(|| "Could not get file name from input path".to_string())?;
+
+                    // 新しいファイル名 (例: image.png -> image.webp)
+                    let new_file_name = PathBuf::from(file_name).with_extension("webp");
+
+                    path.join(new_file_name)
+                } else {
+                    // pathがファイルの場合:
+                    // そのまま出力パスとして使用
+                    path
+                }
+            }
+            // None の場合: 元のファイルと同じディレクトリに保存
+            None => {
+                let parent = input.parent().ok_or("Invalid file path".to_string())?;
+                let filename = input
+                    .file_stem()
+                    .ok_or("Invalid file name".to_string())?
+                    .to_string_lossy();
+                parent.join(format!("{}.webp", filename))
+            }
+        };
+
+        // overwriteのチェック (このロジックは元から正しい)
+        if out_path.exists() && !overwrite {
+            return Err(format!(
+                "File '{}' already exists.",
+                out_path.to_string_lossy()
+            ));
+        }
 
         // WebP に変換
         let encoded = encode_webp(&img, quality).map_err(|e| e.to_string())?;
 
-        // 出力先: 元ファイルと同じディレクトリに保存
-        let parent = input.parent().ok_or("Invalid file path".to_string())?;
-        let filename = input
-            .file_stem()
-            .ok_or("Invalid file name".to_string())?
-            .to_string_lossy();
-        let out_path = output.unwrap_or(parent.join(format!("{}.webp", filename)));
-
         // 書き込み
         std::fs::write(&out_path, &encoded).map_err(|e| e.to_string())?;
+
         Ok(())
     })
     .await
     .map_err(|e| e.to_string())??;
+
     Ok(true)
 }
 

@@ -22,7 +22,7 @@ export default defineConfigWithVueTs(
     name: 'app/files-to-lint',
     files: ['**/*.{ts,mts,tsx,vue}']
   },
-  globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**']),
+  globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**', '**/src-tauri/**']),
   pluginVue.configs['flat/recommended'],
   ...pluginVueA11y.configs['flat/recommended'],
   vueTsConfigs.recommended,

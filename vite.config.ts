@@ -1,9 +1,11 @@
 import { writeFileSync } from 'node:fs';
+import path from 'node:path';
 import { fileURLToPath, URL } from 'node:url';
 
 import vue from '@vitejs/plugin-vue';
 import { defineConfig, type UserConfig } from 'vite';
 
+import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { checker } from 'vite-plugin-checker';
 import vueDevTools from 'vite-plugin-vue-devtools';
@@ -46,6 +48,13 @@ export default defineConfig(({ command, mode }): UserConfig => {
         // vueTsc: true,
         // eslint: { lintCommand: 'eslint' },
         // stylelint: { lintCommand: 'stylelint' },
+      }),
+      VueI18nPlugin({
+        // trueにすると、<i18n>ブロックの警告が出なくなります
+        // See https://github.com/intlify/bundle-tools/issues/22
+        compositionOnly: false,
+        // <i18n>カスタムブロックを持つファイルを指定
+        include: path.resolve(__dirname, './src/**/*.vue') // <-- 自分のプロジェクトの構造に合わせてパスを調整してください
       })
     ],
     // Resolver

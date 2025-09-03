@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" class="h-100">
   <head>
     <meta charset="utf-8" />
@@ -23,17 +23,11 @@
       content="DropWebP is a drag-and-drop tool for converting image files to WebP format."
     />
     <meta property="fb:app_id" content="129144050466298" />
-    <meta
-      property="article:publisher"
-      content="https://www.facebook.com/logue256"
-    />
+    <meta property="article:publisher" content="https://www.facebook.com/logue256" />
     <meta name="twitter:card" content="Summary" />
     <meta name="twitter:site" content="@logue256" />
     <meta name="twitter:title" content="DropWebP" />
-    <meta
-      name="twitter:url"
-      content="https://https://logue.github.io/DropWebP/"
-    />
+    <meta name="twitter:url" content="https://https://logue.github.io/DropWebP/" />
     <meta
       name="twitter:description"
       content="DropWebP is a drag-and-drop tool for converting image files to WebP format. #webp #dropwebp"
@@ -43,17 +37,14 @@
       content="https://github.com/logue/DropWebP/raw/master/DropWebP/Resources/vise.png"
     />
     <!-- Google tag (gtag.js) -->
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=G-2Y2FW3QEG4"
-    ></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-2Y2FW3QEG4"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag() {
         dataLayer.push(arguments);
       }
-      gtag("js", new Date());
-      gtag("config", "G-2Y2FW3QEG4");
+      gtag('js', new Date());
+      gtag('config', 'G-2Y2FW3QEG4');
     </script>
 
     <!-- Bootstrap core CSS -->
@@ -104,15 +95,15 @@
           <div id="navbarCollapse" class="collapse navbar-collapse flex-grow-0">
             <ul class="navbar-nav">
               <li class="nav-item active">
-                <a class="nav-link" href="#"
-                  >Document
+                <a class="nav-link" href="#">
+                  Document
                   <span class="sr-only">(current)</span>
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="https://github.com/logue/DropWebP/"
-                  ><i class="bi bi-github"></i
-                ></a>
+                <a class="nav-link" href="https://github.com/logue/DropWebP/">
+                  <i class="bi bi-github"></i>
+                </a>
               </li>
             </ul>
           </div>
@@ -125,40 +116,32 @@
       <div class="container">
         <h1>DropWebP</h1>
         <p class="lead">
-          DropWebP is a drag-and-drop tool for converting image files to WebP
-          format.
+          DropWebP is a drag-and-drop tool for converting image files to WebP format.
         </p>
 
         <article>
           <h2>What is WebP?</h2>
           <p>
-            WebP is a next-generation image format developed by Google and is
-            compatible with all current browsers as of 2021. Google, the
-            developer of WebP, has announced that it can be about 26% lighter
-            than PNG and 25-34% lighter than JPG with almost the same image
+            WebP is a next-generation image format developed by Google and is compatible with all
+            current browsers as of 2021. Google, the developer of WebP, has announced that it can be
+            about 26% lighter than PNG and 25-34% lighter than JPG with almost the same image
             quality.
           </p>
           <p>
-            When I tried it, I converted an uncompressed 4K quality PNG file
-            that was originally 12.9M to non-degraded WebP, and I was able to
-            reduce it to 7.85MB. The recommended value is 95% lossy compression,
-            but in that case it will be around 1.32M.
+            When I tried it, I converted an uncompressed 4K quality PNG file that was originally
+            12.9M to non-degraded WebP, and I was able to reduce it to 7.85MB. The recommended value
+            is 95% lossy compression, but in that case it will be around 1.32M.
           </p>
         </article>
         <article>
           <h2>Sample</h2>
-          <p>
-            The sample used here is a PNG image with a resolution of 3860x2160.
-          </p>
+          <p>The sample used here is a PNG image with a resolution of 3860x2160.</p>
           <section>
             <h3>Original and Lossless</h3>
             <p>Lossless compression of an image halves its capacity.</p>
             <figure class="compare">
               <div class="d-none">
-                <img
-                  src="assets/original.png"
-                  alt="Original PNG (3860x2160 10.7M)"
-                />
+                <img src="assets/original.png" alt="Original PNG (3860x2160 10.7M)" />
               </div>
               <div>
                 <img src="assets/lossless.webp" alt="WebP Lossless (6.49M)" />
@@ -168,40 +151,30 @@
           <section>
             <h3>Original and Lossy WebP (95%)</h3>
             <p>
-              In the case of lossy compression, even if the quality is 95%, the
-              capacity is about 1/10.
+              In the case of lossy compression, even if the quality is 95%, the capacity is about
+              1/10.
             </p>
             <figure class="compare">
               <div class="d-none">
-                <img
-                  src="assets/original.png"
-                  alt="Original PNG (3860x2160 10.7M)"
-                />
+                <img src="assets/original.png" alt="Original PNG (3860x2160 10.7M)" />
               </div>
               <div>
-                <img
-                  src="assets/compressed.webp"
-                  alt="WebP Lossy 95% (1.15M)"
-                />
+                <img src="assets/compressed.webp" alt="WebP Lossy 95% (1.15M)" />
               </div>
             </figure>
           </section>
           <section>
             <h3>Lossy WebP and JPEG highest</h3>
             <p>
-              The capacity of WebP at the time of lossless compression is almost
-              the same as the capacity at the time of the highest quality of
-              JPEG.
+              The capacity of WebP at the time of lossless compression is almost the same as the
+              capacity at the time of the highest quality of JPEG.
             </p>
             <figure class="compare">
               <div class="d-none">
                 <img src="assets/compressed.jpg" alt="Jpeg Highest (6.24M)" />
               </div>
               <div>
-                <img
-                  src="assets/compressed.webp"
-                  alt="WebP Lossy 95% (1.15M)"
-                />
+                <img src="assets/compressed.webp" alt="WebP Lossy 95% (1.15M)" />
               </div>
             </figure>
           </section>
@@ -242,7 +215,7 @@
 
     <script>
       $(document).ready(() => {
-        $(".compare").imagesCompare();
+        $('.compare').imagesCompare();
       });
     </script>
   </body>

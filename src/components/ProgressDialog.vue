@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import type { PropType } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 defineProps({
   dialog: { type: Boolean, default: false },
@@ -8,7 +11,7 @@ defineProps({
   progress: {
     type: Number as PropType<number | string | undefined>,
     required: false,
-    default: undefined
+    default: null
   },
   inProgress: { type: Boolean, default: false }
 });
@@ -20,10 +23,15 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <v-dialog :model-value="dialog" width="auto" @update:model-value="emit('update:dialog', $event)">
+  <v-dialog
+    :model-value="dialog"
+    width="auto"
+    style="cursor: wait"
+    @update:model-value="emit('update:dialog', $event)"
+  >
     <v-card width="512" prepend-icon="mdi-arrow-collapse-vertical" :title="title">
       <template #actions>
-        <v-btn class="ms-auto" text="Cancel" @click="emit('update:inProgress', false)" />
+        <v-btn class="ms-auto" :text="t('cancel')" @click="emit('update:inProgress', false)" />
       </template>
       <v-card-text>
         {{ currentFile }}
@@ -41,3 +49,10 @@ const emit = defineEmits<{
     </v-card>
   </v-dialog>
 </template>
+
+<i18n lang="yaml">
+en:
+  cancel: Cancel
+ja:
+  cancel: キャンセル
+</i18n>
