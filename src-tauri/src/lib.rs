@@ -1,13 +1,14 @@
 mod decoder;
 
-use std::{
-    error::Error, ffi::c_void, io::Cursor, path::Path, ptr::null_mut, slice::from_raw_parts,
-};
-
 use exif::{In, Reader as ExifReader, Tag};
 use image::{DynamicImage, RgbaImage, imageops::*};
+use imgref::Img;
 use libwebp_sys::{
     WebPEncodeLosslessRGB, WebPEncodeLosslessRGBA, WebPEncodeRGB, WebPEncodeRGBA, WebPFree,
+};
+use rgb::{RGB8, RGBA8};
+use std::{
+    error::Error, ffi::c_void, io::Cursor, path::Path, ptr::null_mut, slice::from_raw_parts,
 };
 
 /// 画像を読み込んでDynamicImageに変換する
@@ -40,7 +41,10 @@ pub fn load_image(path: &Path) -> Result<DynamicImage, Box<dyn Error>> {
 /// - 失敗した場合は `Box<dyn Error>` を返します。
 /// # 注意
 /// - `libwebp-sys` クレートを使用して WebP エンコードを行います。事前に `libwebp` ライブラリがシステムにインストールされている必要があります。
-pub fn encode_webp(img: &DynamicImage, quality: i32) -> Result<Vec<u8>, Box<dyn Error>> {
+pub fn convert_dynamic_image_to_webp(
+    img: &DynamicImage,
+    quality: i32,
+) -> Result<Vec<u8>, Box<dyn Error>> {
     if quality < 0 || quality > 100 {
         return Err("Quality must be between 0 and 100".into());
     }
@@ -139,6 +143,71 @@ pub fn correct_orientation(img: &RgbaImage, data: &[u8]) -> RgbaImage {
     } else {
         img.clone()
     }
+}
+
+/// DynamicImage を AVIF 形式のバイトデータに変換する (raif クレート使用)
+///
+/// # Arguments
+/// * `dynamic_image` - 変換元のDynamicImage
+/// * `quality` - 品質 (0-100)。0は可逆圧縮、100は最高品質。
+/// * `alpha_quality` - アルファチャンネルの品質
+/// * `speed` - エンコード速度 (0-10)。0は最高品質で最も遅い、10は最速。
+pub fn convert_dynamic_image_to_avif(
+    img: &DynamicImage,
+    quality: u8,
+    alpha_quality: u8,
+    speed: u8,
+) -> Result<Vec<u8>, Box<dyn Error>> {
+    // エンコーダーの設定は先に済ませておく
+    let encoder = ravif::Encoder::new()
+        .with_quality(quality as f32)
+        .with_speed(speed)
+        .with_alpha_quality(alpha_quality as f32);
+
+    // DynamicImageの具体的な型でマッチングして処理を分岐
+    let encoded_avif = match img {
+        // --- RGB8形式の場合 ---
+        DynamicImage::ImageRgb8(rgb_image) => {
+            println!("Optimized path: Encoding as RGB...");
+            let width = rgb_image.width() as usize;
+            let height = rgb_image.height() as usize;
+
+            // &[u8] を &[RGB8] に変換
+            let pixels_rgb8: &[RGB8] = bytemuck::cast_slice(rgb_image.as_raw());
+            let image_view = Img::new(pixels_rgb8, width, height);
+
+            // encode_rgb を使用
+            encoder.encode_rgb(image_view)?
+        }
+        // --- RGBA8形式の場合 ---
+        DynamicImage::ImageRgba8(rgba_image) => {
+            println!("Standard path: Encoding as RGBA...");
+            let width = rgba_image.width() as usize;
+            let height = rgba_image.height() as usize;
+
+            // &[u8] を &[RGBA8] に変換
+            let pixels_rgba8: &[RGBA8] = bytemuck::cast_slice(rgba_image.as_raw());
+            let image_view = Img::new(pixels_rgba8, width, height);
+
+            // encode_rgba を使用
+            encoder.encode_rgba(image_view)?
+        }
+        // --- その他の形式の場合 (Luma8, Bgr8など) ---
+        // 汎用的なRGBA8に変換してから処理する（フォールバック）
+        _ => {
+            println!("Fallback path: Converting to RGBA then encoding...");
+            let rgba_image = img.to_rgba8();
+            let width = rgba_image.width() as usize;
+            let height = rgba_image.height() as usize;
+
+            let pixels_rgba8: &[RGBA8] = bytemuck::cast_slice(rgba_image.as_raw());
+            let image_view = Img::new(pixels_rgba8, width, height);
+
+            encoder.encode_rgba(image_view)?
+        }
+    };
+
+    Ok(encoded_avif.avif_file)
 }
 
 // End of file src-tauri/src/lib.rs

@@ -18,16 +18,20 @@ name = "drop_webp_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
+cc = "1.2.35"
 pkg-config = "0.3.32"
 tauri-build = { version = "2.4.0", features = [] }
-cc = "1.2.35"                                      # FFIビルド用
 
 [dependencies]
+bytemuck = "1.23.2"
 image = "0.25.6"
+imgref = "1.11.0"
+jpeg2k = "0.10.1"
 kamadak-exif = "0.6.1"
 libheif-rs = "2.3.0"
 libwebp-sys = "0.13.3"
-jpeg2k = "0.10.1"
+ravif = "0.12.0"
+rgb = "0.8.52"
 tauri = { version = "2.8.4", features = [] }
 tauri-plugin-dialog = "2.3.3"
 tauri-plugin-fs = "2.4.2"

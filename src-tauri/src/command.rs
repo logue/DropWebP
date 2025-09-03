@@ -1,4 +1,4 @@
-use drop_webp_lib::{correct_orientation, encode_webp, load_image};
+use drop_webp_lib::{convert_dynamic_image_to_webp, correct_orientation, load_image};
 use image::DynamicImage;
 use std::{fs, io::Cursor, path::PathBuf};
 
@@ -90,7 +90,7 @@ pub async fn convert_image(
         }
 
         // WebP に変換
-        let encoded = encode_webp(&img, quality).map_err(|e| e.to_string())?;
+        let encoded = convert_dynamic_image_to_webp(&img, quality).map_err(|e| e.to_string())?;
 
         // 書き込み
         std::fs::write(&out_path, &encoded).map_err(|e| e.to_string())?;
@@ -130,8 +130,8 @@ pub async fn convert_u8i(data: Vec<u8>, output: PathBuf, quality: i32) -> Result
         let img = correct_orientation(&img, &data);
 
         // WebP に変換
-        let encoded =
-            encode_webp(&DynamicImage::ImageRgba8(img), quality).map_err(|e| e.to_string())?;
+        let encoded = convert_dynamic_image_to_webp(&DynamicImage::ImageRgba8(img), quality)
+            .map_err(|e| e.to_string())?;
         // 書き込み
         std::fs::write(&output, &encoded).map_err(|e| e.to_string())?;
         Ok(())
