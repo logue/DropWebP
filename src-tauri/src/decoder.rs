@@ -1,22 +1,86 @@
-use image::{DynamicImage, ImageBuffer, Rgba};
+use image::{DynamicImage, ImageBuffer, ImageFormat, Rgba};
 use libheif_rs::{HeifContext, LibHeif};
 use std::error::Error;
-use std::path::Path;
+
+/// バイトデータから画像をデコードし、DynamicImageとして返す
+/// サポートする形式: HEIC, JPEG 2000, そして imageクレートが対応する形式
+/// # 引数
+/// - `image_bytes`: 画像のバイトデータ
+/// # 戻り値
+/// - 成功した場合は `DynamicImage` を返します。
+/// - 失敗した場合は `Box<dyn Error>` を返します。
+pub fn decode(image_bytes: Vec<u8>) -> Result<DynamicImage, Box<dyn Error>> {
+    // まず、バイトデータから画像形式を判別する
+    let format = detect_format(&image_bytes)
+        .ok_or_else(|| "Unsupported or unknown image format".to_string())?;
+
+    // 判別した形式に応じて、適切なデコーダーを呼び出す
+    let dynamic_image = match format {
+        DetectedFormat::Heic => heif_to_dynamic_image(&image_bytes),
+        // DetectedFormat::Exr => exr_to_dynamic_image(&image_bytes),
+        DetectedFormat::Exr => return Err("EXR format is not supported in this version".into()),
+        DetectedFormat::Jpeg2000 => jpeg2k_to_dynamic_image(&image_bytes),
+
+        // imageクレートが対応している形式の場合
+        DetectedFormat::Standard(image_format) => {
+            image::load_from_memory_with_format(&image_bytes, image_format)
+                .map_err(|e| e.to_string().into())
+        }
+    }
+    .map_err(|e| e.to_string())?;
+
+    Ok(dynamic_image)
+}
+
+// 独自の形式を定義するためのenum
+enum DetectedFormat {
+    Heic,
+    Exr,
+    Jpeg2000,
+    // imageクレートがサポートするその他の形式
+    Standard(ImageFormat),
+}
+
+/// バイトデータのマジックナンバーから画像形式を判別する
+fn detect_format(bytes: &[u8]) -> Option<DetectedFormat> {
+    // HEIC/AVIF (ISOBMFFコンテナ) のチェック
+    // ftyp ボックスが "heic", "heix", "avif" などを含むか
+    if bytes.len() > 12 && &bytes[4..8] == b"ftyp" {
+        let ftyp = &bytes[8..12];
+        if ftyp == b"heic" || ftyp == b"heix" || ftyp == b"hevc" || ftyp == b"heim" {
+            return Some(DetectedFormat::Heic);
+        }
+        // AVIFの判別もここに追加できる
+        if ftyp == b"avif" || ftyp == b"avis" {
+            // AVIFの場合はimageクレートが扱えるのでStandardに流す
+            if let Ok(format) = image::guess_format(bytes) {
+                return Some(DetectedFormat::Standard(format));
+            }
+        }
+    }
+    // EXRのチェック
+    if bytes.starts_with(&[0x76, 0x2f, 0x31, 0x01]) {
+        return Some(DetectedFormat::Exr);
+    }
+
+    // JPEG 2000のチェック
+    if bytes.starts_with(b"\x00\x00\x00\x0CjP  \r\n\x87\n") {
+        return Some(DetectedFormat::Jpeg2000);
+    }
+
+    // 上記のいずれでもない場合、imageクレートの形式推測に任せる
+    if let Ok(format) = image::guess_format(bytes) {
+        return Some(DetectedFormat::Standard(format));
+    }
+
+    None
+}
 
 /// HEIFファイルを読み込み、DynamicImageに変換する関数
-pub fn heif_to_dynamic_image<P: AsRef<Path>>(
-    path: P,
-) -> std::result::Result<DynamicImage, Box<dyn Error>> {
+fn heif_to_dynamic_image(bytes: &[u8]) -> Result<DynamicImage, Box<dyn Error>> {
     let lib_heif = LibHeif::new();
 
-    // --- 修正点 1: unwrap() を安全なエラーハンドリングに変更 ---
-    // path.as_ref().to_str() は、パスがUTF-8でない場合にNoneを返すため、unwrap()は危険です。
-    let path_str = path
-        .as_ref()
-        .to_str()
-        .ok_or("Path contains invalid UTF-8 characters")?;
-
-    let ctx = HeifContext::read_from_file(path_str)?;
+    let ctx = HeifContext::read_from_bytes(bytes)?;
     let handle = ctx.primary_image_handle()?;
     let img = lib_heif.decode(
         &handle,
@@ -38,11 +102,9 @@ pub fn heif_to_dynamic_image<P: AsRef<Path>>(
 }
 
 /// JPEG 2000 ファイルを読み込み、DynamicImageに変換する
-pub fn jpeg2000_to_dynamic_image<P: AsRef<Path>>(
-    path: P,
-) -> std::result::Result<DynamicImage, Box<dyn Error>> {
-    // Load jpeg 2000 file from file.
-    let jp2_image = jpeg2k::Image::from_file(path).expect("Failed to load j2k file.");
+fn jpeg2k_to_dynamic_image(bytes: &[u8]) -> Result<DynamicImage, Box<dyn Error>> {
+    // Use the `jpeg2k` crate to decode JPEG 2000 from bytes
+    let jp2_image = jpeg2k::Image::from_bytes(bytes)?;
 
     let width = jp2_image.width();
     let height = jp2_image.height();

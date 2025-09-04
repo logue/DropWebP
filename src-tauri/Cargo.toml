@@ -1,7 +1,7 @@
 [package]
-name = "drop-webp"
+name = "drop-comporess-image"
 version = "2.0.0"
-description = "DropWebP is a desktop application that converts images to WebP format using drag-and-drop functionality. Built with Vite, Vue 3, TypeScript, and Tauri."
+description = "DropCompressImage is a desktop application that converts images to WebP format using drag-and-drop functionality. Built with Vite, Vue 3, TypeScript, and Tauri."
 authors = ["Logue"]
 license = "MIT"
 repository = "https://github.com/logue/DropWebP"
@@ -14,17 +14,17 @@ rust-version = "1.89.0"
 # The `_lib` suffix may seem redundant but it is necessary
 # to make the lib name unique and wouldn't conflict with the bin name.
 # This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
-name = "drop_webp_lib"
+name = "drop_compress_image_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
 cc = "1.2.35"
 pkg-config = "0.3.32"
-tauri-build = { version = "2.4.0", features = [] }
+tauri-build = { version = "2.4.1", features = [] }
 
 [dependencies]
 bytemuck = "1.23.2"
-image = "0.25.6"
+image = "0.25.8"
 imgref = "1.11.0"
 jpeg2k = "0.10.1"
 kamadak-exif = "0.6.1"
@@ -32,8 +32,9 @@ libheif-rs = "2.3.0"
 libwebp-sys = "0.13.3"
 ravif = "0.12.0"
 rgb = "0.8.52"
-tauri = { version = "2.8.4", features = [] }
-tauri-plugin-dialog = "2.3.3"
+serde = "1.0.219"
+tauri = { version = "2.8.5", features = [] }
+tauri-plugin-dialog = "2.4.0"
 tauri-plugin-fs = "2.4.2"
-tauri-plugin-log = "2.6.0"
+tauri-plugin-log = "2.7.0"
 tauri-plugin-opener = "2.5.0"
