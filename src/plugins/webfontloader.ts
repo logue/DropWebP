@@ -36,7 +36,7 @@ export async function loadFonts(): Promise<void> {
             'Noto+Sans+JP:100,300,400,500,700,900',
             'Noto+Sans+KR:100,300,400,500,700,900',
             'Noto+Sans+Mono:100,300,400,500,700,900',
-
+            'Noto+Sans+TC:100,300,400,500,700,900',
             // Emoji Fix
             // (Only put `display=swap` on the last line.)
             'Noto+Color+Emoji&display=swap'

@@ -27,6 +27,7 @@
     }
   },
   "bundle": {
+    "publisher": "Logue",
     "active": true,
     "targets": "all",
     "icon": [

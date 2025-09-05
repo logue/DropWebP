@@ -54,9 +54,10 @@ impl AlphaColorMode {
 }
 
 /// AVIF形式のオプション
+/// lossless: true/false (可逆圧縮を使うかどうか)
 /// quality: 0-100 (0は可逆圧縮、100は最高品質)
 /// bit_depth: ビット深度 (BitDepth::Auto, BitDepth::Eight, BitDepth::Ten, BitDepth::Twelve)
-/// alpha_quality: アルファチャンネルの品質 (0-100)
+/// alpha_quality: アルファチャンネルの品質 (0は可逆圧縮、100は最高品質)
 /// speed: エンコード速度 (0-10)。0は最高品質で最も遅い、10は最速。
 /// color_model: カラーモデル (ColorModel::YCbCr, ColorModel::RGB)
 /// threads: 使用するスレッド数 (Noneの場合は自動設定)
@@ -69,6 +70,7 @@ impl AlphaColorMode {
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct AvifOptions {
+    pub lossless: bool,
     pub quality: f32,
     pub bit_depth: BitDepth,
     pub alpha_quality: f32,
@@ -98,6 +100,10 @@ pub struct EncodeOptions {
     // 将来的にJPEG EXRのオプションもここに追加できる
 }
 
+/// ファイルパス情報
+/// file_name: ファイル名 (拡張子含む)
+/// extension: 拡張子 (ドット無し)
+/// parent_dir: 親ディレクトリのパス
 #[derive(serde::Serialize)]
 #[serde(rename_all = "camelCase")] // JS側でキャメルケースになるように設定
 pub struct PathInfo {

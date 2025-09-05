@@ -34,4 +34,8 @@ en:
   title: 'About'
 ja:
   title: 'このアプリケーションについて'
+kr:
+  title: '정보'
+zh:
+  title: '關於'
 </i18n>

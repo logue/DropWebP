@@ -16,10 +16,7 @@
     {
       "identifier": "fs:scope",
       "allow": [
-        "$APP/**",
-        "$DOCUMENT/**/*",
-        "$DESKTOP/**/*",
-        "$DOWNLOAD/**/*"
+        "**"
       ]
     }
   ]

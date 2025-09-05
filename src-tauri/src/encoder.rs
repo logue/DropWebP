@@ -8,6 +8,16 @@ use ravif::{AlphaColorMode, BitDepth, ColorModel, Encoder};
 use rgb::{RGB8, RGBA8};
 use std::{error::Error, ffi::c_void, ptr::null_mut, slice::from_raw_parts};
 
+/// 画像を指定された形式でエンコードします。
+/// # 引数
+/// - `img`: 変換対象の画像 (DynamicImage)
+/// - `options`: エンコードオプション (options::EncodeOptions)
+/// # 戻り値
+/// - 成功した場合はエンコードされたバイト列を `Vec<u8>` として返します。
+/// - 失敗した場合は `Box<dyn Error>` を返します。
+/// # 注意
+/// - AVIF形式のエンコードには `ravif` クレートを使用しています。ビルド時に `libavif` ライブラリがシステムにインストールされている必要があります。
+/// - WebP形式のエンコードには `libwebp-sys` クレートを使用しています。ビルド時に `libwebp` ライブラリがシステムにインストールされている必要があります。
 pub fn encode(
     img: &DynamicImage,
     options: options::EncodeOptions,
@@ -17,6 +27,21 @@ pub fn encode(
         println!("Adapter: Converting AvifOptions for ravif encoder...");
 
         // ravifを使ったエンコード処理...
+        if avif_opts.lossless {
+            println!("Lossless encoding selected, setting quality to 0.");
+            // 可逆圧縮を選択した場合、品質を0に設定
+            return convert_dynamic_image_to_avif(
+                img,
+                0.0,
+                avif_opts.bit_depth.to_ravif(),
+                0.0, // アルファ品質も0に設定
+                avif_opts.speed,
+                avif_opts.color_model.to_ravif(),
+                avif_opts.threads,
+                avif_opts.alpha_color_mode.to_ravif(),
+            );
+        }
+
         return convert_dynamic_image_to_avif(
             img,
             avif_opts.quality,
@@ -144,14 +169,27 @@ fn convert_dynamic_image_to_avif(
     alpha_color_mode: AlphaColorMode,
 ) -> Result<Vec<u8>, Box<dyn Error>> {
     // エンコーダーの設定は先に済ませておく
-    let encoder = Encoder::new()
-        .with_quality(quality)
-        .with_bit_depth(bit_depth)
-        .with_internal_color_model(color_model)
-        .with_num_threads(threads)
-        .with_alpha_color_mode(alpha_color_mode)
-        .with_speed(speed)
-        .with_alpha_quality(alpha_quality);
+    let encoder;
+    if quality < 1.0 {
+        // TODO: 可逆圧縮の実装
+        encoder = Encoder::new()
+            // .with_lossless()
+            .with_bit_depth(bit_depth)
+            .with_internal_color_model(color_model)
+            .with_num_threads(threads)
+            .with_alpha_color_mode(alpha_color_mode)
+            .with_speed(speed);
+    } else {
+        // 通常の品質設定
+        encoder = Encoder::new()
+            .with_quality(quality)
+            .with_bit_depth(bit_depth)
+            .with_internal_color_model(color_model)
+            .with_num_threads(threads)
+            .with_alpha_color_mode(alpha_color_mode)
+            .with_speed(speed)
+            .with_alpha_quality(alpha_quality);
+    }
 
     // DynamicImageの具体的な型でマッチングして処理を分岐
     let encoded_avif = match img {

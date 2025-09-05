@@ -7,7 +7,12 @@ const settingsStore = useSettingsStore();
 </script>
 
 <template>
-  <v-switch v-model="settingsStore.webpOptions.lossless" :label="t('lossless')" color="primary" />
+  <v-switch
+    v-model="settingsStore.webpOptions.lossless"
+    :label="t('lossless')"
+    color="primary"
+    inline
+  />
   <v-slider
     v-model="settingsStore.webpOptions.quality"
     :disabled="settingsStore.webpOptions.lossless"
@@ -32,4 +37,12 @@ ja:
   lossless: 'ロスレス'
   quality: '品質 (0-100)'
   reset_webp_options: 'WebPオプションをリセット'
+kr:
+  lossless: '무손실'
+  quality: '품질 (0-100)'
+  reset_webp_options: 'WebP 옵션 재설정'
+zh:
+  lossless: '無損'
+  quality: '質量 (0-100)'
+  reset_webp_options: '重置 WebP 選項'
 </i18n>

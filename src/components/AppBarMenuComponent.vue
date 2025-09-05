@@ -51,4 +51,14 @@ ja:
   about: '{appname}について'
   locale: '言語を選択'
   toggle-dark-mode: 'ダークモードを切り替え'
+kr:
+  title: 'Drop Compress Image'
+  about: '{appname} 정보'
+  locale: '언어 선택'
+  toggle-dark-mode: '다크 모드 전환'
+zh:
+  title: 'Drop Compress Image'
+  about: '關於 {appname}'
+  locale: '選擇語言'
+  toggle-dark-mode: '切換深色模式'
 </i18n>

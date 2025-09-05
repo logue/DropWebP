@@ -57,4 +57,14 @@ ja:
   common_options: '共通設定'
   webp_options: 'WebP設定'
   avif_options: 'AVIF設定'
+kr:
+  settings: '설정'
+  common_options: '공통 설정'
+  webp_options: 'WebP 설정'
+  avif_options: 'AVIF 설정'
+zh:
+  settings: '設置'
+  common_options: '通用設置'
+  webp_options: 'WebP設置'
+  avif_options: 'AVIF設置'
 </i18n>

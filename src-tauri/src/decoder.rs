@@ -9,6 +9,12 @@ use std::error::Error;
 /// # 戻り値
 /// - 成功した場合は `DynamicImage` を返します。
 /// - 失敗した場合は `Box<dyn Error>` を返します。
+/// # 注意
+/// - EXR形式はこのバージョンではサポートされていません
+/// - HEIC形式のデコードには `libheif-rs` クレートを使用しています。ビルド時に `libheif` ライブラリがシステムにインストールされている必要があります。
+/// - JPEG 2000形式のデコードには `jpeg2k` クレートを使用しています。
+///  ただし、このクレートはすべてのJPEG 2000ファイルに対応しているわけではないため、特定のファイルでエラーが発生する可能性があります。
+#[allow(dead_code)]
 pub fn decode(image_bytes: Vec<u8>) -> Result<DynamicImage, Box<dyn Error>> {
     // まず、バイトデータから画像形式を判別する
     let format = detect_format(&image_bytes)

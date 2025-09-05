@@ -10,6 +10,7 @@ import type { WebpOptions } from '@/interfaces/WebpOptions';
 
 // デフォルト設定を定義
 const defaultAvifOptions: AvifOptions = {
+  lossless: false,
   quality: 80.0,
   bitDepth: 'Auto',
   alphaQuality: 80.0,
@@ -36,7 +37,7 @@ const defaultCommonOptions: CommonOptions = {
 
 /** Global Store */
 export default defineStore(
-  'encode_settings',
+  'settings',
   () => {
     // State
 

@@ -56,4 +56,8 @@ en:
   cancel: Cancel
 ja:
   cancel: キャンセル
+kr:
+  cancel: 취소
+zh:
+  cancel: 取消
 </i18n>

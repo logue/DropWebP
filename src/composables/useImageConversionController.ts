@@ -32,6 +32,7 @@ export function useImageConversionController(t: ComposerTranslation) {
         // 拡張子がマッチしない場合はスキップ
         continue;
       }
+      currentFile.value = file;
       try {
         // 汎用コンバーターを呼び出す
         await convert(
