@@ -97,3 +97,11 @@ pub struct EncodeOptions {
     pub webp: Option<WebpOptions>,
     // 将来的にJPEG EXRのオプションもここに追加できる
 }
+
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")] // JS側でキャメルケースになるように設定
+pub struct PathInfo {
+    pub(crate) file_name: Option<String>,
+    pub(crate) extension: Option<String>,
+    pub(crate) parent_dir: Option<String>,
+}

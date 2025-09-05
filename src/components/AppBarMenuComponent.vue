@@ -3,8 +3,8 @@ import { useConfigStore } from '@/store';
 import { type Ref, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import AboutModal from './AboutModal.vue';
 import LocaleSelector from './LocaleSelector.vue';
+import AboutModal from './modals/AboutModal.vue';
 
 const { t } = useI18n();
 /** Config Store */

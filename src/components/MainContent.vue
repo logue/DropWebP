@@ -1,102 +1,25 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 
-import ProgressDialog from './ProgressDialog.vue';
+import ProgressDialog from './modals/ProgressModal.vue';
 
 import { useImageConversionController } from '@/composables/useImageConversionController';
 
 const { t } = useI18n();
 
-const {
-  isLossless,
-  quality,
-  isRecursive,
-  ignoreJpeg,
-  isOverwrite,
-  dialog,
-  inProgress,
-  currentFile,
-  progress,
-  isSameDirectory,
-  isDeleteOriginal,
-  outputPath,
-  browse,
-  convertByDialog,
-  convertByDirDialog
-} = useImageConversionController(t);
+const { dialog, inProgress, currentFile, progress, convertByDialog, convertByDirDialog } =
+  useImageConversionController(t);
 </script>
 
 <template>
   <v-container>
     <h2>{{ t('info') }}</h2>
-    <v-row>
-      <v-col>
-        <v-switch v-model="isRecursive" :label="t('recursive')" color="primary" hide-details />
-      </v-col>
-      <v-col>
-        <v-switch v-model="ignoreJpeg" :label="t('ignore_jpeg')" color="primary" hide-details />
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="3">
-        <v-switch v-model="isLossless" :label="t('lossless')" color="primary" hide-details />
-      </v-col>
-      <v-col cols="9">
-        <v-slider
-          v-model="quality"
-          :disabled="isLossless"
-          :max="100"
-          :min="1"
-          :step="1"
-          color="primary"
-          hide-details
-          :label="t('quality')"
-        >
-          <template #append>
-            <span>{{ quality }}</span>
-          </template>
-        </v-slider>
-      </v-col>
-    </v-row>
-
     <v-btn prepend-icon="mdi-file-multiple" class="mr-2" @click="convertByDialog">
       {{ t('select_files') }}
     </v-btn>
     <v-btn prepend-icon="mdi-folder-open" @click="convertByDirDialog">
       {{ t('select_folder') }}
     </v-btn>
-    <v-row>
-      <v-col>
-        <v-switch
-          v-model="isSameDirectory"
-          :label="t('same_directory')"
-          color="primary"
-          hide-details
-        />
-      </v-col>
-      <v-col>
-        <v-switch v-model="isOverwrite" :label="t('overwrite')" color="primary" hide-details />
-      </v-col>
-      <v-col>
-        <v-switch
-          v-model="isDeleteOriginal"
-          :label="t('delete_original')"
-          color="primary"
-          disabled
-          hide-details
-        />
-      </v-col>
-    </v-row>
-    <v-text-field
-      v-model="outputPath"
-      :label="t('output_path')"
-      readonly
-      :disabled="isSameDirectory"
-    >
-      <template #append>
-        <v-btn variant="flat" icon="mdi-folder-open" @click="browse" />
-      </template>
-    </v-text-field>
   </v-container>
   <progress-dialog
     v-model:dialog="dialog"

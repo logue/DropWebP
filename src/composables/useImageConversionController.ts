@@ -1,20 +1,17 @@
-import { useGlobalStore } from '@/store';
-import { ref, computed, type Ref, nextTick } from 'vue';
+import { useGlobalStore, useSettingsStore } from '@/store';
+import { ref, type Ref, nextTick } from 'vue';
 import type { ComposerTranslation } from 'vue-i18n';
 
 import { listen } from '@tauri-apps/api/event';
-import { documentDir } from '@tauri-apps/api/path';
 import { open } from '@tauri-apps/plugin-dialog';
 
+import { useFileSystem } from './useFileSystem';
 import { useImageConverter } from './useImageConverter'; // 汎用コンバーターをインポート
-
-import { collectFiles } from '@/utilities/collectFiles';
-
-const docDir = await documentDir();
-// ... 他のインポート
 
 export function useImageConversionController(t: ComposerTranslation) {
   const globalStore = useGlobalStore();
+  const fileSystem = useFileSystem();
+  const settingStore = useSettingsStore();
   const { convert } = useImageConverter(); // コアロジックを取得
 
   // --- UIの状態管理 ---
@@ -24,31 +21,6 @@ export function useImageConversionController(t: ComposerTranslation) {
   const progress: Ref<string | number | undefined> = ref(); // 進捗
   // ...
 
-  // --- 変換オプション ---
-  const isLossless = ref(true); // ロスレス
-  const targetFormat = ref<'webp' | 'avif'>('webp'); // フォーマットを選択できるように
-  const ignoreJpeg = ref(false); // JPEGを無視
-  const isOverwrite = ref(true); // 上書き
-  const quality = ref(80); // 品質
-  const isRecursive = ref(false); // サブディレクトリを含むか
-  const isSameDirectory = ref(true); // 同じディレクトリに出力するか
-  const isDeleteOriginal = ref(false); // オリジナルを削除するか
-  const outputPath: Ref<string | null> = ref(docDir); // 出力先
-  // ...
-
-  // 拡張子のマッチパターン
-  const imageRegExp = computed(() =>
-    ignoreJpeg.value
-      ? /\.(png|gif|tif?f|bmp|heic|heif|jp2|j2k)$/i
-      : /\.(jpe?g|png|gif|tif?f|bmp|heic|heif|jp2|j2k)$/i
-  );
-  const browse = async () => {
-    outputPath.value = await open({
-      multiple: false,
-      directory: true
-    });
-  };
-
   // 変換処理
   const processFiles = async (files: string[]) => {
     dialog.value = true;
@@ -57,19 +29,16 @@ export function useImageConversionController(t: ComposerTranslation) {
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      if (!file) {
+      if (!file || settingStore.extensionPattern.test(file)) {
         continue;
       }
       try {
         // 汎用コンバーターを呼び出す
         await convert(
-          targetFormat.value,
           file,
-          isSameDirectory.value ? null : outputPath.value,
-          isOverwrite.value,
-          {
-            quality: isLossless.value ? 100 : quality.value
-          }
+          settingStore.commonOptions.sameDirectory
+            ? undefined
+            : settingStore.commonOptions.outputPath
         );
       } catch (e: unknown) {
         if (e instanceof Error) {
@@ -91,7 +60,11 @@ export function useImageConversionController(t: ComposerTranslation) {
   // D&D
   listen('tauri://drag-drop', async e => {
     const inputs = (e.payload as { paths: string[] }).paths;
-    const files = await collectFiles(inputs, imageRegExp.value, isRecursive.value);
+    const files = await fileSystem.collectFiles(
+      inputs,
+      settingStore.extensionPattern,
+      settingStore.commonOptions.recursive
+    );
     if (!files.length) {
       globalStore.setMessage(t('error.no_images_found_dropped'));
       return;
@@ -125,7 +98,11 @@ export function useImageConversionController(t: ComposerTranslation) {
     });
     if (!selected) return;
     const paths = Array.isArray(selected) ? selected : [selected];
-    const files = await collectFiles(paths, imageRegExp.value, isRecursive.value);
+    const files = await fileSystem.collectFiles(
+      paths,
+      settingStore.extensionPattern,
+      settingStore.commonOptions.recursive
+    );
 
     if (!files.length) {
       globalStore.setMessage(t('error.no_images_found_selected'));
@@ -146,7 +123,11 @@ export function useImageConversionController(t: ComposerTranslation) {
     currentFile.value = t('scanning');
     await nextTick();
 
-    const files = await collectFiles(dir, imageRegExp.value, isRecursive.value);
+    const files = await fileSystem.collectFiles(
+      dir,
+      settingStore.extensionPattern,
+      settingStore.commonOptions.recursive
+    );
 
     if (!files.length) {
       dialog.value = false;
@@ -164,20 +145,11 @@ export function useImageConversionController(t: ComposerTranslation) {
 
   return {
     // state
-    isLossless,
-    quality,
-    isRecursive,
-    ignoreJpeg,
-    isOverwrite,
     dialog,
     inProgress,
     currentFile,
     progress,
-    isSameDirectory,
-    outputPath,
-    isDeleteOriginal,
     // methods
-    browse,
     convertByDialog,
     convertByDirDialog
   };
