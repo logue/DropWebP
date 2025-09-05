@@ -28,6 +28,7 @@ pub fn encode(
             avif_opts.alpha_color_mode.to_ravif(),
         );
     } else if let Some(webp_opts) = options.webp {
+        println!("Adapter: Converting WebpOptions for libwebp_sys encoder...");
         return convert_dynamic_image_to_webp(img, webp_opts.quality, webp_opts.lossless);
     }
     Ok(vec![]) // 仮の戻り値
@@ -82,6 +83,7 @@ fn convert_dynamic_image_to_webp(
         // WebP にエンコード
         // qualityが100の場合はロスレスエンコードを使用
         let len = if is_rgba {
+            println!("Optimized path: Encoding as RGBA...");
             // RGBA圧縮
             if lossless == true {
                 WebPEncodeLosslessRGBA(raw.as_ptr(), width, height, stride, &mut out_buf)
@@ -89,6 +91,7 @@ fn convert_dynamic_image_to_webp(
                 WebPEncodeRGBA(raw.as_ptr(), width, height, stride, quality, &mut out_buf)
             }
         } else {
+            println!("Optimized path: Encoding as RGB...");
             // RGB圧縮
             if lossless == true {
                 WebPEncodeLosslessRGB(raw.as_ptr(), width, height, stride, &mut out_buf)
@@ -107,6 +110,8 @@ fn convert_dynamic_image_to_webp(
 
         // C 側で確保されたメモリを解放
         WebPFree(out_buf as *mut c_void);
+
+        println!("Finished encoding WebP.");
 
         Ok(result)
     }
@@ -190,6 +195,7 @@ fn convert_dynamic_image_to_avif(
             encoder.encode_rgba(image_view)?
         }
     };
+    println!("Finished encoding AVIF.");
 
     Ok(encoded_avif.avif_file)
 }

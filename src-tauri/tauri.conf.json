@@ -1,9 +1,9 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "drop-webp",
-  "mainBinaryName": "DropWebP",
+  "productName": "drop-compress-image",
+  "mainBinaryName": "Drop Compress Image",
   "version": "2.0.0",
-  "identifier": "dev.logue.drop-webp",
+  "identifier": "dev.logue.drop-compress-image",
   "build": {
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://localhost:1420",
@@ -13,7 +13,7 @@
   "app": {
     "windows": [
       {
-        "title": "DropWebP",
+        "title": "Drop Compress Image",
         "width": 640,
         "height": 480,
         "resizable": true,

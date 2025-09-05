@@ -1,31 +1,35 @@
 <script setup lang="ts">
 import { useSettingsStore } from '@/store';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const settingsStore = useSettingsStore();
 </script>
 
 <template>
-  <v-card class="pa-4">
-    <v-card-text>
-      <v-row class="mb-4">
-        <v-col cols="12" sm="6">
-          <v-switch v-model="settingsStore.webpOptions.lossless" label="ロスレス" />
-        </v-col>
-        <v-col cols="12" sm="6">
-          <v-slider
-            v-model="settingsStore.webpOptions.quality"
-            label="品質 (0-100)"
-            type="number"
-            :min="0"
-            :max="100"
-            step="1"
-            :disabled="settingsStore.webpOptions.lossless"
-          />
-        </v-col>
-      </v-row>
-    </v-card-text>
-    <v-card-actions>
-      <v-btn @click="settingsStore.resetWebpOptions()">WebPオプションをリセット</v-btn>
-    </v-card-actions>
-  </v-card>
+  <v-switch v-model="settingsStore.webpOptions.lossless" :label="t('lossless')" color="primary" />
+  <v-slider
+    v-model="settingsStore.webpOptions.quality"
+    :disabled="settingsStore.webpOptions.lossless"
+    :label="t('quality')"
+    :max="100"
+    :min="0"
+    color="primary"
+    hide-details
+    step="1"
+    thumb-label="always"
+    type="number"
+  />
+  <v-btn @click="settingsStore.resetWebpOptions()">{{ t('reset_webp_options') }}</v-btn>
 </template>
+
+<i18n lang="yaml">
+en:
+  lossless: 'Lossless'
+  quality: 'Quality (0-100)'
+  reset_webp_options: 'Reset WebP Options'
+ja:
+  lossless: 'ロスレス'
+  quality: '品質 (0-100)'
+  reset_webp_options: 'WebPオプションをリセット'
+</i18n>

@@ -22,7 +22,7 @@ const globalStore = useGlobalStore();
 const configStore = useConfigStore();
 
 /** Title */
-const title = import.meta.env.VITE_APP_TITLE ?? 'DropWebP';
+const title = import.meta.env.VITE_APP_TITLE ?? 'Drop Compress Image';
 
 /** loading overlay visibility */
 const loading: WritableComputedRef<boolean> = computed({
@@ -100,9 +100,7 @@ onMounted(async () => {
 @use 'vuetify/_settings';
 @use 'sass:map';
 
-html {
-  // Fix always scrollbar shown.
-  overflow-y: auto;
+body {
   // Modern scrollbar style
   scrollbar-width: thin;
   scrollbar-color: map.get(settings.$grey, 'lighten-2') map.get(settings.$grey, 'base');
@@ -122,11 +120,6 @@ html {
   border-radius: 0.5rem;
   background-color: map.get(settings.$grey, 'base');
   box-shadow: inset 0 0 0.5rem rgba(0, 0, 0, 0.1);
-}
-
-// Fixed a bug that the theme color is interrupted when scrolling
-.v-application {
-  overflow-y: auto;
 }
 
 // Fix app-bar's progress-bar

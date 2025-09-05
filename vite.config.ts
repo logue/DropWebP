@@ -1,5 +1,4 @@
 import { writeFileSync } from 'node:fs';
-import path from 'node:path';
 import { fileURLToPath, URL } from 'node:url';
 
 import vue from '@vitejs/plugin-vue';
@@ -54,7 +53,7 @@ export default defineConfig(({ command, mode }): UserConfig => {
         // See https://github.com/intlify/bundle-tools/issues/22
         compositionOnly: false,
         // <i18n>カスタムブロックを持つファイルを指定
-        include: path.resolve(__dirname, './src/**/*.vue') // <-- 自分のプロジェクトの構造に合わせてパスを調整してください
+        include: fileURLToPath(new URL('./src/locales', import.meta.url))
       })
     ],
     // Resolver

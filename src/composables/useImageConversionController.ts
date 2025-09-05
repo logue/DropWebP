@@ -18,18 +18,18 @@ export function useImageConversionController(t: ComposerTranslation) {
   const dialog = ref(false); // 進捗ダイアログ表示制御
   const currentFile: Ref<string | undefined> = ref(); // 現在のファイル
   const inProgress = ref(false); // 処理中フラグ
-  const progress: Ref<string | number | undefined> = ref(); // 進捗
-  // ...
+  const progress: Ref<number> = ref(0); // 進捗
 
   // 変換処理
   const processFiles = async (files: string[]) => {
     dialog.value = true;
     inProgress.value = true;
-    progress.value = undefined;
+    progress.value = 0;
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      if (!file || settingStore.extensionPattern.test(file)) {
+      if (!file || !settingStore.extensionPattern.test(file)) {
+        // 拡張子がマッチしない場合はスキップ
         continue;
       }
       try {
@@ -41,6 +41,7 @@ export function useImageConversionController(t: ComposerTranslation) {
             : settingStore.commonOptions.outputPath
         );
       } catch (e: unknown) {
+        console.error(e);
         if (e instanceof Error) {
           globalStore.setMessage(e.message);
         } else {
@@ -74,6 +75,7 @@ export function useImageConversionController(t: ComposerTranslation) {
 
   // ファイル選択
   const convertByDialog = async () => {
+    // ダイアログを表示
     const selected = await open({
       multiple: true,
       directory: false,
@@ -98,6 +100,7 @@ export function useImageConversionController(t: ComposerTranslation) {
     });
     if (!selected) return;
     const paths = Array.isArray(selected) ? selected : [selected];
+    // ファイルリストを作成
     const files = await fileSystem.collectFiles(
       paths,
       settingStore.extensionPattern,
@@ -119,7 +122,7 @@ export function useImageConversionController(t: ComposerTranslation) {
 
     dialog.value = true;
     inProgress.value = true;
-    progress.value = undefined;
+    progress.value = 0;
     currentFile.value = t('scanning');
     await nextTick();
 
@@ -131,7 +134,7 @@ export function useImageConversionController(t: ComposerTranslation) {
 
     if (!files.length) {
       dialog.value = false;
-      progress.value = undefined;
+      progress.value = 0;
       inProgress.value = false;
       globalStore.setMessage(t('error.no_images_found_in_folder'));
       return;

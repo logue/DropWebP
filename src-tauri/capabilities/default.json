@@ -2,12 +2,25 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for the main window",
-  "windows": ["main"],
+  "windows": [
+    "main"
+  ],
   "permissions": [
     "core:default",
     "opener:default",
     "dialog:allow-open",
     "dialog:allow-save",
-    "fs:read-dirs"
+    "fs:read-dirs",
+    "fs:read-files",
+    "fs:write-files",
+    {
+      "identifier": "fs:scope",
+      "allow": [
+        "$APP/**",
+        "$DOCUMENT/**/*",
+        "$DESKTOP/**/*",
+        "$DOWNLOAD/**/*"
+      ]
+    }
   ]
 }

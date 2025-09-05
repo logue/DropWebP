@@ -9,9 +9,9 @@ defineProps({
   title: { type: String, required: true },
   currentFile: { type: String, default: '' },
   progress: {
-    type: Number as PropType<number | string | undefined>,
+    type: Number as PropType<number>,
     required: false,
-    default: null
+    default: 0
   },
   inProgress: { type: Boolean, default: false }
 });
@@ -25,8 +25,9 @@ const emit = defineEmits<{
 <template>
   <v-dialog
     :model-value="dialog"
-    width="auto"
+    persistent
     style="cursor: wait"
+    width="auto"
     @update:model-value="emit('update:dialog', $event)"
   >
     <v-card width="512" prepend-icon="mdi-arrow-collapse-vertical" :title="title">
@@ -36,10 +37,10 @@ const emit = defineEmits<{
       <v-card-text>
         {{ currentFile }}
         <v-progress-linear
+          :indeterminate="progress === 0"
           :model-value="progress"
-          height="25"
-          :indeterminate="progress === undefined"
           color="primary"
+          height="25"
         >
           <template #default="{ value }">
             <strong v-if="progress">{{ Math.ceil(value) }}%</strong>

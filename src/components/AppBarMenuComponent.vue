@@ -1,29 +1,19 @@
 <script setup lang="ts">
 import { useConfigStore } from '@/store';
-import { type Ref, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import LocaleSelector from './LocaleSelector.vue';
-import AboutModal from './modals/AboutModal.vue';
+import AboutDialog from './modals/AboutDialog.vue';
+import SettingsDialog from './modals/SettingsDialog.vue';
 
 const { t } = useI18n();
 /** Config Store */
 const configStore = useConfigStore();
-
-/** アバウトモーダル */
-const aboutModal: Ref<InstanceType<typeof AboutModal> | undefined> = ref();
-
-/** アバウトを表示 */
-const showAbout = () => aboutModal.value?.open();
 </script>
 
 <template>
   <!-- About -->
-  <v-tooltip :text="t('about', { appname: t('title') })" location="bottom">
-    <template #activator="{ props }">
-      <v-btn v-bind="props" icon="mdi-information-outline" variant="plain" @click="showAbout" />
-    </template>
-  </v-tooltip>
+  <about-dialog />
   <!-- Locale Menu -->
   <v-menu location="bottom">
     <template #activator="{ props }">
@@ -47,17 +37,17 @@ const showAbout = () => aboutModal.value?.open();
       />
     </template>
   </v-tooltip>
-  <about-modal ref="aboutModal" />
+  <settings-dialog />
 </template>
 
 <i18n lang="yaml">
 en:
-  title: 'DropWebP'
+  title: 'Drop Compress Image'
   about: 'About {appname}'
   locale: 'Select Language'
   toggle-dark-mode: 'Toggle Dark Mode'
 ja:
-  title: 'DropWebP'
+  title: 'Drop Compress Image'
   about: '{appname}について'
   locale: '言語を選択'
   toggle-dark-mode: 'ダークモードを切り替え'

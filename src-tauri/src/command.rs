@@ -15,8 +15,10 @@ use std::path::Path;
 pub async fn convert(data: Vec<u8>, options: EncodeOptions) -> Result<Vec<u8>, String> {
     // spawn_blocking でUIをフリーズさせずに重い処理を実行
     let converted_data = tauri::async_runtime::spawn_blocking(move || {
+        println!("Decoding...");
         // 画像デコード
         let img = decode(data).map_err(|e| format!("Failed to decode image: {}", e))?;
+        println!("Encoding...");
         // 画像エンコード
         let data = encode(&img, options).map_err(|e| format!("Failed to encode image: {}", e))?;
 
@@ -31,8 +33,7 @@ pub async fn convert(data: Vec<u8>, options: EncodeOptions) -> Result<Vec<u8>, S
 /// # 引数
 /// - `path_str`: 解析対象のファイルパス文字列
 /// # 戻り値
-/// - 成功した場合は `PathInfo` 構
-/// 造体を返します。
+/// - 成功した場合は `PathInfo` 構造体を返します。
 /// - 失敗した場合はエラーメッセージを `String` として返します。
 #[tauri::command]
 pub fn parse_path(path_str: String) -> Result<PathInfo, String> {

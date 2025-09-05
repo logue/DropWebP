@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import { join } from '@tauri-apps/api/path';
+import { join, sep } from '@tauri-apps/api/path';
 import { readDir, readFile, writeFile, type DirEntry } from '@tauri-apps/plugin-fs';
 
 /** ファイルシステムコンポーサブル */
@@ -13,7 +13,7 @@ export function useFileSystem() {
     try {
       // fs.readBinaryFile は Uint8Array を Promise で返す
       const contents = await readFile(filePath);
-      console.log(`Successfully read ${contents.length} bytes from ${filePath}`);
+      console.info(`Successfully read ${contents.length} bytes from ${filePath}`);
       return contents;
     } catch (error) {
       console.error(`Failed to read file: ${filePath}`, error);
@@ -30,7 +30,7 @@ export function useFileSystem() {
   async function save(path: string, data: Uint8Array): Promise<void> {
     try {
       await writeFile(path, data);
-      console.log(`Successfully saved file to ${path}`);
+      console.info(`Successfully saved file to ${path}`);
     } catch (error) {
       console.error('Failed to save file:', error);
       throw error;
@@ -91,7 +91,8 @@ export function useFileSystem() {
     return results;
   }
 
-  /** パスからファイル名などを取得
+  /**
+   * パスからファイル名などを取得
    * @param path パス文字列
    * @returns ファイル名、拡張子、親ディレクトリ名
    */
@@ -101,7 +102,7 @@ export function useFileSystem() {
     parentDir: string;
   }> {
     try {
-      return await invoke('parse_path', { path_str: path });
+      return await invoke('parse_path', { pathStr: path });
     } catch (error) {
       console.error('Failed to parse path:', error);
       throw error;
@@ -114,7 +115,7 @@ export function useFileSystem() {
    * @returns 親ディレクトリパス（ルートの場合は空文字）
    */
   async function getDir(path: string) {
-    return (await parsePath(path)).parentDir;
+    return (await parsePath(path)).parentDir + sep(); // 末尾にディレクトリセパレータを追加
   }
 
   /**

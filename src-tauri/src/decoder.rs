@@ -16,13 +16,20 @@ pub fn decode(image_bytes: Vec<u8>) -> Result<DynamicImage, Box<dyn Error>> {
 
     // 判別した形式に応じて、適切なデコーダーを呼び出す
     let dynamic_image = match format {
-        DetectedFormat::Heic => heif_to_dynamic_image(&image_bytes),
+        DetectedFormat::Heic => {
+            println!("Decoder: Using heif decoder...");
+            heif_to_dynamic_image(&image_bytes)
+        }
         // DetectedFormat::Exr => exr_to_dynamic_image(&image_bytes),
         DetectedFormat::Exr => return Err("EXR format is not supported in this version".into()),
-        DetectedFormat::Jpeg2000 => jpeg2k_to_dynamic_image(&image_bytes),
+        DetectedFormat::Jpeg2000 => {
+            println!("Decoder: Using Jpeg2k decoder...");
+            jpeg2k_to_dynamic_image(&image_bytes)
+        }
 
         // imageクレートが対応している形式の場合
         DetectedFormat::Standard(image_format) => {
+            println!("Decoder: Using image decoder...");
             image::load_from_memory_with_format(&image_bytes, image_format)
                 .map_err(|e| e.to_string().into())
         }
@@ -98,6 +105,7 @@ fn heif_to_dynamic_image(bytes: &[u8]) -> Result<DynamicImage, Box<dyn Error>> {
         ImageBuffer::from_raw(width, height, pixel_data)
             .ok_or("Failed to create ImageBuffer from raw data")?;
 
+    println!("Decoder: Finish decoding HEIC.");
     Ok(DynamicImage::ImageRgba8(image_buffer))
 }
 
@@ -142,6 +150,8 @@ fn jpeg2k_to_dynamic_image(bytes: &[u8]) -> Result<DynamicImage, Box<dyn Error>>
         }
         _ => return Err("Unsupported number of components in JPEG 2000 file".into()),
     };
+
+    println!("Decoder: Finish decoding JPEG 2000.");
 
     Ok(dynamic_image)
 }
