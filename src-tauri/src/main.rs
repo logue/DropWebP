@@ -1,6 +1,7 @@
 mod command;
 mod decoder;
 mod encoder;
+mod error;
 mod options;
 
 fn main() {

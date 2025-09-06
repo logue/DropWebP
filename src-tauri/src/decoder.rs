@@ -1,6 +1,6 @@
+use crate::error::AppError;
 use image::{DynamicImage, ImageBuffer, ImageFormat, Rgba};
 use libheif_rs::{HeifContext, LibHeif};
-use std::error::Error;
 
 /// バイトデータから画像をデコードし、DynamicImageとして返す
 /// サポートする形式: HEIC, JPEG 2000, そして imageクレートが対応する形式
@@ -15,34 +15,30 @@ use std::error::Error;
 /// - JPEG 2000形式のデコードには `jpeg2k` クレートを使用しています。
 ///  ただし、このクレートはすべてのJPEG 2000ファイルに対応しているわけではないため、特定のファイルでエラーが発生する可能性があります。
 #[allow(dead_code)]
-pub fn decode(image_bytes: Vec<u8>) -> Result<DynamicImage, Box<dyn Error>> {
+pub fn decode(image_bytes: &[u8]) -> Result<DynamicImage, AppError> {
     // まず、バイトデータから画像形式を判別する
-    let format = detect_format(&image_bytes)
-        .ok_or_else(|| "Unsupported or unknown image format".to_string())?;
+    let format = detect_format(image_bytes)
+        .ok_or_else(|| AppError::Decode("Unsupported or unknown image format".to_string()))?;
 
     // 判別した形式に応じて、適切なデコーダーを呼び出す
-    let dynamic_image = match format {
+    match format {
         DetectedFormat::Heic => {
             println!("Decoder: Using heif decoder...");
-            heif_to_dynamic_image(&image_bytes)
+            heif_to_dynamic_image(image_bytes)
         }
-        // DetectedFormat::Exr => exr_to_dynamic_image(&image_bytes),
-        DetectedFormat::Exr => return Err("EXR format is not supported in this version".into()),
+        DetectedFormat::Exr => Err(AppError::Decode(
+            "EXR format is not supported in this version".into(),
+        )),
         DetectedFormat::Jpeg2000 => {
             println!("Decoder: Using Jpeg2k decoder...");
-            jpeg2k_to_dynamic_image(&image_bytes)
+            jpeg2k_to_dynamic_image(image_bytes)
         }
-
-        // imageクレートが対応している形式の場合
         DetectedFormat::Standard(image_format) => {
             println!("Decoder: Using image decoder...");
-            image::load_from_memory_with_format(&image_bytes, image_format)
-                .map_err(|e| e.to_string().into())
+            image::load_from_memory_with_format(image_bytes, image_format)
+                .map_err(|e| AppError::Decode(e.to_string()))
         }
     }
-    .map_err(|e| e.to_string())?;
-
-    Ok(dynamic_image)
 }
 
 // 独自の形式を定義するためのenum
@@ -90,35 +86,43 @@ fn detect_format(bytes: &[u8]) -> Option<DetectedFormat> {
 }
 
 /// HEIFファイルを読み込み、DynamicImageに変換する関数
-fn heif_to_dynamic_image(bytes: &[u8]) -> Result<DynamicImage, Box<dyn Error>> {
+fn heif_to_dynamic_image(bytes: &[u8]) -> Result<DynamicImage, AppError> {
     let lib_heif = LibHeif::new();
 
-    let ctx = HeifContext::read_from_bytes(bytes)?;
-    let handle = ctx.primary_image_handle()?;
-    let img = lib_heif.decode(
-        &handle,
-        libheif_rs::ColorSpace::Rgb(libheif_rs::RgbChroma::Rgba),
-        None,
-    )?;
+    let ctx = HeifContext::read_from_bytes(bytes).map_err(|e| AppError::Decode(e.to_string()))?;
+    let handle = ctx
+        .primary_image_handle()
+        .map_err(|e| AppError::Decode(e.to_string()))?;
+    let img = lib_heif
+        .decode(
+            &handle,
+            libheif_rs::ColorSpace::Rgb(libheif_rs::RgbChroma::Rgba),
+            None,
+        )
+        .map_err(|e| AppError::Decode(e.to_string()))?;
 
     let width = handle.width();
     let height = handle.height();
     let planes = img.planes();
-    let interleaved_plane = planes.interleaved.ok_or("Interleaved plane not found")?;
+    let interleaved_plane = planes
+        .interleaved
+        .ok_or(AppError::Decode("Interleaved plane not found".to_string()))?;
     let pixel_data = interleaved_plane.data.to_vec();
 
     let image_buffer: ImageBuffer<Rgba<u8>, Vec<u8>> =
-        ImageBuffer::from_raw(width, height, pixel_data)
-            .ok_or("Failed to create ImageBuffer from raw data")?;
+        ImageBuffer::from_raw(width, height, pixel_data).ok_or(AppError::Decode(
+            "Failed to create ImageBuffer from raw data".to_string(),
+        ))?;
 
     println!("Decoder: Finish decoding HEIC.");
     Ok(DynamicImage::ImageRgba8(image_buffer))
 }
 
 /// JPEG 2000 ファイルを読み込み、DynamicImageに変換する
-fn jpeg2k_to_dynamic_image(bytes: &[u8]) -> Result<DynamicImage, Box<dyn Error>> {
+fn jpeg2k_to_dynamic_image(bytes: &[u8]) -> Result<DynamicImage, AppError> {
     // Use the `jpeg2k` crate to decode JPEG 2000 from bytes
-    let jp2_image = jpeg2k::Image::from_bytes(bytes)?;
+    let jp2_image =
+        jpeg2k::Image::from_bytes(bytes).map_err(|e| AppError::Decode(e.to_string()))?;
 
     let width = jp2_image.width();
     let height = jp2_image.height();
@@ -154,7 +158,11 @@ fn jpeg2k_to_dynamic_image(bytes: &[u8]) -> Result<DynamicImage, Box<dyn Error>>
             }
             DynamicImage::ImageRgba8(img_buf)
         }
-        _ => return Err("Unsupported number of components in JPEG 2000 file".into()),
+        _ => {
+            return Err(AppError::Decode(
+                "Unsupported number of components in JPEG 2000 file".into(),
+            ));
+        }
     };
 
     println!("Decoder: Finish decoding JPEG 2000.");

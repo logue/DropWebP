@@ -1,12 +1,13 @@
+use crate::error::AppError;
 use crate::options;
-use image::{self, DynamicImage};
+use image::DynamicImage;
 use imgref::Img;
 use libwebp_sys::{
     WebPEncodeLosslessRGB, WebPEncodeLosslessRGBA, WebPEncodeRGB, WebPEncodeRGBA, WebPFree,
 };
 use ravif::{AlphaColorMode, BitDepth, ColorModel, Encoder};
 use rgb::{RGB8, RGBA8};
-use std::{error::Error, ffi::c_void, ptr::null_mut, slice::from_raw_parts};
+use std::{ffi::c_void, ptr::null_mut, slice::from_raw_parts};
 
 /// 画像を指定された形式でエンコードします。
 /// # 引数
@@ -18,10 +19,7 @@ use std::{error::Error, ffi::c_void, ptr::null_mut, slice::from_raw_parts};
 /// # 注意
 /// - AVIF形式のエンコードには `ravif` クレートを使用しています。ビルド時に `libavif` ライブラリがシステムにインストールされている必要があります。
 /// - WebP形式のエンコードには `libwebp-sys` クレートを使用しています。ビルド時に `libwebp` ライブラリがシステムにインストールされている必要があります。
-pub fn encode(
-    img: &DynamicImage,
-    options: options::EncodeOptions,
-) -> Result<Vec<u8>, Box<dyn Error>> {
+pub fn encode(img: &DynamicImage, options: options::EncodeOptions) -> Result<Vec<u8>, AppError> {
     if let Some(avif_opts) = options.avif {
         // ここで `AvifOptions` から `ravif` 用の引数への変換を行う
         println!("Adapter: Converting AvifOptions for ravif encoder...");
@@ -50,16 +48,16 @@ pub fn encode(
 /// - `lossless`: ロスレス
 /// # 戻り値
 /// - 成功した場合は WebP のバイト列を `Vec<u8>` として返します。
-/// - 失敗した場合は `Box<dyn Error>` を返します。
+/// - 失敗した場合は `AppError` を返します。
 /// # 注意
 /// - `libwebp-sys` クレートを使用して WebP エンコードを行います。ビルド時に `libwebp` ライブラリがシステムにインストールされている必要があります。
 fn convert_dynamic_image_to_webp(
     img: &DynamicImage,
     quality: f32,
     lossless: bool,
-) -> Result<Vec<u8>, Box<dyn Error>> {
+) -> Result<Vec<u8>, AppError> {
     if quality < 0.0 || quality > 100.0 {
-        return Err("Quality must be between 0 and 100".into());
+        return Err(AppError::Encode("Quality must be between 0 and 100".into()));
     }
 
     let width = img.width() as i32;
@@ -80,13 +78,13 @@ fn convert_dynamic_image_to_webp(
         let mut out_buf: *mut u8 = null_mut();
         // ストライドの計算
         let stride = if is_rgba {
-            width
-                .checked_mul(4)
-                .ok_or("Stride calculation overflowed")?
+            width.checked_mul(4).ok_or(AppError::Encode(
+                "Stride calculation overflowed".to_string(),
+            ))?
         } else {
-            width
-                .checked_mul(3)
-                .ok_or("Stride calculation overflowed")?
+            width.checked_mul(3).ok_or(AppError::Encode(
+                "Stride calculation overflowed".to_string(),
+            ))?
         };
 
         // WebP にエンコード
@@ -110,7 +108,7 @@ fn convert_dynamic_image_to_webp(
         };
 
         if out_buf.is_null() || len == 0 {
-            return Err("WebP encoding failed".into());
+            return Err(AppError::Encode("WebP encoding failed".into()));
         }
 
         // Rust Vec にコピー
@@ -139,7 +137,7 @@ fn convert_dynamic_image_to_webp(
 /// * `alpha_color_mode` - アルファチャネルの色モード (AlphaColorMode::Straight, AlphaColorMode::Premultiplied)
 /// # 戻り値
 /// * 成功した場合はAVIF形式のバイト列をVec<u8>として返します。
-/// * 失敗した場合はBox<dyn Error>を返します。
+/// * 失敗した場合はAppErrorを返します。
 /// # 注意
 /// * `ravif` クレートを使用してAVIFエンコードを行います。ビルド時に `libavif` ライブラリがシステムにインストールされている必要があります。
 fn convert_dynamic_image_to_avif(
@@ -151,7 +149,7 @@ fn convert_dynamic_image_to_avif(
     color_model: ColorModel,
     threads: Option<usize>,
     alpha_color_mode: AlphaColorMode,
-) -> Result<Vec<u8>, Box<dyn Error>> {
+) -> Result<Vec<u8>, AppError> {
     // エンコーダーの設定は先に済ませておく
     let encoder;
     if quality < 1.0 {
@@ -188,7 +186,7 @@ fn convert_dynamic_image_to_avif(
             let image_view = Img::new(pixels_rgb8, width, height);
 
             // encode_rgb を使用
-            encoder.encode_rgb(image_view)?
+            encoder.encode_rgb(image_view).map_err(AppError::Ravif)?
         }
         // --- RGBA8形式の場合 ---
         DynamicImage::ImageRgba8(rgba_image) => {
@@ -201,7 +199,7 @@ fn convert_dynamic_image_to_avif(
             let image_view = Img::new(pixels_rgba8, width, height);
 
             // encode_rgba を使用
-            encoder.encode_rgba(image_view)?
+            encoder.encode_rgba(image_view).map_err(AppError::Ravif)?
         }
         // --- その他の形式の場合 (Luma8, Bgr8など) ---
         // 汎用的なRGBA8に変換してから処理する（フォールバック）
@@ -214,7 +212,7 @@ fn convert_dynamic_image_to_avif(
             let pixels_rgba8: &[RGBA8] = bytemuck::cast_slice(rgba_image.as_raw());
             let image_view = Img::new(pixels_rgba8, width, height);
 
-            encoder.encode_rgba(image_view)?
+            encoder.encode_rgba(image_view).map_err(AppError::Ravif)?
         }
     };
     println!("Finished encoding AVIF.");

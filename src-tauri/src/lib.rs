@@ -1,4 +1,5 @@
 mod decoder;
+pub mod error;
 
 use exif::{In, Reader as ExifReader, Tag};
 use image::{self, ImageFormat, RgbaImage, imageops::*};

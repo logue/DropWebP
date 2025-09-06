@@ -17,7 +17,7 @@ pub async fn convert(data: Vec<u8>, options: EncodeOptions) -> Result<Vec<u8>, S
     let converted_data = tauri::async_runtime::spawn_blocking(move || {
         println!("Decoding...");
         // 画像デコード
-        let img = decode(data).map_err(|e| format!("Failed to decode image: {}", e))?;
+        let img = decode(&data).map_err(|e| format!("Failed to decode image: {}", e))?;
         println!("Encoding...");
         // 画像エンコード
         let data = encode(&img, options).map_err(|e| format!("Failed to encode image: {}", e))?;
