@@ -3,16 +3,19 @@ import { ref, type Ref, nextTick } from 'vue';
 import type { ComposerTranslation } from 'vue-i18n';
 
 import { listen } from '@tauri-apps/api/event';
-import { open } from '@tauri-apps/plugin-dialog';
+import { sep } from '@tauri-apps/api/path';
+import { open, save } from '@tauri-apps/plugin-dialog';
 
 import { useFileSystem } from './useFileSystem';
 import { useImageConverter } from './useImageConverter'; // 汎用コンバーターをインポート
+import { usePaste } from './usePaste';
 
 export function useImageConversionController(t: ComposerTranslation) {
   const globalStore = useGlobalStore();
   const fileSystem = useFileSystem();
-  const settingStore = useSettingsStore();
-  const { convert } = useImageConverter(); // コアロジックを取得
+  const settingsStore = useSettingsStore();
+
+  const { convert, compress } = useImageConverter(); // コアロジックを取得
 
   // --- UIの状態管理 ---
   const dialog = ref(false); // 進捗ダイアログ表示制御
@@ -28,7 +31,7 @@ export function useImageConversionController(t: ComposerTranslation) {
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      if (!file || !settingStore.extensionPattern.test(file)) {
+      if (!file || !settingsStore.extensionPattern.test(file)) {
         // 拡張子がマッチしない場合はスキップ
         continue;
       }
@@ -37,9 +40,9 @@ export function useImageConversionController(t: ComposerTranslation) {
         // 汎用コンバーターを呼び出す
         await convert(
           file,
-          settingStore.commonOptions.sameDirectory
+          settingsStore.commonOptions.sameDirectory
             ? undefined
-            : settingStore.commonOptions.outputPath
+            : settingsStore.commonOptions.outputPath
         );
       } catch (e: unknown) {
         console.error(e);
@@ -57,6 +60,7 @@ export function useImageConversionController(t: ComposerTranslation) {
 
     dialog.value = false;
     inProgress.value = false;
+    globalStore.setMessage(t('completed'));
   };
 
   // D&D
@@ -64,8 +68,8 @@ export function useImageConversionController(t: ComposerTranslation) {
     const inputs = (e.payload as { paths: string[] }).paths;
     const files = await fileSystem.collectFiles(
       inputs,
-      settingStore.extensionPattern,
-      settingStore.commonOptions.recursive
+      settingsStore.extensionPattern,
+      settingsStore.commonOptions.recursive
     );
     if (!files.length) {
       globalStore.setMessage(t('error.no_images_found_dropped'));
@@ -74,10 +78,44 @@ export function useImageConversionController(t: ComposerTranslation) {
     await processFiles(files);
   });
 
+  // ペースト処理
+  async function handlePaste(event: ClipboardEvent) {
+    const items = event.clipboardData?.items;
+    if (!items) return;
+
+    globalStore.setLoading(true);
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        const file = item.getAsFile();
+        if (!file) continue;
+        const buffer = new Uint8Array(await file.arrayBuffer());
+        const savePath = await save({
+          title: t('save_as_title'),
+          defaultPath: `${settingsStore.commonOptions.outputPath}${sep()}image.${
+            settingsStore.commonOptions.format
+          }`,
+          filters: [
+            settingsStore.commonOptions.format === 'webp'
+              ? { name: t('type.webp'), extensions: ['webp'] }
+              : { name: t('type.avif'), extensions: ['avif'] }
+          ]
+        });
+        if (savePath) {
+          const converted = await compress(buffer);
+          await fileSystem.save(savePath, converted);
+          globalStore.setMessage(t('completed'));
+        }
+      }
+    }
+    globalStore.setLoading(false);
+  }
+  usePaste(handlePaste);
+
   // ファイル選択
   const convertByDialog = async () => {
     // ダイアログを表示
     const selected = await open({
+      title: t('select_files_title'),
       multiple: true,
       directory: false,
       filters: [
@@ -100,12 +138,17 @@ export function useImageConversionController(t: ComposerTranslation) {
       ]
     });
     if (!selected) return;
+    dialog.value = true;
+    inProgress.value = true;
+    progress.value = 0;
+    currentFile.value = t('scanning');
+    await nextTick();
     const paths = Array.isArray(selected) ? selected : [selected];
     // ファイルリストを作成
     const files = await fileSystem.collectFiles(
       paths,
-      settingStore.extensionPattern,
-      settingStore.commonOptions.recursive
+      settingsStore.extensionPattern,
+      settingsStore.commonOptions.recursive
     );
 
     if (!files.length) {
@@ -117,7 +160,11 @@ export function useImageConversionController(t: ComposerTranslation) {
 
   // フォルダ選択
   const convertByDirDialog = async () => {
-    const picked = await open({ directory: true, recursive: true });
+    const picked = await open({
+      title: t('select_directory_title'),
+      directory: true,
+      recursive: true
+    });
     if (!picked) return;
     const dir = Array.isArray(picked) ? picked[0] : picked;
 
@@ -129,8 +176,8 @@ export function useImageConversionController(t: ComposerTranslation) {
 
     const files = await fileSystem.collectFiles(
       dir,
-      settingStore.extensionPattern,
-      settingStore.commonOptions.recursive
+      settingsStore.extensionPattern,
+      settingsStore.commonOptions.recursive
     );
 
     if (!files.length) {

@@ -13,8 +13,16 @@ const tab = ref('common');
 
 <template>
   <v-dialog fullscreen persistent>
-    <template #activator="{ props: activatorProps }">
-      <v-btn icon="mdi-cog" variant="plain" v-bind="activatorProps" />
+    <template #activator="{ props: dialogProps }">
+      <v-tooltip :text="t('settings')" location="bottom">
+        <template #activator="{ props: tooltipProps }">
+          <v-btn
+            v-bind="{ ...dialogProps, ...tooltipProps }"
+            icon="mdi-cog-outline"
+            variant="plain"
+          />
+        </template>
+      </v-tooltip>
     </template>
     <template #default="{ isActive }">
       <v-card>

@@ -26,22 +26,6 @@ pub fn encode(
         // ここで `AvifOptions` から `ravif` 用の引数への変換を行う
         println!("Adapter: Converting AvifOptions for ravif encoder...");
 
-        // ravifを使ったエンコード処理...
-        if avif_opts.lossless {
-            println!("Lossless encoding selected, setting quality to 0.");
-            // 可逆圧縮を選択した場合、品質を0に設定
-            return convert_dynamic_image_to_avif(
-                img,
-                0.0,
-                avif_opts.bit_depth.to_ravif(),
-                0.0, // アルファ品質も0に設定
-                avif_opts.speed,
-                avif_opts.color_model.to_ravif(),
-                avif_opts.threads,
-                avif_opts.alpha_color_mode.to_ravif(),
-            );
-        }
-
         return convert_dynamic_image_to_avif(
             img,
             avif_opts.quality,

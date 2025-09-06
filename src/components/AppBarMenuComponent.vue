@@ -19,15 +19,15 @@ const configStore = useConfigStore();
     <template #activator="{ props }">
       <v-btn v-bind="props" icon variant="plain">
         <v-icon>mdi-translate</v-icon>
-        <v-tooltip :text="t('locale')" activator="parent" location="bottom" />
+        <v-tooltip :text="t('locale_btn')" activator="parent" location="bottom" />
       </v-btn>
     </template>
     <v-list density="compact">
-      <locale-selector />
+      <locale-selector :tooltip="t('locale_btn')" />
     </v-list>
   </v-menu>
   <!-- Toggle Dark mode -->
-  <v-tooltip :text="t('toggle-dark-mode')" location="bottom">
+  <v-tooltip :text="t('toggle_dark_mode_btn')" location="bottom">
     <template #activator="{ props }">
       <v-btn
         v-bind="props"
@@ -37,28 +37,32 @@ const configStore = useConfigStore();
       />
     </template>
   </v-tooltip>
-  <settings-dialog />
+  <settings-dialog :tooltip="t('settings_btn')" />
 </template>
 
 <i18n lang="yaml">
 en:
   title: 'Drop Compress Image'
-  about: 'About {appname}'
-  locale: 'Select Language'
-  toggle-dark-mode: 'Toggle Dark Mode'
+  about_btn: 'About {appname}'
+  locale_btn: 'Select Language'
+  toggle_dark_mode_btn: 'Toggle Dark Mode'
+  setttings_btn: 'Settings'
 ja:
   title: 'Drop Compress Image'
-  about: '{appname}について'
-  locale: '言語を選択'
-  toggle-dark-mode: 'ダークモードを切り替え'
+  about_btn: '{appname}について'
+  locale_btn: '言語を選択'
+  toggle_dark_mode_btn: 'ダークモードを切り替え'
+  settings_btn: '設定'
 kr:
   title: 'Drop Compress Image'
-  about: '{appname} 정보'
-  locale: '언어 선택'
-  toggle-dark-mode: '다크 모드 전환'
+  about_btn: '{appname} 정보'
+  locale_btn: '언어 선택'
+  toggle_dark_mode_btn: '다크 모드 전환'
+  settings_btn: '설정'
 zh:
   title: 'Drop Compress Image'
-  about: '關於 {appname}'
-  locale: '選擇語言'
-  toggle-dark-mode: '切換深色模式'
+  about_btn: '關於 {appname}'
+  locale_btn: '選擇語言'
+  toggle_dark_mode_btn: '切換深色模式'
+  settings_btn: '設置'
 </i18n>

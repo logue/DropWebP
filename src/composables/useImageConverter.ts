@@ -1,4 +1,4 @@
-import { useGlobalStore, useSettingsStore } from '@/store';
+import { useSettingsStore } from '@/store';
 import { toRaw } from 'vue';
 
 import { invoke } from '@tauri-apps/api/core';
@@ -7,7 +7,6 @@ import { join } from '@tauri-apps/api/path';
 import { useFileSystem } from './useFileSystem';
 
 export function useImageConverter() {
-  const globalStore = useGlobalStore();
   const fileSystem = useFileSystem();
   const settingsStore = useSettingsStore();
 
@@ -17,38 +16,40 @@ export function useImageConverter() {
    * @param options 変換パラメータ
    */
   const convert = async (input: string, output?: string) => {
-    // 変換オプション
+    // 入力ファイル名
+    const fileName = await fileSystem.getFileName(input);
+    // 変換
+    const buffer = await compress(await fileSystem.read(input));
+    // 出力ファイル名を生成
+    const outputFileName = `${fileName.split('.').slice(0, -1).join('.')}.${settingsStore.commonOptions.format}`;
+    // 保存先
+    const savePath = output
+      ? await join(output, outputFileName) // 出力先を指定して保存
+      : await join(await fileSystem.getDir(input), outputFileName); // 入力パスと同じディレクトリに保存
+
+    // 保存処理
+    await fileSystem.save(savePath, buffer);
+  };
+
+  /**
+   * 圧縮処理
+   * @param data 元バイナリデータ
+   * @returns 圧縮済みバイナリデータ
+   */
+  const compress = async (data: Uint8Array): Promise<Uint8Array> => {
+    // 圧縮オプション
     const options =
       settingsStore.commonOptions.format === 'avif'
         ? { avif: toRaw(settingsStore.avifOptions) }
         : { webp: toRaw(settingsStore.webpOptions) };
-
     try {
-      // 入力ファイル名
-      const fileName = await fileSystem.getFileName(input);
       // rust側のVec<8>はnumber[]型になるのでUint8Arrayに変換する
-      const buffer = new Uint8Array(
-        await invoke('convert', {
-          data: await fileSystem.read(input),
-          options
-        })
-      );
-      // 出力ファイル名を生成
-      const outputFileName = `${fileName.split('.').slice(0, -1).join('.')}.${settingsStore.commonOptions.format}`;
-      // 保存先
-      const savePath = output
-        ? await join(output, outputFileName) // 出力先を指定して保存
-        : await join(await fileSystem.getDir(input), outputFileName); // 入力パスと同じディレクトリに保存
-
-      // 保存処理
-      await fileSystem.save(savePath, buffer);
+      return new Uint8Array(await invoke<number[]>('convert', { data, options }));
     } catch (e) {
       console.error(e);
-      globalStore.setMessage(`Failed to convert file: ${input}`);
+      throw e;
     }
   };
 
-  return {
-    convert
-  };
+  return { convert, compress };
 }
