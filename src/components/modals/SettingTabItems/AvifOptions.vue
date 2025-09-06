@@ -41,6 +41,7 @@ const isLossless = ref(false);
       { text: t('bit_depth_auto'), value: BitDepth.Auto }
     ]"
     :label="t('bit_depth')"
+    :hint="t('bit_depth_hint')"
     item-title="text"
     item-value="value"
   />
@@ -52,7 +53,7 @@ const isLossless = ref(false);
       { text: 'Premultiplied', value: AlphaColorMode.Premultiplied }
     ]"
     :label="t('alpha_color_mode')"
-    :hint="t('color_model_hint')"
+    :hint="t('alpha_color_mode_hint')"
     item-title="text"
     item-value="value"
   />
@@ -87,19 +88,23 @@ const isLossless = ref(false);
     clearable
     type="number"
   />
-  <v-btn @click="settingsStore.resetAvifOptions()">{{ t('reset_avif_options') }}</v-btn>
+  <v-btn prepend-icon="mdi-rotate-left" variant="text" @click="settingsStore.resetCommonOptions()">
+    {{ t('reset_avif_options') }}
+  </v-btn>
 </template>
 
 <i18n lang="yaml">
 en:
   lossless: 'Lossless Compression (Larger File Size)'
   bit_depth: 'Bit Depth'
+  bit_depth_hint: 'Select the bit depth. Higher bit depth provides better quality but results in larger file sizes.'
   bit_depth_8: '8-bit'
   bit_depth_10: '10-bit'
   bit_depth_auto: 'Auto'
   quality: 'Quality (1-100)'
   alpha_quality: 'Alpha Channel Quality (1-100)'
   alpha_color_mode: 'Alpha Color Mode'
+  alpha_color_mode_hint: 'Specifies how to handle the colors of the alpha channel'
   speed: 'Encoding Speed (1-10)'
   speed_hint: 'Higher speed results in lower quality'
   color_model: 'Color Model'
@@ -110,12 +115,14 @@ en:
 ja:
   lossless: 'ロスレス圧縮 (ファイルサイズは大きくなります)'
   bit_depth: 'ビット深度'
+  bit_depth_hint: 'ビット深度を選択します。高いビット深度はより良い品質を提供しますが、ファイルサイズも大きくなります。'
   bit_depth_8: '8ビット'
   bit_depth_10: '10ビット'
   bit_depth_auto: '自動'
   quality: '品質 (1-100)'
   alpha_quality: 'アルファチャンネルの品質 (1-100)'
   alpha_color_mode: 'アルファカラーモード'
+  alpha_color_mode_hint: 'アルファチャンネルの色の扱い方を指定します'
   speed: 'エンコード速度 (1-10)'
   speed_hint: '速度が速いほど品質が低くなります'
   color_model: 'カラーモデル'
@@ -126,12 +133,14 @@ ja:
 kr:
   lossless: '무손실 압축 (파일 크기가 커질 수 있음)'
   bit_depth: '비트 깊이'
+  bit_depth_hint: '비트 깊이를 선택합니다. 비트 깊이가 높을수록 더 나은 품질을 제공하지만 파일 크기도 커집니다.'
   bit_depth_8: '8비트'
   bit_depth_10: '10비트'
   bit_depth_auto: '자동'
   quality: '품질 (1-100)'
   alpha_quality: '알파 채널 품질 (1-100)'
   alpha_color_mode: '알파 색상 모드'
+  alpha_color_mode_hint: '알파 채널의 색상을 처리하는 방법을 지정합니다'
   speed: '인코딩 속도 (1-10)'
   speed_hint: '속도가 높을수록 품질이 낮아집니다'
   color_model: '색상 모델'
@@ -142,12 +151,14 @@ kr:
 zh:
   lossless: '無損壓縮 (文件大小可能會增大)'
   bit_depth: '位深'
+  bit_depth_hint: '選擇位深。較高的位深提供更好的質量，但文件大小也會增大。'
   bit_depth_8: '8位'
   bit_depth_10: '10位'
   bit_depth_auto: '自動'
   quality: '質量 (1-100)'
   alpha_quality: 'Alpha通道質量 (1-100)'
   alpha_color_mode: 'Alpha顏色模式'
+  alpha_color_mode_hint: '指定如何處理Alpha通道的顏色'
   speed: '編碼速度 (1-10)'
   speed_hint: '速度越快，質量越低'
   color_model: '顏色模型'

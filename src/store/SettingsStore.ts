@@ -27,7 +27,7 @@ const defaultWebpOptions: WebpOptions = {
 
 const defaultCommonOptions: CommonOptions = {
   format: 'webp',
-  overwrite: false,
+  overwrite: true,
   deleteOriginal: false,
   recursive: false,
   sameDirectory: true,

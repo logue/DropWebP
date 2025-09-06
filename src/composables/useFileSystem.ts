@@ -38,6 +38,34 @@ export function useFileSystem() {
   }
 
   /**
+   * パスが存在するかチェック
+   * @param path チェックするパス
+   * @returns 存在する場合はtrue、存在しない場合はfalse
+   */
+  async function exists(path: string): Promise<boolean> {
+    try {
+      await invoke('exists_path', { pathStr: path }); // Rust側でexists_pathコマンドを呼び出す
+      return true; // 存在する場合はtrueを返す
+    } catch {
+      return false; // 存在しない場合はfalseを返す
+    }
+  }
+
+  /**
+   * パスを削除する
+   * @param path 削除するパス
+   */
+  async function del(path: string): Promise<void> {
+    try {
+      await invoke('delete_path', { pathStr: path }); // Rust側でdelete_pathコマンドを呼び出す
+      console.info(`Successfully deleted: ${path}`);
+    } catch (error) {
+      console.error(`Failed to delete path: ${path}`, error);
+      throw error;
+    }
+  }
+
+  /**
    * ディレクトリからファイルを収集する
    * @param path 入力ファイル
    * @param pattern 拡張子のマッチパターン
@@ -136,5 +164,5 @@ export function useFileSystem() {
     return (await parsePath(path)).extension;
   }
 
-  return { read, save, collectFiles, getDir, getFileName, getExtension };
+  return { read, save, exists, del, collectFiles, getDir, getFileName, getExtension };
 }

@@ -44,6 +44,11 @@ export function useImageConversionController(t: ComposerTranslation) {
         // 拡張子がマッチしない場合はスキップ
         continue;
       }
+      if (!settingsStore.commonOptions.overwrite && (await fileSystem.exists(file))) {
+        // 上書き禁止オプションが有効で、出力先に同名ファイルが存在する場合はスキップ
+        console.info(`Skipping ${file} as it already exists and overwrite is disabled.`);
+        continue;
+      }
       currentFile.value = file;
       try {
         // 汎用コンバーターを呼び出す
@@ -53,6 +58,11 @@ export function useImageConversionController(t: ComposerTranslation) {
             ? undefined
             : settingsStore.commonOptions.outputPath
         );
+        if (settingsStore.commonOptions.deleteOriginal) {
+          // 元ファイル削除オプションが有効な場合、元ファイルを削除
+          await fileSystem.del(file);
+          console.info(`Deleted original file: ${file}`);
+        }
       } catch (e: unknown) {
         console.error(e);
         if (e instanceof Error) {

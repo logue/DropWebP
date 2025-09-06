@@ -27,8 +27,9 @@ const tab = ref('common');
     <template #default="{ isActive }">
       <v-card>
         <v-toolbar>
-          <v-btn icon="mdi-close" @click="isActive.value = false" />
           <v-toolbar-title>{{ t('settings') }}</v-toolbar-title>
+          <v-spacer />
+          <v-btn icon="mdi-close" @click="isActive.value = false" />
         </v-toolbar>
         <v-card-text>
           <v-tabs v-model="tab" grow>
