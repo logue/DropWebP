@@ -5,6 +5,12 @@ import type { ComposerTranslation } from 'vue-i18n';
 import { listen } from '@tauri-apps/api/event';
 import { sep } from '@tauri-apps/api/path';
 import { open, save } from '@tauri-apps/plugin-dialog';
+import { useSound } from '@vueuse/sound';
+
+// eslint-disable-next-line import/no-unresolved
+import completeSound from '../assets/sounds/complete.mp3';
+// eslint-disable-next-line import/no-unresolved
+import errorSound from '../assets/sounds/error.mp3';
 
 import { useFileSystem } from './useFileSystem';
 import { useImageConverter } from './useImageConverter'; // 汎用コンバーターをインポート
@@ -14,6 +20,9 @@ export function useImageConversionController(t: ComposerTranslation) {
   const globalStore = useGlobalStore();
   const fileSystem = useFileSystem();
   const settingsStore = useSettingsStore();
+
+  const { play: playCompleteSound } = useSound(completeSound);
+  const { play: playErrorSound } = useSound(errorSound);
 
   const { convert, compress } = useImageConverter(); // コアロジックを取得
 
@@ -51,6 +60,7 @@ export function useImageConversionController(t: ComposerTranslation) {
         } else {
           globalStore.setMessage(String(e));
         }
+        playErrorSound();
         dialog.value = false;
         inProgress.value = false;
         return;
@@ -60,6 +70,7 @@ export function useImageConversionController(t: ComposerTranslation) {
 
     dialog.value = false;
     inProgress.value = false;
+    playCompleteSound();
     globalStore.setMessage(t('completed'));
   };
 
@@ -73,6 +84,7 @@ export function useImageConversionController(t: ComposerTranslation) {
     );
     if (!files.length) {
       globalStore.setMessage(t('error.no_images_found_dropped'));
+      playErrorSound();
       return;
     }
     await processFiles(files);
@@ -113,81 +125,112 @@ export function useImageConversionController(t: ComposerTranslation) {
 
   // ファイル選択
   const convertByDialog = async () => {
-    // ダイアログを表示
-    const selected = await open({
-      title: t('select_files_title'),
-      multiple: true,
-      directory: false,
-      filters: [
-        {
-          name: 'Image',
-          extensions: [
-            'png',
-            'jpeg',
-            'jpg',
-            'tif',
-            'tiff',
-            'gif',
-            'bmp',
-            'heic',
-            'heif',
-            'jp2',
-            'j2k'
-          ]
-        }
-      ]
-    });
-    if (!selected) return;
-    dialog.value = true;
-    inProgress.value = true;
-    progress.value = 0;
-    currentFile.value = t('scanning');
-    await nextTick();
-    const paths = Array.isArray(selected) ? selected : [selected];
-    // ファイルリストを作成
-    const files = await fileSystem.collectFiles(
-      paths,
-      settingsStore.extensionPattern,
-      settingsStore.commonOptions.recursive
-    );
+    try {
+      // ダイアログを表示
+      const selected = await open({
+        title: t('select_files_title'),
+        multiple: true,
+        directory: false,
+        filters: [
+          {
+            name: 'Image',
+            extensions: [
+              'png',
+              'jpeg',
+              'jpg',
+              'tif',
+              'tiff',
+              'gif',
+              'bmp',
+              'heic',
+              'heif',
+              'jp2',
+              'j2k'
+            ]
+          }
+        ]
+      });
+      if (!selected) return;
+      dialog.value = true;
+      inProgress.value = true;
+      progress.value = 0;
+      currentFile.value = t('scanning');
+      await nextTick();
+      const paths = Array.isArray(selected) ? selected : [selected];
+      // ファイルリストを作成
+      const files = await fileSystem.collectFiles(
+        paths,
+        settingsStore.extensionPattern,
+        settingsStore.commonOptions.recursive
+      );
 
-    if (!files.length) {
-      globalStore.setMessage(t('error.no_images_found_selected'));
+      if (!files.length) {
+        globalStore.setMessage(t('error.no_images_found_selected'));
+        playErrorSound();
+        dialog.value = false;
+        progress.value = 0;
+        inProgress.value = false;
+        return;
+      }
+      await processFiles(files);
+    } catch (e) {
+      console.error(e);
+      if (e instanceof Error) {
+        globalStore.setMessage(e.message);
+      } else {
+        globalStore.setMessage(String(e));
+      }
+      playErrorSound();
       return;
     }
-    await processFiles(files);
   };
 
   // フォルダ選択
   const convertByDirDialog = async () => {
-    const picked = await open({
-      title: t('select_directory_title'),
-      directory: true,
-      recursive: true
-    });
-    if (!picked) return;
-    const dir = Array.isArray(picked) ? picked[0] : picked;
+    try {
+      const picked = await open({
+        title: t('select_directory_title'),
+        directory: true,
+        recursive: true
+      });
 
-    dialog.value = true;
-    inProgress.value = true;
-    progress.value = 0;
-    currentFile.value = t('scanning');
-    await nextTick();
+      if (!picked) return;
+      const dir = Array.isArray(picked) ? picked[0] : picked;
 
-    const files = await fileSystem.collectFiles(
-      dir,
-      settingsStore.extensionPattern,
-      settingsStore.commonOptions.recursive
-    );
+      dialog.value = true;
+      inProgress.value = true;
+      progress.value = 0;
+      currentFile.value = t('scanning');
+      await nextTick();
 
-    if (!files.length) {
+      const files = await fileSystem.collectFiles(
+        dir,
+        settingsStore.extensionPattern,
+        settingsStore.commonOptions.recursive
+      );
+
+      if (!files.length) {
+        dialog.value = false;
+        progress.value = 0;
+        inProgress.value = false;
+        globalStore.setMessage(t('error.no_images_found_in_folder'));
+        playErrorSound();
+        return;
+      }
+      await processFiles(files);
+    } catch (e) {
+      console.error(e);
+      if (e instanceof Error) {
+        globalStore.setMessage(e.message);
+      } else {
+        globalStore.setMessage(String(e));
+      }
       dialog.value = false;
       progress.value = 0;
       inProgress.value = false;
-      globalStore.setMessage(t('error.no_images_found_in_folder'));
+      playErrorSound();
       return;
     }
-    await processFiles(files);
   };
 
   // ファイル選択やD&Dのロジックはここに残す

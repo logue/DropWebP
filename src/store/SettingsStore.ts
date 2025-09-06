@@ -79,8 +79,8 @@ export default defineStore(
         multiple: false,
         directory: true
       });
-      if (path && path.length) {
-        commonOptions.value.outputPath = path as string;
+      if (path?.length) {
+        commonOptions.value.outputPath = path;
       }
     };
 
