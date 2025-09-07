@@ -13,7 +13,9 @@ fn main() {
         // Vue から呼び出せるコマンド関数を登録
         .invoke_handler(tauri::generate_handler![
             command::convert,
-            command::parse_path
+            command::parse_path,
+            command::exists_path,
+            command::delete_path
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

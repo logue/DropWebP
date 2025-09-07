@@ -1,7 +1,9 @@
 use crate::decoder::decode;
 use crate::encoder::encode;
+use crate::error::AppError;
 use crate::options::EncodeOptions;
 use crate::options::PathInfo;
+use std::path;
 use std::path::Path;
 
 /// Uint8Arrayバイナリデータを圧縮してUint8Arrayで返します。
@@ -57,4 +59,35 @@ pub fn parse_path(path_str: String) -> Result<PathInfo, String> {
     };
 
     Ok(info)
+}
+
+/// 指定されたパスが存在するかどうかを確認します。
+/// # 引数
+/// - `path_str`: 確認対象のファイルまたはディレクトリのパス文字列
+/// # 戻り値
+/// - 存在する場合は `true`、存在しない場合は `false` を返します。
+/// - エラーが発生した場合はエラーメッセージを `String` として返します。
+#[tauri::command]
+pub async fn exists_path(path_str: String) -> Result<bool, String> {
+    let path = Path::new(&path_str);
+    Ok(path.exists())
+}
+
+/// 指定されたパスのファイルまたはディレクトリを削除します。
+/// # 引数
+/// - `path_str`: 削除対象のファイルまたはディレクトリのパス文字列
+/// # 戻り値
+/// - 成功した場合は `Ok(())` を返します。
+/// - 失敗した場合はエラーメッセージを `String` として返します。
+#[tauri::command]
+pub async fn delete_path(path_str: String) -> Result<(), String> {
+    let path = path::Path::new(&path_str);
+    if path.exists() {
+        if path.is_file() {
+            std::fs::remove_file(path).map_err(|e| AppError::Io(e))?;
+        } else if path.is_dir() {
+            std::fs::remove_dir_all(path).map_err(|e| AppError::Io(e))?;
+        }
+    }
+    Ok(())
 }

@@ -8,6 +8,9 @@ pub enum AppError {
     #[error("Image encoding failed: {0}")]
     Encode(String),
 
+    #[error("Image processing error: {0}")]
+    Image(#[from] image::ImageError), // image::ImageErrorから自動
+
     // ravif::Errorを保持するためのバリアントを追加
     #[error("AVIF encoding error: {0}")]
     Ravif(#[from] ravif::Error), //
