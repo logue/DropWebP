@@ -1,13 +1,23 @@
 fn main() {
+    let libs = ["libheif", "aom"];
     #[cfg(target_os = "macos")]
     {
-        // Homebrew で libheif / libaom をインストール済みを想定
-        if pkg_config::probe_library("libheif").is_err() {
-            panic!("libheif not found. Install via Homebrew: brew install libheif");
-        }
-        if pkg_config::probe_library("aom").is_err() {
-            panic!("libaom not found. Install via Homebrew: brew install libaom");
+        for lib in libs {
+            match pkg_config::probe_library(lib) {
+                Ok(info) => println!("cargo:warning=Found {}: {:?}", lib, info),
+                Err(e) => panic!("{} not found via pkg-config: {}", lib, e),
+            }
         }
     }
+    #[cfg(target_os = "windows")]
+    {
+        for lib in libs {
+            match pkg_config::Config::new().statik(true).probe(lib) {
+                Ok(info) => println!("cargo:warning=Found {}: {:?}", lib, info),
+                Err(e) => panic!("{} not found via pkg-config: {}", lib, e),
+            }
+        }
+    }
+
     tauri_build::build()
 }
