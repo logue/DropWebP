@@ -4,7 +4,7 @@ fn main() {
     {
         for lib in libs {
             match pkg_config::probe_library(lib) {
-                Ok(info) => println!("cargo:warning=Found {}: {:?}", lib, info),
+                Ok(info) => println!("cargo:info=Found {}: {:?}", lib, info),
                 Err(e) => panic!("{} not found via pkg-config: {}", lib, e),
             }
         }
@@ -13,7 +13,7 @@ fn main() {
     {
         for lib in libs {
             match pkg_config::Config::new().statik(true).probe(lib) {
-                Ok(info) => println!("cargo:warning=Found {}: {:?}", lib, info),
+                Ok(info) => println!("cargo:info=Found {}: {:?}", lib, info),
                 Err(e) => panic!("{} not found via pkg-config: {}", lib, e),
             }
         }
