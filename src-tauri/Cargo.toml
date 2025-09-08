@@ -21,6 +21,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 cc = "1.2.35"
 pkg-config = "0.3.32"
 tauri-build = { version = "2.4.1", features = [] }
+vcpkg = "0.2.15"
 
 [dependencies]
 bytemuck = "1.23.2"

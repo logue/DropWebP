@@ -12,7 +12,7 @@ fn main() {
     #[cfg(target_os = "windows")]
     {
         for lib in libs {
-            match pkg_config::Config::new().statik(true).probe(lib) {
+            match vcpkg::find_package(lib) {
                 Ok(info) => println!("cargo:info=Found {}: {:?}", lib, info),
                 Err(e) => panic!("{} not found via pkg-config: {}", lib, e),
             }
