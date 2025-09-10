@@ -2,12 +2,17 @@ use crate::error::AppError;
 use crate::options;
 use image::DynamicImage;
 use imgref::Img;
+use jpegxl_rs::{
+    encode::{ColorEncoding, EncoderResult, EncoderSpeed},
+    encoder_builder,
+    parallel::ParallelRunner,
+};
 use libwebp_sys::{
     WebPEncodeLosslessRGB, WebPEncodeLosslessRGBA, WebPEncodeRGB, WebPEncodeRGBA, WebPFree,
 };
 use ravif::{AlphaColorMode, BitDepth, ColorModel, Encoder};
 use rgb::{RGB8, RGBA8};
-use std::{ffi::c_void, ptr::null_mut, slice::from_raw_parts};
+use std::{borrow::Cow, ffi::c_void, ptr::null_mut, slice::from_raw_parts};
 
 /// 画像を指定された形式でエンコードします。
 /// # 引数
@@ -63,13 +68,16 @@ fn convert_dynamic_image_to_webp(
     let width = img.width() as i32;
     let height = img.height() as i32;
 
-    // RGBA または RGB の判定と格納処理
+    // 1. 効率的なデータ準備 (Cow<T>の利用)
+    //    - 不要な画像全体のクローンを避けます。
+    //    - to_rgba8()で変換が必要な場合のみ、新しい所有権を持つデータ(Owned)を生成します。
+    //    - 元のフォーマットのまま使える場合は、スライスを借用(Borrowed)するだけで済みます。
     let (raw, is_rgba) = match img {
-        DynamicImage::ImageRgba8(img) => (img.clone().into_raw(), true),
-        DynamicImage::ImageRgb8(img) => (img.clone().into_raw(), false),
+        DynamicImage::ImageRgba8(buffer) => (Cow::Borrowed(buffer.as_raw()), true),
+        DynamicImage::ImageRgb8(buffer) => (Cow::Borrowed(buffer.as_raw()), false),
         _ => {
-            let img_buf = img.to_rgba8();
-            (img_buf.into_raw(), true)
+            let buffer = img.to_rgba8();
+            (Cow::Owned(buffer.into_raw()), true)
         }
     };
 
@@ -127,7 +135,7 @@ fn convert_dynamic_image_to_webp(
 /// DynamicImage を AVIF 形式のバイトデータに変換する (raif クレート使用)
 ///
 /// # 引数
-/// * `dynamic_image` - 変換元のDynamicImage
+/// * `img` - 変換元のDynamicImage
 /// * `quality` - 品質 (0-100)。0は可逆圧縮、100は最高品質。
 /// * `bit_depth` - ビット深度 (BitDepth::Auto, BitDepth::Eight, BitDepth::Ten, BitDepth::Twelve)
 /// * `alpha_quality` - アルファチャンネルの品質
@@ -218,4 +226,93 @@ fn convert_dynamic_image_to_avif(
     println!("Finished encoding AVIF.");
 
     Ok(encoded_avif.avif_file)
+}
+
+/// DynamicImage を JPEG XL 形式のバイトデータに変換する (jpegxl-rs クレート使用)
+///
+/// # 引数
+/// * `img` - 変換元のDynamicImage
+/// * `lossless` - ロスレス圧縮するか
+/// * `speed` - エンコード速度（1~10）値が低いほど早いが品質が劣る
+/// * `quality` - 品質（0.1〜15.0）値が高いほど高品質。デフォルトは1。推奨値0.5〜3.0。（ロスレス時は無視されます）
+/// * `use_container` - JPEG XLコンテナ形式を使用するようにエンコーダを構成する
+/// * `uses_original_profile` - エンコーダを元のカラープロファイルを使用するように設定する。（ロスレス時は常に有効）
+/// * `decoding_speed` - デコード速度を設定（0~4）。値が低いほど高品質。デフォルトは0
+/// * `init_buffer_size` - 出力バッファの初期サイズ（バイト単位）32未満は32kbに切り上げ
+/// * `color_encoding` - カラーエンコード方法を設定する。デフォルトはsRGB
+/// * `parallel_runner` - 並列ランナーを設定する。デフォルト: None
+/// - 成功した場合は JPEG XL のバイト列を `Vec<u8>` として返します。
+/// - 失敗した場合は `AppError` を返します。
+/// # 注意
+/// - `jpegxl-rs` クレートを使用して JPEG XL エンコードを行います。ビルド時に `libwebp` ライブラリがシステムにインストールされている必要があります。
+fn convert_dynamic_image_to_jxl(
+    img: &DynamicImage,
+    lossless: bool,
+    speed: EncoderSpeed,
+    quality: f32,
+    use_container: bool,
+    uses_original_profie: bool,
+    decoding_speed: i64,
+    init_buffer_size: usize,
+    color_encoding: ColorEncoding,
+    parallel_runner: Option<&dyn ParallelRunner>,
+) -> Result<Vec<u8>, AppError> {
+    let width = img.width();
+    let height = img.height();
+
+    // 1. 効率的なデータ準備 (Cow<T>の利用)
+    //    - 不要な画像全体のクローンを避けます。
+    //    - to_rgba8()で変換が必要な場合のみ、新しい所有権を持つデータ(Owned)を生成します。
+    //    - 元のフォーマットのまま使える場合は、スライスを借用(Borrowed)するだけで済みます。
+    let (pixel_data, is_rgba) = match img {
+        DynamicImage::ImageRgba8(buffer) => (Cow::Borrowed(buffer.as_raw()), true),
+        DynamicImage::ImageRgb8(buffer) => (Cow::Borrowed(buffer.as_raw()), false),
+        _ => {
+            let buffer = img.to_rgba8();
+            (Cow::Owned(buffer.into_raw()), true)
+        }
+    };
+
+    // 2. エンコーダーの組み立て (ビルダーパターンの活用)
+    //    - unwrap() を避け、`?` 演算子でエラーを伝播させます。
+    let mut binding = encoder_builder();
+    let mut builder = binding
+        .speed(speed)
+        .use_container(use_container)
+        .decoding_speed(decoding_speed)
+        .init_buffer_size(init_buffer_size)
+        .color_encoding(color_encoding);
+
+    // 並列処理ランナーの設定
+    if let Some(runner) = parallel_runner {
+        builder = builder.parallel_runner(runner);
+    }
+
+    // 可逆/非可逆と品質の設定
+    if lossless {
+        builder = builder.lossless(true).uses_original_profile(true);
+    } else {
+        // libjxlの品質設定は「バターワース距離」です。
+        // 1.0が視覚的にロスレスに近い高品質、数値が大きいほど低品質になります。
+        // 0.0は特別な意味を持つ場合があるため、通常は0.1以上が安全です。
+        builder = builder
+            .quality(quality.clamp(0.1, 15.0))
+            .uses_original_profile(uses_original_profie);
+    }
+
+    let mut encoder = builder
+        .build()
+        .map_err(|e| AppError::Encode(format!("JXL encoder build failed: {}", e)))?;
+
+    // 3. ピクセルフォーマット情報の設定
+    encoder.has_alpha = is_rgba;
+
+    // 4. エンコード処理と結果の返却
+    //    - unwrap() を避け、`?` でエラーハンドリングします。
+    //    - `encode` の戻り値は `Result<Vec<u8>, _>` なので、そのまま返します。
+    let buffer: EncoderResult<f32> = encoder
+        .encode(&pixel_data, width, height)
+        .map_err(|e| AppError::Encode(format!("JXL encode failed: {}", e)))?;
+
+    Ok(buffer.to_vec())
 }

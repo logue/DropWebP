@@ -1,5 +1,5 @@
 fn main() {
-    let libs = ["libheif", "aom"];
+    let libs = ["libheif", "aom", "libjxl"];
     #[cfg(target_os = "macos")]
     {
         for lib in libs {

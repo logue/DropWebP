@@ -982,6 +982,37 @@ dependencies = [
 ]
 
 [[package]]
+name = "derive_builder"
+version = "0.20.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "507dfb09ea8b7fa618fcf76e953f4f5e192547945816d5358edffe39f6f94947"
+dependencies = [
+ "derive_builder_macro",
+]
+
+[[package]]
+name = "derive_builder_core"
+version = "0.20.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2d5bcf7b024d6835cfb3d473887cd966994907effbe9227e8c8219824d06c4e8"
+dependencies = [
+ "darling",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.106",
+]
+
+[[package]]
+name = "derive_builder_macro"
+version = "0.20.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ab63b0e2bf4d5928aff72e83a7dace85d7bba5fe12dcc3c5a572d78caffd3f3c"
+dependencies = [
+ "derive_builder_core",
+ "syn 2.0.106",
+]
+
+[[package]]
 name = "derive_more"
 version = "0.99.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1110,6 +1141,7 @@ dependencies = [
  "image",
  "imgref",
  "jpeg2k",
+ "jpegxl-rs",
  "kamadak-exif",
  "libheif-rs",
  "libwebp-sys",
@@ -2358,6 +2390,29 @@ dependencies = [
  "openjp2",
  "openjpeg-sys",
  "thiserror 1.0.69",
+]
+
+[[package]]
+name = "jpegxl-rs"
+version = "0.11.2+libjxl-0.11.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "875063ddd0cb50c5668b9c3214152ee54e6ca1f42b662d66c0855f76687033c0"
+dependencies = [
+ "byteorder",
+ "derive_builder",
+ "half",
+ "image",
+ "jpegxl-sys",
+ "thiserror 2.0.16",
+]
+
+[[package]]
+name = "jpegxl-sys"
+version = "0.11.2+libjxl-0.11.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fdaef0388e8220dc89a4ab47f92f942b68dfc237fa2dd3c3881948c5d88ce2f0"
+dependencies = [
+ "pkg-config",
 ]
 
 [[package]]
@@ -5487,9 +5542,9 @@ dependencies = [
 
 [[package]]
 name = "unicode-ident"
-version = "1.0.18"
+version = "1.0.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5a5f39404a5da50712a4c1eecf25e90dd62b613502b7e925fd4e4d19b5c96512"
+checksum = "f63a545481291138910575129486daeaf8ac54aee4387fe7906919f7830c7d9d"
 
 [[package]]
 name = "unicode-segmentation"
