@@ -38,8 +38,16 @@ pub async fn convert(data: Vec<u8>, options: EncodeOptions) -> Result<Vec<u8>, S
 /// - 成功した場合は `PathInfo` 構造体を返します。
 /// - 失敗した場合はエラーメッセージを `String` として返します。
 #[tauri::command]
-pub fn parse_path(path_str: String) -> Result<PathInfo, String> {
+pub fn get_path_info(path_str: String) -> Result<PathInfo, String> {
     let path = Path::new(&path_str);
+
+    // 最初に一度だけ存在確認を行う
+    let exists = path.exists();
+
+    // パスが存在する場合のみ、ファイルかディレクトリかを判定する
+    // 存在しない場合は、どちらも false になる
+    let is_file = if exists { path.is_file() } else { false };
+    let is_dir = if exists { path.is_dir() } else { false };
 
     let info = PathInfo {
         file_name: path
@@ -56,21 +64,13 @@ pub fn parse_path(path_str: String) -> Result<PathInfo, String> {
             .parent()
             .and_then(|s| s.to_str())
             .map(|s| s.to_string()),
+
+        exists: Some(exists.to_string()),
+        is_file: Some(is_file),
+        is_dir: Some(is_dir),
     };
 
     Ok(info)
-}
-
-/// 指定されたパスが存在するかどうかを確認します。
-/// # 引数
-/// - `path_str`: 確認対象のファイルまたはディレクトリのパス文字列
-/// # 戻り値
-/// - 存在する場合は `true`、存在しない場合は `false` を返します。
-/// - エラーが発生した場合はエラーメッセージを `String` として返します。
-#[tauri::command]
-pub async fn exists_path(path_str: String) -> Result<bool, String> {
-    let path = Path::new(&path_str);
-    Ok(path.exists())
 }
 
 /// 指定されたパスのファイルまたはディレクトリを削除します。

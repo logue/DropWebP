@@ -104,10 +104,16 @@ pub struct EncodeOptions {
 /// file_name: ファイル名 (拡張子含む)
 /// extension: 拡張子 (ドット無し)
 /// parent_dir: 親ディレクトリのパス
+/// exists: パスが存在するか
+/// is_file: ファイルであるか
+/// is_dir: ディレクトリであるか
 #[derive(serde::Serialize)]
 #[serde(rename_all = "camelCase")] // JS側でキャメルケースになるように設定
 pub struct PathInfo {
     pub(crate) file_name: Option<String>,
     pub(crate) extension: Option<String>,
     pub(crate) parent_dir: Option<String>,
+    pub(crate) exists: Option<String>,
+    pub(crate) is_file: Option<bool>,
+    pub(crate) is_dir: Option<bool>,
 }

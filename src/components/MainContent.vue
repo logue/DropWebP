@@ -41,13 +41,17 @@ const isEnter = ref(false);
           {{ t('select_files') }}
         </v-btn>
       </v-col>
-      <v-col>
+      <!--v-col>
         <v-btn prepend-icon="mdi-folder-open" @click="convertByDirDialog">
           {{ t('select_folder') }}
         </v-btn>
-      </v-col>
-      <v-col class="d-flex justify-end">
-        <v-radio-group v-model="settingsStore.commonOptions.format" inline>
+      </!v-col-->
+      <v-col>
+        <v-radio-group
+          v-model="settingsStore.commonOptions.format"
+          class="d-flex justify-end"
+          inline
+        >
           <v-radio label="WebP" value="webp" color="green" />
           <v-radio label="Avif" value="avif" color="red" />
         </v-radio-group>
@@ -65,7 +69,7 @@ const isEnter = ref(false);
 
 <i18n lang="yaml">
 en:
-  hero_text: Drag and drop image files or Paste image here to compress image.
+  hero_text: Drag and drop image files or directories here, or paste images to compress them in the format selected by the radio buttons below.
   select_files: Select Files
   select_folder: Select Folder
   progress: Compressing...
@@ -77,12 +81,13 @@ en:
   file_type:
     webp: WebP Image
     avif: Avif Image
+    jxl: JPEG XL Image
   error:
     no_images_found_dropped: No images found in the dropped items.
     no_images_found_selected: No images found in the selected items.
     no_images_found_in_folder: No images found in the selected folder.
 ja:
-  hero_text: ここに画像ファイルをドラッグ＆ドロップするか、画像をペーストすることで画像圧縮できます。
+  hero_text: ここに画像ファイルやディレクトリをドラッグ＆ドロップするか、画像をペーストすることで下のラジオボタンの形式で画像圧縮できます。
   select_files: ファイルを選択
   select_folder: フォルダを選択
   progress: 圧縮しています…
@@ -94,12 +99,13 @@ ja:
   type:
     webp: WebP画像
     avif: Avif画像
+    jxl: JPEG XL画像
   error:
     no_images_found_dropped: ドロップされたアイテムに画像が見つかりませんでした。
     no_images_found_selected: 選択されたアイテムに画像が見つかりませんでした。
     no_images_found_in_folder: フォルダ内に画像が見つかりませんでした。
 kr:
-  hero_text: 이미지 파일을 끌어다 놓거나 이미지를 붙여넣어 이미지를 압축합니다.
+  hero_text: 여기에 이미지 파일이나 디렉토리를 드래그 앤 드롭하거나 이미지를 붙여넣기하여 아래의 라디오 버튼 형식으로 이미지 압축할 수 있습니다.
   select_files: 파일 선택
   select_folder: 폴더 선택
   progress: 압축 중...
@@ -111,12 +117,13 @@ kr:
   type:
     webp: WebP 이미지
     avif: Avif 이미지
+    jxl: JPEG XL 이미지
   error:
     no_images_found_dropped: 드롭된 항목에서 이미지를 찾을 수 없습니다
     no_images_found_selected: 선택한 항목에서 이미지를 찾을 수 없습니다.
     no_images_found_in_folder: 폴더에서 이미지를 찾을 수 없습니다.
 zh:
-  hero_text: 拖放圖像文件或粘貼圖像以壓縮圖像。
+  hero_text: 將圖像檔案或目錄拖放到此處，或貼上圖像以按照下面單選按鈕選擇的格式進行壓縮。
   select_files: 選擇文件
   select_folder: 選擇文件夾
   progress: 壓縮中...
@@ -128,6 +135,7 @@ zh:
   type:
     webp: WebP 圖像
     avif: Avif 圖像
+    jxl: JPEG XL 圖像
   error:
     no_images_found_dropped: 在拖放的項目中未找到圖像。
     no_images_found_selected: 在所選項目中未找到圖像。

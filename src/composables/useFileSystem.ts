@@ -2,6 +2,8 @@ import { invoke } from '@tauri-apps/api/core';
 import { join, sep } from '@tauri-apps/api/path';
 import { readDir, readFile, writeFile, type DirEntry } from '@tauri-apps/plugin-fs';
 
+import type { PathInfo } from '@/interfaces/PathInfo';
+
 /** ファイルシステムコンポーサブル */
 export function useFileSystem() {
   /**
@@ -33,21 +35,6 @@ export function useFileSystem() {
       console.info(`Successfully saved file to ${path}`);
     } catch (error) {
       console.error('Failed to save file:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * パスが存在するかチェック
-   * @param path チェックするパス
-   * @returns 存在する場合はtrue、存在しない場合はfalse
-   */
-  async function exists(path: string): Promise<boolean> {
-    try {
-      await invoke('exists_path', { pathStr: path }); // Rust側でexists_pathコマンドを呼び出す
-      return true; // 存在する場合はtrueを返す
-    } catch {
-      return false; // 存在しない場合はfalseを返す
     }
   }
 
@@ -67,25 +54,20 @@ export function useFileSystem() {
 
   /**
    * ディレクトリからファイルを収集する
-   * @param path 入力ファイル
-   * @param pattern 拡張子のマッチパターン
+   * @param path ディレクトリ
    * @param recursive 再起的に探索するか
    * @returns ファイルパスの配列
    */
-  async function collectFilesFromDir(
-    path: string,
-    pattern: RegExp,
-    recursive = false
-  ): Promise<string[]> {
+  async function collectFilesFromDir(path: string, recursive = false): Promise<string[]> {
     const entries: DirEntry[] = await readDir(path);
     let files: string[] = [];
 
     for (const entry of entries) {
       const fullPath = await join(path, entry.name); // フルパス生成
-      if (entry.isFile && pattern.exec(entry.name)) {
+      if (entry.isFile) {
         files.push(fullPath);
       } else if (recursive && entry.isDirectory) {
-        const sub = await collectFilesFromDir(fullPath, pattern, recursive);
+        const sub = await collectFilesFromDir(fullPath, recursive);
         files = files.concat(sub);
       }
     }
@@ -96,24 +78,20 @@ export function useFileSystem() {
   /**
    * ファイル or フォルダのパス配列を受け取ってファイル一覧に正規化
    * @param paths 入力パス配列
-   * @param pattern 拡張子のマッチパターン
    * @param recursive 再起的に探索するか
    * @returns ファイルパスの配列
    */
-  async function collectFiles(
-    paths: string[],
-    pattern: RegExp,
-    recursive = false
-  ): Promise<string[]> {
+  async function collectFiles(paths: string[], recursive = false): Promise<string[]> {
     let results: string[] = [];
 
-    for (const p of paths) {
-      if (pattern.test(p)) {
-        results.push(p);
-      } else {
-        const subFiles = await collectFilesFromDir(p, pattern, recursive);
+    for (const path of paths) {
+      if ((await pathInfo(path)).isDir) {
+        // ディレクトリだった場合
+        const subFiles = await collectFilesFromDir(path, recursive);
         results = results.concat(subFiles);
+        continue;
       }
+      results = results.concat(path);
     }
 
     return results;
@@ -124,45 +102,24 @@ export function useFileSystem() {
    * @param path パス文字列
    * @returns ファイル名、拡張子、親ディレクトリ名
    */
-  async function parsePath(path: string): Promise<{
-    fileName: string;
-    extension: string;
-    parentDir: string;
-  }> {
+  async function pathInfo(path: string): Promise<PathInfo> {
     try {
-      return await invoke('parse_path', { pathStr: path });
+      const ret = await invoke<PathInfo>('get_path_info', { pathStr: path });
+
+      // 出力前にミューテーションする
+      return {
+        fileName: ret.fileName,
+        extension: ret.extension ? ret.extension.toLowerCase() : ret.extension, // 拡張子は常に小文字にする
+        parentDir: ret.parentDir + sep(), // 親ディレクトリの末尾の/がつかないのでここで追記
+        isFile: ret.isFile,
+        isDir: ret.isDir,
+        exists: ret.exists
+      };
     } catch (error) {
       console.error('Failed to parse path:', error);
       throw error;
     }
   }
 
-  /**
-   * 親ディレクトリパスを取得
-   * @param path パス文字列
-   * @returns 親ディレクトリパス（ルートの場合は空文字）
-   */
-  async function getDir(path: string) {
-    return (await parsePath(path)).parentDir + sep(); // 末尾にディレクトリセパレータを追加
-  }
-
-  /**
-   * ファイル名を取得
-   * @param path パス文字列
-   * @returns ファイル名（拡張子含む）
-   */
-  async function getFileName(path: string) {
-    return (await parsePath(path)).fileName;
-  }
-
-  /**
-   * 拡張子を取得
-   * @param path パス文字列
-   * @returns 拡張子（ドットなし、存在しない場合は空文字）
-   */
-  async function getExtension(path: string) {
-    return (await parsePath(path)).extension;
-  }
-
-  return { read, save, exists, del, collectFiles, getDir, getFileName, getExtension };
+  return { read, save, del, collectFiles, pathInfo };
 }
