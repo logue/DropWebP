@@ -3,8 +3,6 @@ import type { BitDepth, ColorModel, AlphaColorMode } from '@/types/AvifTypes';
  * Rustの `AvifOptions` 構造体に対応
  */
 export interface AvifOptions {
-  /** ロスレス（未実装） */
-  lossless: boolean;
   /** 品質 */
   quality: number;
   /** ビット進度 */
