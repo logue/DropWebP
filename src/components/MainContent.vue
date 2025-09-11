@@ -10,7 +10,7 @@ import { useImageConversionController } from '@/composables/useImageConversionCo
 const settingsStore = useSettingsStore();
 const { t } = useI18n();
 
-const { dialog, inProgress, currentFile, progress, convertByDialog, convertByDirDialog } =
+const { dialog, inProgress, currentFile, progress, convertByDialog } =
   useImageConversionController(t);
 
 const isEnter = ref(false);
@@ -54,6 +54,7 @@ const isEnter = ref(false);
         >
           <v-radio label="WebP" value="webp" color="green" />
           <v-radio label="Avif" value="avif" color="red" />
+          <v-radio label="JPEG XL" value="jxl" color="blue" />
         </v-radio-group>
       </v-col>
     </v-row>

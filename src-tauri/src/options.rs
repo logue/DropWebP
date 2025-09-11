@@ -21,12 +21,13 @@ pub struct PathInfo {
 }
 
 /// 全てのエンコードオプションをまとめる親構造体
+/// エンコード形式を一つだけ指定するための列挙型
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct EncodeOptions {
-    pub avif: Option<AvifOptions>,
-    pub webp: Option<WebpOptions>,
-    pub jxl: Option<JxlOptions>,
+pub enum EncodeOptions {
+    Avif(AvifOptions),
+    Webp(WebpOptions),
+    Jxl(JxlOptions),
 }
 
 /// AVIF形式のオプション

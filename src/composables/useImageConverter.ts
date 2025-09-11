@@ -69,10 +69,29 @@ export function useImageConverter() {
    */
   const compress = async (data: Uint8Array): Promise<Uint8Array> => {
     // 圧縮オプション
-    const options =
-      settingsStore.commonOptions.format === 'avif'
-        ? { avif: toRaw(settingsStore.avifOptions) }
-        : { webp: toRaw(settingsStore.webpOptions) };
+    // 対応するフォーマットとオプションのソースをマッピングするオブジェクトを定義
+    const optionsMap = {
+      avif: settingsStore.avifOptions,
+      jxl: settingsStore.jxlOptions,
+      webp: settingsStore.webpOptions
+    };
+
+    // 型の一致を保証するためにキーの型を定義
+    type Format = keyof typeof optionsMap;
+
+    const format = settingsStore.commonOptions.format as Format;
+
+    // マップに指定されたフォーマットが存在するかチェック
+    if (!(format in optionsMap)) {
+      throw new Error('Unsupported format');
+    }
+
+    // マッピングオブジェクトから動的に値を取得し、optionsを一度に構築
+    const options = {
+      [format]: toRaw(optionsMap[format])
+    };
+
+    console.log(options);
     try {
       // rust側のVec<8>はnumber[]型になるのでUint8Arrayに変換する
       return new Uint8Array(await invoke<number[]>('convert', { data, options }));

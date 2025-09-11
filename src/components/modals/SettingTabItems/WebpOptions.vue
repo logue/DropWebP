@@ -25,7 +25,7 @@ const settingsStore = useSettingsStore();
     thumb-label="always"
     type="number"
   />
-  <v-btn prepend-icon="mdi-rotate-left" variant="text" @click="settingsStore.resetCommonOptions()">
+  <v-btn prepend-icon="mdi-rotate-left" variant="text" @click="settingsStore.resetWebpOptions()">
     {{ t('reset_webp_options') }}
   </v-btn>
 </template>

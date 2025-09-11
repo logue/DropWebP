@@ -73,7 +73,15 @@ export function useImageConversionController(t: ComposerTranslation) {
         }
       } catch (e) {
         console.error(file, e);
-        continue;
+        dialog.value = false;
+        inProgress.value = false;
+        if (e instanceof Error) {
+          globalStore.setMessage(e.message);
+        } else {
+          globalStore.setMessage(String(e));
+        }
+        playErrorSound();
+        return;
       }
       progress.value = Math.floor(((i + 1) / files.length) * 100);
     }
@@ -146,17 +154,27 @@ export function useImageConversionController(t: ComposerTranslation) {
 
       // ファイルをUint8Arrayバイナリとして読み込む
       const buffer = new Uint8Array(await file.arrayBuffer());
+
+      const filtersMap = {
+        avif: { name: t('type.avif'), extensions: ['avif'] },
+        jxl: { name: t('type.jxl'), extensions: ['jxl'] },
+        webp: { name: t('type.webp'), extensions: ['webp'] }
+      };
+      type Format = keyof typeof filtersMap;
+
+      const format = settingsStore.commonOptions.format as Format;
+
+      if (!(format in filtersMap)) {
+        throw new Error('Unsupported format');
+      }
+
       // 保存先のダイアログを表示
       const savePath = await save({
         title: t('save_as_title'),
         defaultPath: `${settingsStore.commonOptions.outputPath}${sep()}image.${
           settingsStore.commonOptions.format
         }`,
-        filters: [
-          settingsStore.commonOptions.format === 'webp'
-            ? { name: t('type.webp'), extensions: ['webp'] }
-            : { name: t('type.avif'), extensions: ['avif'] }
-        ]
+        filters: [filtersMap[format]]
       });
       if (!savePath) {
         // キャンセルボタンが押された場合処理しない

@@ -1,11 +1,12 @@
 import { defineStore } from 'pinia';
-import { computed, ref, type Ref } from 'vue';
+import { ref, type Ref } from 'vue';
 
 import { documentDir } from '@tauri-apps/api/path';
 import { open } from '@tauri-apps/plugin-dialog';
 
 import type { AvifOptions } from '@/interfaces/AvifOptions';
 import type { CommonOptions } from '@/interfaces/CommonOptions';
+import type { JxlOptions } from '@/interfaces/JxlOptions';
 import type { WebpOptions } from '@/interfaces/WebpOptions';
 
 // デフォルト設定を定義
@@ -24,6 +25,17 @@ const defaultWebpOptions: WebpOptions = {
   lossless: true
 } as const;
 
+const defaultJxlOptions: JxlOptions = {
+  lossless: true,
+  speed: 'Squirrel',
+  quality: 1,
+  useContainer: true,
+  usesOriginalProfile: true,
+  decodingSpeed: 0,
+  initBufferSize: 512,
+  colorEncoding: 'Srgb'
+};
+
 const defaultCommonOptions: CommonOptions = {
   format: 'webp',
   overwrite: true,
@@ -38,39 +50,27 @@ const defaultCommonOptions: CommonOptions = {
 export default defineStore(
   'settings',
   () => {
-    // State
-
-    /** AVIF Options */
-    const avifOptions: Ref<AvifOptions> = ref({ ...defaultAvifOptions });
-    /** WebP Options */
-    const webpOptions: Ref<WebpOptions> = ref({ ...defaultWebpOptions });
-    /** Overwrite original file */
+    /** 全般オプション */
     const commonOptions: Ref<CommonOptions> = ref({ ...defaultCommonOptions });
+    /** AVIFオプション */
+    const avifOptions: Ref<AvifOptions> = ref({ ...defaultAvifOptions });
+    /** WebPオプション */
+    const webpOptions: Ref<WebpOptions> = ref({ ...defaultWebpOptions });
+    /** JPEG XLオプション */
+    const jxlOptions: Ref<JxlOptions> = ref({ ...defaultJxlOptions });
 
-    const extensionPattern: Ref<RegExp> = computed(() =>
-      commonOptions.value.ignoreJpeg
-        ? /\.(png|gif|tif?f|bmp|heic|heif|jp2|j2k)$/i
-        : /\.(jpe?g|png|gif|tif?f|bmp|heic|heif|jp2|j2k)$/i
-    );
-
-    /** Reset to default settings */
+    /** 設定を初期化 */
     const reset = () => {
+      commonOptions.value = { ...defaultCommonOptions };
       avifOptions.value = { ...defaultAvifOptions };
       webpOptions.value = { ...defaultWebpOptions };
-      commonOptions.value = { ...defaultCommonOptions };
+      jxlOptions.value = { ...defaultJxlOptions };
     };
 
-    const resetAvifOptions = () => {
-      avifOptions.value = { ...defaultAvifOptions };
-    };
-
-    const resetWebpOptions = () => {
-      webpOptions.value = { ...defaultWebpOptions };
-    };
-
-    const resetCommonOptions = () => {
-      commonOptions.value = { ...defaultCommonOptions };
-    };
+    const resetCommonOptions = () => (commonOptions.value = { ...defaultCommonOptions });
+    const resetAvifOptions = () => (avifOptions.value = { ...defaultAvifOptions });
+    const resetWebpOptions = () => (webpOptions.value = { ...defaultWebpOptions });
+    const resetJxlOptions = () => (jxlOptions.value = { ...defaultJxlOptions });
 
     /** 出力先ディレクトリ選択ダイアログ */
     const browseOutputPath = async () => {
@@ -86,12 +86,13 @@ export default defineStore(
     return {
       avifOptions,
       webpOptions,
+      jxlOptions,
       commonOptions,
-      extensionPattern,
       reset,
       resetAvifOptions,
       resetWebpOptions,
       resetCommonOptions,
+      resetJxlOptions,
       browseOutputPath
     };
   },

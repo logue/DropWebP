@@ -1,5 +1,5 @@
-use crate::error::AppError;
 use crate::options;
+use crate::{error::AppError, options::EncodeOptions};
 use image::DynamicImage;
 use imgref::Img;
 use jpegxl_rs::{
@@ -24,40 +24,43 @@ use std::{borrow::Cow, ffi::c_void, ptr::null_mut, slice::from_raw_parts};
 /// # 注意
 /// - AVIF形式のエンコードには `ravif` クレートを使用しています。ビルド時に `libavif` ライブラリがシステムにインストールされている必要があります。
 /// - WebP形式のエンコードには `libwebp-sys` クレートを使用しています。ビルド時に `libwebp` ライブラリがシステムにインストールされている必要があります。
+/// - JPEG XL形式のエンコードには `jpegxl-rs` クレートを使用しています。ビルド時に `libjxl` ライブラリがシステムにインストールされている必要があります。
 pub fn encode(img: &DynamicImage, options: options::EncodeOptions) -> Result<Vec<u8>, AppError> {
-    if let Some(avif_opts) = options.avif {
-        // ここで `AvifOptions` から `ravif` 用の引数への変換を行う
-        println!("Adapter: Converting AvifOptions for ravif encoder...");
-
-        return convert_dynamic_image_to_avif(
-            img,
-            avif_opts.quality,
-            avif_opts.bit_depth.to_ravif(),
-            avif_opts.alpha_quality,
-            avif_opts.speed,
-            avif_opts.color_model.to_ravif(),
-            avif_opts.threads,
-            avif_opts.alpha_color_mode.to_ravif(),
-        );
-    } else if let Some(webp_opts) = options.webp {
-        println!("Adapter: Converting WebpOptions for libwebp_sys encoder...");
-        return convert_dynamic_image_to_webp(img, webp_opts.quality, webp_opts.lossless);
-    } else if let Some(jxl_opts) = options.jxl {
-        println!("Adapter: Converting JxlOptions for jpegxl_rs encoder...");
-        return convert_dynamic_image_to_jxl(
-            img,
-            jxl_opts.lossless,
-            jxl_opts.speed.to_jxl(),
-            jxl_opts.quality,
-            jxl_opts.use_container,
-            jxl_opts.uses_original_profile,
-            jxl_opts.decoding_speed,
-            jxl_opts.init_buffer_size,
-            jxl_opts.color_encoding.to_jxl(),
-            None, // 並列ランナーは今のところサポートしない
-        );
+    match options {
+        EncodeOptions::Avif(opts) => {
+            println!("Adapter: Converting AvifOptions for ravif encoder...");
+            return convert_dynamic_image_to_avif(
+                img,
+                opts.quality,
+                opts.bit_depth.to_ravif(),
+                opts.alpha_quality,
+                opts.speed,
+                opts.color_model.to_ravif(),
+                opts.threads,
+                opts.alpha_color_mode.to_ravif(),
+            );
+        }
+        EncodeOptions::Webp(opts) => {
+            println!("Adapter: Converting WebpOptions for libwebp_sys encoder...");
+            return convert_dynamic_image_to_webp(img, opts.quality, opts.lossless);
+        }
+        EncodeOptions::Jxl(opts) => {
+            println!("Adapter: Converting JxlOptions for jpegxl_rs encoder...");
+            return convert_dynamic_image_to_jxl(
+                img,
+                opts.lossless,
+                opts.speed.to_jxl(),
+                opts.quality,
+                opts.use_container,
+                opts.uses_original_profile,
+                opts.decoding_speed,
+                opts.init_buffer_size,
+                opts.color_encoding.to_jxl(),
+                None, // 並列ランナーは今のところサポートしない
+            );
+        }
+        _ => Err(AppError::UnsupportedFormat),
     }
-    Ok(vec![]) // 仮の戻り値
 }
 
 /// DynamicImageからエンコード用のピクセルデータを効率的に抽出します。
@@ -70,7 +73,7 @@ pub fn encode(img: &DynamicImage, options: options::EncodeOptions) -> Result<Vec
 ///
 /// # Returns
 /// * `(Cow<'a, [u8]>, bool)` - ピクセルデータと、アルファチャンネルの有無 (`true`ならRGBA) のタプル。
-fn extract_pixel_data(img: &DynamicImage) -> (Cow<[u8]>, bool) {
+fn extract_pixel_data(img: &DynamicImage) -> (Cow<'_, [u8]>, bool) {
     match img {
         DynamicImage::ImageRgba8(buffer) => (Cow::Borrowed(buffer.as_raw()), true),
         DynamicImage::ImageRgb8(buffer) => (Cow::Borrowed(buffer.as_raw()), false),
@@ -263,7 +266,7 @@ fn convert_dynamic_image_to_jxl(
     speed: EncoderSpeed,
     quality: f32,
     use_container: bool,
-    uses_original_profile: bool,
+    _uses_original_profile: bool,
     decoding_speed: i64,
     init_buffer_size: usize,
     color_encoding: ColorEncoding,
@@ -297,9 +300,8 @@ fn convert_dynamic_image_to_jxl(
         // libjxlの品質設定は「バターワース距離」です。
         // 1.0が視覚的にロスレスに近い高品質、数値が大きいほど低品質になります。
         // 0.0は特別な意味を持つ場合があるため、通常は0.1以上が安全です。
-        builder = builder
-            .quality(quality.clamp(0.1, 15.0))
-            .uses_original_profile(uses_original_profile);
+        builder = builder.quality(quality.clamp(0.1, 15.0));
+        //.uses_original_profile(uses_original_profile);
     }
 
     let mut encoder = builder

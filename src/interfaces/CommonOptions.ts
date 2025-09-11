@@ -1,6 +1,6 @@
 export interface CommonOptions {
   /** Output image format */
-  format: 'avif' | 'webp';
+  format: 'avif' | 'webp' | 'jxl';
   /** Overwrite original file */
   overwrite: boolean;
   /** Delete original file after conversion */

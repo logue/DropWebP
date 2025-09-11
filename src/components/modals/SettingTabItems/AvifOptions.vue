@@ -95,7 +95,7 @@ const settingsStore = useSettingsStore();
       />
     </v-col>
   </v-row>
-  <v-btn prepend-icon="mdi-rotate-left" variant="text" @click="settingsStore.resetCommonOptions()">
+  <v-btn prepend-icon="mdi-rotate-left" variant="text" @click="settingsStore.resetAvifOptions()">
     {{ t('reset_avif_options') }}
   </v-btn>
 </template>

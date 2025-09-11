@@ -50,7 +50,15 @@ const { t } = useI18n();
     </template>
   </v-text-field>
   <v-btn prepend-icon="mdi-rotate-left" variant="text" @click="settingsStore.resetCommonOptions()">
-    {{ t('reset') }}
+    {{ t('reset_common') }}
+  </v-btn>
+  <v-btn
+    prepend-icon="mdi-rotate-left"
+    variant="text"
+    color="danger"
+    @click="settingsStore.reset()"
+  >
+    {{ t('reset_all') }}
   </v-btn>
 </template>
 
@@ -65,7 +73,8 @@ en:
   recursive: Include Subdirectories
   output_path: Default output path
   browse: Browse
-  reset: Reset common options
+  reset_all: Reset All
+  reset_common: Reset common options
 ja:
   ignore_jpeg: JPEGを無視
   ignore_jpeg_hint: JPEG画像はもともと圧縮されているため、変換すると容量がかえって増えてしまうことがあります。このオプションでJPEG画像を無視できます。
@@ -76,7 +85,8 @@ ja:
   recursive: サブディレクトリを含める
   output_path: デフォルトの出力先のパス
   browse: ブラウズ
-  reset: 共通オプションをリセット
+  reset_all: 全てをリセット
+  reset_common: 共通オプションをリセット
 kr:
   ignore_jpeg: JPEG 무시
   ignore_jpeg_hint: JPEG 이미지는 원래 압축되어 있기 때문에 변환하면 용량이 오히려 늘어날 수 있습니다. 이 옵션으로 JPEG 이미지를 무시할 수 있습니다.
@@ -87,7 +97,8 @@ kr:
   recursive: 하위 디렉토리 포함
   output_path: 기본 출력 경로
   browse: 찾아보기
-  reset: 공통 옵션 재설정
+  reset_all: 모두 재설정
+  reset_common: 공통 옵션 재설정
 zh:
   ignore_jpeg: 忽略 JPEG
   ignore_jpeg_hint: JPEG 图像已经是压缩过的，因此转换后文件大小可能会增加。此选项允许您忽略 JPEG 图像。
@@ -98,5 +109,6 @@ zh:
   recursive: 包含子目錄
   output_path: 默認輸出路徑
   browse: 瀏覽
-  reset: 重置通用選項
+  reset_all: 全部重置
+  reset_common: 重置通用選項
 </i18n>

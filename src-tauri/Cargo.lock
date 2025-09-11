@@ -1134,7 +1134,7 @@ dependencies = [
 
 [[package]]
 name = "drop-compress-image"
-version = "2.0.1"
+version = "2.1.0"
 dependencies = [
  "bytemuck",
  "cc",
