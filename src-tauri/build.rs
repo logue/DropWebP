@@ -1,5 +1,5 @@
 fn main() {
-    let libs = ["libheif", "aom", "libjxl"];
+    let libs = ["libheif", "libavif", "libjxl"];
     #[cfg(target_os = "macos")]
     {
         for lib in libs {
@@ -14,7 +14,7 @@ fn main() {
         for lib in libs {
             match vcpkg::find_package(lib) {
                 Ok(info) => println!("cargo:info=Found {}: {:?}", lib, info),
-                Err(e) => panic!("{} not found via pkg-config: {}", lib, e),
+                Err(e) => panic!("{} not found via vcpkg: {}", lib, e),
             }
         }
     }

@@ -8,7 +8,7 @@ use std::io::Cursor;
 // 独自の形式を定義するためのenum
 pub enum DetectedFormat {
     Heic,
-    // Exr,
+    Exr,
     Jpeg2000,
     // imageクレートがサポートするその他の形式
     Standard(ImageFormat),
@@ -31,12 +31,6 @@ pub fn detect_format(bytes: &[u8]) -> Option<DetectedFormat> {
             }
         }
     }
-    /*
-    // EXRのチェック
-    if bytes.starts_with(&[0x76, 0x2f, 0x31, 0x01]) {
-        return Some(DetectedFormat::Exr);
-    }
-    */
 
     // JPEG 2000のチェック
     if bytes.starts_with(b"\x00\x00\x00\x0CjP  \r\n\x87\n") {
