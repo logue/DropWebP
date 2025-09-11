@@ -42,8 +42,43 @@ pub fn encode(img: &DynamicImage, options: options::EncodeOptions) -> Result<Vec
     } else if let Some(webp_opts) = options.webp {
         println!("Adapter: Converting WebpOptions for libwebp_sys encoder...");
         return convert_dynamic_image_to_webp(img, webp_opts.quality, webp_opts.lossless);
+    } else if let Some(jxl_opts) = options.jxl {
+        println!("Adapter: Converting JxlOptions for jpegxl_rs encoder...");
+        return convert_dynamic_image_to_jxl(
+            img,
+            jxl_opts.lossless,
+            jxl_opts.speed.to_jxl(),
+            jxl_opts.quality,
+            jxl_opts.use_container,
+            jxl_opts.uses_original_profile,
+            jxl_opts.decoding_speed,
+            jxl_opts.init_buffer_size,
+            jxl_opts.color_encoding.to_jxl(),
+            None, // 並列ランナーは今のところサポートしない
+        );
     }
     Ok(vec![]) // 仮の戻り値
+}
+
+/// DynamicImageからエンコード用のピクセルデータを効率的に抽出します。
+///
+/// - 元の画像がRGB8/RGBA8形式の場合、データを借用して不要なコピーを避けます。
+/// - それ以外の形式の場合は、RGBA8に変換して所有権を持つデータを生成します。
+///
+/// # Arguments
+/// * `img` - 処理対象の`DynamicImage`への参照。
+///
+/// # Returns
+/// * `(Cow<'a, [u8]>, bool)` - ピクセルデータと、アルファチャンネルの有無 (`true`ならRGBA) のタプル。
+fn extract_pixel_data(img: &DynamicImage) -> (Cow<[u8]>, bool) {
+    match img {
+        DynamicImage::ImageRgba8(buffer) => (Cow::Borrowed(buffer.as_raw()), true),
+        DynamicImage::ImageRgb8(buffer) => (Cow::Borrowed(buffer.as_raw()), false),
+        _ => {
+            let buffer = img.to_rgba8();
+            (Cow::Owned(buffer.into_raw()), true)
+        }
+    }
 }
 
 /// 画像を WebP にエンコードします。
@@ -68,18 +103,8 @@ fn convert_dynamic_image_to_webp(
     let width = img.width() as i32;
     let height = img.height() as i32;
 
-    // 1. 効率的なデータ準備 (Cow<T>の利用)
-    //    - 不要な画像全体のクローンを避けます。
-    //    - to_rgba8()で変換が必要な場合のみ、新しい所有権を持つデータ(Owned)を生成します。
-    //    - 元のフォーマットのまま使える場合は、スライスを借用(Borrowed)するだけで済みます。
-    let (raw, is_rgba) = match img {
-        DynamicImage::ImageRgba8(buffer) => (Cow::Borrowed(buffer.as_raw()), true),
-        DynamicImage::ImageRgb8(buffer) => (Cow::Borrowed(buffer.as_raw()), false),
-        _ => {
-            let buffer = img.to_rgba8();
-            (Cow::Owned(buffer.into_raw()), true)
-        }
-    };
+    // 1. データ準備
+    let (raw, is_rgba) = extract_pixel_data(img);
 
     unsafe {
         // 出力バッファのポインタ
@@ -136,9 +161,9 @@ fn convert_dynamic_image_to_webp(
 ///
 /// # 引数
 /// * `img` - 変換元のDynamicImage
-/// * `quality` - 品質 (0-100)。0は可逆圧縮、100は最高品質。
-/// * `bit_depth` - ビット深度 (BitDepth::Auto, BitDepth::Eight, BitDepth::Ten, BitDepth::Twelve)
-/// * `alpha_quality` - アルファチャンネルの品質
+/// * `quality` - 品質 (1-100)。値が高いほど最高品質。
+/// * `bit_depth` - ビット深度 (BitDepth::Auto, BitDepth::Eight, BitDepth::Ten)
+/// * `alpha_quality` - アルファチャンネルの品質（1-100）。値が高いほど最高品質。
 /// * `speed` - エンコード速度 (0-10)。0は最高品質で最も遅い、10は最速。
 /// * `color_model` - カラーモデル (ColorModel::YCbCr, ColorModel::RGB)
 /// * `threads` - 使用するスレッド数 (Noneの場合は自動設定)
@@ -159,27 +184,14 @@ fn convert_dynamic_image_to_avif(
     alpha_color_mode: AlphaColorMode,
 ) -> Result<Vec<u8>, AppError> {
     // エンコーダーの設定は先に済ませておく
-    let encoder;
-    if quality < 1.0 {
-        // TODO: 可逆圧縮の実装
-        encoder = Encoder::new()
-            // .with_lossless()
-            .with_bit_depth(bit_depth)
-            .with_internal_color_model(color_model)
-            .with_num_threads(threads)
-            .with_alpha_color_mode(alpha_color_mode)
-            .with_speed(speed);
-    } else {
-        // 通常の品質設定
-        encoder = Encoder::new()
-            .with_quality(quality)
-            .with_bit_depth(bit_depth)
-            .with_internal_color_model(color_model)
-            .with_num_threads(threads)
-            .with_alpha_color_mode(alpha_color_mode)
-            .with_speed(speed)
-            .with_alpha_quality(alpha_quality);
-    }
+    let encoder = Encoder::new()
+        .with_quality(quality)
+        .with_bit_depth(bit_depth)
+        .with_internal_color_model(color_model)
+        .with_num_threads(threads)
+        .with_alpha_color_mode(alpha_color_mode)
+        .with_speed(speed)
+        .with_alpha_quality(alpha_quality);
 
     // DynamicImageの具体的な型でマッチングして処理を分岐
     let encoded_avif = match img {
@@ -251,7 +263,7 @@ fn convert_dynamic_image_to_jxl(
     speed: EncoderSpeed,
     quality: f32,
     use_container: bool,
-    uses_original_profie: bool,
+    uses_original_profile: bool,
     decoding_speed: i64,
     init_buffer_size: usize,
     color_encoding: ColorEncoding,
@@ -261,17 +273,7 @@ fn convert_dynamic_image_to_jxl(
     let height = img.height();
 
     // 1. 効率的なデータ準備 (Cow<T>の利用)
-    //    - 不要な画像全体のクローンを避けます。
-    //    - to_rgba8()で変換が必要な場合のみ、新しい所有権を持つデータ(Owned)を生成します。
-    //    - 元のフォーマットのまま使える場合は、スライスを借用(Borrowed)するだけで済みます。
-    let (pixel_data, is_rgba) = match img {
-        DynamicImage::ImageRgba8(buffer) => (Cow::Borrowed(buffer.as_raw()), true),
-        DynamicImage::ImageRgb8(buffer) => (Cow::Borrowed(buffer.as_raw()), false),
-        _ => {
-            let buffer = img.to_rgba8();
-            (Cow::Owned(buffer.into_raw()), true)
-        }
-    };
+    let (pixel_data, is_rgba) = extract_pixel_data(img);
 
     // 2. エンコーダーの組み立て (ビルダーパターンの活用)
     //    - unwrap() を避け、`?` 演算子でエラーを伝播させます。
@@ -297,7 +299,7 @@ fn convert_dynamic_image_to_jxl(
         // 0.0は特別な意味を持つ場合があるため、通常は0.1以上が安全です。
         builder = builder
             .quality(quality.clamp(0.1, 15.0))
-            .uses_original_profile(uses_original_profie);
+            .uses_original_profile(uses_original_profile);
     }
 
     let mut encoder = builder
