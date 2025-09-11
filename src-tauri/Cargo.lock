@@ -1157,6 +1157,7 @@ dependencies = [
  "tauri-plugin-log",
  "tauri-plugin-opener",
  "thiserror 2.0.16",
+ "tonemap",
  "vcpkg",
 ]
 
@@ -5371,6 +5372,12 @@ name = "toml_writer"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fcc842091f2def52017664b53082ecbbeb5c7731092bad69d2c63050401dfd64"
+
+[[package]]
+name = "tonemap"
+version = "0.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2d97478858c823077ed7bc79d6a84be4e0af8e9882b222e61a8a5dbae458f45d"
 
 [[package]]
 name = "tower"

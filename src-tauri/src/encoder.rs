@@ -77,12 +77,107 @@ fn extract_pixel_data(img: &DynamicImage) -> (Cow<'_, [u8]>, bool) {
     match img {
         DynamicImage::ImageRgba8(buffer) => (Cow::Borrowed(buffer.as_raw()), true),
         DynamicImage::ImageRgb8(buffer) => (Cow::Borrowed(buffer.as_raw()), false),
+        // 16ビット画像(Rgba16)や他の形式が来た場合...
         _ => {
+            // ...img.to_rgba8() を使って8ビットのRGBA形式に変換する！
             let buffer = img.to_rgba8();
+            // これで、どんな入力でも必ず8ビットRGBAデータになる
             (Cow::Owned(buffer.into_raw()), true)
         }
     }
 }
+
+/*
+/// 画像のダイナミックレンジを判定するためのenum
+#[derive(Debug, PartialEq)]
+pub enum ImageRange {
+    Sdr,
+    Hdr,
+}
+
+/// 8bitのSDR画像データを保持するためのenum。RGBとRGBAを区別します。
+pub enum SdrImage {
+    Rgb(ImageBuffer<Rgb<u8>, Vec<u8>>),
+    Rgba(ImageBuffer<Rgba<u8>, Vec<u8>>),
+}
+
+/// DynamicImageのビット深度からSDRかHDRかを判定する
+fn determine_image_range(img: &DynamicImage) -> ImageRange {
+    match img.color() {
+        ColorType::L8 | ColorType::La8 | ColorType::Rgb8 | ColorType::Rgba8 => ImageRange::Sdr,
+        ColorType::L16
+        | ColorType::La16
+        | ColorType::Rgb16
+        | ColorType::Rgba16
+        | ColorType::Rgb32F
+        | ColorType::Rgba32F => ImageRange::Hdr,
+        _ => ImageRange::Sdr,
+    }
+}
+
+/// SDR画像を標準的なRGB8またはRGBA8形式に正規化する
+fn normalize_sdr(img: &DynamicImage) -> Result<SdrImage, AppError> {
+    println!("SDR image detected. Normalizing...");
+    // 元画像がアルファチャンネルを持つか否かで、変換先を分岐
+    match img.color().has_alpha() {
+        true => Ok(SdrImage::Rgba(img.to_rgba8())),
+        false => Ok(SdrImage::Rgb(img.to_rgb8())),
+    }
+}
+
+/// HDR画像をACESトーンマッピングでSDR画像(RGB8/RGBA8)に変換する
+fn tonemap_hdr_to_sdr(hdr_image: &DynamicImage) -> Result<SdrImage, AppError> {
+    println!("HDR image detected. Applying ACES tonemapping...");
+
+    let rgba32f_image = hdr_image.to_rgba32f();
+
+    // HDRピクセルデータ (f32) を取得
+    let mut rgb_pixels: Vec<[f32; 3]> =
+        rgba32f_image.pixels().map(|p| [p[0], p[1], p[2]]).collect();
+
+    // ★★★ここが修正点★★★
+    // 各ピクセルに対して、個別にトーンマッピング関数を適用します
+    for pixel in rgb_pixels.iter_mut() {
+        tonemap::tonemap_aces_narkowicz(pixel);
+    }
+
+    // --- 以降のロジックは同じ ---
+    let has_alpha = match hdr_image.color() {
+        ColorType::La16 | ColorType::Rgba16 | ColorType::Rgba32F => true,
+        _ => false,
+    };
+
+    if has_alpha {
+        let sdr_buffer: Vec<u8> = rgb_pixels
+            .iter()
+            .zip(rgba32f_image.pixels())
+            .flat_map(|(rgb, original_rgba)| {
+                let r = (rgb[0].clamp(0.0, 1.0) * 255.0).round() as u8;
+                let g = (rgb[1].clamp(0.0, 1.0) * 255.0).round() as u8;
+                let b = (rgb[2].clamp(0.0, 1.0) * 255.0).round() as u8;
+                let a = (original_rgba[3].clamp(0.0, 1.0) * 255.0).round() as u8;
+                [r, g, b, a]
+            })
+            .collect();
+        let image_buffer = ImageBuffer::from_raw(hdr_image.width(), hdr_image.height(), sdr_buffer)
+            .ok_or_else(|| AppError::ImageProcessing("SDR RGBAバッファの生成に失敗".to_string()))?;
+        Ok(SdrImage::Rgba(image_buffer))
+    } else {
+        let sdr_buffer: Vec<u8> = rgb_pixels
+            .iter()
+            .flat_map(|p| {
+                let r = (p[0].clamp(0.0, 1.0) * 255.0).round() as u8;
+                let g = (p[1].clamp(0.0, 1.0) * 255.0).round() as u8;
+                let b = (p[2].clamp(0.0, 1.0) * 255.0).round() as u8;
+                [r, g, b]
+            })
+            .collect();
+        let image_buffer = ImageBuffer::from_raw(hdr_image.width(), hdr_image.height(), sdr_buffer)
+            .ok_or_else(|| AppError::ImageProcessing("SDR RGBバッファの生成に失敗".to_string()))?;
+        Ok(SdrImage::Rgb(image_buffer))
+    }
+}
+*/
 
 /// 画像を WebP にエンコードします。
 /// # 引数

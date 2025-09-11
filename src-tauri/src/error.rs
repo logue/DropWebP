@@ -15,11 +15,17 @@ pub enum AppError {
     #[error("AVIF encoding error: {0}")]
     Ravif(#[from] ravif::Error), //
 
+    #[error("JPEG XL encoding error: {0}")]
+    Jxr(#[from] jpegxl_rs::EncodeError),
+
     #[error("Filesystem error: {0}")]
     Io(#[from] std::io::Error), // std::io::Errorから自動変換
 
     #[error("Unsupported format")]
     UnsupportedFormat,
+
+    #[error("Image processing Error: {0}")] // TODO: image::ImageErrorと混同
+    ImageProcessing(String),
 }
 
 /// Tauriコマンドは String を返す必要があるため、変換を実装
