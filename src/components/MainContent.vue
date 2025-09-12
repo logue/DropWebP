@@ -47,6 +47,7 @@ const isEnter = ref(false);
         </v-btn>
       </!v-col-->
       <v-col>
+        <p>{{ t('convert_to') }}</p>
         <v-radio-group
           v-model="settingsStore.commonOptions.format"
           class="d-flex justify-end"
@@ -79,7 +80,8 @@ en:
   save_as_title: Save As...
   select_files_title: Select image files to compress
   select_directory_title: Select a directory containing images to batch compress
-  file_type:
+  convert_to: 'Convert to:'
+  type:
     webp: WebP Image
     avif: Avif Image
     jxl: JPEG XL Image
@@ -97,6 +99,7 @@ ja:
   save_as_title: 名前を付けて保存…
   select_files_title: 圧縮したい画像ファイルを選択
   select_directory_title: 一括圧縮したい画像の入ったディレクトリを選択
+  convert_to: 変換先：
   type:
     webp: WebP画像
     avif: Avif画像
@@ -115,6 +118,7 @@ kr:
   save_as_title: 다른 이름으로 저장...
   select_files_title: 압축할 이미지 파일 선택
   select_directory_title: 일괄 압축할 이미지가 들어 있는 디렉터리 선택
+  convert_to: '변환 대상:'
   type:
     webp: WebP 이미지
     avif: Avif 이미지
@@ -133,6 +137,7 @@ zh:
   save_as_title: 另存為...
   select_files_title: 選擇要壓縮的圖像文件
   select_directory_title: 選擇包含圖像以進行批量壓縮的目錄
+  convert_to: 轉換為：
   type:
     webp: WebP 圖像
     avif: Avif 圖像

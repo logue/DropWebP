@@ -34,7 +34,8 @@ export function useImageConverter() {
     'heic',
     'heif',
     'jp2',
-    'j2k'
+    'j2k',
+    'jxl'
   ];
 
   /**

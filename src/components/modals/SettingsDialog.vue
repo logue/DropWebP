@@ -33,7 +33,7 @@ const tab = ref('common');
           <v-btn icon="mdi-close" @click="isActive.value = false" />
         </v-toolbar>
         <v-card-text>
-          <v-tabs v-model="tab" grow>
+          <v-tabs v-model="tab" color="primary">
             <v-tab value="common">{{ t('common_options') }}</v-tab>
             <v-tab value="webp">{{ t('webp_options') }}</v-tab>
             <v-tab value="avif">{{ t('avif_options') }}</v-tab>

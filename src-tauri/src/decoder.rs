@@ -1,5 +1,6 @@
 mod heif;
 mod jpeg2k;
+mod jxl;
 
 use crate::error::AppError;
 use image::{DynamicImage, ImageFormat};
@@ -35,6 +36,10 @@ pub fn decode(image_bytes: &[u8]) -> Result<DynamicImage, AppError> {
             println!("Decoder: Using Jpeg2k decoder...");
             jpeg2k::decode(image_bytes)
         }
+        DetectedFormat::Jxl => {
+            println!("Decoder: Using JPEG XL decoder...");
+            jxl::decode(image_bytes)
+        }
         DetectedFormat::Standard(image_format) => {
             println!("Decoder: Using image decoder...");
             image::load_from_memory_with_format(image_bytes, image_format)
@@ -48,6 +53,7 @@ enum DetectedFormat {
     Heic,
     Exr,
     Jpeg2000,
+    Jxl,
     // imageクレートがサポートするその他の形式
     Standard(ImageFormat),
 }
@@ -77,6 +83,11 @@ fn detect_format(bytes: &[u8]) -> Option<DetectedFormat> {
     // JPEG 2000のチェック
     if bytes.starts_with(b"\x00\x00\x00\x0CjP  \r\n\x87\n") {
         return Some(DetectedFormat::Jpeg2000);
+    }
+
+    // JPEG XLのチェック
+    if bytes.starts_with(b"\xFF\x0A") || bytes.starts_with(b"\x00\x00\x00\x0CJXL ") {
+        return Some(DetectedFormat::Jxl);
     }
 
     // 上記のいずれでもない場合、imageクレートの形式推測に任せる

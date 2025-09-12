@@ -31,7 +31,7 @@ const openGitHub = async () => {
           <v-btn color="primary" class="ms-auto" text="OK" @click="isActive.value = false" />
         </template>
         <v-card-text class="text-center">
-          <h3>Drop Compress Image</h3>
+          <h2>Drop Compress Image</h2>
           <p>
             Version {{ Meta.version }}
             <br />
