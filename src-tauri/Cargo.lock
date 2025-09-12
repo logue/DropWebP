@@ -1157,7 +1157,6 @@ dependencies = [
  "tauri-plugin-log",
  "tauri-plugin-opener",
  "thiserror 2.0.16",
- "tonemap",
  "vcpkg",
 ]
 
@@ -2534,9 +2533,9 @@ dependencies = [
 
 [[package]]
 name = "libheif-rs"
-version = "2.3.0"
+version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "655d704f3729feafc446ee9ce50f67efc5f0fc2277ed360877bd564b1f7b0778"
+checksum = "fdd55cee81e3c8738cc1fcf3f512e94a8dca765454d4de3383d4f5179be5c38e"
 dependencies = [
  "cfg-if",
  "enumn",
@@ -5372,12 +5371,6 @@ name = "toml_writer"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fcc842091f2def52017664b53082ecbbeb5c7731092bad69d2c63050401dfd64"
-
-[[package]]
-name = "tonemap"
-version = "0.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2d97478858c823077ed7bc79d6a84be4e0af8e9882b222e61a8a5dbae458f45d"
 
 [[package]]
 name = "tower"
