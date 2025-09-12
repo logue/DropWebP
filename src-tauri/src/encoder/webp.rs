@@ -3,25 +3,34 @@ use image::DynamicImage;
 use libwebp_sys::{
     WebPEncodeLosslessRGB, WebPEncodeLosslessRGBA, WebPEncodeRGB, WebPEncodeRGBA, WebPFree,
 };
+use serde::{Deserialize, Serialize};
 use std::{ffi::c_void, ptr::null_mut, slice::from_raw_parts};
+
+/// WebP形式のオプション
+/// quality: 0-100 (0は最低品質、100は最高品質)
+/// lossless: true/false (可逆圧縮を使うかどうか
+/// 注意: losslessがtrueの場合、qualityは無視される)
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct WebpOptions {
+    pub quality: f32,
+    pub lossless: bool,
+}
 
 /// 画像を WebP にエンコードします。
 /// # 引数
 /// - `img`: 変換対象の画像 (DynamicImage)
-/// - `quality`: 品質 (0〜100)
-/// - `lossless`: ロスレス
+/// - `options`: WebPエンコードオプション (WebpOptions)
 /// # 戻り値
 /// - 成功した場合は WebP のバイト列を `Vec<u8>` として返します。
 /// - 失敗した場合は `AppError` を返します。
 /// # 注意
 /// - `libwebp-sys` クレートを使用して WebP エンコードを行います。ビルド時に `libwebp` ライブラリがシステムにインストールされている必要があります。
-pub fn encode(img: &DynamicImage, quality: f32, lossless: bool) -> Result<Vec<u8>, AppError> {
-    if quality < 0.0 || quality > 100.0 {
-        return Err(AppError::Encode("Quality must be between 0 and 100".into()));
-    }
-
+pub fn encode(img: &DynamicImage, options: &WebpOptions) -> Result<Vec<u8>, AppError> {
     let width = img.width() as i32;
     let height = img.height() as i32;
+    let quality = options.quality.clamp(0.0, 100.0) as f32;
+    let lossless = options.lossless;
 
     // 1. データ準備
     let (raw, is_rgba) = extract_pixel_data(img);

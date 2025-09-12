@@ -1,16 +1,16 @@
-mod avif;
-mod jxl;
-mod webp;
+pub mod avif;
+pub mod jxl;
+pub mod webp;
 
-use crate::options;
-use crate::{error::AppError, options::EncodeOptions};
+use crate::error::AppError;
+use crate::options::EncodeOptions;
 use image::DynamicImage;
 use std::borrow::Cow;
 
 /// 画像を指定された形式でエンコードします。
 /// # 引数
 /// - `img`: 変換対象の画像 (DynamicImage)
-/// - `options`: エンコードオプション (options::EncodeOptions)
+/// - `options`: エンコードオプション (EncodeOptions)
 /// # 戻り値
 /// - 成功した場合はエンコードされたバイト列を `Vec<u8>` として返します。
 /// - 失敗した場合は `Box<dyn Error>` を返します。
@@ -18,42 +18,25 @@ use std::borrow::Cow;
 /// - AVIF形式のエンコードには `ravif` クレートを使用しています。ビルド時に `libavif` ライブラリがシステムにインストールされている必要があります。
 /// - WebP形式のエンコードには `libwebp-sys` クレートを使用しています。ビルド時に `libwebp` ライブラリがシステムにインストールされている必要があります。
 /// - JPEG XL形式のエンコードには `jpegxl-rs` クレートを使用しています。ビルド時に `libjxl` ライブラリがシステムにインストールされている必要があります。
-pub fn encode(img: &DynamicImage, options: options::EncodeOptions) -> Result<Vec<u8>, AppError> {
-    match options {
+pub fn encode(img: &DynamicImage, options: &EncodeOptions) -> Result<Vec<u8>, AppError> {
+    // match式の結果を変数に束縛する
+    let result = match options {
         EncodeOptions::Avif(opts) => {
             println!("Adapter: Converting AvifOptions for ravif encoder...");
-            return avif::encode(
-                img,
-                opts.quality,
-                opts.bit_depth.to_ravif(),
-                opts.alpha_quality,
-                opts.speed,
-                opts.color_model.to_ravif(),
-                opts.threads,
-                opts.alpha_color_mode.to_ravif(),
-            );
+            avif::encode(img, opts)
         }
         EncodeOptions::Webp(opts) => {
             println!("Adapter: Converting WebpOptions for libwebp_sys encoder...");
-            return webp::encode(img, opts.quality, opts.lossless);
+            webp::encode(img, opts)
         }
         EncodeOptions::Jxl(opts) => {
             println!("Adapter: Converting JxlOptions for jpegxl_rs encoder...");
-            return jxl::encode(
-                img,
-                opts.lossless,
-                opts.speed.to_jxl(),
-                opts.quality,
-                opts.use_container,
-                opts.uses_original_profile,
-                opts.decoding_speed,
-                opts.init_buffer_size,
-                opts.color_encoding.to_jxl(),
-                None, // 並列ランナーは今のところサポートしない
-            );
+            jxl::encode(img, opts)
         }
-        _ => Err(AppError::UnsupportedFormat),
-    }
+    };
+
+    // match式から受け取った結果を返す
+    result
 }
 
 /// DynamicImageからエンコード用のピクセルデータを効率的に抽出します。

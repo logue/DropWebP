@@ -1,10 +1,7 @@
-use crate::decoder::decode;
-use crate::encoder::encode;
 use crate::error::AppError;
-use crate::options::EncodeOptions;
-use crate::options::PathInfo;
-use std::path;
-use std::path::Path;
+use crate::options::{EncodeOptions, PathInfo};
+use image::{ImageFormat, guess_format};
+use std::{self, path::Path};
 
 /// Uint8Arrayバイナリデータを圧縮してUint8Arrayで返します。
 /// # 引数
@@ -17,12 +14,29 @@ use std::path::Path;
 pub async fn convert(data: Vec<u8>, options: EncodeOptions) -> Result<Vec<u8>, String> {
     // spawn_blocking でUIをフリーズさせずに重い処理を実行
     let converted_data = tauri::async_runtime::spawn_blocking(move || {
+        // まず、デコードする前にJPEGトランスコードの条件をチェックする
+        // `if let` を使って、JXLオプションの場合のみ中身を取り出す
+        if let EncodeOptions::Jxl(jxl_opts) = &options {
+            // `guess_format`がJPEGを返した場合にのみ、このブロックに入る
+            if guess_format(&data).map_or(false, |format| format == ImageFormat::Jpeg) {
+                println!("JPEG detected for JPEG XL target. Using transcode path...");
+
+                // トランスコードを実行し、成功したら`return`で即座に関数を抜ける
+                return crate::encoder::jxl::transcode(&data, jxl_opts)
+                    .map_err(|e| format!("Failed to transcode JPEG to JPEG XL: {}", e));
+            }
+        }
+        // --- 上記のif条件に当てはまらなかった場合、通常のデコード→エンコード処理に進む ---
+
         println!("Decoding...");
         // 画像デコード
-        let img = decode(&data).map_err(|e| format!("Failed to decode image: {}", e))?;
-        println!("Encoding...");
+        let img =
+            crate::decoder::decode(&data).map_err(|e| format!("Failed to decode image: {}", e))?;
+
         // 画像エンコード
-        let data = encode(&img, options).map_err(|e| format!("Failed to encode image: {}", e))?;
+        println!("Encoding...");
+        let data = crate::encoder::encode(&img, &options)
+            .map_err(|e| format!("Failed to encode image: {}", e))?;
 
         Ok(data)
     })
@@ -81,12 +95,12 @@ pub fn get_path_info(path_str: String) -> Result<PathInfo, String> {
 /// - 失敗した場合はエラーメッセージを `String` として返します。
 #[tauri::command]
 pub async fn delete_path(path_str: String) -> Result<(), String> {
-    let path = path::Path::new(&path_str);
+    let path = Path::new(&path_str);
     if path.exists() {
         if path.is_file() {
-            std::fs::remove_file(path).map_err(|e| AppError::Io(e))?;
+            std::fs::remove_file(path).map_err(|e| AppError::Io(e).to_string())?;
         } else if path.is_dir() {
-            std::fs::remove_dir_all(path).map_err(|e| AppError::Io(e))?;
+            std::fs::remove_dir_all(path).map_err(|e| AppError::Io(e).to_string())?;
         }
     }
     Ok(())
