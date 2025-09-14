@@ -1,44 +1,54 @@
-# DropWebP
+# 🚀 Drop Compress Image: The Modern Image Converter
 
-このソフトウェアは、ドラッグアンドドップで画像ファイルを WebP に圧縮するアプリケーションです。
+Drop Compress Image is a powerful, fast, and versatile GUI tool for converting your images into next-generation formats. Built with performance in mind, it leverages modern codecs to bring you the best in speed, quality, and file size. Say goodbye to outdated formats and hello to the future of web images!
 
-## 使用方法
+This project was created to provide a comprehensive conversion solution, supporting a wide range of input formats and exporting to highly efficient formats like **AVIF**, **JPEG XL**, and **WebP**.
 
-WebP 画像に圧縮したい画像ファイルをドラッグアンドロップしてください。
-同じディレクトリに保存されます。
+## ✨ Features
 
-また、クリップボードに保存されている画像をこのアプリの画面上でペーストすることにより、直接 WebP 画像を出力することができます。
+**Wide Format Support**: Convert from dozens of classic and modern image formats.
 
-## 今後の予定
+**Next-Gen Output**: Export images to AVIF, JPEG XL (JPEG transcode), and WebP (both lossy and lossless) for superior compression and quality.
 
-- ディレクトリ内監視（ファイルが追加されると自動圧縮）
-- Discord に直接投稿
+**High Performance**: Built with Rust for speed and reliability you can count on.
 
-## WebP とは？
+**International Ready**: Fully localized interface available in multiple languages.
 
-WebP は、Google が開発した次世代の画像形式で、2021 年現在の現行のブラウザすべてが対応しています。
-WebP の開発元である Google は、ほぼ同等の画質で PNG よりも約 26％、JPG より約 25〜34％軽くできると発表しています。
+## 🔀 Supported Formats
 
-自分が試したところ、もともと 12.9M あった無圧縮の 4K 画質の PNG ファイルを無劣化 WebP に変換したところ、7.85MB まで落とすことができました。
-推奨値は 95%の不可逆圧縮ですが、その場合 1.32M 程度になります。
+ImageForge handles a vast array of file types for both input and output.
 
-使用できる Web サービスは、Discord、LINE、Twitter、Facebook のみです。Mixi および、Lobi は対応していません。
+### Input Formats
 
-なお、[WebpCodecSetup.exe](https://storage.googleapis.com/downloads.webmproject.org/releases/webp/WebpCodecSetup.exe)を用いることでエクスプローラーからサムネイルを表示することができます。
+We support a huge range of input formats, including:
 
-### 圧縮サンプル
+- **HEIF / HEIC** (.heif, .heic)
+- **JPEG 2000** (.jp2, .j2k)
+- **JPEG** (.jpg, .jpeg)
+- **PNG** (.png)
+- **GIF** (.gif)
+- **BMP** (.bmp)
+- **TIFF** (.tiff)
 
-| 圧縮形式                                                                               | 容量  |
-| -------------------------------------------------------------------------------------- | ----- |
-| [オリジナル画像](https://logue.github.io/DropWebP/assets/original.png)                 | 10.7M |
-| [WebP 無劣化圧縮](https://logue.github.io/DropWebP/assets/lossless.webp)               | 6.33M |
-| [WebP 不可逆圧縮（推奨設定）](https://logue.github.io/DropWebP/assets/compressed.webp) | 1.15M |
-| [JPEG 最高品質（参考）](https://logue.github.io/DropWebP/assets/compressed.jpg)        | 6.24M |
+...and all other formats supported by the excellent Rust image crate.
 
-※[PSO2NGS](https://pso2.jp/)の 4K スクリーンショットです。
+### Output Formats
 
-## ライセンス
+Optimize your images by converting them to these modern, highly efficient formats:
 
-Licensed under the [MIT](LICENSE) License.
+- **AVIF** (.avif)
+- **JPEG XL** (.jxl) - **_JPEG transcode_** supported. Lossy & lossless is experimental.
+- **WebP** (.webp) - **_Lossy & Lossless_** supported
 
-Copyright © 2021-2025 [Logue](https://logue.dev/)
+## 🌐 Localization
+
+The user interface is available in the following languages:
+
+- 🇬🇧 **English**
+- 🇯🇵 **Japanese** (日本語)
+- 🇰🇷 **Korean** (한국어)
+- 🇨🇳 **Chinese** (中文)
+
+## License
+
+©2023, 2025 by Logue. Licensed under the [MIT License](LICENSE).
