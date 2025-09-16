@@ -8,7 +8,7 @@ This project was created to provide a comprehensive conversion solution, support
 
 **Wide Format Support**: Convert from dozens of classic and modern image formats.
 
-**Next-Gen Output**: Export images to AVIF, JPEG XL (JPEG transcode), and WebP (both lossy and lossless) for superior compression and quality.
+**Next-Gen Output**: Export images to AVIF, JPEG XL (also JPEG transcode), and WebP (both lossy and lossless) for superior compression and quality.
 
 **High Performance**: Built with Rust for speed and reliability you can count on.
 
@@ -25,12 +25,14 @@ We support a huge range of input formats, including:
 - **HEIF / HEIC** (.heif, .heic)
 - **JPEG 2000** (.jp2, .j2k)
 - **JPEG** (.jpg, .jpeg)
+- **JPEG XL** (.jpx)
 - **PNG** (.png)
 - **GIF** (.gif)
 - **BMP** (.bmp)
-- **TIFF** (.tiff)
+- **TIFF** (.tif, .tiff)
+- **WebP** (.webp)
 
-...and all other formats supported by the excellent Rust image crate.
+...and all other formats supported by the excellent [Rust image crate](https://docs.rs/image/latest/image/codecs/index.html).
 
 ### Output Formats
 

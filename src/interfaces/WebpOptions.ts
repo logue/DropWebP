@@ -1,3 +1,5 @@
+import type { WebPImageHint } from '@/types/WebpTypes';
+
 /**
  * Rustの `WebpOptions` 構造体に対応
  */
@@ -6,4 +8,10 @@ export interface WebpOptions {
   quality: number;
   /** ロスレス圧縮にするか */
   lossless: boolean;
+  /** エンコード方法（0~6） */
+  method: number;
+  /** 自動フィルタリングを使うか */
+  autofilter: boolean;
+  /** 画像のヒント */
+  hint: WebPImageHint;
 }

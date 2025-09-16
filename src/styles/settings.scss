@@ -16,6 +16,9 @@
     )
 );
 
+// Import Google Fonts
+@import url('https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&family=Noto+Sans+JP:wght@100..900&family=Noto+Sans+KR:wght@100..900&family=Noto+Sans+Mono:wght@100..900&family=Noto+Sans+TC:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+
 // Fix for monospace Font.
 code,
 kbd,
@@ -23,4 +26,7 @@ pre,
 samp,
 var {
   font-family: 'Noto Sans Mono', monospace !important;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings: 'wdth' 100;
 }

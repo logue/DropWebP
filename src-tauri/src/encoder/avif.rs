@@ -153,7 +153,10 @@ pub fn encode(img: &DynamicImage, options: &AvifOptions) -> Result<Vec<u8>, AppE
             encoder.encode_rgba(image_view).map_err(AppError::Ravif)?
         }
     };
-    println!("Finished encoding AVIF.");
+    println!(
+        "Finished encoding AVIF. (Color byte size: {}/ Alpha byte size: {})",
+        encoded_avif.color_byte_size, encoded_avif.alpha_byte_size
+    );
 
     Ok(encoded_avif.avif_file)
 }

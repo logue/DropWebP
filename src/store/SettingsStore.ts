@@ -17,20 +17,23 @@ const defaultAvifOptions: AvifOptions = {
   speed: 5,
   colorModel: 'YCbCr',
   threads: undefined,
-  alphaColorMode: 'UnassociatedClean'
+  alphaColorMode: 'Premultiplied'
 } as const;
 
 const defaultWebpOptions: WebpOptions = {
   quality: 80,
-  lossless: true
+  lossless: true,
+  hint: 'Default',
+  method: 6,
+  autofilter: false
 } as const;
 
 const defaultJxlOptions: JxlOptions = {
   lossless: true,
   speed: 'Squirrel',
   quality: 1,
-  useContainer: true,
-  usesOriginalProfile: true,
+  useContainer: false,
+  usesOriginalProfile: false,
   decodingSpeed: 0,
   initBufferSize: 512,
   colorEncoding: 'Srgb'

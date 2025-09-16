@@ -24,6 +24,7 @@ const settingsStore = useSettingsStore();
     color="primary"
     max="15.0"
     min="0.1"
+    persistent-hint
     step="0.1"
     thumb-label="always"
     type="number"
@@ -52,9 +53,10 @@ const settingsStore = useSettingsStore();
     <v-col>
       <v-switch
         v-model="settingsStore.jxlOptions.useContainer"
+        :hint="t('use_container_hint')"
         :label="t('use_container')"
         color="primary"
-        hide-details
+        persistent-hint
       />
     </v-col>
     <v-col>
@@ -73,7 +75,6 @@ const settingsStore = useSettingsStore();
     :hint="t('decoding_speed_hint')"
     :label="t('decoding_speed')"
     color="primary"
-    hide-details
     max="4"
     min="0"
     persistent-hint
@@ -102,9 +103,11 @@ const settingsStore = useSettingsStore();
           { text: 'SrgbLuma', value: ColorEncoding.SrgbLuma },
           { text: 'LinearSrgbLuma', value: ColorEncoding.LinearSrgbLuma }
         ]"
+        :hint="t('color_encoding_hint')"
         :label="t('color_encoding')"
         item-title="text"
         item-value="value"
+        persistent-hint
       />
     </v-col>
   </v-row>
@@ -127,13 +130,15 @@ en:
   quality: Quality (0.1-15.0)
   quality_hint: Higher values mean higher quality. Default is 1, recommended values are 0.5-3.0.
   use_container: Use JPEG XL container format
+  use_container_hint: Using the JPEG XL container format allows saving metadata such as JPEG reconstruction. However, even if there is no additional metadata, a few bytes are added to the encoded file for the container header.
   uses_original_profile: Use original color profile
-  uses_original_profile_hint: Always used when lossless is enabled.
+  uses_original_profile_hint: If the input image has a color profile, it will be used for the encoded image. Otherwise, an internal fixed color profile is chosen (which should be smaller).
   decoding_speed: Decoding speed (0-4).
   decoding_speed_hint: Lower values mean higher quality.
   init_buffer_size: Output buffer
   init_buffer_size_hint: Initial size of output buffer (in bytes). Values less than 32 are rounded up to 32kb.
   color_encoding: Color encoding method
+  color_encoding_hint: If you don't know, it's recommended not to choose anything other than Srgb.
   reset_jxl_options: Reset JPEG XL settings
 ja:
   lossless: ロスレス圧縮
@@ -143,13 +148,15 @@ ja:
   quality: 品質（0.1〜15.0）
   quality_hint: 値が高いほど高品質です。デフォルトは1で、推奨値は0.5〜3.0です。
   use_container: JPEG XLコンテナ形式を使用
+  use_container_hint: JPEG XLコンテナ形式を使用すると、JPEG再構成などのメタデータを保存できます。ただし、追加のメタデータがない場合でも、コンテナヘッダー用にエンコードされたファイルに数バイトが追加されます。
   uses_original_profile: 元のカラープロファイルを使用
-  uses_original_profile_hint: ロスレス時は常に使用になります。
+  uses_original_profile_hint: 入力画像にカラープロファイルがある場合、それがエンコードされた画像に使用されます。そうでない場合は、内部の固定カラープロファイルが選択されます（これはより小さくなるはずです）。
   decoding_speed: デコード速度（0~4）
   decoding_speed_hint: 値が低いほど高品質
   init_buffer_size: 出力バッファ
   init_buffer_size_hint: 出力バッファの初期サイズ（バイト単位）32未満は32kbに切り上げられます。
-  color_encoding: カラーエンコード方法（よくわからない場合は、Srgb以外にしないこと）
+  color_encoding: カラーエンコード方法
+  color_encoding_hint: よくわからない場合は、Srgb以外にしないことをお勧めします。
   reset_jxl_options: JPEG XL設定をリセット
 ko:
   lossless: 무손실 압축
@@ -159,13 +166,15 @@ ko:
   quality: 품질(0.1~15.0)
   quality_hint: 값이 높을수록 품질이 높아집니다. 기본값은 1이며 권장 값은 0.5~3.0입니다.
   use_container: JPEG XL 컨테이너 형식 사용
+  use_container_hint: JPEG XL 컨테이너 형식을 사용하면 JPEG 재구성과 같은 메타데이터를 저장할 수 있습니다. 그러나 추가 메타데이터가 없는 경우에도 컨테이너 헤더에 대해 인코딩된 파일에 몇 바이트가 추가됩니다.
   uses_original_profile: 원래 컬러 프로파일 사용
-  uses_original_profile_hint: 무손실시 항상 사용됩니다.
+  uses_original_profile_hint: 입력 이미지에 컬러 프로파일이 있는 경우 인코딩된 이미지에 사용됩니다. 그렇지 않으면 내부 고정 컬러 프로파일이 선택됩니다(더 작아야 함).
   decoding_speed: 디코딩 속도(0~4).
   decoding_speed_hint: 값이 낮을수록 고품질
   init_buffer_size: 출력 버퍼
   init_buffer_size_hint: 출력 버퍼의 초기 크기 (바이트) 32 미만은 32kb로 반올림됩니다.
   color_encoding: 컬러 인코딩 방법
+  color_encoding_hint: 잘 모르는 경우 Srgb 이외의 항목을 선택하지 않는 것이 좋습니다.
   reset_jxl_options: JPEG XL 설정 재설정
 zh:
   lossless: 無損壓縮
@@ -175,12 +184,14 @@ zh:
   quality: 質量 (0.1-15.0)
   quality_hint: 值越高，質量越高。默認值為 1，建議值為 0.5-3.0。
   use_container: 使用 JPEG XL 容器格式
+  use_container_hint: 使用 JPEG XL 容器格式可以保存 JPEG 重建等元數據。但是，即使沒有其他元數據，編碼文件的容器標頭也會添加幾個字節。
   uses_original_profile: 使用原始顏色設定檔
-  uses_original_profile_hint: 啟用無損壓縮時一律使用。
+  uses_original_profile_hint: 如果輸入圖像具有顏色設定檔，則將其用於編碼圖像。否則，將選擇內部固定顏色設定檔（應該更小）。
   decoding_speed: 解碼速度 (0-4)
-  decoding_speed_hint: 數值越低，品質越高。
+  decoding_speed_hint: 值越低，質量越高。
   init_buffer_size: 輸出緩衝區
   init_buffer_size_hint: 輸出緩衝區的初始大小（以位元組為單位）。小於 32 的值將向上舍入為 32kb。
   color_encoding: 顏色編碼法
+  color_encoding_hint: 如果您不知道，建議不要選擇 Srgb 以外的任何選項。
   reset_jxl_options: 重設 JPEG XL 設定
 </i18n>

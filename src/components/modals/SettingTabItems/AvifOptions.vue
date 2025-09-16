@@ -18,10 +18,11 @@ const settingsStore = useSettingsStore();
           { text: t('bit_depth_10'), value: BitDepth.Ten },
           { text: t('bit_depth_auto'), value: BitDepth.Auto }
         ]"
-        :label="t('bit_depth')"
         :hint="t('bit_depth_hint')"
+        :label="t('bit_depth')"
         item-title="text"
         item-value="value"
+        persistent-hint
       />
     </v-col>
     <v-col>
@@ -32,10 +33,11 @@ const settingsStore = useSettingsStore();
           { text: 'UnassociatedClean', value: AlphaColorMode.UnassociatedClean },
           { text: 'Premultiplied', value: AlphaColorMode.Premultiplied }
         ]"
-        :label="t('alpha_color_mode')"
         :hint="t('alpha_color_mode_hint')"
+        :label="t('alpha_color_mode')"
         item-title="text"
         item-value="value"
+        persistent-hint
       />
     </v-col>
   </v-row>
@@ -45,6 +47,7 @@ const settingsStore = useSettingsStore();
     :max="100"
     :min="1"
     color="primary"
+    persistent-hint
     step="0.1"
     thumb-label="always"
     type="number"
@@ -57,14 +60,16 @@ const settingsStore = useSettingsStore();
     color="primary"
     step="0.1"
     thumb-label="always"
+    persistent-hint
   />
   <v-slider
     v-model="settingsStore.avifOptions.speed"
-    :label="t('speed')"
     :hint="t('speed_hint')"
+    :label="t('speed')"
     :max="10"
     :min="1"
     color="primary"
+    persistent-hint
     step="1"
     thumb-label="always"
     type="number"
@@ -77,10 +82,11 @@ const settingsStore = useSettingsStore();
           { text: 'YCbCr', value: ColorModel.YCbCr },
           { text: 'RGB', value: ColorModel.RGB }
         ]"
-        :label="t('color_model')"
         :hint="t('color_model_hint')"
+        :label="t('color_model')"
         item-title="text"
         item-value="value"
+        persistent-hint
       />
     </v-col>
     <v-col>
@@ -92,6 +98,7 @@ const settingsStore = useSettingsStore();
         :min="1"
         clearable
         type="number"
+        persistent-hint
       />
     </v-col>
   </v-row>

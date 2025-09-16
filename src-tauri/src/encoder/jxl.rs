@@ -170,7 +170,7 @@ pub fn transcode(img: &[u8], options: &JxlOptions) -> Result<Vec<u8>, AppError> 
     let mut builder = binding
         .speed(options.speed.to_jxl())
         .use_container(options.use_container)
-        .uses_original_profile(options.uses_original_profile)
+        .uses_original_profile(true)
         .decoding_speed(options.decoding_speed)
         .init_buffer_size(options.init_buffer_size)
         .color_encoding(options.color_encoding.to_jxl());
