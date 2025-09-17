@@ -22,7 +22,7 @@ pub struct WebpOptions {
     pub method: u8,
     pub autofilter: bool,
     pub hint: WebPImageHint,
-    pub preset: WebPPreset,
+    // pub preset: WebPPreset,
 }
 
 /// WebPの画像ヒント    

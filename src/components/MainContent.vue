@@ -24,14 +24,11 @@ const isEnter = ref(false);
   >
     <v-sheet
       :class="isEnter ? 'bg-green-lighten-5' : ''"
-      class="d-flex align-center justify-center mb-4"
-      height="300"
+      class="d-flex align-center justify-center mb-4 px-5"
+      height="280"
       rounded="xl"
     >
-      <h2
-        class="text-center"
-        style="pointer-events: none; user-select: none; opacity: 0.6; max-width: 80%"
-      >
+      <h2 class="text-center text-medium-emphasis">
         {{ t('hero_text') }}
       </h2>
     </v-sheet>
@@ -99,7 +96,7 @@ ja:
   save_as_title: 名前を付けて保存…
   select_files_title: 圧縮したい画像ファイルを選択
   select_directory_title: 一括圧縮したい画像の入ったディレクトリを選択
-  convert_to: 変換先：
+  convert_to: 変換先の形式：
   type:
     webp: WebP画像
     avif: Avif画像
@@ -118,7 +115,7 @@ kr:
   save_as_title: 다른 이름으로 저장...
   select_files_title: 압축할 이미지 파일 선택
   select_directory_title: 일괄 압축할 이미지가 들어 있는 디렉터리 선택
-  convert_to: '변환 대상:'
+  convert_to: '변환 형식:'
   type:
     webp: WebP 이미지
     avif: Avif 이미지
@@ -137,7 +134,7 @@ zh:
   save_as_title: 另存為...
   select_files_title: 選擇要壓縮的圖像文件
   select_directory_title: 選擇包含圖像以進行批量壓縮的目錄
-  convert_to: 轉換為：
+  convert_to: '轉換為：'
   type:
     webp: WebP 圖像
     avif: Avif 圖像

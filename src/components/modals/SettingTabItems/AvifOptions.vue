@@ -127,7 +127,7 @@ en:
   speed_hint: 'Higher values are faster but lower quality'
   color_model: 'Color Model'
   color_model_hint: 'YCbCr generally offers better compression, but RGB may yield better results for some images'
-  threads: 'Max Threads to Use (Leave Blank for Auto)'
+  threads: 'Max Threads to Use'
   threads_hint: 'If left blank, it will be set automatically based on the number of logical cores in the system'
   reset_avif_options: 'Reset AVIF Options'
 ja:
@@ -144,7 +144,7 @@ ja:
   speed_hint: '値が高いほど速度は速くなりますが、品質が悪くなります'
   color_model: 'カラーモデル'
   color_model_hint: 'YCbCrは一般的により良い圧縮を提供しますが、RGBは一部の画像でより良い結果をもたらす場合があります'
-  threads: '最大スレッド数 (空欄で自動設定)'
+  threads: '最大スレッド数'
   threads_hint: '空欄の場合、システムの論理コア数に基づいて自動的に設定されます'
   reset_avif_options: 'AVIFオプションをリセット'
 kr:
@@ -161,7 +161,7 @@ kr:
   speed_hint: '값이 높을수록 속도는 빨라지지만 품질은 낮아집니다'
   color_model: '색상 모델'
   color_model_hint: 'YCbCr는 일반적으로 더 나은 압축을 제공하지만, RGB는 일부 이미지에서 더 나은 결과를 제공할 수 있습니다'
-  threads: '사용할 최대 스레드 수 (자동 설정하려면 비워두기)'
+  threads: '사용할 최대 스레드 수'
   threads_hint: '비워두면 시스템의 논리 코어 수에 따라 자동으로 설정됩니다'
   reset_avif_options: 'AVIF 옵션 재설정'
 zh:
@@ -178,7 +178,7 @@ zh:
   speed_hint: '值越高，速度越快，但質量越差'
   color_model: '顏色模型'
   color_model_hint: 'YCbCr通常提供更好的壓縮，但RGB可能對某些圖像效果更好'
-  threads: '使用的最大線程數 (留空則自動設置)'
+  threads: '使用的最大線程數'
   threads_hint: '如果留空，將根據系統中的邏輯核心數自動設置'
   reset_avif_options: '重置 AVIF 選項'
 </i18n>
