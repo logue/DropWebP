@@ -29,6 +29,7 @@ pub async fn convert(data: Vec<u8>, options: EncodeOptions) -> Result<Vec<u8>, S
         // --- 上記のif条件に当てはまらなかった場合、通常のデコード→エンコード処理に進む ---
 
         println!("Decoding...");
+
         // 画像デコード
         let img =
             crate::decoder::decode(&data).map_err(|e| format!("Failed to decode image: {}", e))?;

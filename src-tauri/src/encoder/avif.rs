@@ -1,13 +1,11 @@
-use crate::error::AppError;
-use image::DynamicImage;
+use crate::{encoder::extract_pixel_data, error::AppError, options::HighBitDepthImage};
 use imgref::Img;
-use ravif::Encoder;
-use rgb::{RGB8, RGBA8};
+use ravif::{EncodedImage, Encoder};
 use serde::{Deserialize, Serialize};
 
 /// AVIF形式のオプション
 /// quality: 0-100 (01~100。値が高いほど高品質)
-/// bit_depth: ビット深度 (BitDepth::Auto, BitDepth::Eight, BitDepth::Ten, BitDepth::Twelve)
+/// bit_depth: ビット深度 (BitDepth::Auto, BitDepth::Eight, BitDepth::Ten)
 /// alpha_quality: アルファチャンネルの品質 (1~100。値が高いほど高品質)
 /// speed: エンコード速度 (0-10)。0は最高品質で最も遅い、10は最速。
 /// color_model: カラーモデル (ColorModel::YCbCr, ColorModel::RGB)
@@ -100,63 +98,81 @@ impl AlphaColorMode {
 /// * 失敗した場合はAppErrorを返します。
 /// # 注意
 /// * `ravif` クレートを使用してAVIFエンコードを行います。ビルド時に `libavif` ライブラリがシステムにインストールされている必要があります。
-pub fn encode(img: &DynamicImage, options: &AvifOptions) -> Result<Vec<u8>, AppError> {
-    // エンコーダーの設定は先に済ませておく
-    let encoder = Encoder::new()
-        .with_quality(options.quality)
-        .with_bit_depth(options.bit_depth.to_ravif())
-        .with_internal_color_model(options.color_model.to_ravif())
-        .with_num_threads(options.threads)
-        .with_alpha_color_mode(options.alpha_color_mode.to_ravif())
-        .with_speed(options.speed)
-        .with_alpha_quality(options.alpha_quality);
+pub fn encode(img: &HighBitDepthImage, options: &AvifOptions) -> Result<Vec<u8>, AppError> {
+    // ★ 1. 先に画像サイズとピクセルデータを取得
+    let (width, height) = match img {
+        HighBitDepthImage::Rgb(buf) => buf.dimensions(),
+        HighBitDepthImage::Rgba(buf) => buf.dimensions(),
+    };
+    let (pixels_f32, is_rgba) = extract_pixel_data(img);
 
-    // DynamicImageの具体的な型でマッチングして処理を分岐
-    let encoded_avif = match img {
-        // --- RGB8形式の場合 ---
-        DynamicImage::ImageRgb8(rgb_image) => {
-            println!("Optimized path: Encoding as RGB...");
-            let width = rgb_image.width() as usize;
-            let height = rgb_image.height() as usize;
+    let encoded_avif: EncodedImage = match options.bit_depth.to_ravif() {
+        ravif::BitDepth::Eight => {
+            // ★ 8bit用のエンコーダーをここで生成
+            let encoder = Encoder::new()
+                .with_quality(options.quality)
+                .with_bit_depth(ravif::BitDepth::Eight) // 明示的に指定
+                .with_internal_color_model(options.color_model.to_ravif())
+                .with_num_threads(options.threads)
+                .with_alpha_color_mode(options.alpha_color_mode.to_ravif())
+                .with_speed(options.speed)
+                .with_alpha_quality(options.alpha_quality);
 
-            // &[u8] を &[RGB8] に変換
-            let pixels_rgb8: &[RGB8] = bytemuck::cast_slice(rgb_image.as_raw());
-            let image_view = Img::new(pixels_rgb8, width, height);
+            let pixels_u8: Vec<u8> = pixels_f32
+                .iter()
+                .map(|&p| (p * 255.0).round().clamp(0.0, 255.0) as u8)
+                .collect();
 
-            // encode_rgb を使用
-            encoder.encode_rgb(image_view).map_err(AppError::Ravif)?
+            if is_rgba {
+                let image_view = Img::new(
+                    bytemuck::cast_slice(&pixels_u8),
+                    width as usize,
+                    height as usize,
+                );
+                encoder.encode_rgba(image_view).map_err(AppError::Ravif)?
+            } else {
+                let image_view = Img::new(
+                    bytemuck::cast_slice(&pixels_u8),
+                    width as usize,
+                    height as usize,
+                );
+                encoder.encode_rgb(image_view).map_err(AppError::Ravif)?
+            }
         }
-        // --- RGBA8形式の場合 ---
-        DynamicImage::ImageRgba8(rgba_image) => {
-            println!("Standard path: Encoding as RGBA...");
-            let width = rgba_image.width() as usize;
-            let height = rgba_image.height() as usize;
+        ravif::BitDepth::Ten | ravif::BitDepth::Auto  /* | ravif::BitDepth::Twelve  */=> {
+            // ★ 10bit以上用のエンコーダーをここで生成
+            let encoder = Encoder::new()
+                .with_quality(options.quality)
+                .with_bit_depth(ravif::BitDepth::Ten) // 明示的に指定 (AutoやTwelveの場合もravifがよしなにしてくれる)
+                .with_internal_color_model(options.color_model.to_ravif())
+                .with_num_threads(options.threads)
+                .with_alpha_color_mode(options.alpha_color_mode.to_ravif())
+                .with_speed(options.speed)
+                .with_alpha_quality(options.alpha_quality);
 
-            // &[u8] を &[RGBA8] に変換
-            let pixels_rgba8: &[RGBA8] = bytemuck::cast_slice(rgba_image.as_raw());
-            let image_view = Img::new(pixels_rgba8, width, height);
+            let pixels_u16: Vec<u16> = pixels_f32
+                .iter()
+                .map(|&p| (p * 65535.0).round().clamp(0.0, 65535.0) as u16)
+                .collect();
 
-            // encode_rgba を使用
-            encoder.encode_rgba(image_view).map_err(AppError::Ravif)?
-        }
-        // --- その他の形式の場合 (Luma8, Bgr8など) ---
-        // 汎用的なRGBA8に変換してから処理する（フォールバック）
-        _ => {
-            println!("Fallback path: Converting to RGBA then encoding...");
-            let rgba_image = img.to_rgba8();
-            let width = rgba_image.width() as usize;
-            let height = rgba_image.height() as usize;
-
-            let pixels_rgba8: &[RGBA8] = bytemuck::cast_slice(rgba_image.as_raw());
-            let image_view = Img::new(pixels_rgba8, width, height);
-
-            encoder.encode_rgba(image_view).map_err(AppError::Ravif)?
+            if is_rgba {
+                // こちらは u16 のデータをそのまま渡す
+                let image_view = Img::new(
+                    bytemuck::cast_slice(&pixels_u16),
+                    width as usize,
+                    height as usize,
+                );
+                encoder.encode_rgba(image_view).map_err(AppError::Ravif)?
+            } else {
+                let image_view = Img::new(
+                    bytemuck::cast_slice(&pixels_u16),
+                    width as usize,
+                    height as usize,
+                );
+                encoder.encode_rgb(image_view).map_err(AppError::Ravif)?
+            }
         }
     };
-    println!(
-        "Finished encoding AVIF. (Color byte size: {}/ Alpha byte size: {})",
-        encoded_avif.color_byte_size, encoded_avif.alpha_byte_size
-    );
 
     Ok(encoded_avif.avif_file)
 }

@@ -1,5 +1,7 @@
-use crate::{encoder::extract_pixel_data, error::AppError};
-use image::DynamicImage;
+use crate::{
+    encoder::{HighBitDepthImage, extract_pixel_data},
+    error::AppError,
+};
 use jpegxl_rs::encode::{EncoderResult, EncoderSpeed::*, encoder_builder};
 use serde::{Deserialize, Serialize};
 
@@ -106,11 +108,17 @@ impl ColorEncoding {
 /// - 失敗した場合は `AppError` を返します。
 /// # 注意
 /// - `jpegxl-rs` クレートを使用して JPEG XL エンコードを行います。ビルド時に `libwebp` ライブラリがシステムにインストールされている必要があります。
-pub fn encode(img: &DynamicImage, options: &JxlOptions) -> Result<Vec<u8>, AppError> {
-    let width = img.width();
-    let height = img.height();
+pub fn encode(
+    img: &HighBitDepthImage, // ★ 1. 引数を HighBitDepthImage に変更
+    options: &JxlOptions,
+) -> Result<Vec<u8>, AppError> {
+    // ★ 2. HighBitDepthImage から画像サイズを取得
+    let (width, height) = match img {
+        HighBitDepthImage::Rgb(buf) => buf.dimensions(),
+        HighBitDepthImage::Rgba(buf) => buf.dimensions(),
+    };
 
-    // 1. 効率的なデータ準備 (Cow<T>の利用)
+    // ★ 3. HighBitDepthImage 用のヘルパー関数を呼び出す (Cow<'_, [f32]> が返る)
     let (pixel_data, is_rgba) = extract_pixel_data(img);
 
     // 2. エンコーダーの組み立て (ビルダーパターンの活用)

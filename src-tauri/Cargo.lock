@@ -670,9 +670,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.2.37"
+version = "1.2.38"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "65193589c6404eb80b450d618eaf9a2cafaaafd57ecce47370519ef674a7bd44"
+checksum = "80f41ae168f955c12fb8960b057d70d0ca153fb83182b57d86380443527be7e9"
 dependencies = [
  "find-msvc-tools",
  "jobserver",
@@ -1134,7 +1134,7 @@ dependencies = [
 
 [[package]]
 name = "drop-compress-image"
-version = "2.1.2"
+version = "2.2.0"
 dependencies = [
  "bytemuck",
  "cc",
@@ -1144,7 +1144,6 @@ dependencies = [
  "jpegxl-rs",
  "kamadak-exif",
  "libheif-rs",
- "libwebp-sys2 0.2.0",
  "pkg-config",
  "ravif 0.12.0",
  "rgb",
@@ -1158,6 +1157,7 @@ dependencies = [
  "tauri-plugin-opener",
  "thiserror 2.0.16",
  "vcpkg",
+ "webp",
 ]
 
 [[package]]
@@ -1400,9 +1400,9 @@ dependencies = [
 
 [[package]]
 name = "find-msvc-tools"
-version = "0.1.1"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7fd99930f64d146689264c637b5af2f0233a933bef0d8570e2526bf9e083192d"
+checksum = "1ced73b1dacfc750a6db6c0a0c3a3853c8b41997e2e2c563dc90804ae6867959"
 
 [[package]]
 name = "flate2"
@@ -2590,30 +2590,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "libwebp-sys2"
-version = "0.1.11"
+name = "libwebp-sys"
+version = "0.9.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4790186411a6843ecc0a141c8948c8e623a0bb5e886834b1b6c90f3dfa85bb99"
+checksum = "54cd30df7c7165ce74a456e4ca9732c603e8dc5e60784558c1c6dc047f876733"
 dependencies = [
  "cc",
- "cfg-if",
- "libc",
- "pkg-config",
- "vcpkg",
-]
-
-[[package]]
-name = "libwebp-sys2"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6dc3d00aeaa1d6bf4f35f3003bc1835135e0fb41f2fc19082a3f98d619792505"
-dependencies = [
- "cc",
- "cfg-if",
- "libc",
- "libwebp-sys2 0.1.11",
- "pkg-config",
- "vcpkg",
+ "glob",
 ]
 
 [[package]]
@@ -5941,6 +5924,16 @@ dependencies = [
  "pkg-config",
  "soup3-sys",
  "system-deps 6.2.2",
+]
+
+[[package]]
+name = "webp"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c071456adef4aca59bf6a583c46b90ff5eb0b4f758fc347cea81290288f37ce1"
+dependencies = [
+ "image",
+ "libwebp-sys",
 ]
 
 [[package]]

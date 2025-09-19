@@ -3,23 +3,24 @@ mod jpeg2k;
 mod jxl;
 
 use crate::error::AppError;
+use crate::options::HighBitDepthImage;
 use exif::{In, Reader as ExifReader, Tag};
 use image::{self, DynamicImage, ImageFormat, RgbaImage, imageops::*};
 use std::io::Cursor;
 
-/// バイトデータから画像をデコードし、DynamicImageとして返す
+/// バイトデータから画像をデコードし、HighBitDepthImageとして返す
 /// サポートする形式: HEIC, JPEG 2000, そして imageクレートが対応する形式
 /// # 引数
 /// - `image_bytes`: 画像のバイトデータ
 /// # 戻り値
-/// - 成功した場合は `DynamicImage` を返します。
+/// - 成功した場合は `HighBitDepthImage` を返します。
 /// - 失敗した場合は `Box<dyn Error>` を返します。
 /// # 注意
 /// - EXR形式はこのバージョンではサポートされていません
 /// - HEIC形式のデコードには `libheif-rs` クレートを使用しています。ビルド時に `libheif` ライブラリがシステムにインストールされている必要があります。
 /// - JPEG 2000形式のデコードには `jpeg2k` クレートを使用しています。
 ///  ただし、このクレートはすべてのJPEG 2000ファイルに対応しているわけではないため、特定のファイルでエラーが発生する可能性があります。
-pub fn decode(image_bytes: &[u8]) -> Result<DynamicImage, AppError> {
+pub fn decode(image_bytes: &[u8]) -> Result<HighBitDepthImage, AppError> {
     // まず、バイトデータから画像形式を判別する
     let format = detect_format(image_bytes)
         .ok_or_else(|| AppError::Decode("Unsupported or unknown image format".to_string()))?;
@@ -43,8 +44,26 @@ pub fn decode(image_bytes: &[u8]) -> Result<DynamicImage, AppError> {
         }
         DetectedFormat::Standard(image_format) => {
             println!("Decoder: Using image decoder...");
-            image::load_from_memory_with_format(image_bytes, image_format)
-                .map_err(|e| AppError::Decode(e.to_string()))
+            // 1. まずはDynamicImageとしてメモリから読み込む
+            let img: DynamicImage = image::load_from_memory(image_bytes)
+                .map_err(|e| AppError::Decode(e.to_string()))?;
+
+            // 2. カラータイプを判別して、適切なf32バッファに変換する
+            return match img.color() {
+                // アルファチャンネルを持たない形式の場合
+                image::ColorType::L8
+                | image::ColorType::L16
+                | image::ColorType::Rgb8
+                | image::ColorType::Rgb16 => {
+                    // .to_rgb32f()で Rgb<f32> のImageBufferに変換
+                    Ok(HighBitDepthImage::Rgb(img.to_rgb32f()))
+                }
+                // アルファチャンネルを持つ形式の場合
+                _ => {
+                    // .to_rgba32f()で Rgba<f32> のImageBufferに変換
+                    Ok(HighBitDepthImage::Rgba(img.to_rgba32f()))
+                }
+            };
         }
     }
 }

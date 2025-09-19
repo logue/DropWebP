@@ -1,6 +1,16 @@
 use crate::encoder::{avif::AvifOptions, jxl::JxlOptions, webp::WebpOptions};
 use serde::{Deserialize, Serialize};
 
+/// 高ビット深度画像を表す列挙型
+/// RGBとRGBAの2種類をサポート
+/// f32型のピクセルデータを使用
+/// 例: 16ビットや32ビットの画像データを扱う場合に使用
+#[derive(Debug)]
+pub enum HighBitDepthImage {
+    Rgb(image::ImageBuffer<image::Rgb<f32>, Vec<f32>>),
+    Rgba(image::ImageBuffer<image::Rgba<f32>, Vec<f32>>),
+}
+
 /// ファイルパス情報
 /// file_name: ファイル名 (拡張子含む)
 /// extension: 拡張子 (ドット無し)
@@ -9,6 +19,7 @@ use serde::{Deserialize, Serialize};
 /// is_file: ファイルであるか
 /// is_dir: ディレクトリであるか
 #[derive(serde::Serialize)]
+#[allow(dead_code)]
 #[serde(rename_all = "camelCase")] // JS側でキャメルケースになるように設定
 pub struct PathInfo {
     pub(crate) file_name: Option<String>,
