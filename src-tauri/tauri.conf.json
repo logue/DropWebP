@@ -2,7 +2,7 @@
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "drop-compress-image",
   "mainBinaryName": "Drop Compress Image",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "identifier": "dev.logue.drop-compress-image",
   "build": {
     "beforeDevCommand": "pnpm dev",
