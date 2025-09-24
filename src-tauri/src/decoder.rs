@@ -4,8 +4,7 @@ mod jxl;
 
 use crate::error::AppError;
 use crate::options::HighBitDepthImage;
-use exif::{In, Reader as ExifReader, Tag};
-use image::{self, DynamicImage, ImageFormat, RgbaImage, imageops::*};
+use image::{self, DynamicImage, ImageFormat};
 use std::io::Cursor;
 
 /// バイトデータから画像をデコードし、HighBitDepthImageとして返す
@@ -118,28 +117,6 @@ fn detect_format(bytes: &[u8]) -> Option<DetectedFormat> {
     }
 
     None
-}
-
-/// EXIF Orientation をもとに画像を回転・反転
-pub fn correct_orientation(img: &RgbaImage, data: &[u8]) -> RgbaImage {
-    if let Ok(exif) = ExifReader::new().read_from_container(&mut Cursor::new(data)) {
-        if let Some(field) = exif.get_field(Tag::Orientation, In::PRIMARY) {
-            match field.value.get_uint(0) {
-                Some(2) => flip_horizontal(img),
-                Some(3) => rotate180(img),
-                Some(4) => flip_vertical(img),
-                Some(5) => rotate90(&flip_horizontal(img)),
-                Some(6) => rotate90(img),
-                Some(7) => rotate270(&flip_horizontal(img)),
-                Some(8) => rotate270(img),
-                _ => img.clone(),
-            }
-        } else {
-            img.clone()
-        }
-    } else {
-        img.clone()
-    }
 }
 
 pub fn extract_icc_profile(bytes: &[u8]) -> Option<Vec<u8>> {

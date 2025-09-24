@@ -91,6 +91,7 @@ const settingsStore = useSettingsStore();
         :min="32"
         :step="32"
         clearable
+        persistent-hint
         type="number"
       />
     </v-col>
@@ -124,7 +125,7 @@ const settingsStore = useSettingsStore();
 <i18n lang="yaml">
 en:
   lossless: Lossless compression
-  lossless_hint: If the input file is JPEG, it will be lossless regardless of this setting.
+  lossless_hint: If the input file is JPEG, it will be lossless regardless of this setting. Due to an issue with jpegxl-rs, some images may not be lossless.
   speed: Encoding speed
   speed_hint: Default is Squirrel
   quality: Quality (0.1-15.0)
@@ -136,13 +137,13 @@ en:
   decoding_speed: Decoding speed (0-4).
   decoding_speed_hint: Lower values mean higher quality.
   init_buffer_size: Output buffer
-  init_buffer_size_hint: Initial size of output buffer (in bytes). Values less than 32 are rounded up to 32kb.
+  init_buffer_size_hint: Initial size of output buffer (in kilobytes). Values less than 32KB are rounded up to 32KB.
   color_encoding: Color encoding method
   color_encoding_hint: If you don't know, it's recommended not to choose anything other than Srgb.
   reset_jxl_options: Reset JPEG XL settings
 ja:
   lossless: ロスレス圧縮
-  lossless_hint: JPEGが入力ファイルだった場合、ここの設定に関わらずロスレスになります。
+  lossless_hint: JPEGが入力ファイルだった場合、ここの設定に関わらずロスレスになります。jpegxl-rsの問題で一部の画像はロスレスにならない場合があります。
   speed: エンコード速度
   speed_hint: デフォルトはSquirrelです
   quality: 品質（0.1〜15.0）
@@ -154,13 +155,13 @@ ja:
   decoding_speed: デコード速度（0~4）
   decoding_speed_hint: 値が低いほど高品質
   init_buffer_size: 出力バッファ
-  init_buffer_size_hint: 出力バッファの初期サイズ（バイト単位）32未満は32kbに切り上げられます。
+  init_buffer_size_hint: 出力バッファの初期サイズ（キロバイト単位）32KB未満は32KBに切り上げられます。
   color_encoding: カラーエンコード方法
   color_encoding_hint: よくわからない場合は、Srgb以外にしないことをお勧めします。
   reset_jxl_options: JPEG XL設定をリセット
 ko:
   lossless: 무손실 압축
-  lossless_hint: 입력 파일이 JPEG인 경우 이 설정과 관계없이 무손실이 됩니다.
+  lossless_hint: 입력 파일이 JPEG인 경우 이 설정과 관계없이 무손실이 됩니다. jpegxl-rs의 문제로 일부 이미지는 무손실이 되지 않을 수 있습니다.
   speed: 인코딩 속도
   speed_hint: 기본값은 Squirrel입니다.
   quality: 품질(0.1~15.0)
@@ -172,13 +173,13 @@ ko:
   decoding_speed: 디코딩 속도(0~4).
   decoding_speed_hint: 값이 낮을수록 고품질
   init_buffer_size: 출력 버퍼
-  init_buffer_size_hint: 출력 버퍼의 초기 크기 (바이트) 32 미만은 32kb로 반올림됩니다.
+  init_buffer_size_hint: 출력 버퍼의 초기 크기(킬로바이트 단위). 32KB 미만의 값은 32KB로 반올림됩니다.
   color_encoding: 컬러 인코딩 방법
   color_encoding_hint: 잘 모르는 경우 Srgb 이외의 항목을 선택하지 않는 것이 좋습니다.
   reset_jxl_options: JPEG XL 설정 재설정
 zh:
   lossless: 無損壓縮
-  lossless_hint: 如果輸入文件是 JPEG，則無論此設置如何，都將是無損的。
+  lossless_hint: 如果輸入文件是 JPEG，則無論此設置如何，都將是無損的。由於 jpegxl-rs 的問題，某些圖像可能不是無損的。
   speed: 編碼速度
   speed_hint: 默認為 Squirrel
   quality: 質量 (0.1-15.0)
@@ -190,7 +191,7 @@ zh:
   decoding_speed: 解碼速度 (0-4)
   decoding_speed_hint: 值越低，質量越高。
   init_buffer_size: 輸出緩衝區
-  init_buffer_size_hint: 輸出緩衝區的初始大小（以位元組為單位）。小於 32 的值將向上舍入為 32kb。
+  init_buffer_size_hint: 輸出緩衝區的初始大小（以千字節為單位）。小於 32KB 的值將四捨五入到 32KB。
   color_encoding: 顏色編碼法
   color_encoding_hint: 如果您不知道，建議不要選擇 Srgb 以外的任何選項。
   reset_jxl_options: 重設 JPEG XL 設定

@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 /// f32型のピクセルデータを使用
 /// 例: 16ビットや32ビットの画像データを扱う場合に使用
 #[derive(Debug)]
+#[allow(dead_code)]
 pub enum HighBitDepthImage {
     Rgb(image::ImageBuffer<image::Rgb<f32>, Vec<f32>>),
     Rgba(image::ImageBuffer<image::Rgba<f32>, Vec<f32>>),

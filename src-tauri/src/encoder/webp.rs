@@ -91,9 +91,8 @@ pub fn encode(
     if icc_profile.is_none() {
         return Ok(webp_memory.to_vec());
     };
-    let profile = icc_profile;
-
     /*
+    let profile = icc_profile;
 
     // ★ 3. Muxerを使ってICCプロファイルを結合
     let mut mux = WebPMux::new();
