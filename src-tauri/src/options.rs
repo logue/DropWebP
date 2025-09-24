@@ -2,13 +2,14 @@ use crate::encoder::{avif::AvifOptions, jxl::JxlOptions, webp::WebpOptions};
 use serde::{Deserialize, Serialize};
 
 /// 高ビット深度画像を表す列挙型
-/// RGBとRGBAの2種類をサポート
+/// RGB、RGBA、ARGBの3種類をサポート
 /// f32型のピクセルデータを使用
 /// 例: 16ビットや32ビットの画像データを扱う場合に使用
 #[derive(Debug)]
 pub enum HighBitDepthImage {
     Rgb(image::ImageBuffer<image::Rgb<f32>, Vec<f32>>),
     Rgba(image::ImageBuffer<image::Rgba<f32>, Vec<f32>>),
+    Argb(image::ImageBuffer<image::Rgba<f32>, Vec<f32>>), // ARGB形式（内部的にはRgbaBufferとして保存、ピクセル順序はARGB）
 }
 
 /// ファイルパス情報

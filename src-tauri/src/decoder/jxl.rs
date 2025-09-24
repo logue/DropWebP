@@ -5,7 +5,7 @@ use ::image::{ImageBuffer, Rgb, Rgba};
 use jpegxl_rs::decode::*;
 
 /// JPEG XL 画像をデコードします。
-pub fn decode(data: &[u8]) -> Result<HighBitDepthImage, AppError> {
+pub fn decode(data: &[u8]) -> Result<(HighBitDepthImage, Option<Vec<u8>>), AppError> {
     // jpegxl-rsクレートを使用してJPEG XLをデコード
     let decoder = decoder_builder()
         .build()
@@ -15,6 +15,8 @@ pub fn decode(data: &[u8]) -> Result<HighBitDepthImage, AppError> {
     let (metadata, pixels) = decoder
         .decode(data)
         .map_err(|e| AppError::Decode(format!("Failed to decode JXL: {:?}", e)))?;
+
+    let icc_profile = metadata.icc_profile;
 
     let width = metadata.width;
     let height = metadata.height;
@@ -167,5 +169,5 @@ pub fn decode(data: &[u8]) -> Result<HighBitDepthImage, AppError> {
         }
     };
 
-    Ok(image_buffer)
+    Ok((image_buffer, icc_profile))
 }

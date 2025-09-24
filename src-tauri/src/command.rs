@@ -31,12 +31,13 @@ pub async fn convert(data: Vec<u8>, options: EncodeOptions) -> Result<Vec<u8>, S
         println!("Decoding...");
 
         // 画像デコード
-        let img =
+        let data =
             crate::decoder::decode(&data).map_err(|e| format!("Failed to decode image: {}", e))?;
 
         // 画像エンコード
         println!("Encoding...");
-        let data = crate::encoder::encode(&img, &options)
+        let (img, icc_profile) = data;
+        let data = crate::encoder::encode(img, icc_profile, &options)
             .map_err(|e| format!("Failed to encode image: {}", e))?;
 
         Ok(data)

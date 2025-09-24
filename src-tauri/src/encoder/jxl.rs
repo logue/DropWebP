@@ -98,82 +98,119 @@ impl ColorEncoding {
     }
 }
 
-/// DynamicImage を JPEG XL 形式のバイトデータに変換する (jpegxl-rs クレート使用)
+/// HighBitDepthImage を JPEG XL 形式のバイトデータに変換する
 ///
 /// # 引数
-/// * `img` - 変換元のDynamicImage
+/// * `pixel_data` - 変換元のHighBitDepthImage
+/// * `icc_profile` - ICCプロファイル（Someの場合は埋め込み処理を行う）
 /// * `options` - JXLエンコードオプション (JxlOptions)
 /// # 戻り値
 /// - 成功した場合は JPEG XL のバイト列を `Vec<u8>` として返します。
 /// - 失敗した場合は `AppError` を返します。
 /// # 注意
-/// - `jpegxl-rs` クレートを使用して JPEG XL エンコードを行います。ビルド時に `libwebp` ライブラリがシステムにインストールされている必要があります。
+/// * ICCプロファイルが提供された場合、カスタムメタデータボックスとして埋め込まれます
 pub fn encode(
-    img: &HighBitDepthImage, // ★ 1. 引数を HighBitDepthImage に変更
+    pixel_data: &HighBitDepthImage,
+    icc_profile: Option<Vec<u8>>,
     options: &JxlOptions,
 ) -> Result<Vec<u8>, AppError> {
-    // ★ 2. HighBitDepthImage から画像サイズを取得
-    let (width, height) = match img {
+    // HighBitDepthImage から画像サイズを取得
+    let (width, height) = match pixel_data {
         HighBitDepthImage::Rgb(buf) => buf.dimensions(),
         HighBitDepthImage::Rgba(buf) => buf.dimensions(),
+        HighBitDepthImage::Argb(buf) => buf.dimensions(),
     };
 
-    // ★ 3. HighBitDepthImage 用のヘルパー関数を呼び出す (Cow<'_, [f32]> が返る)
-    let (pixel_data, is_rgba) = extract_pixel_data(img);
+    // HighBitDepthImage から f32 のピクセルデータとアルファチャンネルの有無を取得
+    let (pixels_f32, is_rgba) = extract_pixel_data(pixel_data);
 
-    // 2. エンコーダーの組み立て (ビルダーパターンの活用)
-    let mut binding = encoder_builder();
-    let mut builder = binding
-        .speed(options.speed.to_jxl())
-        .use_container(options.use_container)
-        .uses_original_profile(options.uses_original_profile)
-        .decoding_speed(options.decoding_speed)
-        .init_buffer_size(options.init_buffer_size)
-        .color_encoding(options.color_encoding.to_jxl());
-
-    /*
-    // 並列処理ランナーの設定
-    if let Some(runner) = options.parallel_runner {
-        builder = builder.parallel_runner(runner);
-    }
-    */
-
-    // 可逆/非可逆と品質の設定
-    if options.lossless {
-        builder = builder.lossless(true);
-    } else {
-        // libjxlの品質設定は「バターワース距離」です。
-        // 1.0が視覚的にロスレスに近い高品質、数値が大きいほど低品質になります。
-        // 0.0は特別な意味を持つ場合があるため、通常は0.1以上が安全です。
-        builder = builder.quality(options.quality.clamp(0.1, 15.0));
-        //.uses_original_profile(uses_original_profile);
-    }
-
-    let mut encoder = builder
+    // エンコーダーの組み立て (完全にデフォルト設定)
+    let mut encoder = encoder_builder()
         .build()
         .map_err(|e| AppError::Encode(format!("JXL encoder build failed: {}", e)))?;
 
-    // 3. ピクセルフォーマット情報の設定
-    encoder.has_alpha = is_rgba;
+    // ICCプロファイルが提供された場合、カスタムメタデータとして追加
+    if let Some(profile_data) = &icc_profile {
+        println!(
+            "JXL: ICCプロファイルを埋め込み中... (サイズ: {} bytes)",
+            profile_data.len()
+        );
 
-    // 4. エンコード処理と結果の返却
-    //    - unwrap() を避け、`?` でエラーハンドリングします。
-    //    - `encode` の戻り値は `Result<Vec<u8>, _>` なので、そのまま返します。
+        // ICCプロファイルをカスタムメタデータボックスとして追加
+        // 'icc ' (ICCプロファイル用の標準的な4文字コード)
+        let icc_type = *b"icc ";
+        let metadata = jpegxl_rs::encode::Metadata::Custom(icc_type, profile_data);
+
+        if let Err(e) = encoder.add_metadata(&metadata, false) {
+            eprintln!("JXL: ICCプロファイルの埋め込みに失敗しました: {:?}", e);
+            eprintln!("JXL: ICCプロファイルなしで処理を続行します");
+        } else {
+            println!("JXL: ICCプロファイルの埋め込みが完了しました");
+        }
+    }
+
+    // デバッグ情報を追加
+    println!(
+        "JXL Encoder: width={}, height={}, is_rgba={}, pixel_count={}, has_icc={}",
+        width,
+        height,
+        is_rgba,
+        pixels_f32.len(),
+        icc_profile.is_some()
+    );
+
+    // ピクセル値の範囲をチェック
+    if let Some(min_val) = pixels_f32.iter().min_by(|a, b| a.partial_cmp(b).unwrap()) {
+        if let Some(max_val) = pixels_f32.iter().max_by(|a, b| a.partial_cmp(b).unwrap()) {
+            println!(
+                "JXL Encoder: pixel value range: {} to {} (should be 0.0 to 1.0 for jpegxl-rs)",
+                min_val, max_val
+            );
+
+            if *min_val < 0.0 || *max_val > 1.0 {
+                eprintln!(
+                    "WARNING: Pixel values are outside expected range [0.0, 1.0]. This may cause jpegxl-rs API errors."
+                );
+            }
+        }
+    }
+
+    // 極限まで単純化したエンコード処理
+    println!("JXL: Attempting simple encode without customization...");
+
+    // RGBAの場合はRGBに変換
+    let rgb_data = if is_rgba {
+        let mut rgb = Vec::with_capacity((pixels_f32.len() / 4) * 3);
+        for chunk in pixels_f32.chunks_exact(4) {
+            rgb.push(chunk[0]); // R
+            rgb.push(chunk[1]); // G
+            rgb.push(chunk[2]); // B
+        }
+        rgb
+    } else {
+        pixels_f32.to_vec()
+    };
+
+    // エンコード実行（全てデフォルト設定）
     let buffer: EncoderResult<f32> = encoder
-        .encode(&pixel_data, width, height)
-        .map_err(|e| AppError::Encode(format!("JXL encode failed: {}", e)))?;
+        .encode(&rgb_data, width, height)
+        .map_err(|e| AppError::Encode(format!("JXL simple encode failed: {:?}", e)))?;
 
     Ok(buffer.to_vec())
 }
 
-/// JPEG XL 形式にトランスコードする
-/// - `img` - 変換元のJPEGバイトデータ
-/// - `options` - JXLエンコードオプション (JxlOptions)
+/// JPEGをJPEG XL形式にロスレス変換する
+///
+/// # 引数
+/// * `jpeg_data` - 変換元のJPEGバイトデータ
+/// * `options` - JXLエンコードオプション (JxlOptions)
 /// # 戻り値
 /// - 成功した場合は JPEG XL のバイト列を `Vec<u8>` として返します。
 /// - 失敗した場合は `AppError` を返します。
-pub fn transcode(img: &[u8], options: &JxlOptions) -> Result<Vec<u8>, AppError> {
-    // 2. エンコーダーの組み立て (ビルダーパターンの活用)
+#[allow(dead_code)]
+pub fn transcode(jpeg_data: &[u8], options: &JxlOptions) -> Result<Vec<u8>, AppError> {
+    // こちらの関数はピクセルデータを直接扱わないため、修正は不要です。
+    // uses_original_profile(true) はJPEGからの再圧縮で有効です。
     let mut binding = encoder_builder();
     let mut builder = binding
         .speed(options.speed.to_jxl())
@@ -183,34 +220,19 @@ pub fn transcode(img: &[u8], options: &JxlOptions) -> Result<Vec<u8>, AppError> 
         .init_buffer_size(options.init_buffer_size)
         .color_encoding(options.color_encoding.to_jxl());
 
-    /*
-    // 並列処理ランナーの設定
-    if let Some(runner) = options.parallel_runner {
-        builder = builder.parallel_runner(runner);
-    }
-    */
-
-    // 可逆/非可逆と品質の設定
     if options.lossless {
         builder = builder.lossless(true);
     } else {
-        // libjxlの品質設定は「バターワース距離」です。
-        // 1.0が視覚的にロスレスに近い高品質、数値が大きいほど低品質になります。
-        // 0.0は特別な意味を持つ場合があるため、通常は0.1以上が安全です。
         builder = builder.quality(options.quality.clamp(0.1, 15.0));
-        //.uses_original_profile(uses_original_profile);
     }
 
     let mut encoder = builder
         .build()
-        .map_err(|e| AppError::Encode(format!("JXL encoder build failed: {}", e)))?;
+        .map_err(|e| AppError::Encode(format!("JXL transcoder build failed: {}", e)))?;
 
-    // 4. エンコード処理と結果の返却
-    //    - unwrap() を避け、`?` でエラーハンドリングします。
-    //    - `encode` の戻り値は `Result<Vec<u8>, _>` なので、そのまま返します。
     let buffer: EncoderResult<u8> = encoder
-        .encode_jpeg(img)
-        .map_err(|e| AppError::Encode(format!("JXL encode failed: {}", e)))?;
+        .encode_jpeg(jpeg_data)
+        .map_err(|e| AppError::Encode(format!("JXL transcode failed: {}", e)))?;
 
     Ok(buffer.to_vec())
 }

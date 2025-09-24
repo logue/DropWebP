@@ -20,7 +20,7 @@ use std::io::Cursor;
 /// - HEIC形式のデコードには `libheif-rs` クレートを使用しています。ビルド時に `libheif` ライブラリがシステムにインストールされている必要があります。
 /// - JPEG 2000形式のデコードには `jpeg2k` クレートを使用しています。
 ///  ただし、このクレートはすべてのJPEG 2000ファイルに対応しているわけではないため、特定のファイルでエラーが発生する可能性があります。
-pub fn decode(image_bytes: &[u8]) -> Result<HighBitDepthImage, AppError> {
+pub fn decode(image_bytes: &[u8]) -> Result<(HighBitDepthImage, Option<Vec<u8>>), AppError> {
     // まず、バイトデータから画像形式を判別する
     let format = detect_format(image_bytes)
         .ok_or_else(|| AppError::Decode("Unsupported or unknown image format".to_string()))?;
@@ -36,14 +36,16 @@ pub fn decode(image_bytes: &[u8]) -> Result<HighBitDepthImage, AppError> {
         )),
         DetectedFormat::Jpeg2000 => {
             println!("Decoder: Using Jpeg2k decoder...");
-            jpeg2k::decode(image_bytes)
+            jpeg2k::decode(image_bytes).map(|img| (img, None))
         }
         DetectedFormat::Jxl => {
             println!("Decoder: Using JPEG XL decoder...");
             jxl::decode(image_bytes)
         }
-        DetectedFormat::Standard(image_format) => {
+        DetectedFormat::Standard(_image_format) => {
             println!("Decoder: Using image decoder...");
+            let icc_profile = extract_icc_profile(image_bytes);
+
             // 1. まずはDynamicImageとしてメモリから読み込む
             let img: DynamicImage = image::load_from_memory(image_bytes)
                 .map_err(|e| AppError::Decode(e.to_string()))?;
@@ -56,12 +58,12 @@ pub fn decode(image_bytes: &[u8]) -> Result<HighBitDepthImage, AppError> {
                 | image::ColorType::Rgb8
                 | image::ColorType::Rgb16 => {
                     // .to_rgb32f()で Rgb<f32> のImageBufferに変換
-                    Ok(HighBitDepthImage::Rgb(img.to_rgb32f()))
+                    Ok((HighBitDepthImage::Rgb(img.to_rgb32f()), icc_profile))
                 }
                 // アルファチャンネルを持つ形式の場合
                 _ => {
                     // .to_rgba32f()で Rgba<f32> のImageBufferに変換
-                    Ok(HighBitDepthImage::Rgba(img.to_rgba32f()))
+                    Ok((HighBitDepthImage::Rgba(img.to_rgba32f()), icc_profile))
                 }
             };
         }
@@ -138,4 +140,71 @@ pub fn correct_orientation(img: &RgbaImage, data: &[u8]) -> RgbaImage {
     } else {
         img.clone()
     }
+}
+
+pub fn extract_icc_profile(bytes: &[u8]) -> Option<Vec<u8>> {
+    // --- PNGの場合 ---
+    // PNGのマジックナンバー (89 50 4E 47 0D 0A 1A 0A) を確認
+    if bytes.starts_with(&[0x89, 0x50, 0x4E, 0x47]) {
+        let decoder = png::Decoder::new(Cursor::new(bytes));
+        if let Ok(reader) = decoder.read_info() {
+            if let Some(profile) = &reader.info().icc_profile {
+                // iCCPチャンクからプロファイルデータを取得
+                return Some(profile.to_vec());
+            }
+        }
+        return None;
+    }
+
+    // --- JPEGの場合 ---
+    // JPEGのマジックナンバー (FF D8) を確認
+    if bytes.starts_with(&[0xFF, 0xD8]) {
+        let mut icc_chunks = std::collections::BTreeMap::new();
+        let mut pos = 2; // SOIマーカーの後からスキャン開始
+
+        while pos < bytes.len() - 4 {
+            // マーカー (FFで始まる) を探す
+            if bytes[pos] != 0xFF {
+                pos += 1;
+                continue;
+            }
+
+            let marker = bytes[pos + 1];
+
+            // APP2マーカー (FF E2) かどうかを確認
+            if marker == 0xE2 {
+                let length = u16::from_be_bytes([bytes[pos + 2], bytes[pos + 3]]) as usize;
+                let segment_data = &bytes[pos + 4..pos + 2 + length];
+
+                // "ICC_PROFILE" という識別子があるか確認
+                if segment_data.starts_with(b"ICC_PROFILE\0") {
+                    // チャンク情報を取得
+                    let chunk_index = segment_data[12];
+                    let total_chunks = segment_data[13];
+                    let profile_part = &segment_data[14..];
+
+                    icc_chunks.insert(chunk_index, profile_part);
+
+                    // 全てのチャンクが集まったか確認
+                    if icc_chunks.len() == total_chunks as usize {
+                        let mut full_profile = Vec::new();
+                        for i in 1..=total_chunks {
+                            if let Some(chunk) = icc_chunks.get(&i) {
+                                full_profile.extend_from_slice(chunk);
+                            }
+                        }
+                        return Some(full_profile);
+                    }
+                }
+            }
+            // 次のマーカーへ移動
+            let length = u16::from_be_bytes([bytes[pos + 2], bytes[pos + 3]]) as usize;
+            pos += 2 + length;
+        }
+
+        return None;
+    }
+
+    // 未対応のフォーマット
+    None
 }

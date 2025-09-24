@@ -50,13 +50,18 @@ pub enum WebPImageHint {
 /// - 失敗した場合は `AppError` を返します。
 /// # 注意
 /// - `libwebp-sys` クレートを使用して WebP エンコードを行います。ビルド時に `libwebp` ライブラリがシステムにインストールされている必要があります。
-pub fn encode(img: &HighBitDepthImage, options: &WebpOptions) -> Result<Vec<u8>, AppError> {
+pub fn encode(
+    pixel_data: &HighBitDepthImage,
+    icc_profile: Option<Vec<u8>>,
+    options: &WebpOptions,
+) -> Result<Vec<u8>, AppError> {
     // ★ 1. 画像サイズとf32ピクセルデータを取得
-    let (width, height) = match img {
+    let (width, height) = match pixel_data {
         HighBitDepthImage::Rgb(buf) => buf.dimensions(),
         HighBitDepthImage::Rgba(buf) => buf.dimensions(),
+        HighBitDepthImage::Argb(buf) => buf.dimensions(),
     };
-    let (pixels_f32, is_rgba) = extract_pixel_data(img);
+    let (pixels_f32, is_rgba) = extract_pixel_data(pixel_data);
 
     // ★ 2. f32 -> u8 にデノーマライズ
     // WebPの標準的なエンコーダーは8bit入力を基本とするため
@@ -82,5 +87,25 @@ pub fn encode(img: &HighBitDepthImage, options: &WebpOptions) -> Result<Vec<u8>,
     };
 
     println!("Finished encoding WebP.");
+    // ★ 2. ICCプロファイルがなければ、エンコードしたピクセルデータのみを返す
+    if icc_profile.is_none() {
+        return Ok(webp_memory.to_vec());
+    };
+    let profile = icc_profile;
+
+    /*
+
+    // ★ 3. Muxerを使ってICCプロファイルを結合
+    let mut mux = WebPMux::new();
+    let frame = WebPData {
+        bytes: webp_memory.as_ptr(),
+        size: webp_memory.len(),
+    };
+    mux.push_frame(frame, None)?;
+    mux.set_chunk("ICCP", &profile)?; // "ICCP"チャンクとして設定
+
+    let final_data = mux.encode()?;
+    */
+
     Ok(webp_memory.to_vec())
 }
