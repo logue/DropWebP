@@ -24,7 +24,7 @@ const { t } = useI18n();
     v-model="settingsStore.commonOptions.deleteOriginal"
     :hint="t('delete_original_hint')"
     :label="t('delete_original')"
-    color="primary"
+    color="red"
     persistent-hint
   />
   <v-switch
@@ -69,7 +69,7 @@ en:
   overwrite: Overwrite
   same_directory: Output Same Directory
   delete_original: Delete Original
-  delete_original_hint: Be careful, as deleting the original file cannot be undone.
+  delete_original_hint: ⚠️Be careful, as deleting the original file cannot be undone.
   recursive: Include Subdirectories
   output_path: Default output path
   browse: Browse
@@ -81,7 +81,7 @@ ja:
   overwrite: 上書きする
   same_directory: 同じディレクトリに出力
   delete_original: 元ファイルを削除する
-  delete_original_hint: 元ファイルを削除すると元に戻せなくなるので注意してください。
+  delete_original_hint: ⚠️元ファイルを削除すると元に戻せなくなるので注意してください。
   recursive: サブディレクトリを含める
   output_path: デフォルトの出力先のパス
   browse: ブラウズ
@@ -93,7 +93,7 @@ kr:
   overwrite: 덮어쓰기
   same_directory: 동일 디렉토리에 출력
   delete_original: 원본 파일 삭제
-  delete_original_hint: 원본 파일을 삭제하면 복구할 수 없으니 주의하세요.
+  delete_original_hint: ⚠️원본 파일을 삭제하면 복구할 수 없으니 주의하세요.
   recursive: 하위 디렉토리 포함
   output_path: 기본 출력 경로
   browse: 찾아보기
@@ -105,7 +105,7 @@ zh:
   overwrite: 覆蓋
   same_directory: 輸出到相同目錄
   delete_original: 刪除原文件
-  delete_original_hint: 刪除原文件後將無法恢復，請謹慎操作。
+  delete_original_hint: ⚠️刪除原文件後將無法恢復，請謹慎操作。
   recursive: 包含子目錄
   output_path: 默認輸出路徑
   browse: 瀏覽

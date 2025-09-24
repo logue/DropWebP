@@ -125,9 +125,9 @@ const settingsStore = useSettingsStore();
 <i18n lang="yaml">
 en:
   lossless: Lossless compression
-  lossless_hint: If the input file is JPEG, it will be lossless regardless of this setting. Due to an issue with jpegxl-rs, some images may not be lossless.
+  lossless_hint: If the input file is JPEG, it will be lossless regardless of this setting. It works for most images, but in rare cases it may not be applied (issue of jpegxl-rs).
   speed: Encoding speed
-  speed_hint: Default is Squirrel
+  speed_hint: Default is 7, Squirrel. Lower values are faster but lower quality.
   quality: Quality (0.1-15.0)
   quality_hint: Higher values mean higher quality. Default is 1, recommended values are 0.5-3.0.
   use_container: Use JPEG XL container format
@@ -143,9 +143,9 @@ en:
   reset_jxl_options: Reset JPEG XL settings
 ja:
   lossless: ロスレス圧縮
-  lossless_hint: JPEGが入力ファイルだった場合、ここの設定に関わらずロスレスになります。jpegxl-rsの問題で一部の画像はロスレスにならない場合があります。
+  lossless_hint: JPEGが入力ファイルだった場合、ここの設定に関わらずロスレスになります。ほとんどの画像で機能しますが、稀に適用されないことがあります（jpegxl-rsの問題）。
   speed: エンコード速度
-  speed_hint: デフォルトはSquirrelです
+  speed_hint: デフォルトは7, Squirrelです。値が低いほど高速ですが品質が低くなります。
   quality: 品質（0.1〜15.0）
   quality_hint: 値が高いほど高品質です。デフォルトは1で、推奨値は0.5〜3.0です。
   use_container: JPEG XLコンテナ形式を使用
@@ -161,9 +161,9 @@ ja:
   reset_jxl_options: JPEG XL設定をリセット
 ko:
   lossless: 무손실 압축
-  lossless_hint: 입력 파일이 JPEG인 경우 이 설정과 관계없이 무손실이 됩니다. jpegxl-rs의 문제로 일부 이미지는 무손실이 되지 않을 수 있습니다.
+  lossless_hint: 입력 파일이 JPEG인 경우 이 설정과 관계없이 무손실이 됩니다. 대부분의 이미지에서 작동하지만 드물게 적용되지 않는 경우가 있습니다(jpegxl-rs의 문제).
   speed: 인코딩 속도
-  speed_hint: 기본값은 Squirrel입니다.
+  speed_hint: 기본값은 7, Squirrel입니다. 값이 낮을수록 빠르지만 품질이 낮아집니다.
   quality: 품질(0.1~15.0)
   quality_hint: 값이 높을수록 품질이 높아집니다. 기본값은 1이며 권장 값은 0.5~3.0입니다.
   use_container: JPEG XL 컨테이너 형식 사용
@@ -179,9 +179,9 @@ ko:
   reset_jxl_options: JPEG XL 설정 재설정
 zh:
   lossless: 無損壓縮
-  lossless_hint: 如果輸入文件是 JPEG，則無論此設置如何，都將是無損的。由於 jpegxl-rs 的問題，某些圖像可能不是無損的。
+  lossless_hint: 如果輸入文件是 JPEG，則無論此設置如何，都將是無損的。大多數圖像均可使用，但極少數情況下可能無法應用（jpegxl-rs 的問題）。
   speed: 編碼速度
-  speed_hint: 默認為 Squirrel
+  speed_hint: 默認為 7, Squirrel。值越低，速度越快，但質量越低。
   quality: 質量 (0.1-15.0)
   quality_hint: 值越高，質量越高。默認值為 1，建議值為 0.5-3.0。
   use_container: 使用 JPEG XL 容器格式

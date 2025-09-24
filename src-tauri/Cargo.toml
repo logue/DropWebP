@@ -37,6 +37,7 @@ vcpkg = "0.2.15"
 
 [dependencies]
 bytemuck = "1.23.2"
+chrono = { version = "0.4.42", features = ["serde"] }
 image = "0.25.8"
 imgref = "1.11.0"
 jpeg2k = "0.10.1"

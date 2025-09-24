@@ -24,7 +24,8 @@
   },
   "packageManager": "pnpm@10.17.1",
   "scripts": {
-    "dev": "tauri dev",
+    "dev": "vite",
+    "dev:tauri": "tauri dev",
     "clean": "rimraf ./node_modules/.vite",
     "build": "run-p type-check \"build-only {@}\" build:tauri --",
     "build:analyze": "vite build --mode analyze",
@@ -51,7 +52,7 @@
     "unified-network": "0.6.4",
     "vue": "3.5.21",
     "vue-i18n": "^11.1.12",
-    "vuetify": "3.10.2"
+    "vuetify": "3.10.3"
   },
   "devDependencies": {
     "@intlify/unplugin-vue-i18n": "^11.0.1",

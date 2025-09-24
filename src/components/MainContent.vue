@@ -6,9 +6,11 @@ import { useI18n } from 'vue-i18n';
 import ProgressDialog from './modals/ProgressDialog.vue';
 
 import { useImageConversionController } from '@/composables/useImageConversionController';
+import { useLogger } from '@/composables/useLogger';
 
 const settingsStore = useSettingsStore();
 const { t } = useI18n();
+useLogger();
 
 const { dialog, inProgress, currentFile, progress, convertByDialog } =
   useImageConversionController(t);
@@ -18,44 +20,47 @@ const isEnter = ref(false);
 
 <template>
   <v-container
+    class="fill-height pa-0 d-flex flex-column justify-center"
     @dragenter="isEnter = true"
     @dragleave="isEnter = false"
     @drop.prevent="isEnter = false"
   >
     <v-sheet
       :class="isEnter ? 'bg-green-lighten-5' : ''"
-      class="d-flex align-center justify-center mb-4 px-5"
-      height="280"
+      class="d-flex flex-grow-1 align-center justify-center my-4 px-15"
       rounded="xl"
     >
       <h2 class="text-center text-medium-emphasis">
         {{ t('hero_text') }}
       </h2>
     </v-sheet>
-    <v-row>
-      <v-col>
-        <v-btn prepend-icon="mdi-file-multiple" class="mr-2" @click="convertByDialog">
-          {{ t('select_files') }}
-        </v-btn>
-      </v-col>
-      <!--v-col>
-        <v-btn prepend-icon="mdi-folder-open" @click="convertByDirDialog">
-          {{ t('select_folder') }}
-        </v-btn>
-      </!v-col-->
-      <v-col>
-        <p>{{ t('convert_to') }}</p>
-        <v-radio-group
-          v-model="settingsStore.commonOptions.format"
-          class="d-flex justify-end"
-          inline
-        >
-          <v-radio label="WebP" value="webp" color="green" />
-          <v-radio label="Avif" value="avif" color="red" />
-          <v-radio label="JPEG XL" value="jxl" color="blue" />
-        </v-radio-group>
-      </v-col>
-    </v-row>
+    <v-sheet class="d-flex bg-transparent">
+      <v-btn prepend-icon="mdi-file-multiple" class="mr-2" @click="convertByDialog">
+        {{ t('select_files') }}
+      </v-btn>
+      <v-radio-group
+        v-model="settingsStore.commonOptions.format"
+        :label="t('convert_to')"
+        class="d-flex justify-end"
+        inline
+      >
+        <v-tooltip :text="t('type.webp_description')" location="top">
+          <template #activator="{ props }">
+            <v-radio v-bind="props" :label="t('type.webp')" value="webp" color="green" />
+          </template>
+        </v-tooltip>
+        <v-tooltip :text="t('type.avif_description')" location="top">
+          <template #activator="{ props }">
+            <v-radio v-bind="props" :label="t('type.avif')" value="avif" color="red" />
+          </template>
+        </v-tooltip>
+        <v-tooltip :text="t('type.jxl_description')" location="top">
+          <template #activator="{ props }">
+            <v-radio v-bind="props" :label="t('type.jxl')" value="jxl" color="blue" />
+          </template>
+        </v-tooltip>
+      </v-radio-group>
+    </v-sheet>
   </v-container>
   <progress-dialog
     v-model:current-file="currentFile"
@@ -68,7 +73,7 @@ const isEnter = ref(false);
 
 <i18n lang="yaml">
 en:
-  hero_text: Drag and drop image files or directories here, or paste images to compress them in the format selected by the radio buttons below.
+  hero_text: Drag and drop images here or paste to compress
   select_files: Select Files
   select_folder: Select Folder
   progress: Compressing...
@@ -80,14 +85,17 @@ en:
   convert_to: 'Convert to:'
   type:
     webp: WebP Image
-    avif: Avif Image
-    jxl: JPEG XL Image
+    webp_description: WebP is a modern image format that provides superior lossless and lossy compression for images on the web. Using WebP, webmasters and web developers can create smaller, richer images that make the web faster.
+    avif: AVIF Image
+    avif_description: AVIF is a next-generation image format that provides superior compression and quality characteristics compared to older formats like JPEG and PNG. It supports features like HDR, wide color gamut, and transparency, making it ideal for modern web and mobile applications.
+    jxl: JPEG XL Image (Experimental)
+    jxl_description: JPEG XL is a next-generation image format that provides superior compression and quality characteristics compared to older formats like JPEG and PNG. It supports features like lossless and lossy compression, wide color gamut, and high dynamic range (HDR), making it ideal for modern web and mobile applications.
   error:
     no_images_found_dropped: No images found in the dropped items.
     no_images_found_selected: No images found in the selected items.
     no_images_found_in_folder: No images found in the selected folder.
 ja:
-  hero_text: ここに画像ファイルやディレクトリをドラッグ＆ドロップするか、画像をペーストすることで下のラジオボタンの形式で画像圧縮できます。
+  hero_text: 画像をここにドラッグ＆ドロップするかペースト
   select_files: ファイルを選択
   select_folder: フォルダを選択
   progress: 圧縮しています…
@@ -99,14 +107,17 @@ ja:
   convert_to: 変換先の形式：
   type:
     webp: WebP画像
-    avif: Avif画像
-    jxl: JPEG XL画像
+    webp_description: WebPは、Web上の画像に対して優れたロスレスおよびロス圧縮を提供する最新の画像形式です。WebPを使用すると、WebマスターやWeb開発者は、より小さく、より豊かな画像を作成して、Webを高速化できます。
+    avif: AVIF画像
+    avif_description: AVIFは、JPEGやPNGなどの古い形式と比較して優れた圧縮と品質特性を提供する次世代の画像形式です。HDR、広色域、透明性などの機能をサポートしており、最新のWebおよびモバイルアプリケーションに最適です。
+    jxl: JPEG XL画像(実験的)
+    jxl_description: JPEG XLは、JPEGやPNGなどの古い形式と比較して優れた圧縮と品質特性を提供する次世代の画像形式です。ロスレスおよびロス圧縮、広色域、高ダイナミックレンジ（HDR）などの機能をサポートしており、最新のWebおよびモバイルアプリケーションに最適です。
   error:
     no_images_found_dropped: ドロップされたアイテムに画像が見つかりませんでした。
     no_images_found_selected: 選択されたアイテムに画像が見つかりませんでした。
     no_images_found_in_folder: フォルダ内に画像が見つかりませんでした。
 kr:
-  hero_text: 여기에 이미지 파일이나 디렉토리를 드래그 앤 드롭하거나 이미지를 붙여넣기하여 아래의 라디오 버튼 형식으로 이미지 압축할 수 있습니다.
+  hero_text: 이미지를 여기에 끌어다 놓거나 붙여넣기하여 압축합니다.
   select_files: 파일 선택
   select_folder: 폴더 선택
   progress: 압축 중...
@@ -118,8 +129,11 @@ kr:
   convert_to: '변환 형식:'
   type:
     webp: WebP 이미지
-    avif: Avif 이미지
-    jxl: JPEG XL 이미지
+    webp_description: WebP는 웹의 이미지에 대해 우수한 무손실 및 손실 압축을 제공하는 최신 이미지 형식입니다. WebP를 사용하면 웹마스터와 웹 개발자가 더 작고 풍부한 이미지를 만들어 웹을 더 빠르게 만들 수 있습니다.
+    avif: AVIF 이미지
+    avif_description: AVIF는 JPEG 및 PNG와 같은 이전 형식에 비해 우수한 압축 및 품질 특성을 제공하는 차세대 이미지 형식입니다. HDR, 광색역 및 투명성과 같은 기능을 지원하여 최신 웹 및 모바일 애플리케이션에 적합합니다.
+    jxl: JPEG XL 이미지(실험적인)
+    jxl_description: JPEG XL은 JPEG 및 PNG와 같은 이전 형식에 비해 우수한 압축 및 품질 특성을 제공하는 차세대 이미지 형식입니다. 무손실 및 손실 압축, 광색역 및 고동적 범위(HDR)와 같은 기능을 지원하여 최신 웹 및 모바일 애플리케이션에 적합합니다.
   error:
     no_images_found_dropped: 드롭된 항목에서 이미지를 찾을 수 없습니다
     no_images_found_selected: 선택한 항목에서 이미지를 찾을 수 없습니다.
@@ -137,8 +151,11 @@ zh:
   convert_to: '轉換為：'
   type:
     webp: WebP 圖像
-    avif: Avif 圖像
-    jxl: JPEG XL 圖像
+    webp_description: WebP 是一種現代圖像格式，為網絡上的圖像提供了優越的無損和有損壓縮。使用 WebP，網站管理員和網頁開發人員可以創建更小、更豐富的圖像，從而加快網絡速度。
+    avif: AVIF 圖像
+    avif_description: AVIF 是一種下一代圖像格式，與 JPEG 和 PNG 等較舊格式相比，提供了優越的壓縮和質量特性。它支持 HDR、寬色域和透明度等功能，非常適合現代網絡和移動應用程序。
+    jxl: JPEG XL 圖像(實驗性)
+    jxl_description: JPEG XL 是一種下一代圖像格式，與 JPEG 和 PNG 等較舊格式相比，提供了優越的壓縮和質量特性。它支持無損和有損壓縮、寬色域和高動態範圍 (HDR) 等功能，非常適合現代網絡和移動應用程序。
   error:
     no_images_found_dropped: 在拖放的項目中未找到圖像。
     no_images_found_selected: 在所選項目中未找到圖像。

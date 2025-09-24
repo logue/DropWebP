@@ -2,6 +2,22 @@ use crate::error::AppError;
 use crate::options::{EncodeOptions, PathInfo};
 use image::{ImageFormat, guess_format};
 use std::{self, path::Path};
+use tauri::AppHandle;
+
+/// フロントエンドにログメッセージを送信する
+fn send_log(app_handle: &AppHandle, level: &str, message: &str) {
+    use tauri::Emitter; // Emitterトレイトを使用
+
+    let log_data = serde_json::json!({
+        "level": level,
+        "message": message,
+        "timestamp": chrono::Utc::now().to_rfc3339()
+    });
+
+    if let Err(e) = app_handle.emit("log-message", &log_data) {
+        eprintln!("Failed to send log message: {}", e);
+    }
+}
 
 /// Uint8Arrayバイナリデータを圧縮してUint8Arrayで返します。
 /// # 引数
@@ -11,7 +27,13 @@ use std::{self, path::Path};
 /// - 成功した場合は WebP のバイト列を `Vec<u8>` として返します。
 /// - 失敗した場合は `Box<dyn Error>` を返します。
 #[tauri::command]
-pub async fn convert(data: Vec<u8>, options: EncodeOptions) -> Result<Vec<u8>, String> {
+pub async fn convert(
+    data: Vec<u8>,
+    options: EncodeOptions,
+    app: AppHandle,
+) -> Result<Vec<u8>, String> {
+    send_log(&app, "info", "画像変換を開始します");
+
     // spawn_blocking でUIをフリーズさせずに重い処理を実行
     let converted_data = tauri::async_runtime::spawn_blocking(move || {
         // まず、デコードする前にJPEGトランスコードの条件をチェックする
@@ -44,6 +66,8 @@ pub async fn convert(data: Vec<u8>, options: EncodeOptions) -> Result<Vec<u8>, S
     })
     .await
     .map_err(|e| e.to_string())?;
+
+    send_log(&app, "info", "画像変換が完了しました");
     converted_data
 }
 
