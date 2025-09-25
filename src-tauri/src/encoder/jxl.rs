@@ -5,6 +5,46 @@ use crate::{
 use jpegxl_rs::encode::{EncoderFrame, EncoderResult, EncoderSpeed::*, encoder_builder};
 use serde::{Deserialize, Serialize};
 
+/// 元画像のビット深度を推定する関数
+/// f32データから逆算して元のビット深度を推定
+fn estimate_original_bit_depth(pixels_f32: &[f32], icc_profile: &Option<Vec<u8>>) -> u8 {
+    // ICCプロファイルサイズによる判定
+    let profile_suggests_high_bit = icc_profile.as_ref().map_or(false, |p| p.len() > 400);
+
+    // ピクセル値の精度分析
+    let sample_size = (pixels_f32.len() / 100).max(1000).min(10000);
+    let mut unique_values = std::collections::HashSet::new();
+
+    for &pixel in pixels_f32.iter().take(sample_size) {
+        if pixel >= 0.0 && pixel <= 1.0 {
+            // f32値を8-bitスケールで逆変換
+            let scaled_8bit = (pixel * 255.0).round() as u8;
+            let rescaled = scaled_8bit as f32 / 255.0;
+
+            // 元の値との差が小さければ8-bit由来と判定
+            if (pixel - rescaled).abs() < 0.002 {
+                unique_values.insert(scaled_8bit);
+            }
+        }
+    }
+
+    // 分析結果
+    let appears_8bit_quantized =
+        unique_values.len() <= 256 && pixels_f32.iter().take(sample_size).all(|&p| p <= 1.0);
+
+    // 判定ロジック
+    if appears_8bit_quantized && !profile_suggests_high_bit {
+        println!("JXL: 8-bit量子化パターンを検出 - 標準8-bit画像と判定");
+        8
+    } else if profile_suggests_high_bit {
+        println!("JXL: ICCプロファイル分析により10-bit相当と判定");
+        10
+    } else {
+        println!("JXL: 高ビット深度パターンを検出");
+        16
+    }
+}
+
 /// JPEG XL形式のオプション
 ///
 /// 注意: jpegxl-rs v0.11.2にはロスレスエンコードに関して既知の不具合があります。
@@ -179,7 +219,20 @@ pub fn encode(
         .copied()
         .unwrap_or(1.0);
 
+    // 元のビット深度推定（デコーダーからの情報を復元）
+    let estimated_original_bit_depth = estimate_original_bit_depth(&pixels_f32, &icc_profile);
+
+    println!(
+        "JXL: 元画像ビット深度推定: {}bit",
+        estimated_original_bit_depth
+    );
+
+    // ICCプロファイル情報も考慮したHDR/ワイドガムット検出
+    let has_wide_gamut_profile = icc_profile.as_ref().map_or(false, |p| p.len() > 300);
     let is_hdr = max_pixel_value > 1.0;
+    // 8-bit画像の不適切な高精度処理を回避
+    let is_likely_8bit_source = estimated_original_bit_depth <= 8 && max_pixel_value <= 1.0;
+    let is_wide_gamut_sdr = has_wide_gamut_profile && !is_hdr && !is_likely_8bit_source;
 
     if is_hdr {
         println!(
@@ -188,8 +241,23 @@ pub fn encode(
         );
         // HDR画像の場合、線形カラーエンコーディングを使用
         builder = builder.color_encoding(jpegxl_rs::encode::ColorEncoding::LinearSrgb);
+    } else if is_wide_gamut_sdr {
+        println!(
+            "JXL: ワイドガムットSDR画像を検出（ICCプロファイル: {}bytes） - 高品質設定を適用",
+            icc_profile.as_ref().unwrap().len()
+        );
+        // ワイドガムットSDR画像の場合、sRGBを使用してICCプロファイルで色域を管理
+        builder = builder.color_encoding(jpegxl_rs::encode::ColorEncoding::Srgb);
+        println!("JXL: ワイドガムット用高品質設定を適用");
+    } else if is_likely_8bit_source {
+        println!(
+            "JXL: 標準8-bit画像を検出（最大値: {:.3}） - 効率的な8-bit設定を適用",
+            max_pixel_value
+        );
+        // 8-bit画像の場合、標準sRGB設定で効率的に処理
+        builder = builder.color_encoding(jpegxl_rs::encode::ColorEncoding::Srgb);
     } else {
-        // SDR画像の場合は指定されたカラーエンコーディングを使用
+        // その他の高ビット深度画像
         builder = builder.color_encoding(options.color_encoding.to_jxl());
     }
 
@@ -274,11 +342,20 @@ pub fn encode(
     }
 
     // エンコード情報
+    let bit_depth_info = if is_likely_8bit_source {
+        " [8-bit効率化]"
+    } else if estimated_original_bit_depth > 8 {
+        &format!(" [{}bit高精度]", estimated_original_bit_depth)
+    } else {
+        ""
+    };
+
     println!(
-        "JXL: {}x{} {}画像を変換中{}{}",
+        "JXL: {}x{} {}画像を変換中{}{}{}",
         width,
         height,
         if is_rgba { "RGBA" } else { "RGB" },
+        bit_depth_info,
         if icc_profile.is_some() {
             " (ICCプロファイル付き)"
         } else {
@@ -301,6 +378,16 @@ pub fn encode(
             if *max_val > 1.0 {
                 println!(
                     "JXL: HDR範囲を検出（最大値: {:.3}） - HDR情報を保持します",
+                    max_val
+                );
+            } else if is_wide_gamut_sdr {
+                println!(
+                    "JXL: ワイドガムットSDR範囲（最大値: {:.3}） - ICCプロファイルで色域管理",
+                    max_val
+                );
+            } else if is_likely_8bit_source {
+                println!(
+                    "JXL: 標準8-bit SDR範囲（最大値: {:.3}） - 効率的な8-bit処理",
                     max_val
                 );
             }
@@ -377,12 +464,31 @@ pub fn encode(
 
     // GitHub Issue #96の解決策: EncoderFrameとencode_frameを使用
     println!("JXL: EncoderFrame使用によるエンコード実行中...");
-    let encoder_frame =
-        EncoderFrame::new(final_data.as_slice()).num_channels(expected_channels as u32);
 
-    let encode_result = encoder.encode_frame(&encoder_frame, width, height);
+    let encode_result: Result<Vec<u8>, _> = if is_likely_8bit_source {
+        // 8-bit画像の場合：u8データを使用してビット深度を適切に設定
+        println!("JXL: 8-bit画像として u8 データでエンコード");
+        let data_u8: Vec<u8> = final_data
+            .iter()
+            .map(|&f| (f * 255.0).round().clamp(0.0, 255.0) as u8)
+            .collect();
 
-    let buffer: EncoderResult<f32> = match encode_result {
+        let encoder_frame_u8 =
+            EncoderFrame::new(data_u8.as_slice()).num_channels(expected_channels as u32);
+        encoder
+            .encode_frame::<u8, u8>(&encoder_frame_u8, width, height)
+            .map(|result| result.to_vec())
+    } else {
+        // 高ビット深度画像の場合：f32データを使用
+        println!("JXL: 高ビット深度画像として f32 データでエンコード");
+        let encoder_frame_f32 =
+            EncoderFrame::new(final_data.as_slice()).num_channels(expected_channels as u32);
+        encoder
+            .encode_frame::<f32, f32>(&encoder_frame_f32, width, height)
+            .map(|result| result.to_vec())
+    };
+
+    let buffer = match encode_result {
         Ok(result) => {
             println!("JXL: エンコード成功 - 出力サイズ: {} bytes", result.len());
             result
@@ -420,9 +526,27 @@ pub fn encode(
                 final_data.clone()
             };
 
-            let fallback_frame = EncoderFrame::new(fallback_data.as_slice()).num_channels(3); // フォールバックは常にRGB
+            // フォールバック時も8-bit判定に基づいて適切な型を使用
+            let fallback_result: Result<Vec<u8>, _> = if is_likely_8bit_source {
+                println!("JXL: フォールバック - 8-bit u8 データでエンコード");
+                let fallback_u8: Vec<u8> = fallback_data
+                    .iter()
+                    .map(|&f| (f * 255.0).round().clamp(0.0, 255.0) as u8)
+                    .collect();
+                let fallback_frame_u8 = EncoderFrame::new(fallback_u8.as_slice()).num_channels(3);
+                fallback_encoder
+                    .encode_frame::<u8, u8>(&fallback_frame_u8, width, height)
+                    .map(|result| result.to_vec())
+            } else {
+                println!("JXL: フォールバック - f32 データでエンコード");
+                let fallback_frame_f32 =
+                    EncoderFrame::new(fallback_data.as_slice()).num_channels(3);
+                fallback_encoder
+                    .encode_frame::<f32, f32>(&fallback_frame_f32, width, height)
+                    .map(|result| result.to_vec())
+            };
 
-            match fallback_encoder.encode_frame(&fallback_frame, width, height) {
+            match fallback_result {
                 Ok(result) => {
                     println!(
                         "JXL: 緊急フォールバック成功 - 出力サイズ: {} bytes",
@@ -465,7 +589,7 @@ pub fn encode(
         }
     };
 
-    Ok(buffer.to_vec())
+    Ok(buffer)
 }
 
 /// JPEGをJPEG XL形式にロスレス変換する

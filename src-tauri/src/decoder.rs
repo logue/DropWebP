@@ -4,7 +4,7 @@ mod jxl;
 
 use crate::error::AppError;
 use crate::options::HighBitDepthImage;
-use image::{self, DynamicImage, ImageFormat};
+use image::{self, DynamicImage, GenericImageView, ImageFormat};
 use std::io::Cursor;
 
 /// バイトデータから画像をデコードし、HighBitDepthImageとして返す
@@ -49,22 +49,109 @@ pub fn decode(image_bytes: &[u8]) -> Result<(HighBitDepthImage, Option<Vec<u8>>)
             let img: DynamicImage = image::load_from_memory(image_bytes)
                 .map_err(|e| AppError::Decode(e.to_string()))?;
 
-            // 2. カラータイプを判別して、適切なf32バッファに変換する
-            return match img.color() {
-                // アルファチャンネルを持たない形式の場合
-                image::ColorType::L8
-                | image::ColorType::L16
-                | image::ColorType::Rgb8
-                | image::ColorType::Rgb16 => {
-                    // .to_rgb32f()で Rgb<f32> のImageBufferに変換
-                    Ok((HighBitDepthImage::Rgb(img.to_rgb32f()), icc_profile))
+            // 2. カラータイプとビット深度を分析
+            let color_type = img.color();
+            let (width, height) = img.dimensions();
+
+            println!("PNG: {}x{} - {:?}", width, height, color_type);
+
+            // ICCプロファイル分析によるワイドガムット検出
+            let has_wide_gamut_profile = if let Some(ref profile) = icc_profile {
+                println!("PNG: ICCプロファイル検出 - サイズ: {}bytes", profile.len());
+                // 大きなICCプロファイル（Display P3, Rec2020など）はワイドガムットの可能性
+                profile.len() > 400 && profile.len() < 1000
+            } else {
+                false
+            };
+
+            // ビット深度判定：16-bit形式 または ワイドガムットICCプロファイル付き8-bit
+            let requires_high_precision = match color_type {
+                image::ColorType::L16 | image::ColorType::Rgb16 | image::ColorType::Rgba16 => {
+                    println!("PNG: 16-bit画像として高精度処理");
+                    true
                 }
-                // アルファチャンネルを持つ形式の場合
+                _ if has_wide_gamut_profile => {
+                    println!("PNG: 8-bit画像だがワイドガムットICCプロファイル検出 - 高精度処理");
+                    true
+                }
                 _ => {
-                    // .to_rgba32f()で Rgba<f32> のImageBufferに変換
-                    Ok((HighBitDepthImage::Rgba(img.to_rgba32f()), icc_profile))
+                    println!("PNG: 標準8-bit画像として処理");
+                    false
                 }
             };
+
+            // 3. ビット深度に応じた適切な変換
+            if requires_high_precision {
+                println!("PNG: 高精度f32変換を実行");
+                return match color_type {
+                    // アルファチャンネルを持たない形式の場合
+                    image::ColorType::L8
+                    | image::ColorType::L16
+                    | image::ColorType::Rgb8
+                    | image::ColorType::Rgb16 => {
+                        Ok((HighBitDepthImage::Rgb(img.to_rgb32f()), icc_profile))
+                    }
+                    // アルファチャンネルを持つ形式の場合
+                    _ => Ok((HighBitDepthImage::Rgba(img.to_rgba32f()), icc_profile)),
+                };
+            } else {
+                println!("PNG: 標準精度処理（8-bit効率化）");
+                // 8-bit標準画像：効率的な変換（不要な高精度変換を避ける）
+                return match color_type {
+                    // アルファチャンネルを持たない形式の場合
+                    image::ColorType::L8 | image::ColorType::Rgb8 => {
+                        // 8-bitデータを効率的にf32に変換（0-1範囲）
+                        let rgb8_img = img.to_rgb8();
+                        let pixels_f32: Vec<f32> = rgb8_img
+                            .pixels()
+                            .flat_map(|p| p.0.iter())
+                            .map(|&x| x as f32 / 255.0)
+                            .collect();
+
+                        let buffer = image::ImageBuffer::<image::Rgb<f32>, _>::from_raw(
+                            width, height, pixels_f32,
+                        )
+                        .ok_or_else(|| {
+                            AppError::Decode("Failed to create RGB f32 buffer".to_string())
+                        })?;
+
+                        Ok((HighBitDepthImage::Rgb(buffer), icc_profile))
+                    }
+                    // アルファチャンネルを持つ8-bit形式の場合
+                    image::ColorType::La8 | image::ColorType::Rgba8 => {
+                        println!("PNG: 8-bit RGBA画像を効率的に変換");
+                        // 8-bitデータを効率的にf32に変換（0-1範囲）
+                        let rgba8_img = img.to_rgba8();
+                        let pixels_f32: Vec<f32> = rgba8_img
+                            .pixels()
+                            .flat_map(|p| p.0.iter())
+                            .map(|&x| x as f32 / 255.0)
+                            .collect();
+
+                        let buffer = image::ImageBuffer::<image::Rgba<f32>, _>::from_raw(
+                            width, height, pixels_f32,
+                        )
+                        .ok_or_else(|| {
+                            AppError::Decode("Failed to create RGBA f32 buffer".to_string())
+                        })?;
+
+                        Ok((HighBitDepthImage::Rgba(buffer), icc_profile))
+                    }
+                    // その他（16-bit等）はフォールバック
+                    _ => {
+                        println!("PNG: フォールバック - 高精度変換");
+                        match color_type {
+                            image::ColorType::L8
+                            | image::ColorType::L16
+                            | image::ColorType::Rgb8
+                            | image::ColorType::Rgb16 => {
+                                Ok((HighBitDepthImage::Rgb(img.to_rgb32f()), icc_profile))
+                            }
+                            _ => Ok((HighBitDepthImage::Rgba(img.to_rgba32f()), icc_profile)),
+                        }
+                    }
+                };
+            }
         }
     }
 }
