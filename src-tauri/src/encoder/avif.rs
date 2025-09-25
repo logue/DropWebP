@@ -149,11 +149,64 @@ pub fn encode(
             .with_speed(options.speed)
             .with_alpha_quality(options.alpha_quality);
 
-        // f32ピクセルデータを8ビットに変換
-        let pixels_u8: Vec<u8> = pixels_f32
+        // HDR/ワイドガムット検出（ICCプロファイル情報も考慮）
+        let max_pixel_value = pixels_f32
             .iter()
-            .map(|&p| (p * 255.0).round().clamp(0.0, 255.0) as u8)
-            .collect();
+            .max_by(|a, b| a.partial_cmp(b).unwrap())
+            .copied()
+            .unwrap_or(1.0);
+
+        // ICCプロファイルサイズでワイドガムット検出も追加
+        let has_wide_gamut_profile = icc_profile.as_ref().map_or(false, |p| p.len() > 300);
+        let is_hdr = max_pixel_value > 1.0;
+
+        if is_hdr {
+            println!(
+                "AVIF: HDR画像を検出（最大輝度: {:.3}） - トーンマッピングを適用",
+                max_pixel_value
+            );
+        } else if has_wide_gamut_profile {
+            println!(
+                "AVIF: ワイドガムット画像を検出（ICCプロファイル: {}bytes）",
+                icc_profile.as_ref().unwrap().len()
+            );
+        }
+
+        // f32ピクセルデータを8ビットに変換（HDR/ワイドガムット対応）
+        let pixels_u8: Vec<u8> = if is_hdr || has_wide_gamut_profile {
+            // HDRまたはワイドガムット画像の場合、適切なトーンマッピングを適用
+            pixels_f32
+                .iter()
+                .enumerate()
+                .map(|(i, &p)| {
+                    let clamped = p.max(0.0); // 負の値のみクランプ
+
+                    // Alpha成分はそのまま処理
+                    if is_rgba && (i % 4 == 3) {
+                        (clamped.min(1.0) * 255.0).round() as u8
+                    } else {
+                        // RGB成分にトーンマッピング適用
+                        let tone_mapped = if clamped > 1.0 {
+                            // Reinhardトーンマッピング
+                            let exposure = 1.0;
+                            let adjusted = clamped * exposure;
+                            adjusted / (1.0 + adjusted)
+                        } else {
+                            // 通常の値はそのまま
+                            clamped
+                        };
+
+                        (tone_mapped * 255.0).round() as u8
+                    }
+                })
+                .collect()
+        } else {
+            // 標準画像の場合は単純な変換
+            pixels_f32
+                .iter()
+                .map(|&p| (p.max(0.0).min(1.0) * 255.0).round() as u8)
+                .collect()
+        };
 
         if is_rgba {
             // RGBA: Vec<u8> を RGBA<u8> のスライスに変換

@@ -63,21 +63,74 @@ pub fn encode(
     };
     let (pixels_f32, is_rgba) = extract_pixel_data(pixel_data);
 
-    // ★ 2. f32 -> u8 にデノーマライズ
+    // ★ 2. HDR/ワイドガムット検出とトーンマッピング
+    // RGB値の最大値を確認
+    let max_pixel_value = pixels_f32
+        .iter()
+        .max_by(|a, b| a.partial_cmp(b).unwrap())
+        .copied()
+        .unwrap_or(1.0);
+
+    // ICCプロファイルサイズでワイドガムット検出
+    let has_wide_gamut_profile = icc_profile.as_ref().map_or(false, |p| p.len() > 300);
+    let is_hdr = max_pixel_value > 1.0;
+
+    if is_hdr {
+        println!(
+            "WebP: HDR画像を検出（最大輝度: {:.3}） - トーンマッピングを適用",
+            max_pixel_value
+        );
+    } else if has_wide_gamut_profile {
+        println!(
+            "WebP: ワイドガムット画像を検出（ICCプロファイル: {}bytes）",
+            icc_profile.as_ref().unwrap().len()
+        );
+    }
+
+    // HDRまたはワイドガムット画像の場合、適切なトーンマッピングを適用
+    let tone_mapped_pixels = if is_hdr || has_wide_gamut_profile {
+        pixels_f32
+            .iter()
+            .enumerate()
+            .map(|(i, &pixel)| {
+                let clamped = pixel.max(0.0); // 負の値のみクランプ
+
+                // Alpha成分はそのまま
+                if is_rgba && (i % 4 == 3) {
+                    clamped.min(1.0)
+                } else {
+                    // RGB成分にトーンマッピング適用
+                    if clamped > 1.0 {
+                        // Reinhardトーンマッピング
+                        let exposure = 1.0;
+                        let adjusted = clamped * exposure;
+                        adjusted / (1.0 + adjusted)
+                    } else {
+                        clamped
+                    }
+                }
+            })
+            .collect()
+    } else {
+        // 標準画像はそのまま
+        pixels_f32.clone()
+    };
+
+    // ★ 3. f32 -> u8 にデノーマライズ
     // WebPの標準的なエンコーダーは8bit入力を基本とするため
-    let pixels_u8: Vec<u8> = pixels_f32
+    let pixels_u8: Vec<u8> = tone_mapped_pixels
         .iter()
         .map(|&p| (p * 255.0).round().clamp(0.0, 255.0) as u8)
         .collect();
 
-    // ★ 3. RGB/RGBAに応じてエンコーダーを生成
+    // ★ 4. RGB/RGBAに応じてエンコーダーを生成
     let encoder = if is_rgba {
         Encoder::from_rgba(&pixels_u8, width, height)
     } else {
         Encoder::from_rgb(&pixels_u8, width, height)
     };
 
-    // ★ 4. オプションに応じてエンコード処理を呼び出し
+    // ★ 5. オプションに応じてエンコード処理を呼び出し
     let webp_memory: WebPMemory = if options.lossless {
         // ロスレスエンコード
         encoder.encode_lossless()
@@ -87,14 +140,14 @@ pub fn encode(
     };
 
     println!("Finished encoding WebP.");
-    // ★ 2. ICCプロファイルがなければ、エンコードしたピクセルデータのみを返す
+    // ★ 6. ICCプロファイルがなければ、エンコードしたピクセルデータのみを返す
     if icc_profile.is_none() {
         return Ok(webp_memory.to_vec());
     };
     /*
     let profile = icc_profile;
 
-    // ★ 3. Muxerを使ってICCプロファイルを結合
+    // ★ 7. Muxerを使ってICCプロファイルを結合
     let mut mux = WebPMux::new();
     let frame = WebPData {
         bytes: webp_memory.as_ptr(),

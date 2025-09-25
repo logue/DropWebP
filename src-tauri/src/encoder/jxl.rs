@@ -172,8 +172,27 @@ pub fn encode(
 
     builder = builder.init_buffer_size(safe_buffer_size);
 
-    // color_encodingとuses_original_profileは慎重に設定
-    builder = builder.color_encoding(options.color_encoding.to_jxl());
+    // HDR画像の検出
+    let max_pixel_value = pixels_f32
+        .iter()
+        .max_by(|a, b| a.partial_cmp(b).unwrap())
+        .copied()
+        .unwrap_or(1.0);
+
+    let is_hdr = max_pixel_value > 1.0;
+
+    if is_hdr {
+        println!(
+            "JXL: HDR画像を検出（最大輝度: {:.3}） - HDR用設定を適用",
+            max_pixel_value
+        );
+        // HDR画像の場合、線形カラーエンコーディングを使用
+        builder = builder.color_encoding(jpegxl_rs::encode::ColorEncoding::LinearSrgb);
+    } else {
+        // SDR画像の場合は指定されたカラーエンコーディングを使用
+        builder = builder.color_encoding(options.color_encoding.to_jxl());
+    }
+
     if options.uses_original_profile {
         builder = builder.uses_original_profile(true);
     }
@@ -274,15 +293,20 @@ pub fn encode(
         }
     );
 
-    // ピクセル値の範囲をチェック（ApiUsageエラーの原因調査）
+    // ピクセル値の範囲をチェック（HDR対応版）
     if let Some(min_val) = pixels_f32.iter().min_by(|a, b| a.partial_cmp(b).unwrap()) {
         if let Some(max_val) = pixels_f32.iter().max_by(|a, b| a.partial_cmp(b).unwrap()) {
-            if *min_val < 0.0 || *max_val > 1.0 {
-                eprintln!(
-                    "JXL Warning: ピクセル値が範囲外です [{:.3}, {:.3}] (期待値: [0.0, 1.0])",
-                    min_val, max_val
+            println!("JXL: ピクセル値範囲 [{:.3}, {:.3}]", min_val, max_val);
+
+            if *max_val > 1.0 {
+                println!(
+                    "JXL: HDR範囲を検出（最大値: {:.3}） - HDR情報を保持します",
+                    max_val
                 );
-                eprintln!("JXL: ピクセル値を正規化します...");
+            }
+
+            if *min_val < 0.0 {
+                eprintln!("JXL Warning: 負の値を検出 - 0.0にクランプします");
             }
         }
     }
@@ -298,16 +322,19 @@ pub fn encode(
         })?;
     }
 
-    // GitHub Issue #96の解決策に基づくRGBA処理
+    // GitHub Issue #96の解決策に基づくRGBA処理（HDR対応版）
     let final_data: Vec<f32> = if is_rgba {
-        println!("JXL: RGBA画像をそのまま処理します（アルファチャンネル保持）");
+        println!("JXL: RGBA画像をそのまま処理します（アルファチャンネル保持、HDR対応）");
 
         // RGBA画像の場合、アルファチャンネルをそのまま保持
         let mut rgba_data = pixels_f32.to_vec();
 
-        // ピクセル値の正規化（ApiUsageエラー回避）
+        // HDR対応：負の値のみクランプ、上限は設定しない
         for pixel in rgba_data.iter_mut() {
-            *pixel = pixel.clamp(0.0, 1.0);
+            if *pixel < 0.0 {
+                *pixel = 0.0; // 負の値のみ0にクランプ
+            }
+            // 1.0を超える値は保持（HDR情報として）
         }
 
         rgba_data
@@ -315,9 +342,12 @@ pub fn encode(
         // RGB画像の場合
         let mut rgb_data = pixels_f32.to_vec();
 
-        // 最終的なピクセル値の正規化（ApiUsageエラー回避）
+        // HDR対応：負の値のみクランプ、上限は設定しない
         for pixel in rgb_data.iter_mut() {
-            *pixel = pixel.clamp(0.0, 1.0);
+            if *pixel < 0.0 {
+                *pixel = 0.0; // 負の値のみ0にクランプ
+            }
+            // 1.0を超える値は保持（HDR情報として）
         }
 
         rgb_data
