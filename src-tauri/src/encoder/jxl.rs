@@ -2,7 +2,7 @@ use crate::{
     encoder::{HighBitDepthImage, extract_pixel_data},
     error::AppError,
 };
-use jpegxl_rs::encode::{EncoderResult, EncoderSpeed::*, encoder_builder};
+use jpegxl_rs::encode::{EncoderFrame, EncoderResult, EncoderSpeed::*, encoder_builder};
 use serde::{Deserialize, Serialize};
 
 /// JPEG XL形式のオプション
@@ -288,87 +288,69 @@ pub fn encode(
     }
 
     // アルファチャンネル対応エンコード処理
+    // GitHub Issue #96の解決策を適用: has_alpha()をビルダーで設定
     if is_rgba {
-        // 注意: jpegxl-rs v0.11.2はRGBAエンコードに制限があるため、
-        // RGB変換によるフォールバック処理を使用します
-        println!("JXL: 透明度付き画像を処理中（RGB変換使用）...");
-        encoder.has_alpha = false;
+        println!("JXL: RGBA画像を処理中（アルファチャンネル保持）...");
+        builder = builder.has_alpha(true);
+        // エンコーダーを再構築（has_alphaはビルダー時に設定が必要）
+        encoder = builder.build().map_err(|e| {
+            AppError::Encode(format!("JXL encoder rebuild with alpha failed: {}", e))
+        })?;
     }
 
-    // RGB処理（元のRGBまたはRGBAフォールバック）
-    let mut rgb_data = if is_rgba {
-        let mut rgb = Vec::with_capacity((pixels_f32.len() / 4) * 3);
-        let mut transparent_pixels = 0;
-        let mut semi_transparent_pixels = 0;
+    // GitHub Issue #96の解決策に基づくRGBA処理
+    let final_data: Vec<f32> = if is_rgba {
+        println!("JXL: RGBA画像をそのまま処理します（アルファチャンネル保持）");
 
-        for chunk in pixels_f32.chunks_exact(4) {
-            let r = chunk[0];
-            let g = chunk[1];
-            let b = chunk[2];
-            let a = chunk[3];
+        // RGBA画像の場合、アルファチャンネルをそのまま保持
+        let mut rgba_data = pixels_f32.to_vec();
 
-            if a <= 0.01 {
-                // 完全透明: 白背景にフォールバック
-                transparent_pixels += 1;
-                rgb.push(1.0); // 白 R
-                rgb.push(1.0); // 白 G  
-                rgb.push(1.0); // 白 B
-            } else if a >= 0.99 {
-                // 完全不透明: そのまま使用
-                rgb.push(r);
-                rgb.push(g);
-                rgb.push(b);
-            } else {
-                // 半透明: プリマルチプライ済みアルファの場合は色を復元
-                semi_transparent_pixels += 1;
-                if a > 0.0 {
-                    // アルファで除算して元の色を復元（プリマルチプライ対応）
-                    rgb.push((r / a).clamp(0.0, 1.0));
-                    rgb.push((g / a).clamp(0.0, 1.0));
-                    rgb.push((b / a).clamp(0.0, 1.0));
-                } else {
-                    rgb.push(r);
-                    rgb.push(g);
-                    rgb.push(b);
-                }
-            }
+        // ピクセル値の正規化（ApiUsageエラー回避）
+        for pixel in rgba_data.iter_mut() {
+            *pixel = pixel.clamp(0.0, 1.0);
         }
 
-        if transparent_pixels > 0 || semi_transparent_pixels > 0 {
-            println!(
-                "JXL: 透明ピクセル処理完了 - 透明: {}, 半透明: {} (白背景として処理)",
-                transparent_pixels, semi_transparent_pixels
-            );
-        }
-
-        rgb
+        rgba_data
     } else {
-        pixels_f32.to_vec()
+        // RGB画像の場合
+        let mut rgb_data = pixels_f32.to_vec();
+
+        // 最終的なピクセル値の正規化（ApiUsageエラー回避）
+        for pixel in rgb_data.iter_mut() {
+            *pixel = pixel.clamp(0.0, 1.0);
+        }
+
+        rgb_data
     };
 
-    // 最終的なピクセル値の正規化（ApiUsageエラー回避）
-    for pixel in rgb_data.iter_mut() {
-        *pixel = pixel.clamp(0.0, 1.0);
-    }
-
     // 最終チェック
+    let expected_channels = if is_rgba { 4 } else { 3 };
+    let expected_length = (width * height * expected_channels) as usize;
+
     println!(
-        "JXL: エンコード開始 - RGB data length: {}, expected: {}",
-        rgb_data.len(),
-        width * height * 3
+        "JXL: エンコード開始 - data length: {}, expected: {} ({}チャンネル)",
+        final_data.len(),
+        expected_length,
+        expected_channels
     );
 
-    if rgb_data.len() != (width * height * 3) as usize {
+    if final_data.len() != expected_length {
         return Err(AppError::Encode(format!(
-            "JXL: RGB data length mismatch: got {}, expected {}",
-            rgb_data.len(),
-            width * height * 3
+            "JXL: data length mismatch: got {}, expected {} for {}x{} {}チャンネル画像",
+            final_data.len(),
+            expected_length,
+            width,
+            height,
+            expected_channels
         )));
     }
 
-    // RGB エンコード実行（段階的フォールバック戦略付き）
-    println!("JXL: RGB エンコード実行中...");
-    let encode_result = encoder.encode(&rgb_data, width, height);
+    // GitHub Issue #96の解決策: EncoderFrameとencode_frameを使用
+    println!("JXL: EncoderFrame使用によるエンコード実行中...");
+    let encoder_frame =
+        EncoderFrame::new(final_data.as_slice()).num_channels(expected_channels as u32);
+
+    let encode_result = encoder.encode_frame(&encoder_frame, width, height);
 
     let buffer: EncoderResult<f32> = match encode_result {
         Ok(result) => {
@@ -393,7 +375,24 @@ pub fn encode(
                 })?;
 
             println!("JXL: 緊急フォールバック設定でエンコード再試行中...");
-            match fallback_encoder.encode(&rgb_data, width, height) {
+
+            // フォールバック時はRGB（3チャンネル）に変換
+            let fallback_data = if is_rgba {
+                let mut rgb = Vec::with_capacity((final_data.len() / 4) * 3);
+                for chunk in final_data.chunks_exact(4) {
+                    rgb.push(chunk[0]); // R
+                    rgb.push(chunk[1]); // G
+                    rgb.push(chunk[2]); // B
+                    // アルファチャンネルは破棄
+                }
+                rgb
+            } else {
+                final_data.clone()
+            };
+
+            let fallback_frame = EncoderFrame::new(fallback_data.as_slice()).num_channels(3); // フォールバックは常にRGB
+
+            match fallback_encoder.encode_frame(&fallback_frame, width, height) {
                 Ok(result) => {
                     println!(
                         "JXL: 緊急フォールバック成功 - 出力サイズ: {} bytes",
@@ -409,7 +408,7 @@ pub fn encode(
                     eprintln!("JXL: 設定情報:");
                     eprintln!("  - Width: {}, Height: {}", width, height);
                     eprintln!("  - Is RGBA: {}", is_rgba);
-                    eprintln!("  - Data length: {}", rgb_data.len());
+                    eprintln!("  - Data length: {}", final_data.len());
                     eprintln!("  - Lossless (requested): {}", options.lossless);
                     eprintln!("  - Lossless (actual): {}", use_lossless);
                     eprintln!("  - Quality: {}", options.quality);
