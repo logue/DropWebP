@@ -1,3 +1,4 @@
+mod common;
 mod heif;
 mod jpeg2k;
 mod jxl;
@@ -15,7 +16,6 @@ use std::io::Cursor;
 /// - 成功した場合は `HighBitDepthImage` を返します。
 /// - 失敗した場合は `Box<dyn Error>` を返します。
 /// # 注意
-/// - EXR形式はこのバージョンではサポートされていません
 /// - HEIC形式のデコードには `libheif-rs` クレートを使用しています。ビルド時に `libheif` ライブラリがシステムにインストールされている必要があります。
 /// - JPEG 2000形式のデコードには `jpeg2k` クレートを使用しています。
 ///  ただし、このクレートはすべてのJPEG 2000ファイルに対応しているわけではないため、特定のファイルでエラーが発生する可能性があります。
@@ -30,12 +30,9 @@ pub fn decode(image_bytes: &[u8]) -> Result<(HighBitDepthImage, Option<Vec<u8>>)
             println!("Decoder: Using heif decoder...");
             heif::decode(image_bytes)
         }
-        DetectedFormat::Exr => Err(AppError::Decode(
-            "EXR format is not supported in this version".into(),
-        )),
         DetectedFormat::Jpeg2000 => {
             println!("Decoder: Using Jpeg2k decoder...");
-            jpeg2k::decode(image_bytes).map(|img| (img, None))
+            jpeg2k::decode(image_bytes)
         }
         DetectedFormat::Jxl => {
             println!("Decoder: Using JPEG XL decoder...");
@@ -159,7 +156,6 @@ pub fn decode(image_bytes: &[u8]) -> Result<(HighBitDepthImage, Option<Vec<u8>>)
 // 独自の形式を定義するためのenum
 enum DetectedFormat {
     Heic,
-    Exr,
     Jpeg2000,
     Jxl,
     // imageクレートがサポートするその他の形式
@@ -182,10 +178,6 @@ fn detect_format(bytes: &[u8]) -> Option<DetectedFormat> {
                 return Some(DetectedFormat::Standard(format));
             }
         }
-    }
-    // EXRのチェック
-    if bytes.starts_with(&[0x76, 0x2f, 0x31, 0x01]) {
-        return Some(DetectedFormat::Exr);
     }
 
     // JPEG 2000のチェック

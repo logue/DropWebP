@@ -5,60 +5,74 @@ use crate::{
 use jpegxl_rs::encode::{EncoderFrame, EncoderResult, EncoderSpeed::*, encoder_builder};
 use serde::{Deserialize, Serialize};
 
-/// 元画像のビット深度を推定する関数
-/// f32データから逆算して元のビット深度を推定
+/// Image type classification based on pixel data and ICC profile
+#[derive(Debug, Clone, Copy)]
+enum ImageType {
+    Standard8Bit,
+    WideGamutSdr,
+    Hdr,
+}
+
+/// Encoding configuration optimized for different image types
+#[derive(Debug)]
+struct EncodingConfig {
+    image_type: ImageType,
+    use_8bit_data: bool,
+    color_encoding: jpegxl_rs::encode::ColorEncoding,
+    description: &'static str,
+}
+
+/// Estimate original bit depth from f32 pixel data
+/// This function reverse-engineers the likely source bit depth
 fn estimate_original_bit_depth(pixels_f32: &[f32], icc_profile: &Option<Vec<u8>>) -> u8 {
-    // ICCプロファイルサイズによる判定
     let profile_suggests_high_bit = icc_profile.as_ref().map_or(false, |p| p.len() > 400);
 
-    // ピクセル値の精度分析
+    // Analyze pixel value precision
     let sample_size = (pixels_f32.len() / 100).max(1000).min(10000);
     let mut unique_values = std::collections::HashSet::new();
 
     for &pixel in pixels_f32.iter().take(sample_size) {
-        if pixel >= 0.0 && pixel <= 1.0 {
-            // f32値を8-bitスケールで逆変換
+        if (0.0..=1.0).contains(&pixel) {
+            // Reverse-convert f32 value to 8-bit scale
             let scaled_8bit = (pixel * 255.0).round() as u8;
             let rescaled = scaled_8bit as f32 / 255.0;
 
-            // 元の値との差が小さければ8-bit由来と判定
+            // If the difference is small, it's likely from 8-bit source
             if (pixel - rescaled).abs() < 0.002 {
                 unique_values.insert(scaled_8bit);
             }
         }
     }
 
-    // 分析結果
     let appears_8bit_quantized =
         unique_values.len() <= 256 && pixels_f32.iter().take(sample_size).all(|&p| p <= 1.0);
 
-    // 判定ロジック
     if appears_8bit_quantized && !profile_suggests_high_bit {
-        println!("JXL: 8-bit量子化パターンを検出 - 標準8-bit画像と判定");
+        println!("JXL: Detected 8-bit quantization pattern - standard 8-bit image");
         8
     } else if profile_suggests_high_bit {
-        println!("JXL: ICCプロファイル分析により10-bit相当と判定");
+        println!("JXL: ICC profile analysis suggests 10-bit equivalent");
         10
     } else {
-        println!("JXL: 高ビット深度パターンを検出");
+        println!("JXL: High bit-depth pattern detected");
         16
     }
 }
 
-/// JPEG XL形式のオプション
+/// JPEG XL encoding options
 ///
-/// 注意: jpegxl-rs v0.11.2にはロスレスエンコードに関して既知の不具合があります。
-/// 特にRGBA画像でロスレスを指定するとApiUsageエラーが発生します。
-/// この実装では自動的に高品質モードにフォールバックします。
+/// Note: jpegxl-rs v0.11.2 has known issues with lossless encoding.
+/// RGBA images with lossless mode cause ApiUsage errors.
+/// This implementation automatically falls back to high quality mode.
 ///
-/// * `lossless` - ロスレス圧縮するか（RGBA画像では自動フォールバック）
-/// * `speed` - エンコード速度（0~10）値が低いほど早いが品質が劣る
-/// * `quality` - 品質（0.1〜15.0）値が高いほど高品質。デフォルトは1。推奨値0.5〜3.0。（ロスレス時は無視されます）
-/// * `use_container` - JPEG XLコンテナ形式を使用するようにエンコーダを構成する
-/// * `uses_original_profile` - エンコーダを元のカラープロファイルを使用するように設定する。（ロスレス時は常に有効）
-/// * `decoding_speed` - デコード速度を設定（0~4）。値が低いほど高品質。デフォルトは0
-/// * `init_buffer_size` - 出力バッファの初期サイズ（UI側はキロバイト単位、内部でバイト単位に変換）最小32KB
-/// * `color_encoding` - カラーエンコード方法を設定する。デフォルトはsRGB
+/// * `lossless` - Use lossless compression (auto-fallback for RGBA images)
+/// * `speed` - Encoding speed (0-10), lower values are faster but lower quality
+/// * `quality` - Quality (0.1-15.0), higher values mean better quality. Default 1.0, recommended 0.5-3.0
+/// * `use_container` - Configure encoder to use JPEG XL container format
+/// * `uses_original_profile` - Use original color profile (always enabled for lossless)
+/// * `decoding_speed` - Decoding speed setting (0-4), lower values mean higher quality
+/// * `init_buffer_size` - Initial output buffer size (UI sends KB, converted to bytes internally), minimum 32KB
+/// * `color_encoding` - Color encoding method, default is sRGB
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct JxlOptions {
@@ -72,20 +86,20 @@ pub struct JxlOptions {
     pub color_encoding: ColorEncoding,
 }
 
-/// エンコード速度の列挙型
-/// - Lightning: 最速、品質は最低
-/// - Thunder: 非常に速い、品質は低い
-/// - Falcon: 速い、品質はやや低い
-/// - Cheetah: バランスの取れた速度と品質
-/// - Hare: やや遅い、品質は良い
-/// - Wombat: 遅い、品質は非常に良い
-/// - Squirrel: 非常に遅い、品質は最高
-/// - Kitten: 最高品質、非常に遅い
-/// - Tortoise: 最高品質、非常に遅い
-/// - Glacier: 最高品質、非常に遅い、アーカイブ向け
-/// # 注意
-/// - 速度が遅いほど品質が高くなりますが、エンコード時間も長くなります。
-/// - 速度設定は0〜10の範囲で行い、0が最速、10が最高品質です。
+/// Encoding speed enumeration
+/// - Lightning: Fastest speed, lowest quality
+/// - Thunder: Very fast, low quality  
+/// - Falcon: Fast, slightly low quality
+/// - Cheetah: Balanced speed and quality
+/// - Hare: Slightly slow, good quality
+/// - Wombat: Slow, very good quality
+/// - Squirrel: Very slow, highest quality
+/// - Kitten: Best quality, very slow
+/// - Tortoise: Best quality, very slow
+/// - Glacier: Best quality, very slow, for archival use
+///
+/// Note: Slower speeds produce higher quality but take longer to encode.
+/// Speed settings range from 0-10, where 0 is fastest and 10 is highest quality.
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum EncoderSpeed {
     Lightning,
@@ -117,13 +131,13 @@ impl EncoderSpeed {
     }
 }
 
-/// カラーエンコード方法の列挙型
-/// - Srgb: 標準的なsRGBカラースペース
-/// - LinearSrgb: 線形sRGBカラースペース
-/// - SrgbLuma: sRGBカラースペースで輝度情報を使用
-/// - LinearSrgbLuma: 線形sRGBカラースペースで輝度情報を使用
-/// # 注意
-/// - 適切なカラーエンコードを選択することで、画像の品質を最適化できます。  
+/// Color encoding method enumeration
+/// - Srgb: Standard sRGB color space
+/// - LinearSrgb: Linear sRGB color space
+/// - SrgbLuma: sRGB color space with luminance information
+/// - LinearSrgbLuma: Linear sRGB color space with luminance information
+///
+/// Note: Selecting appropriate color encoding optimizes image quality.  
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ColorEncoding {
     Srgb,
@@ -205,7 +219,7 @@ pub fn encode(
     } else {
         // キロバイト単位で指定された場合の確認メッセージ
         println!(
-            "JXL: バッファサイズを設定しました {}KB ({}bytes)",
+            "JXL: Buffer size configured: {}KB ({} bytes)",
             buffer_size_kb, buffer_size_bytes
         );
     }
@@ -236,14 +250,14 @@ pub fn encode(
 
     if is_hdr {
         println!(
-            "JXL: HDR画像を検出（最大輝度: {:.3}） - HDR用設定を適用",
+            "JXL: HDR image detected (max luminance: {:.3}) - applying HDR settings",
             max_pixel_value
         );
         // HDR画像の場合、線形カラーエンコーディングを使用
         builder = builder.color_encoding(jpegxl_rs::encode::ColorEncoding::LinearSrgb);
     } else if is_wide_gamut_sdr {
         println!(
-            "JXL: ワイドガムットSDR画像を検出（ICCプロファイル: {}bytes） - 高品質設定を適用",
+            "JXL: Wide gamut SDR image detected (ICC profile: {} bytes) - applying high quality settings",
             icc_profile.as_ref().unwrap().len()
         );
         // ワイドガムットSDR画像の場合、sRGBを使用してICCプロファイルで色域を管理
@@ -251,7 +265,7 @@ pub fn encode(
         println!("JXL: ワイドガムット用高品質設定を適用");
     } else if is_likely_8bit_source {
         println!(
-            "JXL: 標準8-bit画像を検出（最大値: {:.3}） - 効率的な8-bit設定を適用",
+            "JXL: Standard 8-bit image detected (max value: {:.3}) - applying efficient 8-bit settings",
             max_pixel_value
         );
         // 8-bit画像の場合、標準sRGB設定で効率的に処理
@@ -324,7 +338,7 @@ pub fn encode(
     // ICCプロファイルが提供された場合、カスタムメタデータとして追加
     if let Some(profile_data) = &icc_profile {
         println!(
-            "JXL: ICCプロファイルを埋め込み中... (サイズ: {} bytes)",
+            "JXL: Embedding ICC profile... (size: {} bytes)",
             profile_data.len()
         );
 
@@ -337,7 +351,7 @@ pub fn encode(
             eprintln!("JXL: ICCプロファイルの埋め込みに失敗しました: {:?}", e);
             eprintln!("JXL: ICCプロファイルなしで処理を続行します");
         } else {
-            println!("JXL: ICCプロファイルの埋め込みが完了しました");
+            println!("JXL: ICC profile embedding completed");
         }
     }
 
@@ -351,20 +365,20 @@ pub fn encode(
     };
 
     println!(
-        "JXL: {}x{} {}画像を変換中{}{}{}",
+        "JXL: Converting {}x{} {} image{}{}{}",
         width,
         height,
         if is_rgba { "RGBA" } else { "RGB" },
         bit_depth_info,
         if icc_profile.is_some() {
-            " (ICCプロファイル付き)"
+            " (with ICC profile)"
         } else {
             ""
         },
         if is_rgba && options.lossless && !use_lossless {
-            " [ロスレスフォールバック]"
+            " [lossless fallback]"
         } else if use_lossless {
-            " [ロスレス]"
+            " [lossless]"
         } else {
             ""
         }
@@ -373,21 +387,21 @@ pub fn encode(
     // ピクセル値の範囲をチェック（HDR対応版）
     if let Some(min_val) = pixels_f32.iter().min_by(|a, b| a.partial_cmp(b).unwrap()) {
         if let Some(max_val) = pixels_f32.iter().max_by(|a, b| a.partial_cmp(b).unwrap()) {
-            println!("JXL: ピクセル値範囲 [{:.3}, {:.3}]", min_val, max_val);
+            println!("JXL: Pixel value range [{:.3}, {:.3}]", min_val, max_val);
 
             if *max_val > 1.0 {
                 println!(
-                    "JXL: HDR範囲を検出（最大値: {:.3}） - HDR情報を保持します",
+                    "JXL: HDR range detected (max value: {:.3}) - preserving HDR information",
                     max_val
                 );
             } else if is_wide_gamut_sdr {
                 println!(
-                    "JXL: ワイドガムットSDR範囲（最大値: {:.3}） - ICCプロファイルで色域管理",
+                    "JXL: Wide gamut SDR range (max value: {:.3}) - color gamut managed by ICC profile",
                     max_val
                 );
             } else if is_likely_8bit_source {
                 println!(
-                    "JXL: 標準8-bit SDR範囲（最大値: {:.3}） - 効率的な8-bit処理",
+                    "JXL: Standard 8-bit SDR range (max value: {:.3}) - efficient 8-bit processing",
                     max_val
                 );
             }
@@ -401,7 +415,7 @@ pub fn encode(
     // アルファチャンネル対応エンコード処理
     // GitHub Issue #96の解決策を適用: has_alpha()をビルダーで設定
     if is_rgba {
-        println!("JXL: RGBA画像を処理中（アルファチャンネル保持）...");
+        println!("JXL: Processing RGBA image (preserving alpha channel)...");
         builder = builder.has_alpha(true);
         // エンコーダーを再構築（has_alphaはビルダー時に設定が必要）
         encoder = builder.build().map_err(|e| {
@@ -411,7 +425,7 @@ pub fn encode(
 
     // GitHub Issue #96の解決策に基づくRGBA処理（HDR対応版）
     let final_data: Vec<f32> = if is_rgba {
-        println!("JXL: RGBA画像をそのまま処理します（アルファチャンネル保持、HDR対応）");
+        println!("JXL: Processing RGBA image as-is (alpha channel preserved, HDR support)");
 
         // RGBA画像の場合、アルファチャンネルをそのまま保持
         let mut rgba_data = pixels_f32.to_vec();
@@ -463,11 +477,11 @@ pub fn encode(
     }
 
     // GitHub Issue #96の解決策: EncoderFrameとencode_frameを使用
-    println!("JXL: EncoderFrame使用によるエンコード実行中...");
+    println!("JXL: Executing encode using EncoderFrame...");
 
     let encode_result: Result<Vec<u8>, _> = if is_likely_8bit_source {
         // 8-bit画像の場合：u8データを使用してビット深度を適切に設定
-        println!("JXL: 8-bit画像として u8 データでエンコード");
+        println!("JXL: Encoding as 8-bit image with u8 data");
         let data_u8: Vec<u8> = final_data
             .iter()
             .map(|&f| (f * 255.0).round().clamp(0.0, 255.0) as u8)
@@ -480,7 +494,7 @@ pub fn encode(
             .map(|result| result.to_vec())
     } else {
         // 高ビット深度画像の場合：f32データを使用
-        println!("JXL: 高ビット深度画像として f32 データでエンコード");
+        println!("JXL: Encoding as high bit-depth image with f32 data");
         let encoder_frame_f32 =
             EncoderFrame::new(final_data.as_slice()).num_channels(expected_channels as u32);
         encoder

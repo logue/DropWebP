@@ -1,25 +1,44 @@
+use super::common::{IccProfileInfo, log_icc_profile_details};
 use crate::error::AppError;
 use crate::options::HighBitDepthImage;
 
 use ::image::{ImageBuffer, Rgb, Rgba};
 use jpegxl_rs::decode::*;
 
-/// JPEG XL 画像をデコードします。
+/// Decode JPEG XL image with ICC profile analysis
 pub fn decode(data: &[u8]) -> Result<(HighBitDepthImage, Option<Vec<u8>>), AppError> {
-    // jpegxl-rsクレートを使用してJPEG XLをデコード
+    println!("JXL: Starting JPEG XL decode process...");
+
+    // Use jpegxl-rs crate to decode JPEG XL
     let decoder = decoder_builder()
         .build()
         .map_err(|e| AppError::Decode(format!("Failed to create JXL decoder: {:?}", e)))?;
 
-    // デコードを実行
+    // Perform decoding
     let (metadata, pixels) = decoder
         .decode(data)
         .map_err(|e| AppError::Decode(format!("Failed to decode JXL: {:?}", e)))?;
 
-    let icc_profile = metadata.icc_profile;
+    let icc_profile = metadata.icc_profile.clone();
+
+    // Analyze ICC profile if present
+    let profile_info = icc_profile.as_ref().map(|profile| {
+        println!("JXL: ICC profile detected (size: {} bytes)", profile.len());
+        log_icc_profile_details(profile);
+        IccProfileInfo::analyze(profile)
+    });
 
     let width = metadata.width;
     let height = metadata.height;
+
+    println!("JXL: Image properties - {}x{}", width, height);
+
+    if let Some(ref info) = profile_info {
+        println!(
+            "JXL: Profile analysis - Wide gamut: {}, High precision: {}",
+            info.suggests_wide_gamut, info.has_high_precision
+        );
+    }
 
     // ピクセルデータをf32形式で取得し、HighBitDepthImageに変換
     let image_buffer = match pixels {
