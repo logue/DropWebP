@@ -42,6 +42,25 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "macOS": {
+      "bundleName": "Drop Compress Image"
+    },
+    "windows": {
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper"
+      },
+      "wix": {
+        "language": [
+          "en-US",
+          "ja-JP",
+          "ko-KR",
+          "zh-TW"
+        ]
+      },
+      "nsis": {
+        "displayLanguageSelector": true
+      }
+    }
   }
 }
