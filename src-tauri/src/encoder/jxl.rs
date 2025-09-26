@@ -1,3 +1,7 @@
+use super::common::{
+    EncodingAnalysis, get_encoding_recommendations, log_encoding_analysis,
+    provide_icc_recommendations,
+};
 use crate::{
     encoder::{HighBitDepthImage, extract_pixel_data},
     error::AppError,
@@ -157,54 +161,74 @@ impl ColorEncoding {
     }
 }
 
-/// HighBitDepthImage を JPEG XL 形式のバイトデータに変換する
+/// Encode HighBitDepthImage to JPEG XL format with advanced content analysis
 ///
-/// # 引数
-/// * `pixel_data` - 変換元のHighBitDepthImage
-/// * `icc_profile` - ICCプロファイル（Someの場合は埋め込み処理を行う）
-/// * `options` - JXLエンコードオプション (JxlOptions)
-/// # 戻り値
-/// - 成功した場合は JPEG XL のバイト列を `Vec<u8>` として返します。
-/// - 失敗した場合は `AppError` を返します。
-/// # 注意
-/// * ICCプロファイルが提供された場合、カスタムメタデータボックスとして埋め込まれます
+/// # Arguments
+/// * `pixel_data` - Source HighBitDepthImage to encode
+/// * `icc_profile` - ICC profile for color management (embedded as custom metadata box if provided)
+/// * `options` - JPEG XL encoding options (JxlOptions)
+/// # Returns
+/// - Success: JPEG XL format byte data as Vec<u8>
+/// - Failure: AppError
+/// # Notes
+/// * Uses jpegxl-rs crate with fallback strategies for known v0.11.2 issues
+/// * ICC profiles are embedded as custom metadata boxes when provided
+/// * Automatic HDR/wide gamut content detection and optimization
 pub fn encode(
     pixel_data: &HighBitDepthImage,
     icc_profile: Option<Vec<u8>>,
     options: &JxlOptions,
 ) -> Result<Vec<u8>, AppError> {
-    // HighBitDepthImage から画像サイズを取得
+    println!("JXL: Starting JPEG XL encoding process...");
+
+    // Perform content analysis for optimal encoding
+    let analysis = EncodingAnalysis::analyze(pixel_data, icc_profile.as_deref());
+    log_encoding_analysis(&analysis, "JXL");
+    get_encoding_recommendations(&analysis, "JXL");
+
+    // Get image dimensions from HighBitDepthImage
     let (width, height) = match pixel_data {
         HighBitDepthImage::Rgb(buf) => buf.dimensions(),
         HighBitDepthImage::Rgba(buf) => buf.dimensions(),
         HighBitDepthImage::Argb(buf) => buf.dimensions(),
     };
 
-    // HighBitDepthImage から f32 のピクセルデータとアルファチャンネルの有無を取得
+    // Extract f32 pixel data and alpha channel information from HighBitDepthImage
     let (pixels_f32, is_rgba) = extract_pixel_data(pixel_data);
 
-    // エンコーダー設定（安全なデフォルト値を使用）
+    println!(
+        "JXL: Image properties - {}x{}, {} channels",
+        width,
+        height,
+        if is_rgba { 4 } else { 3 }
+    );
+    println!(
+        "JXL: Encoding settings - Lossless: {}, Quality: {}, Speed: {:?}",
+        options.lossless, options.quality, options.speed
+    );
+
+    // Encoder configuration (using safe default values)
     let mut binding = encoder_builder();
     let mut builder = binding
         .speed(options.speed.to_jxl())
         .use_container(options.use_container);
 
-    // decoding_speedの値を検証（範囲外の値はApiUsageエラーの原因になる）
+    // Validate decoding_speed values (out-of-range values cause ApiUsage errors)
     let safe_decoding_speed = options.decoding_speed.clamp(0, 4);
     if safe_decoding_speed != options.decoding_speed {
-        eprintln!(
-            "JXL Warning: decoding_speed値を調整しました {} -> {}",
+        println!(
+            "JXL Warning: decoding_speed value adjusted {} -> {}",
             options.decoding_speed, safe_decoding_speed
         );
     }
     builder = builder.decoding_speed(safe_decoding_speed);
 
-    // init_buffer_sizeの値を検証（UI側はキロバイト指定前提）
-    // UI側の値をキロバイト単位からバイト単位に変換
-    let buffer_size_kb = options.init_buffer_size; // UI側からの値（KB単位）
-    let buffer_size_bytes = buffer_size_kb * 1024; // KB → bytes 変換
+    // Validate init_buffer_size values (UI side assumes kilobyte specification)
+    // Convert UI values from kilobyte to byte units
+    let buffer_size_kb = options.init_buffer_size; // Value from UI (KB units)
+    let buffer_size_bytes = buffer_size_kb * 1024; // KB → bytes conversion
 
-    // jpegxl-rsの最小要件: 32KB = 32768 bytes
+    // jpegxl-rs minimum requirement: 32KB = 32768 bytes
     let safe_buffer_size = if buffer_size_bytes < 32768 {
         32768 // 32KB minimum (32768 bytes)
     } else {
@@ -213,11 +237,11 @@ pub fn encode(
 
     if safe_buffer_size != buffer_size_bytes {
         println!(
-            "JXL Warning: init_buffer_size値を最小要件に調整しました {}KB -> 32KB (32768bytes)",
+            "JXL Warning: init_buffer_size value adjusted to minimum requirement {}KB -> 32KB (32768 bytes)",
             buffer_size_kb
         );
     } else {
-        // キロバイト単位で指定された場合の確認メッセージ
+        // Confirmation message when specified in kilobyte units
         println!(
             "JXL: Buffer size configured: {}KB ({} bytes)",
             buffer_size_kb, buffer_size_bytes
@@ -233,45 +257,48 @@ pub fn encode(
         .copied()
         .unwrap_or(1.0);
 
-    // 元のビット深度推定（デコーダーからの情報を復元）
-    let estimated_original_bit_depth = estimate_original_bit_depth(&pixels_f32, &icc_profile);
+    // Use analysis results from common module instead of local estimation
+    let estimated_original_bit_depth = match analysis.recommended_bit_depth {
+        super::common::RecommendedBitDepth::Eight => 8,
+        super::common::RecommendedBitDepth::Ten => 10,
+        super::common::RecommendedBitDepth::Sixteen => 16,
+    };
 
     println!(
-        "JXL: 元画像ビット深度推定: {}bit",
+        "JXL: Estimated original bit depth: {} bit",
         estimated_original_bit_depth
     );
 
-    // ICCプロファイル情報も考慮したHDR/ワイドガムット検出
-    let has_wide_gamut_profile = icc_profile.as_ref().map_or(false, |p| p.len() > 300);
-    let is_hdr = max_pixel_value > 1.0;
-    // 8-bit画像の不適切な高精度処理を回避
-    let is_likely_8bit_source = estimated_original_bit_depth <= 8 && max_pixel_value <= 1.0;
+    // Use analysis results for content classification
+    let is_hdr = analysis.has_hdr_content;
+    let has_wide_gamut_profile = analysis.has_wide_gamut;
+    let is_likely_8bit_source = estimated_original_bit_depth <= 8 && analysis.max_luminance <= 1.0;
     let is_wide_gamut_sdr = has_wide_gamut_profile && !is_hdr && !is_likely_8bit_source;
 
     if is_hdr {
         println!(
-            "JXL: HDR image detected (max luminance: {:.3}) - applying HDR settings",
-            max_pixel_value
+            "JXL: HDR content detected (max luminance: {:.3}) - using linear color encoding",
+            analysis.max_luminance
         );
-        // HDR画像の場合、線形カラーエンコーディングを使用
+        // Use linear color encoding for HDR images
         builder = builder.color_encoding(jpegxl_rs::encode::ColorEncoding::LinearSrgb);
     } else if is_wide_gamut_sdr {
         println!(
-            "JXL: Wide gamut SDR image detected (ICC profile: {} bytes) - applying high quality settings",
+            "JXL: Wide gamut SDR content detected (ICC profile: {} bytes) - using sRGB with ICC management",
             icc_profile.as_ref().unwrap().len()
         );
-        // ワイドガムットSDR画像の場合、sRGBを使用してICCプロファイルで色域を管理
+        // Use sRGB for wide gamut SDR images, let ICC profile manage color gamut
         builder = builder.color_encoding(jpegxl_rs::encode::ColorEncoding::Srgb);
-        println!("JXL: ワイドガムット用高品質設定を適用");
+        println!("JXL: Applied high quality settings for wide gamut content");
     } else if is_likely_8bit_source {
         println!(
-            "JXL: Standard 8-bit image detected (max value: {:.3}) - applying efficient 8-bit settings",
-            max_pixel_value
+            "JXL: Standard 8-bit content detected (max value: {:.3}) - using efficient 8-bit settings",
+            analysis.max_luminance
         );
-        // 8-bit画像の場合、標準sRGB設定で効率的に処理
+        // Use standard sRGB settings for efficient 8-bit processing
         builder = builder.color_encoding(jpegxl_rs::encode::ColorEncoding::Srgb);
     } else {
-        // その他の高ビット深度画像
+        // Other high bit depth images
         builder = builder.color_encoding(options.color_encoding.to_jxl());
     }
 
@@ -279,18 +306,18 @@ pub fn encode(
         builder = builder.uses_original_profile(true);
     }
 
-    // jpegxl-rs v0.11.2のロスレス不具合の包括的対策
-    // 既知の問題:
-    // 1. RGBA画像 + ロスレス = ApiUsageエラー
-    // 2. 特定の設定組み合わせで不安定
-    // 3. ピクセル値の範囲チェックが厳しい
+    // Comprehensive workaround for jpegxl-rs v0.11.2 lossless issues
+    // Known issues:
+    // 1. RGBA images + lossless = ApiUsage errors
+    // 2. Certain setting combinations are unstable
+    // 3. Strict pixel value range checking
 
     let (use_lossless, fallback_reason) = if options.lossless {
         if is_rgba {
-            (false, Some("RGBA画像でのロスレス不具合のため"))
+            (false, Some("RGBA image lossless mode issues"))
         } else if width * height > 4096 * 4096 {
-            // 大きな画像でのロスレス也不安定
-            (false, Some("大サイズ画像でのロスレス不安定のため"))
+            // Large images with lossless mode are also unstable
+            (false, Some("large image lossless mode instability"))
         } else {
             (true, None)
         }
@@ -299,16 +326,16 @@ pub fn encode(
     };
 
     if let Some(reason) = fallback_reason {
-        println!("JXL: {}、高品質モードにフォールバックします", reason);
+        println!("JXL: Falling back to high quality mode due to: {}", reason);
     }
 
     if use_lossless {
         builder = builder.lossless(true);
     } else {
-        // 品質値を厳密に検証
-        // RGBA画像の場合は高品質設定を使用
+        // Strictly validate quality values
+        // Use high quality settings for RGBA images
         let target_quality = if is_rgba && options.lossless {
-            0.5 // ロスレスからのフォールバック時は高品質を使用
+            0.5 // Use high quality for lossless fallback
         } else {
             options.quality
         };
@@ -317,12 +344,12 @@ pub fn encode(
         if safe_quality != options.quality {
             if is_rgba && options.lossless {
                 println!(
-                    "JXL: RGBA画像のロスレスフォールバックのため、品質を{:.3}に設定しました",
+                    "JXL: Set quality to {:.3} for RGBA lossless fallback",
                     safe_quality
                 );
             } else {
-                eprintln!(
-                    "JXL Warning: quality値を調整しました {:.3} -> {:.3}",
+                println!(
+                    "JXL: Adjusted quality value {:.3} -> {:.3}",
                     options.quality, safe_quality
                 );
             }
@@ -330,42 +357,42 @@ pub fn encode(
         builder = builder.quality(safe_quality);
     }
 
-    // エンコーダーを構築
+    // Construct the encoder
     let mut encoder = builder
         .build()
         .map_err(|e| AppError::Encode(format!("JXL encoder build failed: {}", e)))?;
 
-    // ICCプロファイルが提供された場合、カスタムメタデータとして追加
+    // Add ICC profile as custom metadata if provided
     if let Some(profile_data) = &icc_profile {
         println!(
             "JXL: Embedding ICC profile... (size: {} bytes)",
             profile_data.len()
         );
 
-        // ICCプロファイルをカスタムメタデータボックスとして追加
-        // 'icc ' (ICCプロファイル用の標準的な4文字コード)
+        // Add ICC profile as custom metadata box
+        // 'icc ' (standard 4-character code for ICC profiles)
         let icc_type = *b"icc ";
         let metadata = jpegxl_rs::encode::Metadata::Custom(icc_type, profile_data);
 
         if let Err(e) = encoder.add_metadata(&metadata, false) {
-            eprintln!("JXL: ICCプロファイルの埋め込みに失敗しました: {:?}", e);
-            eprintln!("JXL: ICCプロファイルなしで処理を続行します");
+            println!("JXL: Failed to embed ICC profile: {:?}", e);
+            println!("JXL: Continuing processing without ICC profile");
         } else {
-            println!("JXL: ICC profile embedding completed");
+            println!("JXL: ICC profile embedding completed successfully");
         }
     }
 
-    // エンコード情報
+    // Display encoding information
     let bit_depth_info = if is_likely_8bit_source {
-        " [8-bit効率化]"
+        " [8-bit optimized]"
     } else if estimated_original_bit_depth > 8 {
-        &format!(" [{}bit高精度]", estimated_original_bit_depth)
+        &format!(" [{}-bit high precision]", estimated_original_bit_depth)
     } else {
         ""
     };
 
     println!(
-        "JXL: Converting {}x{} {} image{}{}{}",
+        "JXL: Processing {}x{} {} image{}{}{}",
         width,
         height,
         if is_rgba { "RGBA" } else { "RGB" },
@@ -384,7 +411,7 @@ pub fn encode(
         }
     );
 
-    // ピクセル値の範囲をチェック（HDR対応版）
+    // Check pixel value range (HDR compatible version)
     if let Some(min_val) = pixels_f32.iter().min_by(|a, b| a.partial_cmp(b).unwrap()) {
         if let Some(max_val) = pixels_f32.iter().max_by(|a, b| a.partial_cmp(b).unwrap()) {
             println!("JXL: Pixel value range [{:.3}, {:.3}]", min_val, max_val);
@@ -407,48 +434,48 @@ pub fn encode(
             }
 
             if *min_val < 0.0 {
-                eprintln!("JXL Warning: 負の値を検出 - 0.0にクランプします");
+                println!("JXL: Warning - Negative values detected, will clamp to 0.0");
             }
         }
     }
 
-    // アルファチャンネル対応エンコード処理
-    // GitHub Issue #96の解決策を適用: has_alpha()をビルダーで設定
+    // Alpha channel support encoding
+    // Apply GitHub Issue #96 solution: set has_alpha() in builder
     if is_rgba {
         println!("JXL: Processing RGBA image (preserving alpha channel)...");
         builder = builder.has_alpha(true);
-        // エンコーダーを再構築（has_alphaはビルダー時に設定が必要）
+        // Rebuild encoder (has_alpha must be set at builder time)
         encoder = builder.build().map_err(|e| {
             AppError::Encode(format!("JXL encoder rebuild with alpha failed: {}", e))
         })?;
     }
 
-    // GitHub Issue #96の解決策に基づくRGBA処理（HDR対応版）
+    // RGBA processing based on GitHub Issue #96 solution (HDR compatible version)
     let final_data: Vec<f32> = if is_rgba {
         println!("JXL: Processing RGBA image as-is (alpha channel preserved, HDR support)");
 
-        // RGBA画像の場合、アルファチャンネルをそのまま保持
+        // For RGBA images, preserve alpha channel as-is
         let mut rgba_data = pixels_f32.to_vec();
 
-        // HDR対応：負の値のみクランプ、上限は設定しない
+        // HDR support: clamp only negative values, no upper limit
         for pixel in rgba_data.iter_mut() {
             if *pixel < 0.0 {
-                *pixel = 0.0; // 負の値のみ0にクランプ
+                *pixel = 0.0; // Clamp only negative values to 0
             }
-            // 1.0を超える値は保持（HDR情報として）
+            // Preserve values > 1.0 as HDR information
         }
 
         rgba_data
     } else {
-        // RGB画像の場合
+        // For RGB images
         let mut rgb_data = pixels_f32.to_vec();
 
-        // HDR対応：負の値のみクランプ、上限は設定しない
+        // HDR support: clamp only negative values, no upper limit
         for pixel in rgb_data.iter_mut() {
             if *pixel < 0.0 {
-                *pixel = 0.0; // 負の値のみ0にクランプ
+                *pixel = 0.0; // Clamp only negative values to 0
             }
-            // 1.0を超える値は保持（HDR情報として）
+            // Preserve values > 1.0 as HDR information
         }
 
         rgb_data
@@ -459,7 +486,7 @@ pub fn encode(
     let expected_length = (width * height * expected_channels) as usize;
 
     println!(
-        "JXL: エンコード開始 - data length: {}, expected: {} ({}チャンネル)",
+        "JXL: Starting encode - data length: {}, expected: {} ({} channels)",
         final_data.len(),
         expected_length,
         expected_channels
@@ -467,7 +494,7 @@ pub fn encode(
 
     if final_data.len() != expected_length {
         return Err(AppError::Encode(format!(
-            "JXL: data length mismatch: got {}, expected {} for {}x{} {}チャンネル画像",
+            "JXL: data length mismatch: got {}, expected {} for {}x{} {}-channel image",
             final_data.len(),
             expected_length,
             width,
@@ -476,7 +503,7 @@ pub fn encode(
         )));
     }
 
-    // GitHub Issue #96の解決策: EncoderFrameとencode_frameを使用
+    // GitHub Issue #96 solution: Use EncoderFrame and encode_frame
     println!("JXL: Executing encode using EncoderFrame...");
 
     let encode_result: Result<Vec<u8>, _> = if is_likely_8bit_source {
@@ -504,14 +531,17 @@ pub fn encode(
 
     let buffer = match encode_result {
         Ok(result) => {
-            println!("JXL: エンコード成功 - 出力サイズ: {} bytes", result.len());
+            println!(
+                "JXL: Encoding successful - output size: {} bytes",
+                result.len()
+            );
             result
         }
         Err(e) => {
-            eprintln!("JXL: 1回目のエンコード失敗 - エラー詳細: {:?}", e);
+            println!("JXL: Initial encoding failed - error details: {:?}", e);
 
-            // jpegxl-rsの既知の不具合に対する段階的フォールバック戦略
-            println!("JXL: jpegxl-rsの不具合対策として緊急フォールバックを試行します...");
+            // Staged fallback strategy for known jpegxl-rs issues
+            println!("JXL: Attempting emergency fallback for jpegxl-rs compatibility issues...");
 
             // 最も安全な設定で再試行
             let mut fallback_encoder = encoder_builder()
@@ -533,16 +563,16 @@ pub fn encode(
                     rgb.push(chunk[0]); // R
                     rgb.push(chunk[1]); // G
                     rgb.push(chunk[2]); // B
-                    // アルファチャンネルは破棄
+                    // Discard alpha channel
                 }
                 rgb
             } else {
                 final_data.clone()
             };
 
-            // フォールバック時も8-bit判定に基づいて適切な型を使用
+            // Use appropriate data type based on 8-bit detection for fallback too
             let fallback_result: Result<Vec<u8>, _> = if is_likely_8bit_source {
-                println!("JXL: フォールバック - 8-bit u8 データでエンコード");
+                println!("JXL: Fallback - encoding with 8-bit u8 data");
                 let fallback_u8: Vec<u8> = fallback_data
                     .iter()
                     .map(|&f| (f * 255.0).round().clamp(0.0, 255.0) as u8)
@@ -552,7 +582,7 @@ pub fn encode(
                     .encode_frame::<u8, u8>(&fallback_frame_u8, width, height)
                     .map(|result| result.to_vec())
             } else {
-                println!("JXL: フォールバック - f32 データでエンコード");
+                println!("JXL: Fallback - encoding with f32 data");
                 let fallback_frame_f32 =
                     EncoderFrame::new(fallback_data.as_slice()).num_channels(3);
                 fallback_encoder
@@ -563,17 +593,17 @@ pub fn encode(
             match fallback_result {
                 Ok(result) => {
                     println!(
-                        "JXL: 緊急フォールバック成功 - 出力サイズ: {} bytes",
+                        "JXL: Emergency fallback successful - output size: {} bytes",
                         result.len()
                     );
-                    println!("JXL: 注意: 元の設定ではなく安全な設定を使用しました");
+                    println!("JXL: Note: Used safe settings instead of original configuration");
                     result
                 }
                 Err(fallback_err) => {
-                    eprintln!("JXL: 緊急フォールバックも失敗しました");
-                    eprintln!("JXL: 元のエラー: {:?}", e);
-                    eprintln!("JXL: フォールバックエラー: {:?}", fallback_err);
-                    eprintln!("JXL: 設定情報:");
+                    println!("JXL: Emergency fallback also failed");
+                    println!("JXL: Original error: {:?}", e);
+                    println!("JXL: Fallback error: {:?}", fallback_err);
+                    println!("JXL: Configuration information:");
                     eprintln!("  - Width: {}, Height: {}", width, height);
                     eprintln!("  - Is RGBA: {}", is_rgba);
                     eprintln!("  - Data length: {}", final_data.len());
@@ -588,11 +618,11 @@ pub fn encode(
                     );
                     eprintln!("  - Color encoding: {:?}", options.color_encoding);
                     if let Some(reason) = fallback_reason {
-                        eprintln!("  - フォールバック理由: {}", reason);
+                        println!("  - Fallback reason: {}", reason);
                     }
-                    eprintln!("JXL: jpegxl-rs v0.11.2の既知の不具合により変換に失敗しました");
-                    eprintln!(
-                        "JXL: より新しいバージョンのライブラリまたは代替ライブラリの使用を検討してください"
+                    println!("JXL: Conversion failed due to known issues in jpegxl-rs v0.11.2");
+                    println!(
+                        "JXL: Consider using a newer version of the library or an alternative library"
                     );
                     return Err(AppError::Encode(format!(
                         "JXL encode failed even with fallback: original={:?}, fallback={:?}",
@@ -603,21 +633,24 @@ pub fn encode(
         }
     };
 
+    // Provide ICC profile recommendations
+    provide_icc_recommendations("JXL", analysis.has_wide_gamut, analysis.has_hdr_content);
+
     Ok(buffer)
 }
 
-/// JPEGをJPEG XL形式にロスレス変換する
+/// Lossless transcode JPEG to JPEG XL format
 ///
-/// # 引数
-/// * `jpeg_data` - 変換元のJPEGバイトデータ
-/// * `options` - JXLエンコードオプション (JxlOptions)
-/// # 戻り値
-/// - 成功した場合は JPEG XL のバイト列を `Vec<u8>` として返します。
-/// - 失敗した場合は `AppError` を返します。
+/// # Arguments
+/// * `jpeg_data` - Source JPEG byte data for conversion
+/// * `options` - JXL encoding options (JxlOptions)
+/// # Returns
+/// - On success, returns JPEG XL byte sequence as `Vec<u8>`.
+/// - On failure, returns `AppError`.
 #[allow(dead_code)]
 pub fn transcode(jpeg_data: &[u8], options: &JxlOptions) -> Result<Vec<u8>, AppError> {
-    // こちらの関数はピクセルデータを直接扱わないため、修正は不要です。
-    // uses_original_profile(true) はJPEGからの再圧縮で有効です。
+    // This function does not handle pixel data directly, so no modification is needed.
+    // uses_original_profile(true) is effective for JPEG recompression.
     let mut binding = encoder_builder();
     let mut builder = binding
         .speed(options.speed.to_jxl())
@@ -627,15 +660,15 @@ pub fn transcode(jpeg_data: &[u8], options: &JxlOptions) -> Result<Vec<u8>, AppE
         .init_buffer_size(options.init_buffer_size)
         .color_encoding(options.color_encoding.to_jxl());
 
-    // JPEGトランスコードでもロスレス不具合の対策を適用
-    // JPEGは元々非可逆であるため、ロスレスの意味は薄いが、
-    // ライブラリの不具合を回避するため非可逆モードを使用
-    let use_transcode_lossless = false; // 安全のため常に非可逆
+    // Apply lossless bug workarounds for JPEG transcode as well
+    // JPEG is inherently lossy, so lossless has little meaning,
+    // but use lossy mode to avoid library bugs
+    let use_transcode_lossless = false; // Always lossy for safety
 
     if use_transcode_lossless && options.lossless {
         builder = builder.lossless(true);
     } else {
-        // JPEGトランスコードでは高品質設定を使用
+        // Use high quality settings for JPEG transcode
         let transcode_quality = if options.lossless {
             0.5
         } else {
@@ -644,7 +677,7 @@ pub fn transcode(jpeg_data: &[u8], options: &JxlOptions) -> Result<Vec<u8>, AppE
         builder = builder.quality(transcode_quality.clamp(0.1, 15.0));
 
         if options.lossless {
-            println!("JXL: JPEGトランスコードではライブラリ不具合のため高品質モードを使用します");
+            println!("JXL: Using high quality mode for JPEG transcode due to library issues");
         }
     }
 

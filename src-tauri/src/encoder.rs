@@ -1,4 +1,5 @@
 pub mod avif;
+pub mod common;
 pub mod jxl;
 pub mod webp;
 

@@ -1,18 +1,23 @@
 use crate::{
     encoder::extract_pixel_data,
     error::AppError,
-    options::HighBitDepthImage, // WebpOptionsはそのまま使う
+    options::HighBitDepthImage,
+};
+use super::common::{
+    EncodingAnalysis, ToneMappingType, apply_tone_mapping, convert_f32_to_u8,
+    log_encoding_analysis, get_encoding_recommendations, handle_icc_profile_embedding,
+    provide_icc_recommendations
 };
 use serde::{Deserialize, Serialize};
 use webp::{Encoder, WebPMemory};
 
-/// WebP形式のオプション
-/// quality: 0-100 (0は最低品質、100は最高品質)
-/// lossless: true/false (可逆圧縮を使うかどうか
-/// method: 0-6 (0は高速、6は高品質)
-/// autofilter: true/false (自動フィルタリングを使うかどうか)
-/// hint: 画像のヒント (WebPImageHint列挙型)
-/// 注意: losslessがtrueの場合、qualityは無視される)
+/// WebP format encoding options
+/// quality: 0-100 (0 is lowest quality, 100 is highest quality)
+/// lossless: true/false (whether to use lossless compression)
+/// method: 0-6 (0 is fast, 6 is high quality)
+/// autofilter: true/false (whether to use automatic filtering)
+/// hint: Image hint (WebPImageHint enumeration)
+/// Note: When lossless is true, quality is ignored)
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct WebpOptions {
@@ -41,87 +46,53 @@ pub enum WebPImageHint {
 }
 */
 
-/// 画像を WebP にエンコードします。
-/// # 引数
-/// - `img`: 変換対象の画像 (DynamicImage)
-/// - `options`: WebPエンコードオプション (WebpOptions)
-/// # 戻り値
-/// - 成功した場合は WebP のバイト列を `Vec<u8>` として返します。
-/// - 失敗した場合は `AppError` を返します。
-/// # 注意
-/// - `libwebp-sys` クレートを使用して WebP エンコードを行います。ビルド時に `libwebp` ライブラリがシステムにインストールされている必要があります。
+/// Encode image to WebP format with advanced content analysis
+/// # Arguments
+/// - `pixel_data`: Source image to encode (HighBitDepthImage)
+/// - `icc_profile`: ICC profile for color management
+/// - `options`: WebP encoding options (WebpOptions)
+/// # Returns
+/// - Success: WebP format byte data as Vec<u8>
+/// - Failure: AppError
+/// # Notes
+/// - Uses `libwebp-sys` crate for WebP encoding. Build requires `libwebp` library installed on system
+/// - Performs content analysis for optimal encoding settings
 pub fn encode(
     pixel_data: &HighBitDepthImage,
     icc_profile: Option<Vec<u8>>,
     options: &WebpOptions,
 ) -> Result<Vec<u8>, AppError> {
-    // ★ 1. 画像サイズとf32ピクセルデータを取得
+    println!("WebP: Starting WebP encoding process...");
+    
+    // Perform content analysis for optimal encoding
+    let analysis = EncodingAnalysis::analyze(pixel_data, icc_profile.as_deref());
+    log_encoding_analysis(&analysis, "WebP");
+    get_encoding_recommendations(&analysis, "WebP");
+    
+    // Get image dimensions and pixel data
     let (width, height) = match pixel_data {
         HighBitDepthImage::Rgb(buf) => buf.dimensions(),
         HighBitDepthImage::Rgba(buf) => buf.dimensions(),
         HighBitDepthImage::Argb(buf) => buf.dimensions(),
     };
     let (pixels_f32, is_rgba) = extract_pixel_data(pixel_data);
+    
+    println!("WebP: Image properties - {}x{}, {} channels", width, height, if is_rgba { 4 } else { 3 });
+    println!("WebP: Encoding settings - Quality: {}, Lossless: {}", options.quality, options.lossless);
 
-    // ★ 2. HDR/ワイドガムット検出とトーンマッピング
-    // RGB値の最大値を確認
-    let max_pixel_value = pixels_f32
-        .iter()
-        .max_by(|a, b| a.partial_cmp(b).unwrap())
-        .copied()
-        .unwrap_or(1.0);
-
-    // ICCプロファイルサイズでワイドガムット検出
-    let has_wide_gamut_profile = icc_profile.as_ref().map_or(false, |p| p.len() > 300);
-    let is_hdr = max_pixel_value > 1.0;
-
-    if is_hdr {
-        println!(
-            "WebP: HDR画像を検出（最大輝度: {:.3}） - トーンマッピングを適用",
-            max_pixel_value
-        );
-    } else if has_wide_gamut_profile {
-        println!(
-            "WebP: ワイドガムット画像を検出（ICCプロファイル: {}bytes）",
-            icc_profile.as_ref().unwrap().len()
-        );
-    }
-
-    // HDRまたはワイドガムット画像の場合、適切なトーンマッピングを適用
-    let tone_mapped_pixels = if is_hdr || has_wide_gamut_profile {
-        pixels_f32
-            .iter()
-            .enumerate()
-            .map(|(i, &pixel)| {
-                let clamped = pixel.max(0.0); // 負の値のみクランプ
-
-                // Alpha成分はそのまま
-                if is_rgba && (i % 4 == 3) {
-                    clamped.min(1.0)
-                } else {
-                    // RGB成分にトーンマッピング適用
-                    if clamped > 1.0 {
-                        // Reinhardトーンマッピング
-                        let exposure = 1.0;
-                        let adjusted = clamped * exposure;
-                        adjusted / (1.0 + adjusted)
-                    } else {
-                        clamped
-                    }
-                }
-            })
-            .collect()
+    // Apply tone mapping if HDR content is detected
+    let processed_pixels = if analysis.tone_mapping_required {
+        println!("WebP: Applying tone mapping for HDR content (max luminance: {:.3})", analysis.max_luminance);
+        apply_tone_mapping(&pixels_f32, is_rgba, ToneMappingType::Reinhard, 1.0)
+    } else if analysis.has_wide_gamut {
+        println!("WebP: Processing wide gamut content");
+        pixels_f32.to_vec()
     } else {
-        // 標準画像はそのまま
-        pixels_f32.clone()
+        pixels_f32.to_vec()
     };
 
-    // ★ 3. f32 -> u8 にデノーマライズ
-    // WebPの標準的なエンコーダーは8bit入力を基本とするため
-    let pixels_u8: Vec<u8> = tone_mapped_pixels
-        .iter()
-        .map(|&p| (p * 255.0).round().clamp(0.0, 255.0) as u8)
-        .collect();
+    // Convert f32 pixels to u8 (WebP encoders primarily work with 8-bit input)
+    let pixels_u8 = convert_f32_to_u8(&processed_pixels);
 
     // ★ 4. RGB/RGBAに応じてエンコーダーを生成
     let encoder = if is_rgba {
@@ -139,25 +110,17 @@ pub fn encode(
         encoder.encode(options.quality)
     };
 
-    println!("Finished encoding WebP.");
-    // ★ 6. ICCプロファイルがなければ、エンコードしたピクセルデータのみを返す
-    if icc_profile.is_none() {
-        return Ok(webp_memory.to_vec());
-    };
-    /*
-    let profile = icc_profile;
+    println!("WebP: Successfully encoded WebP data");
+    
+    // Handle ICC profile using common implementation
+    let final_webp_data = handle_icc_profile_embedding(
+        webp_memory.to_vec(),
+        icc_profile,
+        "WebP"
+    );
 
-    // ★ 7. Muxerを使ってICCプロファイルを結合
-    let mut mux = WebPMux::new();
-    let frame = WebPData {
-        bytes: webp_memory.as_ptr(),
-        size: webp_memory.len(),
-    };
-    mux.push_frame(frame, None)?;
-    mux.set_chunk("ICCP", &profile)?; // "ICCP"チャンクとして設定
+    // Provide format-specific ICC recommendations
+    provide_icc_recommendations("WebP", analysis.has_wide_gamut, analysis.has_hdr_content);
 
-    let final_data = mux.encode()?;
-    */
-
-    Ok(webp_memory.to_vec())
+    Ok(final_webp_data)
 }

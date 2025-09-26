@@ -1,21 +1,26 @@
+use super::common::{
+    EncodingAnalysis, ToneMappingType, apply_tone_mapping, convert_f32_to_u8,
+    get_encoding_recommendations, handle_icc_profile_embedding, log_encoding_analysis,
+    provide_icc_recommendations,
+};
 use crate::{encoder::extract_pixel_data, error::AppError, options::HighBitDepthImage};
 use imgref::Img;
 use ravif::{EncodedImage, Encoder};
 use serde::{Deserialize, Serialize};
 
-/// AVIF形式のオプション
-/// quality: 0-100 (01~100。値が高いほど高品質)
-/// bit_depth: ビット深度 (BitDepth::Auto, BitDepth::Eight, BitDepth::Ten)
-/// alpha_quality: アルファチャンネルの品質 (1~100。値が高いほど高品質)
-/// speed: エンコード速度 (0-10)。0は最高品質で最も遅い、10は最速。
-/// color_model: カラーモデル (ColorModel::YCbCr, ColorModel::RGB)
-/// threads: 使用するスレッド数 (Noneの場合は自動設定)
-/// alpha_color_mode: アルファチャネルの色モード (AlphaColorMode::Straight, AlphaColorMode::Premultiplied)
-/// 注意: BitDepth::Autoを選択した場合、入力画像のビット深度に基づいて自動的に決定されます。
-///     例えば、8ビット画像ならBitDepth::Eight、10ビット画像ならBitDepth::Tenが選択されます。
-///     ただし、入力画像が8ビット以上であっても、AVIFエンコード時にBitDepth::Eightを選択することも可能です。
-///     逆に、10ビット以上の画像に対してBitDepth::Eightを選択すると、情報の損失が発生する可能性があります。
-///     そのため、可能な限り入力画像のビット深度に合わせた設定を推奨します。
+/// AVIF format encoding options
+/// quality: 0-100 (higher values mean better quality)
+/// bit_depth: Bit depth (BitDepth::Auto, BitDepth::Eight, BitDepth::Ten)
+/// alpha_quality: Alpha channel quality (1-100, higher values mean better quality)
+/// speed: Encoding speed (0-10). 0 is highest quality but slowest, 10 is fastest
+/// color_model: Color model (ColorModel::YCbCr, ColorModel::RGB)
+/// threads: Number of threads to use (None for automatic)
+/// alpha_color_mode: Alpha channel color mode (AlphaColorMode::Straight, AlphaColorMode::Premultiplied)
+/// Note: When BitDepth::Auto is selected, bit depth is automatically determined based on input image.
+///     For example, 8-bit images will use BitDepth::Eight, 10-bit images will use BitDepth::Ten.
+///     However, it's possible to choose BitDepth::Eight even for images with higher bit depth.
+///     Conversely, choosing BitDepth::Eight for 10-bit+ images may result in information loss.
+///     Therefore, it's recommended to match the input image's bit depth whenever possible.
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct AvifOptions {
@@ -28,10 +33,10 @@ pub struct AvifOptions {
     pub alpha_color_mode: AlphaColorMode,
 }
 
-/// ビット深度の列挙型
-/// - Auto: 入力画像のビット深度に基づいて自動的に決定
-/// - Eight: 8ビット
-/// - Ten: 10ビット
+/// Bit depth enumeration
+/// - Auto: Automatically determined based on input image bit depth
+/// - Eight: 8-bit
+/// - Ten: 10-bit
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BitDepth {
     Auto,
@@ -49,9 +54,9 @@ impl BitDepth {
     }
 }
 
-/// カラーモデルの列挙型
-/// - YCbCr: YCbCrカラーモデル
-/// - RGB: RGBカラーモデル
+/// Color model enumeration
+/// - YCbCr: YCbCr color model
+/// - RGB: RGB color model
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ColorModel {
     YCbCr,
@@ -67,10 +72,10 @@ impl ColorModel {
     }
 }
 
-/// アルファチャネルの色モードの列挙型
-/// - UnassociatedDirty: 非関連アルファ（未クリーン）
-/// - UnassociatedClean: 非関連アルファ（クリーン）
-/// - Premultiplied: 乗算済みアルファ
+/// Alpha channel color mode enumeration
+/// - UnassociatedDirty: Unassociated alpha (dirty)
+/// - UnassociatedClean: Unassociated alpha (clean)
+/// - Premultiplied: Premultiplied alpha
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AlphaColorMode {
     UnassociatedDirty,
@@ -88,24 +93,32 @@ impl AlphaColorMode {
     }
 }
 
-/// DynamicImage を AVIF 形式のバイトデータに変換する (raif クレート使用)
+/// Encode HighBitDepthImage to AVIF format using ravif crate with advanced analysis
 ///
-/// # 引数
-/// * `pixel_data` - 変換元のHighBitDepthImage
-/// * `icc_profile` - ICCプロファイル（Someの場合は埋め込み処理を行う）
-/// * `options` - AVIFエンコードオプション
-/// # 戻り値
-/// * 成功した場合はAVIF形式のバイト列をVec<u8>として返します。
-/// * 失敗した場合はAppErrorを返します。
-/// # 注意
-/// * `ravif` クレートを使用してAVIFエンコードを行います。ビルド時に `libavif` ライブラリがシステムにインストールされている必要があります。
-/// * ICCプロファイルが提供された場合、色味の一貫性を保つために埋め込み処理を試行しますが、`ravif`クレートの制限により完全な対応ではありません。
+/// # Arguments
+/// * `pixel_data` - Source HighBitDepthImage to encode
+/// * `icc_profile` - ICC profile for color management (if provided, embedding will be attempted)
+/// * `options` - AVIF encoding options
+/// # Returns
+/// * Success: AVIF format byte data as Vec<u8>
+/// * Failure: AppError
+/// # Notes
+/// * Uses `ravif` crate for AVIF encoding. Build requires `libavif` library installed on system
+/// * When ICC profile is provided, color consistency is maintained through embedding (limited by ravif crate capabilities)
+/// * Advanced content analysis is performed to optimize encoding settings
 pub fn encode(
     pixel_data: &HighBitDepthImage,
     icc_profile: Option<Vec<u8>>,
     options: &AvifOptions,
 ) -> Result<Vec<u8>, AppError> {
-    // ★ 1. 画像サイズとf32ピクセルデータを取得
+    println!("AVIF: Starting AVIF encoding process...");
+
+    // Perform content analysis for optimal encoding
+    let analysis = EncodingAnalysis::analyze(pixel_data, icc_profile.as_deref());
+    log_encoding_analysis(&analysis, "AVIF");
+    get_encoding_recommendations(&analysis, "AVIF");
+
+    // Get image dimensions and pixel data
     let (width, height) = match &pixel_data {
         HighBitDepthImage::Rgb(buf) => buf.dimensions(),
         HighBitDepthImage::Rgba(buf) => buf.dimensions(),
@@ -113,17 +126,16 @@ pub fn encode(
     };
     let (pixels_f32, is_rgba) = extract_pixel_data(&pixel_data);
 
-    // デバッグ情報を追加
-    println!("AVIF Encoder Debug:");
-    println!("  Width: {}, Height: {}", width, height);
-    println!("  Is RGBA: {}", is_rgba);
-    println!("  Pixel count: {}", pixels_f32.len());
     println!(
-        "  Expected pixel count: {}",
-        width * height * if is_rgba { 4 } else { 3 }
+        "AVIF: Image properties - {}x{}, {} channels",
+        width,
+        height,
+        if is_rgba { 4 } else { 3 }
     );
-    println!("  Bit depth: {:?}", options.bit_depth);
-    println!("  Color model: {:?}", options.color_model);
+    println!(
+        "AVIF: Encoding settings - Quality: {}, Bit depth: {:?}, Color model: {:?}",
+        options.quality, options.bit_depth, options.color_model
+    );
 
     // ピクセルデータの整合性チェック
     let expected_len = (width * height * if is_rgba { 4 } else { 3 }) as usize;
@@ -149,64 +161,22 @@ pub fn encode(
             .with_speed(options.speed)
             .with_alpha_quality(options.alpha_quality);
 
-        // HDR/ワイドガムット検出（ICCプロファイル情報も考慮）
-        let max_pixel_value = pixels_f32
-            .iter()
-            .max_by(|a, b| a.partial_cmp(b).unwrap())
-            .copied()
-            .unwrap_or(1.0);
-
-        // ICCプロファイルサイズでワイドガムット検出も追加
-        let has_wide_gamut_profile = icc_profile.as_ref().map_or(false, |p| p.len() > 300);
-        let is_hdr = max_pixel_value > 1.0;
-
-        if is_hdr {
+        // Apply tone mapping if HDR content is detected
+        let processed_pixels = if analysis.tone_mapping_required {
             println!(
-                "AVIF: HDR画像を検出（最大輝度: {:.3}） - トーンマッピングを適用",
-                max_pixel_value
+                "AVIF: Applying tone mapping for HDR content (max luminance: {:.3})",
+                analysis.max_luminance
             );
-        } else if has_wide_gamut_profile {
-            println!(
-                "AVIF: ワイドガムット画像を検出（ICCプロファイル: {}bytes）",
-                icc_profile.as_ref().unwrap().len()
-            );
-        }
-
-        // f32ピクセルデータを8ビットに変換（HDR/ワイドガムット対応）
-        let pixels_u8: Vec<u8> = if is_hdr || has_wide_gamut_profile {
-            // HDRまたはワイドガムット画像の場合、適切なトーンマッピングを適用
-            pixels_f32
-                .iter()
-                .enumerate()
-                .map(|(i, &p)| {
-                    let clamped = p.max(0.0); // 負の値のみクランプ
-
-                    // Alpha成分はそのまま処理
-                    if is_rgba && (i % 4 == 3) {
-                        (clamped.min(1.0) * 255.0).round() as u8
-                    } else {
-                        // RGB成分にトーンマッピング適用
-                        let tone_mapped = if clamped > 1.0 {
-                            // Reinhardトーンマッピング
-                            let exposure = 1.0;
-                            let adjusted = clamped * exposure;
-                            adjusted / (1.0 + adjusted)
-                        } else {
-                            // 通常の値はそのまま
-                            clamped
-                        };
-
-                        (tone_mapped * 255.0).round() as u8
-                    }
-                })
-                .collect()
+            apply_tone_mapping(&pixels_f32, is_rgba, ToneMappingType::Reinhard, 1.0)
+        } else if analysis.has_wide_gamut {
+            println!("AVIF: Processing wide gamut content");
+            pixels_f32.to_vec()
         } else {
-            // 標準画像の場合は単純な変換
-            pixels_f32
-                .iter()
-                .map(|&p| (p.max(0.0).min(1.0) * 255.0).round() as u8)
-                .collect()
+            pixels_f32.to_vec()
         };
+
+        // Convert f32 pixels to u8 with proper clamping
+        let pixels_u8 = convert_f32_to_u8(&processed_pixels);
 
         if is_rgba {
             // RGBA: Vec<u8> を RGBA<u8> のスライスに変換
@@ -223,64 +193,26 @@ pub fn encode(
         }
     };
 
-    // ICCプロファイルが提供された場合の処理
-    let mut final_avif_data = encoded_avif.avif_file;
+    // Handle ICC profile using common implementation
+    let final_avif_data = handle_icc_profile_embedding(encoded_avif.avif_file, icc_profile, "AVIF");
 
-    if let Some(profile_data) = icc_profile {
-        // ICCプロファイルが提供された場合は色味保持のための最適化を行う
-        println!("AVIF: ICCプロファイルが提供されました。色味保持のための設定を確認中...");
+    // Provide format-specific ICC recommendations
+    provide_icc_recommendations("AVIF", analysis.has_wide_gamut, analysis.has_hdr_content);
 
-        // 色味保持のための推奨設定チェック
+    // Additional AVIF-specific recommendations
+    if analysis.is_hdr_or_wide_gamut {
         if options.color_model != ColorModel::RGB {
-            eprintln!("推奨: ICCプロファイル使用時はColorModel::RGBを推奨します");
+            println!(
+                "AVIF: Recommendation - Use ColorModel::RGB for better ICC profile compatibility"
+            );
         }
 
         if matches!(options.bit_depth, BitDepth::Eight) {
-            eprintln!("推奨: 色域保持のためBitDepth::Ten以上を推奨します");
-        }
-
-        // ICCプロファイルの埋め込みを試行
-        match embed_icc_profile_in_avif(&final_avif_data, &profile_data) {
-            Ok(avif_with_icc) => {
-                println!("AVIF: ICCプロファイルを埋め込みました");
-                final_avif_data = avif_with_icc;
-            }
-            Err(e) => {
-                // ICCプロファイルの埋め込みに失敗した場合は警告を出すが、処理は続行
-                eprintln!("AVIF: ICCプロファイルの埋め込みに失敗しました: {:?}", e);
-                eprintln!("AVIF: ICCプロファイルなしで処理を続行します");
-            }
+            println!(
+                "AVIF: Recommendation - Use BitDepth::Ten or higher to preserve wide gamut content"
+            );
         }
     }
 
     Ok(final_avif_data)
-}
-
-/// AVIFファイルにICCプロファイルを埋め込む関数
-///
-/// # 注意
-/// この機能は実験的であり、完全に機能しない可能性があります。
-/// AVIFファイルの構造は複雑で、手動でのメタデータ埋め込みは困難です。
-///
-/// # 引数
-/// * `avif_data` - 元のAVIFファイルデータ
-/// * `icc_profile` - 埋め込むICCプロファイルデータ
-///
-/// # 戻り値
-/// ICCプロファイル付きのAVIFデータまたはエラー
-fn embed_icc_profile_in_avif(avif_data: &[u8], _icc_profile: &[u8]) -> Result<Vec<u8>, AppError> {
-    // 現在の実装では、ICCプロファイルの埋め込みは技術的に困難です
-    // AVIFはISOベースのコンテナ形式で、正確なバイナリ操作が必要です
-
-    // 暫定的な解決策：警告と共に元のデータを返す
-    eprintln!("警告: AVIF形式へのICCプロファイル埋め込みは現在未対応です");
-    eprintln!("色味の変化を最小限に抑えるには以下を推奨します：");
-    eprintln!("1. ColorModel::RGB を使用");
-    eprintln!("2. BitDepth::Ten 以上を使用");
-    eprintln!("3. 高品質設定を使用");
-
-    // TODO: 将来的には libheif-rs や専用のライブラリを使用してICCプロファイル埋め込みを実装
-
-    // 現時点では元のデータをそのまま返す
-    Ok(avif_data.to_vec())
 }
