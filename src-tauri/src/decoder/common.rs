@@ -1,5 +1,6 @@
 use std::io::Cursor;
 
+#[allow(dead_code)]
 /// ICC profile information for bit depth detection and color space analysis
 #[derive(Debug, Clone)]
 pub struct IccProfileInfo {
@@ -14,7 +15,7 @@ impl IccProfileInfo {
     /// Analyze ICC profile data and extract relevant information
     pub fn analyze(profile: &[u8]) -> Self {
         let size = profile.len();
-        
+
         // Extract profile details if the profile is large enough
         let (color_space, profile_description, has_high_precision) = if size >= 128 {
             let color_space = extract_color_space(profile);
@@ -22,19 +23,22 @@ impl IccProfileInfo {
             let high_precision = detect_high_precision_profile(profile, &color_space);
             (color_space, description, high_precision)
         } else {
-            ("Unknown".to_string(), "Invalid or truncated profile".to_string(), false)
+            (
+                "Unknown".to_string(),
+                "Invalid or truncated profile".to_string(),
+                false,
+            )
         };
 
         // Display P3, Rec2020, and other wide gamut profiles typically range 400-2000 bytes
         // Small profiles (< 400 bytes) are usually sRGB or basic profiles
-        let suggests_wide_gamut = size > 400 && (
-            color_space.contains("RGB") || 
-            profile_description.contains("Display P3") ||
-            profile_description.contains("DCI-P3") ||
-            profile_description.contains("Rec2020") ||
-            profile_description.contains("ProPhoto") ||
-            profile_description.contains("Adobe RGB")
-        );
+        let suggests_wide_gamut = size > 400
+            && (color_space.contains("RGB")
+                || profile_description.contains("Display P3")
+                || profile_description.contains("DCI-P3")
+                || profile_description.contains("Rec2020")
+                || profile_description.contains("ProPhoto")
+                || profile_description.contains("Adobe RGB"));
 
         Self {
             size,
@@ -83,13 +87,16 @@ impl BitDepthAnalysis {
         pixel_count: usize,
     ) -> Self {
         let max_value = ((1 << source_bit_depth) - 1) as u32;
-        
+
         let (processing_type, recommended_format) = match source_bit_depth {
             depth if depth <= 8 => {
                 if let Some(profile) = icc_profile {
                     if profile.requires_high_precision() {
                         // 8-bit data with wide gamut profile - process as higher precision
-                        (ProcessingType::WideGamut8BitAs10Bit, RecommendedFormat::F32Required)
+                        (
+                            ProcessingType::WideGamut8BitAs10Bit,
+                            RecommendedFormat::F32Required,
+                        )
                     } else {
                         // Standard 8-bit processing
                         (ProcessingType::Standard8Bit, RecommendedFormat::U8Optimized)
@@ -99,12 +106,11 @@ impl BitDepthAnalysis {
                     (ProcessingType::Standard8Bit, RecommendedFormat::U8Optimized)
                 }
             }
-            depth if depth <= 12 => {
-                (ProcessingType::HighBitDepth, RecommendedFormat::F32Required)
-            }
-            _ => {
-                (ProcessingType::UltraHighBitDepth, RecommendedFormat::F32Required)
-            }
+            depth if depth <= 12 => (ProcessingType::HighBitDepth, RecommendedFormat::F32Required),
+            _ => (
+                ProcessingType::UltraHighBitDepth,
+                RecommendedFormat::F32Required,
+            ),
         };
 
         Self {
@@ -119,7 +125,10 @@ impl BitDepthAnalysis {
 /// Log detailed ICC profile information for debugging
 pub fn log_icc_profile_details(profile: &[u8]) {
     if profile.len() < 128 {
-        println!("ICC Profile: Invalid or too small (size: {} bytes)", profile.len());
+        println!(
+            "ICC Profile: Invalid or too small (size: {} bytes)",
+            profile.len()
+        );
         return;
     }
 
@@ -130,7 +139,11 @@ pub fn log_icc_profile_details(profile: &[u8]) {
     let profile_signature = std::str::from_utf8(&profile[36..40]).unwrap_or("????");
 
     println!("ICC Profile Analysis:");
-    println!("  Size: {} bytes (header declares: {} bytes)", profile.len(), profile_size);
+    println!(
+        "  Size: {} bytes (header declares: {} bytes)",
+        profile.len(),
+        profile_size
+    );
     println!("  Preferred CMM: {}", preferred_cmm);
     println!("  Device Class: {}", device_class);
     println!("  Color Space: {}", color_space);
@@ -156,7 +169,7 @@ fn extract_color_space(profile: &[u8]) -> String {
     if profile.len() < 20 {
         return "Unknown".to_string();
     }
-    
+
     match std::str::from_utf8(&profile[16..20]) {
         Ok(space) => match space {
             "RGB " => "RGB".to_string(),
@@ -174,10 +187,10 @@ fn extract_color_space(profile: &[u8]) -> String {
 fn extract_profile_description(profile: &[u8]) -> String {
     // This is a simplified implementation
     // A full implementation would parse the tag table and locate the 'desc' tag
-    
+
     // Look for common profile description patterns in the profile data
     let profile_str = String::from_utf8_lossy(profile);
-    
+
     if profile_str.contains("Display P3") {
         "Display P3".to_string()
     } else if profile_str.contains("DCI-P3") {
@@ -199,17 +212,19 @@ fn extract_profile_description(profile: &[u8]) -> String {
 fn detect_high_precision_profile(profile: &[u8], color_space: &str) -> bool {
     // Check for high precision indicators in the profile
     let profile_str = String::from_utf8_lossy(profile);
-    
+
     // Wide gamut color spaces typically benefit from high precision
-    color_space.contains("RGB") && (
-        profile_str.contains("Display P3") ||
-        profile_str.contains("DCI-P3") ||
-        profile_str.contains("Rec2020") ||
-        profile_str.contains("BT.2020") ||
-        profile_str.contains("ProPhoto") ||
-        profile_str.contains("Adobe RGB") ||
-        profile.len() > 1000 // Large profiles often indicate complex tone curves
-    )
+    color_space.contains("RGB")
+        && (
+            profile_str.contains("Display P3")
+                || profile_str.contains("DCI-P3")
+                || profile_str.contains("Rec2020")
+                || profile_str.contains("BT.2020")
+                || profile_str.contains("ProPhoto")
+                || profile_str.contains("Adobe RGB")
+                || profile.len() > 1000
+            // Large profiles often indicate complex tone curves
+        )
 }
 
 /// Extract ICC profile from various image formats
@@ -254,7 +269,7 @@ fn extract_jpeg_icc_profile(bytes: &[u8]) -> Option<Vec<u8>> {
             if pos + 2 + length > bytes.len() {
                 break;
             }
-            
+
             let segment_data = &bytes[pos + 4..pos + 2 + length];
 
             // Check for "ICC_PROFILE" identifier
@@ -277,7 +292,7 @@ fn extract_jpeg_icc_profile(bytes: &[u8]) -> Option<Vec<u8>> {
                 }
             }
         }
-        
+
         // Move to next marker
         let length = u16::from_be_bytes([bytes[pos + 2], bytes[pos + 3]]) as usize;
         pos += 2 + length;

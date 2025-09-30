@@ -32,8 +32,9 @@ pub async fn convert(
     options: EncodeOptions,
     app: AppHandle,
 ) -> Result<Vec<u8>, String> {
-    send_log(&app, "info", "画像変換を開始します");
+    send_log(&app, "info", "Starting compression...");
 
+    let app_clone = app.clone();
     // spawn_blocking でUIをフリーズさせずに重い処理を実行
     let converted_data = tauri::async_runtime::spawn_blocking(move || {
         // まず、デコードする前にJPEGトランスコードの条件をチェックする
@@ -41,7 +42,11 @@ pub async fn convert(
         if let EncodeOptions::Jxl(jxl_opts) = &options {
             // `guess_format`がJPEGを返した場合にのみ、このブロックに入る
             if guess_format(&data).map_or(false, |format| format == ImageFormat::Jpeg) {
-                println!("JPEG detected for JPEG XL target. Using transcode path...");
+                send_log(
+                    &app_clone,
+                    "info",
+                    "JPEG detected for JPEG XL target. Using transcode path...",
+                );
 
                 // トランスコードを実行し、成功したら`return`で即座に関数を抜ける
                 return crate::encoder::jxl::transcode(&data, jxl_opts)
@@ -50,14 +55,14 @@ pub async fn convert(
         }
         // --- 上記のif条件に当てはまらなかった場合、通常のデコード→エンコード処理に進む ---
 
-        println!("Decoding...");
+        send_log(&app_clone, "info", "Decoding image...");
 
         // 画像デコード
         let data =
             crate::decoder::decode(&data).map_err(|e| format!("Failed to decode image: {}", e))?;
 
         // 画像エンコード
-        println!("Encoding...");
+        send_log(&app_clone, "info", "Encoding image...");
         let (img, icc_profile) = data;
         let data = crate::encoder::encode(img, icc_profile, &options)
             .map_err(|e| format!("Failed to encode image: {}", e))?;
@@ -67,7 +72,7 @@ pub async fn convert(
     .await
     .map_err(|e| e.to_string())?;
 
-    send_log(&app, "info", "画像変換が完了しました");
+    send_log(&app, "info", "Finish compression.");
     converted_data
 }
 

@@ -15,11 +15,12 @@ pub struct EncodingAnalysis {
 
 #[derive(Debug, Clone)]
 pub enum RecommendedBitDepth {
-    Eight,     // Standard 8-bit content
-    Ten,       // Wide gamut or light HDR content
-    Sixteen,   // High dynamic range content
+    Eight,   // Standard 8-bit content
+    Ten,     // Wide gamut or light HDR content
+    Sixteen, // High dynamic range content
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub enum ToneMappingType {
     None,
@@ -30,12 +31,9 @@ pub enum ToneMappingType {
 
 impl EncodingAnalysis {
     /// Analyze image content and ICC profile to determine optimal encoding settings
-    pub fn analyze(
-        pixel_data: &HighBitDepthImage,
-        icc_profile: Option<&[u8]>,
-    ) -> Self {
+    pub fn analyze(pixel_data: &HighBitDepthImage, icc_profile: Option<&[u8]>) -> Self {
         let (pixels_f32, has_alpha) = extract_pixel_data_for_analysis(pixel_data);
-        
+
         // Calculate luminance statistics
         let max_luminance = pixels_f32
             .iter()
@@ -43,30 +41,29 @@ impl EncodingAnalysis {
             .filter(|(i, _)| if has_alpha { i % 4 != 3 } else { true }) // Skip alpha channel
             .map(|(_, &p)| p)
             .fold(0.0f32, |max, p| max.max(p));
-            
+
         let min_luminance = pixels_f32
             .iter()
             .enumerate()
             .filter(|(i, _)| if has_alpha { i % 4 != 3 } else { true })
             .map(|(_, &p)| p)
             .fold(1.0f32, |min, p| min.min(p.max(0.0)));
-            
+
         let dynamic_range = if min_luminance > 0.0 {
             max_luminance / min_luminance
         } else {
             max_luminance
         };
-        
+
         // ICC profile analysis
-        let has_wide_gamut = icc_profile.map_or(false, |profile| {
-            analyze_icc_for_wide_gamut(profile)
-        });
-        
+        let has_wide_gamut =
+            icc_profile.map_or(false, |profile| analyze_icc_for_wide_gamut(profile));
+
         // HDR detection
         let has_hdr_content = max_luminance > 1.0 || dynamic_range > 100.0;
-        
+
         let is_hdr_or_wide_gamut = has_hdr_content || has_wide_gamut;
-        
+
         // Recommend bit depth based on content analysis
         let recommended_bit_depth = if has_hdr_content && max_luminance > 4.0 {
             RecommendedBitDepth::Sixteen
@@ -75,9 +72,9 @@ impl EncodingAnalysis {
         } else {
             RecommendedBitDepth::Eight
         };
-        
+
         let tone_mapping_required = has_hdr_content;
-        
+
         Self {
             has_hdr_content,
             has_wide_gamut,
@@ -93,8 +90,8 @@ impl EncodingAnalysis {
 
 /// Apply tone mapping to HDR content for 8-bit output formats
 pub fn apply_tone_mapping(
-    pixels: &[f32], 
-    has_alpha: bool, 
+    pixels: &[f32],
+    has_alpha: bool,
     tone_mapping: ToneMappingType,
     exposure: f32,
 ) -> Vec<f32> {
@@ -103,12 +100,12 @@ pub fn apply_tone_mapping(
         .enumerate()
         .map(|(i, &pixel)| {
             let clamped = pixel.max(0.0);
-            
+
             // Skip tone mapping for alpha channel
             if has_alpha && (i % 4 == 3) {
                 return clamped.min(1.0);
             }
-            
+
             match tone_mapping {
                 ToneMappingType::None => clamped.min(1.0),
                 ToneMappingType::Reinhard => {
@@ -149,13 +146,34 @@ pub fn convert_f32_to_u8(pixels_f32: &[f32]) -> Vec<u8> {
 /// Log encoding analysis results for debugging
 pub fn log_encoding_analysis(analysis: &EncodingAnalysis, format_name: &str) {
     println!("{}:  Encoding Analysis Results:", format_name);
-    println!("{}:   - HDR Content: {}", format_name, analysis.has_hdr_content);
-    println!("{}:   - Wide Gamut: {}", format_name, analysis.has_wide_gamut);
-    println!("{}:   - Max Luminance: {:.3}", format_name, analysis.max_luminance);
-    println!("{}:   - Dynamic Range: {:.1}", format_name, analysis.dynamic_range);
-    println!("{}:   - Alpha Channel: {}", format_name, analysis.alpha_channel_present);
-    println!("{}:   - Recommended Bit Depth: {:?}", format_name, analysis.recommended_bit_depth);
-    println!("{}:   - Tone Mapping Required: {}", format_name, analysis.tone_mapping_required);
+    println!(
+        "{}:   - HDR Content: {}",
+        format_name, analysis.has_hdr_content
+    );
+    println!(
+        "{}:   - Wide Gamut: {}",
+        format_name, analysis.has_wide_gamut
+    );
+    println!(
+        "{}:   - Max Luminance: {:.3}",
+        format_name, analysis.max_luminance
+    );
+    println!(
+        "{}:   - Dynamic Range: {:.1}",
+        format_name, analysis.dynamic_range
+    );
+    println!(
+        "{}:   - Alpha Channel: {}",
+        format_name, analysis.alpha_channel_present
+    );
+    println!(
+        "{}:   - Recommended Bit Depth: {:?}",
+        format_name, analysis.recommended_bit_depth
+    );
+    println!(
+        "{}:   - Tone Mapping Required: {}",
+        format_name, analysis.tone_mapping_required
+    );
 }
 
 /// Provide encoding recommendations based on analysis
@@ -163,23 +181,44 @@ pub fn get_encoding_recommendations(analysis: &EncodingAnalysis, format_name: &s
     if analysis.has_hdr_content {
         println!("{}:  HDR Recommendations:", format_name);
         println!("{}:   - Use 10-bit or higher bit depth", format_name);
-        println!("{}:   - Consider tone mapping for display compatibility", format_name);
+        println!(
+            "{}:   - Consider tone mapping for display compatibility",
+            format_name
+        );
         if analysis.max_luminance > 10.0 {
-            println!("{}:   - Very high dynamic range detected - use 16-bit if supported", format_name);
+            println!(
+                "{}:   - Very high dynamic range detected - use 16-bit if supported",
+                format_name
+            );
         }
     }
-    
+
     if analysis.has_wide_gamut {
         println!("{}:  Wide Gamut Recommendations:", format_name);
-        println!("{}:   - Use RGB color model to preserve color accuracy", format_name);
-        println!("{}:   - Enable ICC profile embedding if supported", format_name);
-        println!("{}:   - Use higher quality settings to preserve gradients", format_name);
+        println!(
+            "{}:   - Use RGB color model to preserve color accuracy",
+            format_name
+        );
+        println!(
+            "{}:   - Enable ICC profile embedding if supported",
+            format_name
+        );
+        println!(
+            "{}:   - Use higher quality settings to preserve gradients",
+            format_name
+        );
     }
-    
+
     if analysis.is_hdr_or_wide_gamut {
         println!("{}:  Quality Recommendations:", format_name);
-        println!("{}:   - Use lossless compression if file size allows", format_name);
-        println!("{}:   - If lossy, use quality >= 85 to preserve detail", format_name);
+        println!(
+            "{}:   - Use lossless compression if file size allows",
+            format_name
+        );
+        println!(
+            "{}:   - If lossy, use quality >= 85 to preserve detail",
+            format_name
+        );
     }
 }
 
@@ -198,20 +237,21 @@ fn analyze_icc_for_wide_gamut(profile: &[u8]) -> bool {
     if profile.len() < 400 {
         return false;
     }
-    
+
     // Look for wide gamut indicators in the profile
     let profile_str = String::from_utf8_lossy(profile);
-    
-    profile_str.contains("Display P3") ||
-    profile_str.contains("DCI-P3") ||
-    profile_str.contains("Rec2020") ||
-    profile_str.contains("BT.2020") ||
-    profile_str.contains("ProPhoto") ||
-    profile_str.contains("Adobe RGB") ||
-    profile.len() > 1000 // Large profiles often indicate complex tone curves or wide gamuts
+
+    profile_str.contains("Display P3")
+        || profile_str.contains("DCI-P3")
+        || profile_str.contains("Rec2020")
+        || profile_str.contains("BT.2020")
+        || profile_str.contains("ProPhoto")
+        || profile_str.contains("Adobe RGB")
+        || profile.len() > 1000 // Large profiles often indicate complex tone curves or wide gamuts
 }
 
 /// Calculate optimal quality settings based on content analysis
+#[allow(dead_code)]
 pub fn calculate_optimal_quality(
     analysis: &EncodingAnalysis,
     base_quality: f32,
@@ -219,23 +259,23 @@ pub fn calculate_optimal_quality(
 ) -> OptimalQuality {
     let mut recommended_quality = base_quality;
     let mut use_lossless = false;
-    
+
     // Adjust quality based on content
     if analysis.is_hdr_or_wide_gamut {
         // High-quality content deserves better compression
         recommended_quality = (base_quality + 15.0).min(100.0);
-        
+
         // Consider lossless for critical content
         if format_supports_lossless && base_quality > 90.0 {
             use_lossless = true;
         }
     }
-    
+
     // Alpha channel content often benefits from higher quality
     if analysis.alpha_channel_present {
         recommended_quality = (recommended_quality + 5.0).min(100.0);
     }
-    
+
     OptimalQuality {
         quality: recommended_quality,
         use_lossless,
@@ -245,7 +285,8 @@ pub fn calculate_optimal_quality(
             "Alpha channel present - slightly increased quality"
         } else {
             "Standard content - base quality"
-        }.to_string(),
+        }
+        .to_string(),
     }
 }
 
@@ -266,16 +307,22 @@ pub trait IccProfileEmbedder {
 /// Default ICC profile embedding warnings for formats that don't support it
 pub fn warn_about_icc_limitations(format_name: &str, profile_size: usize) {
     println!("{}:  ICC Profile Limitations:", format_name);
-    println!("{}:   - ICC profile embedding not fully supported", format_name);
+    println!(
+        "{}:   - ICC profile embedding not fully supported",
+        format_name
+    );
     println!("{}:   - Profile size: {} bytes", format_name, profile_size);
-    println!("{}:   - Consider using sRGB or alternative workflow", format_name);
+    println!(
+        "{}:   - Consider using sRGB or alternative workflow",
+        format_name
+    );
 }
 
 /// Unified ICC profile embedding result
 #[derive(Debug)]
 pub enum IccEmbeddingResult {
     Success(Vec<u8>),
-    NotSupported(Vec<u8>), // Returns original data with reason
+    NotSupported(Vec<u8>),   // Returns original data with reason
     Failed(Vec<u8>, String), // Returns original data with error message
 }
 
@@ -335,13 +382,13 @@ fn embed_jxl_icc_profile(jxl_data: &[u8], _icc_profile: &[u8]) -> IccEmbeddingRe
 fn embed_avif_icc_profile(avif_data: &[u8], _icc_profile: &[u8]) -> IccEmbeddingResult {
     // AVIF ICC profile embedding is technically challenging
     // AVIF uses ISO-based container format requiring precise binary manipulation
-    
+
     println!("AVIF: Warning - ICC profile embedding is currently not supported for AVIF format");
     println!("AVIF: To minimize color changes, we recommend:");
     println!("AVIF:   1. Use ColorModel::RGB");
     println!("AVIF:   2. Use BitDepth::Ten or higher");
     println!("AVIF:   3. Use high quality settings");
-    
+
     // TODO: Implement ICC profile embedding using libheif-rs or dedicated library in the future
     IccEmbeddingResult::NotSupported(avif_data.to_vec())
 }
@@ -350,20 +397,20 @@ fn embed_avif_icc_profile(avif_data: &[u8], _icc_profile: &[u8]) -> IccEmbedding
 fn embed_webp_icc_profile(webp_data: &[u8], _icc_profile: &[u8]) -> IccEmbeddingResult {
     // WebP ICC profile embedding requires WebPMux functionality
     // Current webp crate doesn't expose WebPMux APIs directly
-    
+
     println!("WebP: Warning - ICC profile embedding requires WebPMux functionality");
     println!("WebP: Consider the following alternatives:");
     println!("WebP:   1. Use external tools like cwebp with -icc flag");
     println!("WebP:   2. Implement WebPMux bindings");
     println!("WebP:   3. Use alternative formats like JXL for better color management");
-    
+
     IccEmbeddingResult::NotSupported(webp_data.to_vec())
 }
 
 /// Provide format-specific recommendations for ICC profile handling
 pub fn provide_icc_recommendations(format_name: &str, has_wide_gamut: bool, is_hdr: bool) {
     println!("{}: ICC Profile Recommendations:", format_name);
-    
+
     match format_name {
         "JXL" => {
             println!("{}:   ✓ Full ICC profile embedding support", format_name);
@@ -373,21 +420,36 @@ pub fn provide_icc_recommendations(format_name: &str, has_wide_gamut: bool, is_h
         "AVIF" => {
             println!("{}:   ⚠ Limited ICC profile support", format_name);
             if has_wide_gamut || is_hdr {
-                println!("{}:   → Use ColorModel::RGB for better compatibility", format_name);
+                println!(
+                    "{}:   → Use ColorModel::RGB for better compatibility",
+                    format_name
+                );
                 println!("{}:   → Use BitDepth::Ten or higher", format_name);
             }
-            println!("{}:   → Consider JXL for better color management", format_name);
+            println!(
+                "{}:   → Consider JXL for better color management",
+                format_name
+            );
         }
         "WebP" => {
             println!("{}:   ⚠ No built-in ICC profile support", format_name);
             if has_wide_gamut || is_hdr {
                 println!("{}:   → Apply tone mapping before encoding", format_name);
-                println!("{}:   → Consider AVIF or JXL for wide gamut content", format_name);
+                println!(
+                    "{}:   → Consider AVIF or JXL for wide gamut content",
+                    format_name
+                );
             }
-            println!("{}:   → Use external tools for ICC embedding if needed", format_name);
+            println!(
+                "{}:   → Use external tools for ICC embedding if needed",
+                format_name
+            );
         }
         _ => {
-            println!("{}:   ? Format-specific recommendations not available", format_name);
+            println!(
+                "{}:   ? Format-specific recommendations not available",
+                format_name
+            );
         }
     }
 }

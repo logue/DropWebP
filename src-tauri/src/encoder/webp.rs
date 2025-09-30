@@ -1,13 +1,9 @@
-use crate::{
-    encoder::extract_pixel_data,
-    error::AppError,
-    options::HighBitDepthImage,
-};
 use super::common::{
     EncodingAnalysis, ToneMappingType, apply_tone_mapping, convert_f32_to_u8,
-    log_encoding_analysis, get_encoding_recommendations, handle_icc_profile_embedding,
-    provide_icc_recommendations
+    get_encoding_recommendations, handle_icc_profile_embedding, log_encoding_analysis,
+    provide_icc_recommendations,
 };
+use crate::{encoder::extract_pixel_data, error::AppError, options::HighBitDepthImage};
 use serde::{Deserialize, Serialize};
 use webp::{Encoder, WebPMemory};
 
@@ -63,12 +59,12 @@ pub fn encode(
     options: &WebpOptions,
 ) -> Result<Vec<u8>, AppError> {
     println!("WebP: Starting WebP encoding process...");
-    
+
     // Perform content analysis for optimal encoding
     let analysis = EncodingAnalysis::analyze(pixel_data, icc_profile.as_deref());
     log_encoding_analysis(&analysis, "WebP");
     get_encoding_recommendations(&analysis, "WebP");
-    
+
     // Get image dimensions and pixel data
     let (width, height) = match pixel_data {
         HighBitDepthImage::Rgb(buf) => buf.dimensions(),
@@ -76,13 +72,24 @@ pub fn encode(
         HighBitDepthImage::Argb(buf) => buf.dimensions(),
     };
     let (pixels_f32, is_rgba) = extract_pixel_data(pixel_data);
-    
-    println!("WebP: Image properties - {}x{}, {} channels", width, height, if is_rgba { 4 } else { 3 });
-    println!("WebP: Encoding settings - Quality: {}, Lossless: {}", options.quality, options.lossless);
+
+    println!(
+        "WebP: Image properties - {}x{}, {} channels",
+        width,
+        height,
+        if is_rgba { 4 } else { 3 }
+    );
+    println!(
+        "WebP: Encoding settings - Quality: {}, Lossless: {}",
+        options.quality, options.lossless
+    );
 
     // Apply tone mapping if HDR content is detected
     let processed_pixels = if analysis.tone_mapping_required {
-        println!("WebP: Applying tone mapping for HDR content (max luminance: {:.3})", analysis.max_luminance);
+        println!(
+            "WebP: Applying tone mapping for HDR content (max luminance: {:.3})",
+            analysis.max_luminance
+        );
         apply_tone_mapping(&pixels_f32, is_rgba, ToneMappingType::Reinhard, 1.0)
     } else if analysis.has_wide_gamut {
         println!("WebP: Processing wide gamut content");
@@ -111,13 +118,9 @@ pub fn encode(
     };
 
     println!("WebP: Successfully encoded WebP data");
-    
+
     // Handle ICC profile using common implementation
-    let final_webp_data = handle_icc_profile_embedding(
-        webp_memory.to_vec(),
-        icc_profile,
-        "WebP"
-    );
+    let final_webp_data = handle_icc_profile_embedding(webp_memory.to_vec(), icc_profile, "WebP");
 
     // Provide format-specific ICC recommendations
     provide_icc_recommendations("WebP", analysis.has_wide_gamut, analysis.has_hdr_content);

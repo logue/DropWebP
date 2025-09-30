@@ -1,13 +1,13 @@
+use super::common::{BitDepthAnalysis, IccProfileInfo, log_icc_profile_details};
 use crate::error::AppError;
 use crate::options::HighBitDepthImage;
 use image::{ImageBuffer, Rgb, Rgba};
 use jpeg2k::Image as Jp2Image;
-use super::common::{IccProfileInfo, BitDepthAnalysis, log_icc_profile_details};
 
 /// Decode JPEG 2000 file to HighBitDepthImage with ICC profile analysis
 pub fn decode(bytes: &[u8]) -> Result<(HighBitDepthImage, Option<Vec<u8>>), AppError> {
     println!("JPEG2K: Starting JPEG 2000 decode process...");
-    
+
     let jp2_image = Jp2Image::from_bytes(bytes).map_err(|e| AppError::Decode(e.to_string()))?;
 
     let width = jp2_image.width();
@@ -17,7 +17,10 @@ pub fn decode(bytes: &[u8]) -> Result<(HighBitDepthImage, Option<Vec<u8>>), AppE
     // Extract ICC profile if available (JPEG 2000 can contain ICC profiles)
     let icc_profile = extract_jp2_icc_profile(bytes);
     let profile_info = icc_profile.as_ref().map(|profile| {
-        println!("JPEG2K: ICC profile detected (size: {} bytes)", profile.len());
+        println!(
+            "JPEG2K: ICC profile detected (size: {} bytes)",
+            profile.len()
+        );
         log_icc_profile_details(profile);
         IccProfileInfo::analyze(profile)
     });
@@ -26,11 +29,18 @@ pub fn decode(bytes: &[u8]) -> Result<(HighBitDepthImage, Option<Vec<u8>>), AppE
     let bit_depth = components[0].precision() as u8;
     let pixel_count = (width * height) as usize;
     let bit_analysis = BitDepthAnalysis::analyze(bit_depth, profile_info.as_ref(), pixel_count);
-    
-    println!("JPEG2K: Image properties - {}x{}, {} bit depth, {} components",
-            width, height, bit_depth, components.len());
-    println!("JPEG2K: Processing analysis - Type: {:?}, Format: {:?}",
-            bit_analysis.processing_type, bit_analysis.recommended_format);
+
+    println!(
+        "JPEG2K: Image properties - {}x{}, {} bit depth, {} components",
+        width,
+        height,
+        bit_depth,
+        components.len()
+    );
+    println!(
+        "JPEG2K: Processing analysis - Type: {:?}, Format: {:?}",
+        bit_analysis.processing_type, bit_analysis.recommended_format
+    );
 
     let result: HighBitDepthImage = match components.len() {
         3 => {
@@ -92,31 +102,35 @@ fn extract_jp2_icc_profile(bytes: &[u8]) -> Option<Vec<u8>> {
     // This is a simplified implementation
     // A full implementation would parse the JP2 box structure and locate the 'colr' box
     // containing ICC profile data
-    
+
     // JPEG 2000 uses box-based structure similar to ISO BMFF
     // Look for 'colr' (color specification) box which may contain ICC profile
-    
+
     let mut pos = 0;
     while pos + 8 < bytes.len() {
         // Read box length (4 bytes, big-endian)
-        if pos + 4 > bytes.len() { break; }
-        let box_length = u32::from_be_bytes([
-            bytes[pos], bytes[pos + 1], bytes[pos + 2], bytes[pos + 3]
-        ]) as usize;
-        
+        if pos + 4 > bytes.len() {
+            break;
+        }
+        let box_length =
+            u32::from_be_bytes([bytes[pos], bytes[pos + 1], bytes[pos + 2], bytes[pos + 3]])
+                as usize;
+
         if box_length < 8 || pos + box_length > bytes.len() {
             pos += 4;
             continue;
         }
-        
+
         // Read box type (4 bytes)
-        if pos + 8 > bytes.len() { break; }
+        if pos + 8 > bytes.len() {
+            break;
+        }
         let box_type = &bytes[pos + 4..pos + 8];
-        
+
         // Check for color specification box
         if box_type == b"colr" && box_length > 12 {
             let box_data = &bytes[pos + 8..pos + box_length];
-            
+
             // Check if this is an ICC profile (METH field = 0x02)
             if box_data.len() > 3 && box_data[0] == 0x02 {
                 // ICC profile data starts after the method and precedence fields
@@ -125,9 +139,9 @@ fn extract_jp2_icc_profile(bytes: &[u8]) -> Option<Vec<u8>> {
                 }
             }
         }
-        
+
         pos += box_length;
     }
-    
+
     None
 }

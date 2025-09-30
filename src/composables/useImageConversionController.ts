@@ -29,6 +29,7 @@ export function useImageConversionController(t: ComposerTranslation) {
   const currentFile: Ref<string | undefined> = ref(); // 現在のファイル
   const inProgress = ref(false); // 処理中フラグ
   const progress: Ref<number> = ref(0); // 進捗
+  const message: Ref<string> = ref(''); // ダイアログのメッセージ
 
   /**
    * 変換処理
@@ -46,7 +47,12 @@ export function useImageConversionController(t: ComposerTranslation) {
       if (!file) {
         continue;
       }
+      // 進捗メッセージを更新
       const pathInfo = await fileSystem.pathInfo(file);
+      message.value = t('progress', {
+        file: pathInfo.fileName,
+        type: t(`type.${settingsStore.commonOptions.format}`)
+      });
       if (!settingsStore.commonOptions.overwrite && pathInfo.exists) {
         // 上書き禁止オプションが有効で、出力先に同名ファイルが存在する場合はスキップ
         console.info(`Skipping ${file} as it already exists and overwrite is disabled.`);
@@ -242,6 +248,7 @@ export function useImageConversionController(t: ComposerTranslation) {
     inProgress,
     currentFile,
     progress,
+    message,
     // methods
     convertByDialog,
     convertByDirDialog
