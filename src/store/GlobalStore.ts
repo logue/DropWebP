@@ -11,7 +11,8 @@ export default defineStore('global', () => {
   const progress: Ref<number | null> = ref(null);
   /** SnackBar Text */
   const message: Ref<string> = ref('');
-
+  /** SnackBar Color */
+  const snackbarColor: Ref<string | undefined> = ref();
   // Actions
 
   /**
@@ -43,11 +44,13 @@ export default defineStore('global', () => {
    * Show snackbar message
    *
    * @param msg - snackbar message
+   * @param color - snackbar color
    */
-  function setMessage(msg = ''): void {
+  function setMessage(msg = '', color?: string): void {
     // put snackbar text
     message.value = msg;
+    snackbarColor.value = color;
   }
 
-  return { loading, progress, message, setLoading, setProgress, setMessage };
+  return { loading, progress, message, snackbarColor, setLoading, setProgress, setMessage };
 });

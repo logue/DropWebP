@@ -15,6 +15,8 @@ export function useLogger() {
       // 必要に応じてUIに表示（例：スナックバーで通知）
       if (logData.level === 'info') {
         globalStore.setMessage(logData.message);
+      } else if (logData.level === 'error') {
+        globalStore.setMessage(logData.message, 'red');
       }
     });
   });

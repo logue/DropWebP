@@ -190,7 +190,7 @@ export function useImageConversionController(t: ComposerTranslation) {
       const converted = await compress(buffer);
       await fileSystem.save(savePath, converted);
     }
-    globalStore.setMessage(t('completed'));
+    globalStore.setMessage(t('completed'), 'success');
     globalStore.setLoading(false);
   }
   usePaste(handlePaste);

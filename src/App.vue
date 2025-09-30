@@ -86,7 +86,11 @@ onMounted(async () => {
       <v-progress-circular indeterminate size="64" />
     </v-overlay>
 
-    <v-snackbar v-model="snackbarVisibility" @update:model-value="onSnackbarChanged">
+    <v-snackbar
+      v-model="snackbarVisibility"
+      :color="globalStore.snackbarColor"
+      @update:model-value="onSnackbarChanged"
+    >
       {{ snackbarText }}
       <template #actions>
         <v-btn icon="mdi-close" @click="onSnackbarChanged" />
