@@ -82,9 +82,9 @@ export function useImageConversionController(t: ComposerTranslation) {
         dialog.value = false;
         inProgress.value = false;
         if (e instanceof Error) {
-          globalStore.setMessage(e.message);
+          globalStore.setMessage(e.message, 'red');
         } else {
-          globalStore.setMessage(String(e));
+          globalStore.setMessage(String(e), 'red');
         }
         playErrorSound();
         return;
@@ -95,7 +95,7 @@ export function useImageConversionController(t: ComposerTranslation) {
     dialog.value = false;
     inProgress.value = false;
     playCompleteSound();
-    globalStore.setMessage(t('completed'));
+    globalStore.setMessage(t('completed'), 'success');
   };
 
   /** パスリストからファイル一覧を出力する */
