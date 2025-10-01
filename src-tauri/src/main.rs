@@ -3,6 +3,7 @@ mod command;
 mod decoder;
 mod encoder;
 mod error;
+mod logging;
 mod options;
 use std::time::Instant;
 
@@ -19,6 +20,12 @@ fn main() {
             command::get_path_info,
             command::delete_path
         ])
+        .setup(|app| {
+            // Initialize logging system
+            logging::init_logging(app.handle().clone());
+            logging::send_log(logging::LogLevel::Info, "Application started successfully");
+            Ok(())
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
     println!("[{:.2?}] App exit", start_time.elapsed());

@@ -1,23 +1,9 @@
 use crate::error::AppError;
+use crate::logging::{LogLevel, ResultExt, send_log_with_handle};
 use crate::options::{EncodeOptions, PathInfo};
 use image::{ImageFormat, guess_format};
 use std::{self, path::Path};
 use tauri::AppHandle;
-
-/// フロントエンドにログメッセージを送信する
-fn send_log(app_handle: &AppHandle, level: &str, message: &str) {
-    use tauri::Emitter; // Emitterトレイトを使用
-
-    let log_data = serde_json::json!({
-        "level": level,
-        "message": message,
-        "timestamp": chrono::Utc::now().to_rfc3339()
-    });
-
-    if let Err(e) = app_handle.emit("log-message", &log_data) {
-        eprintln!("Failed to send log message: {}", e);
-    }
-}
 
 /// Uint8Arrayバイナリデータを圧縮してUint8Arrayで返します。
 /// # 引数
@@ -32,7 +18,7 @@ pub async fn convert(
     options: EncodeOptions,
     app: AppHandle,
 ) -> Result<Vec<u8>, String> {
-    send_log(&app, "info", "Starting compression...");
+    send_log_with_handle(&app, LogLevel::Info, "Starting compression...");
 
     let app_clone = app.clone();
     // spawn_blocking でUIをフリーズさせずに重い処理を実行
@@ -42,29 +28,32 @@ pub async fn convert(
         if let EncodeOptions::Jxl(jxl_opts) = &options {
             // `guess_format`がJPEGを返した場合にのみ、このブロックに入る
             if guess_format(&data).map_or(false, |format| format == ImageFormat::Jpeg) {
-                send_log(
+                send_log_with_handle(
                     &app_clone,
-                    "info",
+                    LogLevel::Info,
                     "JPEG detected for JPEG XL target. Using transcode path...",
                 );
 
                 // トランスコードを実行し、成功したら`return`で即座に関数を抜ける
                 return crate::encoder::jxl::transcode(&data, jxl_opts)
+                    .log_error(Some("JPEG to JPEG XL transcode"))
                     .map_err(|e| format!("Failed to transcode JPEG to JPEG XL: {}", e));
             }
         }
         // --- 上記のif条件に当てはまらなかった場合、通常のデコード→エンコード処理に進む ---
 
-        send_log(&app_clone, "info", "Decoding image...");
+        send_log_with_handle(&app_clone, LogLevel::Info, "Decoding image...");
 
         // 画像デコード
-        let data =
-            crate::decoder::decode(&data).map_err(|e| format!("Failed to decode image: {}", e))?;
+        let data = crate::decoder::decode(&data)
+            .log_error(Some("Image decoding"))
+            .map_err(|e| format!("Failed to decode image: {}", e))?;
 
         // 画像エンコード
-        send_log(&app_clone, "info", "Encoding image...");
+        send_log_with_handle(&app_clone, LogLevel::Info, "Encoding image...");
         let (img, icc_profile) = data;
         let data = crate::encoder::encode(img, icc_profile, &options)
+            .log_error(Some("Image encoding"))
             .map_err(|e| format!("Failed to encode image: {}", e))?;
 
         Ok(data)
@@ -72,7 +61,7 @@ pub async fn convert(
     .await
     .map_err(|e| e.to_string())?;
 
-    send_log(&app, "info", "Finish compression.");
+    send_log_with_handle(&app, LogLevel::Info, "Compression completed successfully");
     converted_data
 }
 

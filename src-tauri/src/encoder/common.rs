@@ -1,6 +1,7 @@
 use crate::options::HighBitDepthImage;
 
 /// Encoding quality analysis and optimization
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct EncodingAnalysis {
     pub has_hdr_content: bool,
