@@ -1,0 +1,60 @@
+# 日本語言語ファイル
+common:
+  home: ホーム
+  test: テスト
+  settings: 設定
+  about: について
+  language: 言語
+  copyright: 2025 © Drop Compress Image
+
+# ヘッダー・ナビゲーション
+header:
+  title: Drop Compress Image Help
+  home: ホーム
+  test: テスト
+
+# フッター
+footer:
+  copyright: 2025 © Drop Compress Image
+
+# ホームページ
+home:
+  title: Drop Compress Image ヘルプサイト
+  subtitle: 画像圧縮アプリのヘルプとガイド
+  start_button: 開始する
+  features:
+    multiple_formats:
+      title: 複数形式対応
+      description: WebP、AVIF、JXLなど最新の画像形式に対応
+    high_speed:
+      title: 高速変換
+      description: Rust基盤で高速な画像処理を実現
+    drag_drop:
+      title: ドラッグ&ドロップ
+      description: 簡単な操作で画像を一括変換
+
+# テストページ
+test:
+  title: Vuetify テストページ
+  description: vuetify-nuxt-moduleが正常に動作するかテストするページです。
+  button_test: ボタンテスト
+  icon_test: アイコンテスト
+  card_test: カードテスト
+  form_test: フォームテスト
+  card_title: カード
+  card_content: これはテストカードです。Vuetifyのマテリアルデザインが適用されています。
+  action_button: アクション
+  test_input: テスト入力
+  test_select: テスト選択
+  success_message: vuetify-nuxt-moduleが正常に動作しています！
+  select_options:
+    option1: オプション1
+    option2: オプション2
+    option3: オプション3
+
+# エラーメッセージとアラート
+messages:
+  success: 成功
+  error: エラー
+  warning: 警告
+  info: 情報

@@ -1,0 +1,60 @@
+# 繁體中文語言檔案
+common:
+  home: 首頁
+  test: 測試
+  settings: 設定
+  about: 關於
+  language: 語言
+  copyright: 2025 © Logue
+
+# 標頭與導航
+header:
+  title: Drop Compress Image 說明
+  home: 首頁
+  test: 測試
+
+# 頁尾
+footer:
+  copyright: 2025 © Logue
+
+# 首頁
+home:
+  title: Drop Compress Image 說明網站
+  subtitle: 圖像壓縮應用程式的說明與指南
+  start_button: 開始使用
+  features:
+    multiple_formats:
+      title: 多格式支援
+      description: 支援 WebP、AVIF、JXL 等最新圖像格式
+    high_speed:
+      title: 高速轉換
+      description: 基於 Rust 的快速圖像處理實現
+    drag_drop:
+      title: 拖放操作
+      description: 簡單操作即可批次轉換圖像
+
+# 測試頁面
+test:
+  title: Vuetify 測試頁面
+  description: 這個頁面用來測試 vuetify-nuxt-module 是否正常運作。
+  button_test: 按鈕測試
+  icon_test: 圖示測試
+  card_test: 卡片測試
+  form_test: 表單測試
+  card_title: 卡片
+  card_content: 這是一個測試卡片。已套用 Vuetify 的 Material Design。
+  action_button: 動作
+  test_input: 測試輸入
+  test_select: 測試選擇
+  success_message: vuetify-nuxt-module 正常運作中！
+  select_options:
+    option1: 選項 1
+    option2: 選項 2
+    option3: 選項 3
+
+# 錯誤訊息與警告
+messages:
+  success: 成功
+  error: 錯誤
+  warning: 警告
+  info: 資訊

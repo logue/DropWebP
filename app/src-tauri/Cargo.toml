@@ -1,0 +1,59 @@
+[package]
+name = "drop-compress-image"
+version = "2.2.1"
+authors = ["Logue"]
+edition = "2024"
+rust-version = "1.89.0"
+description = "Drop Compress Image is a desktop application that converts images to WebP/Avif/JPEG XL format using drag-and-drop functionality. Built with Vite, Vue 3, TypeScript, and Tauri."
+readme = "../../ReadMe.md"
+repository = "https://github.com/logue/DropWebP"
+license-file = "../../LICENSE"
+keywords = [
+  "tauri",
+  "webp",
+  "avif",
+  "jpeg-xl",
+  "image",
+  "compress",
+  "converter",
+  "desktop",
+  "application",
+]
+categories = ["image-processing", "gui"]
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "drop_compress_image_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+cc = "1.2.35"
+pkg-config = "0.3.32"
+tauri-build = { version = "2.4.1", features = [] }
+vcpkg = "0.2.15"
+
+[dependencies]
+bytemuck = "1.23.2"
+chrono = { version = "0.4.42", features = ["serde"] }
+image = "0.25.8"
+imgref = "1.11.0"
+jpeg2k = "0.10.1"
+jpegxl-rs = "0.11.2"
+kamadak-exif = "0.6.1"
+libheif-rs = "2.4.0"
+openjpeg-sys = "1.0.12"
+png = "0.18.0"
+ravif = "0.12.0"
+rgb = "0.8.52"
+serde = "1.0.219"
+serde_json = "1.0.143"
+tauri = { version = "2.8.5", features = [] }
+tauri-plugin-dialog = "2.4.0"
+tauri-plugin-fs = "2.4.2"
+tauri-plugin-log = "2.7.0"
+tauri-plugin-opener = "2.5.0"
+thiserror = "2.0.17"
+webp = "0.3.1"

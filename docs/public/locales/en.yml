@@ -1,0 +1,60 @@
+# English language file
+common:
+  home: Home
+  test: Test
+  settings: Settings
+  about: About
+  language: Language
+  copyright: 2025 © Drop Compress Image
+
+# Header & Navigation
+header:
+  title: Drop Compress Image Help
+  home: Home
+  test: Test
+
+# Footer
+footer:
+  copyright: 2025 © Drop Compress Image
+
+# Home Page
+home:
+  title: Drop Compress Image Help Site
+  subtitle: Help and guide for image compression app
+  start_button: Get Started
+  features:
+    multiple_formats:
+      title: Multiple Format Support
+      description: Support for latest image formats like WebP, AVIF, JXL
+    high_speed:
+      title: High-Speed Conversion
+      description: Fast image processing powered by Rust
+    drag_drop:
+      title: Drag & Drop
+      description: Batch convert images with simple operations
+
+# Test Page
+test:
+  title: Vuetify Test Page
+  description: This page tests if vuetify-nuxt-module is working properly.
+  button_test: Button Test
+  icon_test: Icon Test
+  card_test: Card Test
+  form_test: Form Test
+  card_title: Card
+  card_content: This is a test card. Vuetify's Material Design is applied.
+  action_button: Action
+  test_input: Test Input
+  test_select: Test Select
+  success_message: vuetify-nuxt-module is working properly!
+  select_options:
+    option1: Option 1
+    option2: Option 2
+    option3: Option 3
+
+# Error Messages and Alerts
+messages:
+  success: Success
+  error: Error
+  warning: Warning
+  info: Information
