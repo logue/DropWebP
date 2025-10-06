@@ -12,6 +12,7 @@ import errorSound from '../assets/sounds/error.mp3';
 
 import { useFileSystem } from './useFileSystem';
 import { useImageConverter } from './useImageConverter'; // 汎用コンバーターをインポート
+import { useNotification } from './useNotification';
 import { usePaste } from './usePaste';
 
 export function useImageConversionController(t: ComposerTranslation) {
@@ -23,6 +24,7 @@ export function useImageConversionController(t: ComposerTranslation) {
   const { play: playErrorSound } = useSound(errorSound);
 
   const { convert, compress, extensions } = useImageConverter(); // コアロジックを取得
+  const { notifyConversionComplete, notifyBatchComplete, notifyError } = useNotification();
 
   // --- UIの状態管理 ---
   const dialog = ref(false); // 進捗ダイアログ表示制御
@@ -81,11 +83,12 @@ export function useImageConversionController(t: ComposerTranslation) {
         console.error(file, e);
         dialog.value = false;
         inProgress.value = false;
-        if (e instanceof Error) {
-          globalStore.setMessage(e.message, 'red');
-        } else {
-          globalStore.setMessage(String(e), 'red');
-        }
+        const errorMessage = e instanceof Error ? e.message : String(e);
+        globalStore.setMessage(errorMessage, 'red');
+
+        // エラー通知を送信
+        notifyError(errorMessage);
+
         playErrorSound();
         return;
       }
@@ -95,6 +98,17 @@ export function useImageConversionController(t: ComposerTranslation) {
     dialog.value = false;
     inProgress.value = false;
     playCompleteSound();
+
+    // すべての変換が完了した場合の通知
+    const format = settingsStore.commonOptions.format;
+    if (files.length > 1) {
+      notifyBatchComplete(files.length, format);
+    } else if (files.length === 1 && files[0]) {
+      // 単一ファイルの場合はファイル名を取得
+      const pathInfo = await fileSystem.pathInfo(files[0]);
+      notifyConversionComplete(pathInfo.fileName, format);
+    }
+
     globalStore.setMessage(t('completed'), 'success');
   };
 

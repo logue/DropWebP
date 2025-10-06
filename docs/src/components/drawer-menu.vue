@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 
-import type DrawerMenuItem from '../interfaces/DrawerMenuItemInterface';
+import type DrawerMenuItem from '@/interfaces/DrawerMenuItemInterface';
 
 // 現在のルートから言語を取得
 const route = useRoute();

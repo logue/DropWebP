@@ -88,6 +88,12 @@ export default defineNuxtConfig({
       }
     }
   },
+
+  // TypeScript パスエイリアス設定
+  alias: {
+    '@': fileURLToPath(new URL('./src', import.meta.url))
+  },
+
   build: {
     transpile: ['vue-i18n']
   },

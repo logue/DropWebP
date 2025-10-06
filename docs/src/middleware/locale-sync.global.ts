@@ -11,8 +11,9 @@ export default defineNuxtRouteMiddleware(to => {
     // クライアントサイドでi18nの言語を設定
     if (process.client) {
       const { $i18n } = useNuxtApp();
-      if ($i18n && $i18n.locale.value !== firstSegment) {
-        $i18n.locale.value = firstSegment as 'ja' | 'en' | 'ko' | 'zh-tw';
+      const i18n = $i18n as any;
+      if (i18n && i18n.locale && i18n.locale.value !== firstSegment) {
+        i18n.locale.value = firstSegment as 'ja' | 'en' | 'ko' | 'zh-tw';
       }
     }
     return;
@@ -21,8 +22,9 @@ export default defineNuxtRouteMiddleware(to => {
   // デフォルトは英語（フォールバック）
   if (process.client) {
     const { $i18n } = useNuxtApp();
-    if ($i18n && $i18n.locale.value !== 'en') {
-      $i18n.locale.value = 'en';
+    const i18n = $i18n as any;
+    if (i18n && i18n.locale && i18n.locale.value !== 'en') {
+      i18n.locale.value = 'en';
     }
   }
 });

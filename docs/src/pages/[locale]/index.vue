@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 
-import logo from '~/assets/logo.png';
+import logo from '@/assets/logo.png';
 
 const { t } = useI18n();
 const route = useRoute();

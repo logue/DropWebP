@@ -5,7 +5,7 @@ const route = useRoute();
 const nuxtApp = useNuxtApp();
 
 // i18nインスタンスを取得
-const i18n = nuxtApp.$i18n;
+const i18n = nuxtApp.$i18n as any;
 const { t } = useI18n();
 
 const currentLocale = computed(() => {

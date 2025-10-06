@@ -13,6 +13,7 @@
     "fs:read-dirs",
     "fs:read-files",
     "fs:write-files",
+    "notification:default",
     {
       "identifier": "fs:scope",
       "allow": [

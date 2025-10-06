@@ -8,41 +8,41 @@ const messages = {
 };
 
 export default defineNuxtPlugin(nuxtApp => {
-  // URL���猾��R�[�h���擾����֐�
+  // URLから言語コードを取得する関数
   const getLocaleFromRoute = (): string => {
     if (process.client) {
       const path = window.location.pathname;
       const pathSegments = path.split('/').filter(Boolean);
       const supportedLocales = ['ja', 'en', 'ko', 'zh-tw'];
 
-      // �p�X�̐擪���猾��R�[�h�𒊏o�i��: /en/getting-started -> en�j
-      if (pathSegments.length > 0 && supportedLocales.includes(pathSegments[0])) {
-        return pathSegments[0];
+      // パスの先頭から言語コードを抽出（例: /en/getting-started -> en）
+      if (pathSegments.length > 0 && supportedLocales.includes(pathSegments[0]!)) {
+        return pathSegments[0]!;
       }
     }
-    // �p�X�Ɍ���R�[�h���Ȃ��ꍇ�̓f�t�H���g�i���{��j
+    // パスに言語コードがない場合はデフォルト（日本語）
     return 'ja';
   };
 
-  // �u���E�U�̌���ݒ���擾�i�t�H�[���o�b�N�p�j
+  // ブラウザの言語設定を取得（フォールバック用）
   const browserLocale = process.client ? navigator.language.slice(0, 2) || 'ja' : 'ja';
 
-  // URL���猾���D��I�Ɏ擾�A�Ȃ���΃u���E�U�ݒ�
+  // URLから言語を優先的に取得、なければブラウザ設定
   const routeLocale = getLocaleFromRoute();
   let defaultLocale = routeLocale;
 
-  // ����R�[�h���K��
+  // 言語コード正規化
   if (browserLocale === 'zh' && defaultLocale === 'ja') {
     defaultLocale = 'zh-tw';
   }
 
-  // �Ή�����łȂ��ꍇ�͓��{����f�t�H���g��
+  // 対応言語でない場合は日本語をデフォルトに
   const supportedLocales = ['ja', 'en', 'ko', 'zh-tw'];
   if (!supportedLocales.includes(defaultLocale!)) {
     defaultLocale = 'ja';
   }
 
-  // i18n�C���X�^���X���쐬
+  // i18nインスタンスを作成
   const i18n = createI18n({
     legacy: false,
     locale: defaultLocale,
@@ -51,10 +51,10 @@ export default defineNuxtPlugin(nuxtApp => {
     globalInjection: true
   });
 
-  // Vue�A�v���C���X�^���X��Vue I18n���C���X�g�[��
+  // VueアプリインスタンスにVue I18nをインストール
   nuxtApp.vueApp.use(i18n);
 
-  // i18n�C���X�^���X��Nuxt�A�v���ŗ��p�\�ɂ���
+  // i18nインスタンスをNuxtアプリで利用可能にする
   return {
     provide: {
       i18n: i18n.global
