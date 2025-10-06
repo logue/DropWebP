@@ -13,24 +13,40 @@ export default defineNuxtConfig({
   // 2. アプリ設定
   app: {
     baseURL: process.env.NODE_ENV === 'production' ? '/DropWebP/' : '/',
-    buildAssetsDir: '_nuxt/'
+    buildAssetsDir: '_nuxt/',
+    head: {
+      link: [
+        // app側と同じGoogle Fontsを読み込み
+        {
+          rel: 'preconnect',
+          href: 'https://fonts.googleapis.com'
+        },
+        {
+          rel: 'preconnect',
+          href: 'https://fonts.gstatic.com',
+          crossorigin: 'anonymous'
+        },
+        {
+          rel: 'stylesheet',
+          href: 'https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&family=Noto+Sans+JP:wght@100..900&family=Noto+Sans+KR:wght@100..900&family=Noto+Sans+Mono:wght@100..900&family=Noto+Sans+TC:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap'
+        }
+      ]
+    }
   },
 
   // 3. SSG設定（静的サイト生成）
   nitro: {
     prerender: {
       routes: [
-        '/',
+        '/', // ルートはミドルウェアでリダイレクト
         '/ja',
         '/en',
         '/ko',
         '/zh-tw',
-        '/getting-started',
         '/ja/getting-started',
         '/en/getting-started',
         '/ko/getting-started',
         '/zh-tw/getting-started',
-        '/test',
         '/ja/test',
         '/en/test',
         '/ko/test',
@@ -46,7 +62,10 @@ export default defineNuxtConfig({
     }
   },
 
-  modules: ['@nuxt/eslint', 'vuetify-nuxt-module'],
+  modules: ['@nuxt/eslint', 'vuetify-nuxt-module', '@pinia/nuxt'],
+
+  // CSS設定（Vuetifyのフォント設定を含む）
+  css: ['@/styles/settings.scss'],
 
   // Vuetify設定
   vuetify: {

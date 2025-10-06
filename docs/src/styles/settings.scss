@@ -1,0 +1,35 @@
+/**
+ * src/styles/settings.scss
+ *
+ * Configures SASS variables and Vuetify overwrites
+ */
+
+// Vuetify SASS variables override
+@use 'vuetify/settings' with (
+  $body-font-family: (
+    'Noto Sans',
+    'Noto Sans JP',
+    'Noto Sans KR',
+    'Noto Sans TC',
+    'Noto Color Emoji',
+    sans-serif
+  )
+);
+
+// グローバルなフォント設定を追加
+:root {
+  font-family:
+    'Noto Sans', 'Noto Sans JP', 'Noto Sans KR', 'Noto Sans TC', 'Noto Color Emoji', sans-serif;
+}
+
+// Fix for monospace Font.
+code,
+kbd,
+pre,
+samp,
+var {
+  font-family: 'Noto Sans Mono', monospace !important;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings: 'wdth' 100;
+}
