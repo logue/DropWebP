@@ -22,7 +22,30 @@ export default defineConfigWithVueTs(
     name: 'app/files-to-lint',
     files: ['**/*.{ts,mts,tsx,vue}']
   },
-  globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**', '**/src-tauri/**']),
+  globalIgnores([
+    'dist/',
+    'public/',
+    'src-tauri/',
+    '.nuxt/',
+    '.output/',
+    'node_modules/',
+    '**/.vite/',
+    '**/.cache/',
+    '**/*.d.ts',
+    'coverage/',
+    // 生成されたJavaScriptファイルを除外
+    'app/src/**/*.js',
+    'app/src/**/*.vue.js',
+    'docs/src/**/*.js',
+    'docs/src/**/*.vue.js',
+    // ビルド済みファイル
+    'app/dist/',
+    'docs/.output/',
+    'docs/.nuxt/',
+    // Tauri固有
+    'app/src-tauri/target/',
+    'app/src-tauri/Cargo.lock'
+  ]),
   pluginVue.configs['flat/recommended'],
   ...pluginVueA11y.configs['flat/recommended'],
   vueTsConfigs.recommended,

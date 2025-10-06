@@ -16,6 +16,8 @@
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --build --force",
+    "lint": "eslint src/**/*.{ts,vue} --fix --cache --cache-location ./node_modules/.vite/vite-plugin-eslint && prettier src/**/*.{ts,vue,json} -w -u",
+    "lint:style": "stylelint \"./src/**/*.{css,sass,scss,htm,html,vue}\" --fix --cache-location ./node_modules/.vite/vite-plugin-stylelint && prettier \"./src/**/*.{css,sass,scss,htm,html,vue}\" -w -u",
     "tauri": "tauri"
   },
   "dependencies": {
@@ -37,12 +39,7 @@
     "@intlify/unplugin-vue-i18n": "^11.0.1",
     "@modyfi/vite-plugin-yaml": "^1.1.1",
     "@tauri-apps/cli": "2.8.4",
-    "@tsconfig/node-lts": "^22.0.2",
-    "@types/node": "^24.6.2",
     "@vitejs/plugin-vue": "^6.0.1",
-    "@vue/eslint-config-prettier": "^10.2.0",
-    "@vue/eslint-config-typescript": "^14.6.0",
-    "@vue/tsconfig": "^0.8.1",
     "npm-run-all2": "^8.0.4",
     "resize-observer-polyfill": "^1.5.1",
     "rimraf": "^6.0.1",
