@@ -121,5 +121,5 @@ export function useFileSystem() {
     }
   }
 
-  return { read, save, del, collectFiles, pathInfo };
+  return { read, save, del, collectFiles, pathInfo, sep };
 }

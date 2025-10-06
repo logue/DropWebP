@@ -1,4 +1,10 @@
 export interface CommonOptions {
+  /** Play sound when done */
+  sound: boolean;
+  /** Sound Volume */
+  volume: number;
+  /** Notify in desktop */
+  notify: boolean;
   /** Output image format */
   format: 'avif' | 'webp' | 'jxl';
   /** Overwrite original file */

@@ -2,14 +2,13 @@ import { useGlobalStore, useSettingsStore } from '@/store';
 import { ref, type Ref, nextTick } from 'vue';
 import type { ComposerTranslation } from 'vue-i18n';
 
-import { listen } from '@tauri-apps/api/event';
-import { sep } from '@tauri-apps/api/path';
 import { open, save } from '@tauri-apps/plugin-dialog';
 import { useSound } from '@vueuse/sound';
 
 import completeSound from '../assets/sounds/complete.mp3';
 import errorSound from '../assets/sounds/error.mp3';
 
+import { useDragAndDrop } from './useDragAndDrop';
 import { useFileSystem } from './useFileSystem';
 import { useImageConverter } from './useImageConverter'; // 汎用コンバーターをインポート
 import { useNotification } from './useNotification';
@@ -20,8 +19,12 @@ export function useImageConversionController(t: ComposerTranslation) {
   const fileSystem = useFileSystem();
   const settingsStore = useSettingsStore();
 
-  const { play: playCompleteSound } = useSound(completeSound);
-  const { play: playErrorSound } = useSound(errorSound);
+  const { play: playCompleteSound } = useSound(completeSound, {
+    volume: settingsStore.commonOptions.volume
+  });
+  const { play: playErrorSound } = useSound(errorSound, {
+    volume: settingsStore.commonOptions.volume
+  });
 
   const { convert, compress, extensions } = useImageConverter(); // コアロジックを取得
   const { notifyConversionComplete, notifyBatchComplete, notifyError } = useNotification();
@@ -88,16 +91,13 @@ export function useImageConversionController(t: ComposerTranslation) {
 
         // エラー通知を送信
         notifyError(errorMessage);
-
-        playErrorSound();
+        if (settingsStore.commonOptions.sound) {
+          playErrorSound();
+        }
         return;
       }
       progress.value = Math.floor(((i + 1) / files.length) * 100);
     }
-
-    dialog.value = false;
-    inProgress.value = false;
-    playCompleteSound();
 
     // すべての変換が完了した場合の通知
     const format = settingsStore.commonOptions.format;
@@ -110,6 +110,12 @@ export function useImageConversionController(t: ComposerTranslation) {
     }
 
     globalStore.setMessage(t('completed'), 'success');
+
+    dialog.value = false;
+    inProgress.value = false;
+    if (settingsStore.commonOptions.sound) {
+      playCompleteSound();
+    }
   };
 
   /** パスリストからファイル一覧を出力する */
@@ -139,25 +145,63 @@ export function useImageConversionController(t: ComposerTranslation) {
 
     if (!files.length) {
       globalStore.setMessage(t('error.no_images_found_selected'));
-      playErrorSound();
+      if (settingsStore.commonOptions.sound) {
+        playErrorSound();
+      }
       return;
     }
 
     return files;
   };
 
-  // D&D
-  listen('tauri://drag-drop', async e => {
-    const inputs = (e.payload as { paths: string[] }).paths;
-    const files = await scanFiles(inputs);
+  // ファイル選択
+  const convertByDialog = async () => {
+    let selected: string[] | null = [];
+    try {
+      // ダイアログを表示
+      selected = await open({
+        title: t('select_files_title'),
+        multiple: true,
+        directory: false,
+        filters: [{ name: 'Image', extensions }]
+      });
+    } catch (e) {
+      console.error(e);
+    }
+    if (!selected) return;
+
+    const files = await scanFiles(selected);
     if (!files) {
       return;
     }
     await processFiles(files);
-  });
+  };
 
-  // ペースト処理
-  async function handlePaste(event: ClipboardEvent) {
+  // フォルダを選択ボタンが押された
+  const convertByDirDialog = async () => {
+    let picked: string | null = null;
+    try {
+      picked = await open({
+        title: t('select_directory_title'),
+        directory: true,
+        recursive: true
+      });
+    } catch (e) {
+      console.error(e);
+    }
+
+    if (!picked) return;
+    const dir = Array.isArray(picked) ? picked[0] : picked;
+    // ディレクトリを走査
+    const files = await scanFiles(dir);
+    if (!files) {
+      return;
+    }
+    await processFiles(files);
+  };
+
+  // クリップボードからのペーストイベントを監視
+  usePaste(async (event: ClipboardEvent) => {
     // クリップボード内のデータを取得
     const items = event.clipboardData?.items;
     if (!items) return;
@@ -191,7 +235,7 @@ export function useImageConversionController(t: ComposerTranslation) {
       // 保存先のダイアログを表示
       const savePath = await save({
         title: t('save_as_title'),
-        defaultPath: `${settingsStore.commonOptions.outputPath}${sep()}image.${
+        defaultPath: `${settingsStore.commonOptions.outputPath}${fileSystem.sep()}image.${
           settingsStore.commonOptions.format
         }`,
         filters: [filtersMap[format]]
@@ -206,55 +250,19 @@ export function useImageConversionController(t: ComposerTranslation) {
     }
     globalStore.setMessage(t('completed'), 'success');
     globalStore.setLoading(false);
-  }
-  usePaste(handlePaste);
-
-  // ファイル選択
-  const convertByDialog = async () => {
-    let selected: string[] | null = [];
-    try {
-      // ダイアログを表示
-      selected = await open({
-        title: t('select_files_title'),
-        multiple: true,
-        directory: false,
-        filters: [{ name: 'Image', extensions }]
-      });
-    } catch (e) {
-      console.error(e);
+    if (settingsStore.commonOptions.sound) {
+      playCompleteSound();
     }
-    console.log(selected);
-    if (!selected) return;
+  });
 
-    const files = await scanFiles(selected);
+  // ドラッグ&ドロップイベントを監視
+  useDragAndDrop(async paths => {
+    const files = await scanFiles(paths);
     if (!files) {
       return;
     }
     await processFiles(files);
-  };
-
-  // フォルダを選択ボタンが押された
-  const convertByDirDialog = async () => {
-    let picked: string | null = null;
-    try {
-      picked = await open({
-        title: t('select_directory_title'),
-        directory: true,
-        recursive: true
-      });
-    } catch (e) {
-      console.error(e);
-    }
-
-    if (!picked) return;
-    const dir = Array.isArray(picked) ? picked[0] : picked;
-    // ディレクトリを走査
-    const files = await scanFiles(dir);
-    if (!files) {
-      return;
-    }
-    await processFiles(files);
-  };
+  });
 
   return {
     // state

@@ -40,13 +40,16 @@ const defaultJxlOptions: JxlOptions = {
 };
 
 const defaultCommonOptions: CommonOptions = {
+  sound: true,
+  volume: 1.0,
+  notify: true,
   format: 'webp',
   overwrite: true,
   deleteOriginal: false,
   recursive: false,
   sameDirectory: true,
   ignoreJpeg: false,
-  outputPath: await documentDir()
+  outputPath: ''
 } as const;
 
 /** Global Store */
@@ -63,11 +66,12 @@ export default defineStore(
     const jxlOptions: Ref<JxlOptions> = ref({ ...defaultJxlOptions });
 
     /** 設定を初期化 */
-    const reset = () => {
+    const reset = async () => {
       commonOptions.value = { ...defaultCommonOptions };
       avifOptions.value = { ...defaultAvifOptions };
       webpOptions.value = { ...defaultWebpOptions };
       jxlOptions.value = { ...defaultJxlOptions };
+      commonOptions.value.outputPath = await documentDir();
     };
 
     const resetCommonOptions = () => (commonOptions.value = { ...defaultCommonOptions });
