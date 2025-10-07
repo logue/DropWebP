@@ -1,4 +1,4 @@
-use crate::encoder::{avif::AvifOptions, jxl::JxlOptions, webp::WebpOptions};
+use crate::encoder::{avif::AvifOptions, jxl::JxlOptions, png::PngOptions, webp::WebpOptions};
 use serde::{Deserialize, Serialize};
 
 /// 高ビット深度画像を表す列挙型
@@ -40,4 +40,5 @@ pub enum EncodeOptions {
     Avif(AvifOptions),
     Webp(WebpOptions),
     Jxl(JxlOptions),
+    Png(PngOptions),
 }

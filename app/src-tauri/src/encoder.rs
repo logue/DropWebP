@@ -1,6 +1,7 @@
 pub mod avif;
 pub mod common;
 pub mod jxl;
+pub mod png;
 pub mod webp;
 
 use crate::error::AppError;
@@ -36,6 +37,10 @@ pub fn encode(
         EncodeOptions::Jxl(opts) => {
             println!("Adapter: Converting JxlOptions for jpegxl_rs encoder...");
             jxl::encode(&img, icc_profile, opts)
+        }
+        EncodeOptions::Png(opts) => {
+            println!("Adapter: Converting PngOptions for zopfli encoder...");
+            png::encode(&img, icc_profile, opts)
         }
     };
 

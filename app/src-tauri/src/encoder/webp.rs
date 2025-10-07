@@ -1,7 +1,7 @@
 use super::common::{
-    EncodingAnalysis, ToneMappingType, apply_tone_mapping, convert_f32_to_u8,
-    get_encoding_recommendations, handle_icc_profile_embedding, log_encoding_analysis,
-    provide_icc_recommendations,
+    apply_tone_mapping, convert_f32_to_u8, get_encoding_recommendations,
+    handle_icc_profile_embedding, log_encoding_analysis, provide_icc_recommendations,
+    EncodingAnalysis, ToneMappingType,
 };
 use crate::{encoder::extract_pixel_data, error::AppError, options::HighBitDepthImage};
 use serde::{Deserialize, Serialize};
@@ -126,4 +126,32 @@ pub fn encode(
     provide_icc_recommendations("WebP", analysis.has_wide_gamut, analysis.has_hdr_content);
 
     Ok(final_webp_data)
+}
+
+/// WebPファイルサイズを推定
+pub fn estimate_size(img: &HighBitDepthImage, options: &WebpOptions) -> usize {
+    let (width, height) = match img {
+        HighBitDepthImage::Rgb(buf) => buf.dimensions(),
+        HighBitDepthImage::Rgba(buf) => buf.dimensions(),
+        HighBitDepthImage::Argb(buf) => buf.dimensions(),
+    };
+
+    let channels = match img {
+        HighBitDepthImage::Rgb(_) => 3,
+        HighBitDepthImage::Rgba(_) => 4,
+        HighBitDepthImage::Argb(_) => 4,
+    };
+
+    let uncompressed_size = (width * height * channels) as usize;
+
+    // WebPの圧縮率推定
+    let compression_ratio = if options.lossless {
+        0.4 // ロスレスの場合は40%圧縮
+    } else {
+        // 品質に基づく圧縮率（品質が高いほど圧縮率は低い）
+        let quality_factor = options.quality / 100.0;
+        0.1 + (quality_factor * 0.5) // 10%-60%の範囲
+    };
+
+    (uncompressed_size as f64 * compression_ratio as f64) as usize
 }

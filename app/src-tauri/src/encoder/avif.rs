@@ -1,7 +1,7 @@
 use super::common::{
-    EncodingAnalysis, ToneMappingType, apply_tone_mapping, convert_f32_to_u8,
-    get_encoding_recommendations, handle_icc_profile_embedding, log_encoding_analysis,
-    provide_icc_recommendations,
+    apply_tone_mapping, convert_f32_to_u8, get_encoding_recommendations,
+    handle_icc_profile_embedding, log_encoding_analysis, provide_icc_recommendations,
+    EncodingAnalysis, ToneMappingType,
 };
 use crate::{encoder::extract_pixel_data, error::AppError, options::HighBitDepthImage};
 use imgref::Img;
@@ -215,4 +215,27 @@ pub fn encode(
     }
 
     Ok(final_avif_data)
+}
+
+/// AVIFファイルサイズを推定
+pub fn estimate_size(img: &HighBitDepthImage, options: &AvifOptions) -> usize {
+    let (width, height) = match img {
+        HighBitDepthImage::Rgb(buf) => buf.dimensions(),
+        HighBitDepthImage::Rgba(buf) => buf.dimensions(),
+        HighBitDepthImage::Argb(buf) => buf.dimensions(),
+    };
+
+    let channels = match img {
+        HighBitDepthImage::Rgb(_) => 3,
+        HighBitDepthImage::Rgba(_) => 4,
+        HighBitDepthImage::Argb(_) => 4,
+    };
+
+    let uncompressed_size = (width * height * channels) as usize;
+
+    // AVIFの圧縮率推定（非常に効率的な圧縮）
+    let quality_factor = options.quality / 100.0;
+    let compression_ratio = 0.05 + (quality_factor * 0.15); // 5%-20%の範囲
+
+    (uncompressed_size as f64 * compression_ratio as f64) as usize
 }

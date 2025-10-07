@@ -19,7 +19,8 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             command::convert,
             command::get_path_info,
-            command::delete_path
+            command::delete_path,
+            command::estimate_size
         ])
         .setup(|app| {
             // Initialize logging system

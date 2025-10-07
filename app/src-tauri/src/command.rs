@@ -125,3 +125,46 @@ pub async fn delete_path(path_str: String) -> Result<(), String> {
     }
     Ok(())
 }
+
+/// 圧縮後のファイルサイズを推定
+#[tauri::command]
+pub async fn estimate_size(
+    data: Vec<u8>,
+    options: EncodeOptions,
+    app: AppHandle,
+) -> Result<usize, String> {
+
+    
+    send_log_with_handle(&app, LogLevel::Info, "Estimating output size...");
+
+    let app_clone = app.clone();
+    let size = tauri::async_runtime::spawn_blocking(move || {
+        // まず画像をデコード
+        send_log_with_handle(&app_clone, LogLevel::Info, "Decoding image for size estimation...");
+        let (img, _) = crate::decoder::decode(&data)
+            .log_error(Some("Image decoding for estimation"))
+            .map_err(|e| format!("Failed to decode image: {}", e))?;
+
+        // オプションに応じてサイズ推定
+        let size = match &options {
+            EncodeOptions::Png(opts) => {
+                crate::encoder::png::estimate_size(&img, opts)
+            }
+            EncodeOptions::Webp(opts) => {
+                crate::encoder::webp::estimate_size(&img, opts)
+            }
+            EncodeOptions::Avif(opts) => {
+                crate::encoder::avif::estimate_size(&img, opts)
+            }
+            EncodeOptions::Jxl(opts) => {
+                crate::encoder::jxl::estimate_size(&img, opts)
+            }
+        };
+
+        Ok::<usize, String>(size)
+    })
+    .await
+    .map_err(|e| e.to_string())??;
+    send_log_with_handle(&app, LogLevel::Info, &format!("Estimated size: {} bytes", size));
+    Ok(size)
+}

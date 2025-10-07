@@ -1,12 +1,12 @@
 use super::common::{
-    EncodingAnalysis, get_encoding_recommendations, log_encoding_analysis,
-    provide_icc_recommendations,
+    get_encoding_recommendations, log_encoding_analysis, provide_icc_recommendations,
+    EncodingAnalysis,
 };
 use crate::{
-    encoder::{HighBitDepthImage, extract_pixel_data},
+    encoder::{extract_pixel_data, HighBitDepthImage},
     error::AppError,
 };
-use jpegxl_rs::encode::{EncoderFrame, EncoderResult, EncoderSpeed::*, encoder_builder};
+use jpegxl_rs::encode::{encoder_builder, EncoderFrame, EncoderResult, EncoderSpeed::*};
 use serde::{Deserialize, Serialize};
 
 /// Image type classification based on pixel data and ICC profile
@@ -563,7 +563,7 @@ pub fn encode(
                     rgb.push(chunk[0]); // R
                     rgb.push(chunk[1]); // G
                     rgb.push(chunk[2]); // B
-                    // Discard alpha channel
+                                        // Discard alpha channel
                 }
                 rgb
             } else {
@@ -690,4 +690,32 @@ pub fn transcode(jpeg_data: &[u8], options: &JxlOptions) -> Result<Vec<u8>, AppE
         .map_err(|e| AppError::Encode(format!("JXL transcode failed: {}", e)))?;
 
     Ok(buffer.to_vec())
+}
+
+/// JXLファイルサイズを推定
+pub fn estimate_size(img: &HighBitDepthImage, options: &JxlOptions) -> usize {
+    let (width, height) = match img {
+        HighBitDepthImage::Rgb(buf) => buf.dimensions(),
+        HighBitDepthImage::Rgba(buf) => buf.dimensions(),
+        HighBitDepthImage::Argb(buf) => buf.dimensions(),
+    };
+
+    let channels = match img {
+        HighBitDepthImage::Rgb(_) => 3,
+        HighBitDepthImage::Rgba(_) => 4,
+        HighBitDepthImage::Argb(_) => 4,
+    };
+
+    let uncompressed_size = (width * height * channels) as usize;
+
+    // JXLの圧縮率推定（非常に効率的な圧縮）
+    let compression_ratio = if options.lossless {
+        0.3 // ロスレスの場合は30%圧縮
+    } else {
+        // 品質に基づく圧縮率
+        let quality_factor = options.quality / 100.0;
+        0.03 + (quality_factor * 0.12) // 3%-15%の範囲
+    };
+
+    (uncompressed_size as f64 * compression_ratio as f64) as usize
 }
