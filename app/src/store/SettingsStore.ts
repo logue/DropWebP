@@ -7,6 +7,7 @@ import { open } from '@tauri-apps/plugin-dialog';
 import type { AvifOptions } from '@/interfaces/AvifOptions';
 import type { CommonOptions } from '@/interfaces/CommonOptions';
 import type { JxlOptions } from '@/interfaces/JxlOptions';
+import type { PngOptions } from '@/interfaces/PngOptions';
 import type { WebpOptions } from '@/interfaces/WebpOptions';
 
 // デフォルト設定を定義
@@ -39,6 +40,11 @@ const defaultJxlOptions: JxlOptions = {
   colorEncoding: 'Srgb'
 };
 
+const defaultPngOptions: PngOptions = {
+  zopfliIterations: 15,
+  embedIccProfile: true
+} as const;
+
 const defaultCommonOptions: CommonOptions = {
   sound: true,
   volume: 1.0,
@@ -64,6 +70,8 @@ export default defineStore(
     const webpOptions: Ref<WebpOptions> = ref({ ...defaultWebpOptions });
     /** JPEG XLオプション */
     const jxlOptions: Ref<JxlOptions> = ref({ ...defaultJxlOptions });
+    /** PNGオプション */
+    const pngOptions: Ref<PngOptions> = ref({ ...defaultPngOptions });
 
     /** 設定を初期化 */
     const reset = async () => {
@@ -71,6 +79,7 @@ export default defineStore(
       avifOptions.value = { ...defaultAvifOptions };
       webpOptions.value = { ...defaultWebpOptions };
       jxlOptions.value = { ...defaultJxlOptions };
+      pngOptions.value = { ...defaultPngOptions };
       commonOptions.value.outputPath = await documentDir();
     };
 
@@ -78,6 +87,7 @@ export default defineStore(
     const resetAvifOptions = () => (avifOptions.value = { ...defaultAvifOptions });
     const resetWebpOptions = () => (webpOptions.value = { ...defaultWebpOptions });
     const resetJxlOptions = () => (jxlOptions.value = { ...defaultJxlOptions });
+    const resetPngOptions = () => (pngOptions.value = { ...defaultPngOptions });
 
     /** 出力先ディレクトリ選択ダイアログ */
     const browseOutputPath = async () => {
@@ -94,12 +104,14 @@ export default defineStore(
       avifOptions,
       webpOptions,
       jxlOptions,
+      pngOptions,
       commonOptions,
       reset,
       resetAvifOptions,
       resetWebpOptions,
       resetCommonOptions,
       resetJxlOptions,
+      resetPngOptions,
       browseOutputPath
     };
   },

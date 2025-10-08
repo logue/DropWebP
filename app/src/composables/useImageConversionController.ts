@@ -55,7 +55,6 @@ export function useImageConversionController(t: ComposerTranslation) {
       // 進捗メッセージを更新
       const pathInfo = await fileSystem.pathInfo(file);
       message.value = t('progress', {
-        file: pathInfo.fileName,
         type: t(`type.${settingsStore.commonOptions.format}`)
       });
       if (!settingsStore.commonOptions.overwrite && pathInfo.exists) {
@@ -163,7 +162,7 @@ export function useImageConversionController(t: ComposerTranslation) {
         title: t('select_files_title'),
         multiple: true,
         directory: false,
-        filters: [{ name: 'Image', extensions }]
+        filters: [{ name: t('image'), extensions }]
       });
     } catch (e) {
       console.error(e);

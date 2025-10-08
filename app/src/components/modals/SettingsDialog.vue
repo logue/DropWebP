@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import AvifOptions from './SettingTabItems/AvifOptions.vue';
 import CommonOptions from './SettingTabItems/CommonOptions.vue';
 import JxlOptions from './SettingTabItems/JxlOptions.vue';
+import PngOptions from './SettingTabItems/PngOptions.vue';
 import WebpOptions from './SettingTabItems/WebpOptions.vue';
 
 const { t } = useI18n();
@@ -35,6 +36,7 @@ const tab = ref('common');
         <v-card-text>
           <v-tabs v-model="tab" color="primary">
             <v-tab value="common">{{ t('common_options') }}</v-tab>
+            <v-tab value="png">{{ t('png_options') }}</v-tab>
             <v-tab value="webp">{{ t('webp_options') }}</v-tab>
             <v-tab value="avif">{{ t('avif_options') }}</v-tab>
             <v-tab value="jxl">{{ t('jxl_options') }}</v-tab>
@@ -43,6 +45,9 @@ const tab = ref('common');
           <v-window v-model="tab" class="mt-4">
             <v-window-item value="common">
               <common-options />
+            </v-window-item>
+            <v-window-item value="png">
+              <png-options />
             </v-window-item>
             <v-window-item value="webp">
               <webp-options />
@@ -62,27 +67,31 @@ const tab = ref('common');
 
 <i18n lang="yaml">
 en:
-  settings: 'Settings'
-  common_options: 'Common Options'
-  webp_options: 'WebP Options'
-  avif_options: 'AVIF Options'
-  jxl_options: 'JPEG XL Options'
+  settings: Settings
+  common_options: Common Options
+  png_options: PNG(Zopfli) Options
+  webp_options: WebP Options
+  avif_options: AVIF Options
+  jxl_options: JPEG XL Options
 ja:
-  settings: '設定'
-  common_options: '共通設定'
-  webp_options: 'WebP設定'
-  avif_options: 'AVIF設定'
-  jxl_options: 'JPEG XL設定'
+  settings: 設定
+  common_options: 共通設定
+  png_options: PNG(Zopfli)設定
+  webp_options: WebP設定
+  avif_options: AVIF設定
+  jxl_options: JPEG XL設定
 kr:
-  settings: '설정'
-  common_options: '공통 설정'
-  webp_options: 'WebP 설정'
-  avif_options: 'AVIF 설정'
-  jxl_options: 'JPEG XL 설정'
+  settings: 설정
+  common_options: 공통 설정
+  png_options: PNG(Zopfli) 설정
+  webp_options: WebP 설정
+  avif_options: AVIF 설정
+  jxl_options: JPEG XL 설정
 zh:
-  settings: '設置'
-  common_options: '通用設置'
-  webp_options: 'WebP設置'
-  avif_options: 'AVIF設置'
-  jxl_options: 'JPEG XL設置'
+  settings: 設置
+  common_options: 通用設置
+  png_options: PNG(Zopfli)設置
+  webp_options: WebP設置
+  avif_options: AVIF設置
+  jxl_options: JPEG XL設置
 </i18n>
