@@ -1,16 +1,14 @@
 import configPrettier from '@vue/eslint-config-prettier';
-import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript';
+import withNuxt from './.nuxt/eslint.config.mjs';
 
 import { globalIgnores } from 'eslint/config';
-// @ts-ignore
-import pluginImport from 'eslint-plugin-import';
 import pluginVue from 'eslint-plugin-vue';
 import pluginVueA11y from 'eslint-plugin-vuejs-accessibility';
 
 /**
  * ESLint Config for Docs (Nuxt)
  */
-export default defineConfigWithVueTs(
+export default withNuxt(
   {
     name: 'docs/files-to-lint',
     files: ['**/*.{ts,mts,tsx,vue}']
@@ -31,11 +29,17 @@ export default defineConfigWithVueTs(
     'src/**/*.js',
     'src/**/*.vue.js'
   ]),
+  {
+    files: ['/**/*.ts', '/**/*.tsx'],
+    languageOptions: {
+      parserOptions: {
+        project: './tsconfig.json',
+        tsconfigRootDir: __dirname
+      }
+    }
+  },
   pluginVue.configs['flat/recommended'],
   ...pluginVueA11y.configs['flat/recommended'],
-  vueTsConfigs.recommended,
-  pluginImport.flatConfigs.recommended,
-  pluginImport.flatConfigs.typescript,
   {
     settings: {
       // This will do the trick
@@ -140,8 +144,9 @@ export default defineConfigWithVueTs(
           }
         }
       ],
-      // Mitigate non-multiword component name errors to warnings.
-      'vue/multi-word-component-names': 'warn'
+      // Nuxtのページコンポーネントは単一ファイルコンポーネントではないため、multi-word-component-namesを無効化
+      'vue/multi-word-component-names': 'off',
+      'vue/no-multiple-template-root': 'off'
     }
   },
   configPrettier

@@ -92,7 +92,7 @@ onMounted(() => {
       </template>
     </v-snackbar>
 
-    <v-footer app elevation="3">
+    <v-footer app elevation="3" color="primary">
       <span class="mr-5">2025 &copy; Logue</span>
     </v-footer>
   </v-app>
@@ -104,3 +104,37 @@ onMounted(() => {
     <link rel="icon" :href="logo" type="image/x-icon" />
   </teleport>
 </template>
+
+<style lang="scss">
+/* stylelint-disable-next-line scss/load-no-partial-leading-underscore */
+@use 'vuetify/_settings';
+@use 'sass:map';
+
+body {
+  // Modern scrollbar style
+  scrollbar-width: thin;
+  scrollbar-color: map.get(settings.$grey, 'lighten-2') map.get(settings.$grey, 'base');
+}
+
+::-webkit-scrollbar {
+  width: 0.5rem;
+  height: 0.5rem;
+}
+
+::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 0.5rem rgba(0, 0, 0, 0.1);
+  background-color: map.get(settings.$grey, 'lighten-2');
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 0.5rem;
+  background-color: map.get(settings.$grey, 'base');
+  box-shadow: inset 0 0 0.5rem rgba(0, 0, 0, 0.1);
+}
+
+// Fix app-bar's progress-bar
+.v-app-bar .v-progress-linear {
+  position: absolute;
+  bottom: 0;
+}
+</style>

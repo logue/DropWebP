@@ -1,58 +1,12 @@
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n';
-import { supportedLocales } from '@/plugins/i18n';
+import { useI18nLocale } from '@/composables/useI18nLocale';
+import type { SupportedLocale } from '@/plugins/i18n';
 
-const route = useRoute();
-const nuxtApp = useNuxtApp();
+// useI18nLocale composableを使用
+const { currentLocale, supportedLocales, setLocaleAndNavigate, t } = useI18nLocale();
 
-// i18nインスタンスを取得
-const i18n = nuxtApp.$i18n as any;
-const { t } = useI18n();
-
-const currentLocale = computed(() => {
-  // i18nのlocaleを優先し、フォールバックとしてルートパラメータを使用
-  if (i18n && i18n.locale) {
-    return i18n.locale.value;
-  }
-  return (route.params.locale as string) || 'en';
-});
-
-const setLocale = async (newLocale: string) => {
-  // i18nのロケールを更新
-  if (i18n && i18n.locale) {
-    i18n.locale.value = newLocale;
-  }
-
-  // HTML lang属性を更新
-  if (import.meta.client) {
-    document.documentElement.lang = newLocale;
-    localStorage.setItem('locale', newLocale);
-  }
-
-  // URLを言語対応に変更
-  const currentPath = route.path;
-
-  // 現在のパスから言語コードを除去
-  const pathSegments = currentPath.split('/').filter(Boolean);
-  const firstSegment = pathSegments[0] || '';
-
-  let cleanPath = currentPath;
-  if (supportedLocales.includes(firstSegment)) {
-    // 言語コードを除去したパスを作成
-    cleanPath = '/' + pathSegments.slice(1).join('/');
-    if (cleanPath === '/') {
-      cleanPath = '';
-    }
-  }
-
-  // 新しい言語のURLを構築（全ての言語でプレフィックス使用）
-  const newPath = `/${newLocale}${cleanPath || ''}`;
-
-  // 同じパスの場合は何もしない
-  if (newPath !== currentPath) {
-    console.log(`Navigating from ${currentPath} to ${newPath}`);
-    await navigateTo(newPath);
-  }
+const setLocale = async (newLocale: SupportedLocale) => {
+  await setLocaleAndNavigate(newLocale);
 };
 </script>
 
@@ -111,17 +65,3 @@ zhHans:
   zhHant: 🇹🇼 繁体字中文
   zhHans: 🇨🇳 简体字中文
 </i18n>
-
-<style scoped>
-.v-list-item-title {
-  /* グローバルフォント設定を継承し、絵文字表示を最適化 */
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-/* 絵文字の最適化はグローバル設定で適用 */
-:deep(.v-list-item-title) {
-  font-variant-emoji: unicode;
-}
-</style>

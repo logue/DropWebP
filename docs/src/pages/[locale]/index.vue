@@ -1,19 +1,12 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
+import { useI18nLocale } from '@/composables/useI18nLocale';
 
 import logo from '@/assets/logo.png';
 
 const { t } = useI18n();
-const route = useRoute();
-
-// 現在のロケールを取得
-const currentLocale = (route.params.locale as string) || 'en';
-
-// ロケール対応のルート生成関数
-const getLocalizedRoute = (path: string) => {
-  return `/${currentLocale}${path}`;
-};
-
+const { r } = useI18nLocale();
+const version = '2.2.1';
 const features = [
   {
     icon: 'mdi-image-multiple',
@@ -31,38 +24,63 @@ const features = [
 </script>
 
 <template>
-  <v-card class="mb-6" tag="section">
+  <v-card class="mb-6" tag="section" elevation="0">
     <v-img :src="logo" alt="Drop Compress Image Logo" max-width="256" class="mx-auto mb-4" />
-    <v-card-title class="text-h4 text-center pa-6" tag="h2">
-      {{ t('title') }}
-    </v-card-title>
+    <v-card-title class="text-h4 text-center pa-6" tag="h2">Drop Compress Image</v-card-title>
     <v-card-text class="text-center">
       <p class="text-h6 mb-4">{{ t('subtitle') }}</p>
-      <v-btn color="primary" size="large" :to="getLocalizedRoute('/getting-started')">
+      <div class="my-4">
+        <v-btn
+          size="large"
+          :href="`https://github.com/logue/DropWebP/releases/download/${version}/drop-compress-image_${version}_x64_en-US.msi`"
+        >
+          {{ t('download.windows') }}
+          <br />
+          <small class="text-secondary">({{ t('download.window_requirement') }})</small>
+        </v-btn>
+        <v-btn
+          size="large"
+          class="ml-4"
+          :href="`https://github.com/logue/DropWebP/releases/download/${version}/drop-compress-image_${version}_aarch64.dmg`"
+        >
+          {{ t('download.macos') }}
+          <br />
+          <small class="text-secondary">({{ t('download.macos_requirement') }})</small>
+        </v-btn>
+      </div>
+    </v-card-text>
+  </v-card>
+
+  <v-card class="mb-6" tag="section" elevation="0">
+    <v-card-text>
+      <v-row class="mb-5">
+        <v-col v-for="item in features" :key="item.key" cols="12" md="4">
+          <v-card class="h-100">
+            <v-card-text class="text-center">
+              <v-icon :icon="item.icon" size="64" color="primary" class="mb-4" />
+              <h3 class="text-h6 mb-2">{{ t(`features.${item.key}.title`) }}</h3>
+              <p>{{ t(`features.${item.key}.description`) }}</p>
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+      <v-btn color="primary" size="large" :to="r('/getting-started')">
         <v-icon start>mdi-rocket</v-icon>
         {{ t('start_button') }}
       </v-btn>
     </v-card-text>
   </v-card>
-
-  <v-row>
-    <v-col v-for="item in features" :key="item.key" cols="12" md="4">
-      <v-card class="h-100">
-        <v-card-text class="text-center">
-          <v-icon :icon="item.icon" size="64" color="primary" class="mb-4" />
-          <h3 class="text-h6 mb-2">{{ t(`features.${item.key}.title`) }}</h3>
-          <p>{{ t(`features.${item.key}.description`) }}</p>
-        </v-card-text>
-      </v-card>
-    </v-col>
-  </v-row>
 </template>
 
 <i18n lang="yaml">
 en:
-  title: Drop Compress Image Help Site
   subtitle: Help and guide for image compression app
   start_button: Get Started
+  download:
+    windows: Download for Windows
+    window_requirement: Windows 11 or later
+    macos: Download for MacOS
+    macos_requirement: M1 or later
   features:
     multiple_formats:
       title: Multiple Format Support
@@ -74,9 +92,13 @@ en:
       title: Drag & Drop
       description: Easy batch conversion with simple operations.
 fr:
-  title: Site d'aide Drop Compress Image
   subtitle: Aide et guide pour l'application de compression d'images
   start_button: Commencer
+  download:
+    windows: Télécharger pour Windows
+    window_requirement: Windows 11 ou version ultérieure
+    macos: Télécharger pour MacOS
+    macos_requirement: M1 ou version ultérieure
   features:
     multiple_formats:
       title: Prise en charge de plusieurs formats
@@ -88,9 +110,13 @@ fr:
       title: Glisser-Déposer
       description: Conversion par lots facile avec des opérations simples.
 ja:
-  title: Drop Compress Image ヘルプサイト
   subtitle: 画像圧縮アプリのヘルプとガイド
   start_button: はじめに
+  download:
+    windows: Windows版をダウンロード
+    window_requirement: Windows 11以降
+    macos: MacOS版をダウンロード
+    macos_requirement: M1以降
   features:
     multiple_formats:
       title: 複数形式対応
@@ -102,9 +128,13 @@ ja:
       title: ドラッグ&ドロップ
       description: 簡単な操作で画像を一括変換可能。
 ko:
-  title: Drop Compress Image 도움말 사이트
   subtitle: 이미지 압축 앱의 도움말과 가이드
   start_button: 시작하기
+  download:
+    windows: Windows용 다운로드
+    window_requirement: Windows 11 이상
+    macos: MacOS용 다운로드
+    macos_requirement: M1 이상
   features:
     multiple_formats:
       title: 다중 형식 지원
@@ -116,9 +146,13 @@ ko:
       title: 드래그 & 드롭
       description: 간단한 조작으로 이미지 일괄 변환 가능.
 zhHant:
-  title: Drop Compress Image 幫助網站
   subtitle: 圖像壓縮應用程式的幫助和指南
   start_button: 入門
+  download:
+    windows: 下載 Windows 版
+    window_requirement: Windows 11 或更新版本
+    macos: 下載 MacOS 版
+    macos_requirement: M1 或更新版本
   features:
     multiple_formats:
       title: 多格式支援
@@ -130,9 +164,13 @@ zhHant:
       title: 拖放功能
       description: 通過簡單操作輕鬆進行批量轉換。
 zhHans:
-  title: Drop Compress Image 帮助网站
   subtitle: 图像压缩应用程序的帮助和指南
   start_button: 入门
+  download:
+    windows: 下载安装 Windows 版
+    window_requirement: Windows 11 或更新版本
+    macos: 下载安装 MacOS 版
+    macos_requirement: M1 或更新版本
   features:
     multiple_formats:
       title: 多格式支持

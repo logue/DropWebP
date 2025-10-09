@@ -1,34 +1,30 @@
+import { supportedLocales, type SupportedLocale } from '@/plugins/i18n';
+
 export default defineNuxtRouteMiddleware(to => {
   // ルートパス（/）の場合のみリダイレクト処理
-  if (to.path === '/') {
-    const supportedLocales = ['ja', 'en', 'ko', 'zhHant', 'zhHans'];
-    let targetLocale = 'en'; // フォールバックは英語
+  if (to.path !== '/') {
+    return;
+  }
+  let targetLocale = 'en'; // フォールバックは英語
 
-    if (import.meta.client) {
-      // 1. localStorage から優先的に取得
-      const savedLocale = localStorage.getItem('locale');
-      if (savedLocale && supportedLocales.includes(savedLocale)) {
-        targetLocale = savedLocale;
-      } else {
-        // 2. ブラウザの言語設定から判定
-        const browserLang = navigator.language.toLowerCase();
-
-        if (browserLang.startsWith('ja')) {
-          targetLocale = 'ja';
-        } else if (browserLang.startsWith('ko')) {
-          targetLocale = 'ko';
-        } else if (browserLang.startsWith('zh-cn') || browserLang.startsWith('zh-sg')) {
+  if (import.meta.client) {
+    // 1. localStorage から優先的に取得
+    const savedLocale = localStorage.getItem('locale') as SupportedLocale;
+    if (savedLocale && supportedLocales.includes(savedLocale)) {
+      targetLocale = savedLocale;
+    } else {
+      // 2. ブラウザの言語設定から判定
+      const locale = navigator.language.slice(0, 2);
+      if (locale === 'zh') {
+        // 中国語の詳細なロケールを確認
+        const fullLocale = navigator.language.toLowerCase();
+        if (fullLocale === 'zh-cn' || fullLocale === 'zh-sg') {
           targetLocale = 'zhHans'; // 簡体字中国語
-        } else if (
-          browserLang.startsWith('zh-tw') ||
-          browserLang.startsWith('zh-hk') ||
-          browserLang.startsWith('zh-hant')
-        ) {
-          targetLocale = 'zhHant'; // 繁体字中国語
         } else {
-          // その他は英語（フォールバック）
-          targetLocale = 'en';
+          targetLocale = 'zhHant'; // 繁体字中国語
         }
+      } else if (supportedLocales.includes(locale as SupportedLocale)) {
+        targetLocale = locale;
       }
     }
 

@@ -19,13 +19,13 @@ export default defineStore('config', () => {
 
   /** Dark Theme mode */
   const theme: Ref<boolean> = ref(
-    process.client && typeof window !== 'undefined'
+    import.meta.client && typeof window !== 'undefined'
       ? window.matchMedia('(prefers-color-scheme: dark)').matches
       : false
   );
 
   // クライアントサイドでの初期化
-  if (process.client && typeof window !== 'undefined') {
+  if (import.meta.client && typeof window !== 'undefined') {
     // ハイドレーション後にダークモードの設定を確認
     const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
     theme.value = darkModeQuery.matches;
