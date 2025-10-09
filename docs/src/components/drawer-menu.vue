@@ -76,13 +76,19 @@ const items: ComputedRef<DrawerMenuItem[]> = computed(() => [
 en:
   home: Home
   getting_started: Getting Started
+fr:
+  home: Accueil
+  getting_started: Commencer
 ja:
   home: ホーム
   getting_started: はじめに
 ko:
   home: 홈
   getting_started: 시작하기
-zh-tw:
+zhHant:
   home: 首頁
   getting_started: 入門
+zhHans:
+  home: 主页
+  getting_started: 入门
 </i18n>

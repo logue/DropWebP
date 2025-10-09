@@ -54,10 +54,14 @@ const emit = defineEmits<{
 <i18n lang="yaml">
 en:
   cancel: Cancel
+fr:
+  cancel: Annuler
 ja:
   cancel: キャンセル
-kr:
+ko:
   cancel: 취소
-zh:
+zhHant:
+  cancel: 取消
+zhHans:
   cancel: 取消
 </i18n>

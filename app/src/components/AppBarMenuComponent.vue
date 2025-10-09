@@ -42,27 +42,27 @@ const configStore = useConfigStore();
 
 <i18n lang="yaml">
 en:
-  title: 'Drop Compress Image'
-  about_btn: 'About {appname}'
-  locale_btn: 'Select Language'
-  toggle_dark_mode_btn: 'Toggle Dark Mode'
-  setttings_btn: 'Settings'
+  locale_btn: Select Language
+  toggle_dark_mode_btn: Toggle Dark Mode
+  settings_btn: Settings
+fr:
+  locale_btn: Choisir la langue
+  toggle_dark_mode_btn: Basculer en mode sombre
+  settings_btn: Paramètres
 ja:
-  title: 'Drop Compress Image'
-  about_btn: '{appname}について'
-  locale_btn: '言語を選択'
-  toggle_dark_mode_btn: 'ダークモードを切り替え'
-  settings_btn: '設定'
-kr:
-  title: 'Drop Compress Image'
-  about_btn: '{appname} 정보'
-  locale_btn: '언어 선택'
-  toggle_dark_mode_btn: '다크 모드 전환'
-  settings_btn: '설정'
-zh:
-  title: 'Drop Compress Image'
-  about_btn: '關於 {appname}'
-  locale_btn: '選擇語言'
-  toggle_dark_mode_btn: '切換深色模式'
-  settings_btn: '設置'
+  locale_btn: 言語を選択
+  toggle_dark_mode_btn: ダークモード切り替え
+  settings_btn: 設定
+ko:
+  locale_btn: 언어 선택
+  toggle_dark_mode_btn: 다크 모드 전환
+  settings_btn: 설정
+zhHant:
+  locale_btn: 選擇語言
+  toggle_dark_mode_btn: 切換深色模式
+  settings_btn: 設定
+zhHans:
+  locale_btn: 选择语言
+  toggle_dark_mode_btn: 切换深色模式
+  settings_btn: 设置
 </i18n>

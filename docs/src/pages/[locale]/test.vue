@@ -140,7 +140,7 @@ ko:
   form_message: 테스트 메시지
   form_submit: 제출
   success_message: vuetify-nuxt-module이 정상적으로 작동하고 있습니다!
-zh-tw:
+zhHant:
   title: Vuetify 測試頁面
   description: 測試 vuetify-nuxt-module 是否正常運作的頁面。
   button_test: 按鈕測試
@@ -155,4 +155,19 @@ zh-tw:
   form_message: 測試訊息
   form_submit: 提交
   success_message: vuetify-nuxt-module 正常運作中！
+zhHans:
+  title: Vuetify 测试页面
+  description: 测试 vuetify-nuxt-module 是否正常运作的页面。
+  button_test: 按钮测试
+  icon_test: 图标测试
+  card_test: 卡片测试
+  form_test: 表单测试
+  card_title: 卡片
+  card_content: 这是一个测试卡片。应用了 Vuetify 的 Material Design。
+  action_button: 动作
+  form_name: 测试输入
+  form_email: 测试邮件
+  form_message: 测试消息
+  form_submit: 提交
+  success_message: vuetify-nuxt-module 正常运作中！
 </i18n>

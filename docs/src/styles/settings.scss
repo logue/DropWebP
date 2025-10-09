@@ -11,6 +11,7 @@
     'Noto Sans JP',
     'Noto Sans KR',
     'Noto Sans TC',
+    'Noto Sans SC',
     'Noto Color Emoji',
     sans-serif
   )
@@ -19,7 +20,40 @@
 // グローバルなフォント設定を追加
 :root {
   font-family:
-    'Noto Sans', 'Noto Sans JP', 'Noto Sans KR', 'Noto Sans TC', 'Noto Color Emoji', sans-serif;
+    'Noto Sans', 'Noto Sans JP', 'Noto Sans KR', 'Noto Sans TC', 'Noto Sans SC', 'Noto Color Emoji',
+    sans-serif !important;
+}
+
+// 言語別フォント設定
+html[lang='ja'],
+html[lang='ja'] * {
+  font-family: 'Noto Sans JP', 'Noto Sans', 'Noto Color Emoji', sans-serif !important;
+}
+
+html[lang='ko'],
+html[lang='ko'] * {
+  font-family: 'Noto Sans KR', 'Noto Sans', 'Noto Color Emoji', sans-serif !important;
+}
+
+html[lang='zhHant'],
+html[lang='zhHant'] *,
+html[lang='zh-Hant'],
+html[lang='zh-Hant'] * {
+  font-family: 'Noto Sans TC', 'Noto Sans', 'Noto Color Emoji', sans-serif !important;
+}
+
+html[lang='zhHans'],
+html[lang='zhHans'] *,
+html[lang='zh-Hans'],
+html[lang='zh-Hans'] * {
+  font-family: 'Noto Sans SC', 'Noto Sans', 'Noto Color Emoji', sans-serif !important;
+}
+
+html[lang='en'],
+html[lang='en'] *,
+html[lang='fr'],
+html[lang='fr'] * {
+  font-family: 'Noto Sans', 'Noto Color Emoji', sans-serif !important;
 }
 
 // Fix for monospace Font.

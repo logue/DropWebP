@@ -28,7 +28,7 @@ export default defineNuxtConfig({
         },
         {
           rel: 'stylesheet',
-          href: 'https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&family=Noto+Sans+JP:wght@100..900&family=Noto+Sans+KR:wght@100..900&family=Noto+Sans+Mono:wght@100..900&family=Noto+Sans+TC:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap'
+          href: 'https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&family=Noto+Sans+JP:wght@100..900&family=Noto+Sans+KR:wght@100..900&family=Noto+Sans+Mono:wght@100..900&family=Noto+Sans+TC:wght@100..900&family=Noto+Sans+SC:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap'
         }
       ]
     }
@@ -39,18 +39,20 @@ export default defineNuxtConfig({
     prerender: {
       routes: [
         '/', // ルートはミドルウェアでリダイレクト
-        '/ja',
         '/en',
+        '/fr',
+        '/ja',
         '/ko',
-        '/zh-tw',
+        '/zhHant',
+        '/zhHans',
         '/ja/getting-started',
         '/en/getting-started',
         '/ko/getting-started',
-        '/zh-tw/getting-started',
+        '/zhHant/getting-started',
         '/ja/test',
         '/en/test',
         '/ko/test',
-        '/zh-tw/test'
+        '/zhHant/test'
       ]
     }
   },

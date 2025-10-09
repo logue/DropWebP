@@ -109,6 +109,22 @@ en:
   browse: Browse
   reset_all: Reset All
   reset_common: Reset common options
+fr:
+  play_sound: Lire un son à la fin
+  volume: Volume du son
+  notify: Notification sur le bureau
+  notify_hint: Vous risquez de ne pas recevoir de notifications si vous les avez désactivées dans les paramètres de votre système.
+  ignore_jpeg: Ignorer le JPEG
+  ignore_jpeg_hint: Les images JPEG sont déjà compressées, donc les convertir (sauf en JPEG XL) peut augmenter la taille du fichier. Cette option vous permet d'ignorer les images JPEG.
+  overwrite: Écraser
+  same_directory: Sortir dans le même répertoire
+  delete_original: Supprimer l'original
+  delete_original_hint: ⚠️Faites attention, car la suppression du fichier original ne peut pas être annulée.
+  recursive: Inclure les sous-répertoires
+  output_path: Chemin de sortie par défaut
+  browse: Parcourir
+  reset_all: Réinitialiser tout
+  reset_common: Réinitialiser les options communes
 ja:
   play_sound: 完了時にサウンドを再生
   volume: サウンドの音量
@@ -125,7 +141,7 @@ ja:
   browse: ブラウズ
   reset_all: 全てをリセット
   reset_common: 共通オプションをリセット
-kr:
+ko:
   play_sound: 완료 시 소리 재생
   volume: 소리 크기
   notify: 데스크탑 알림
@@ -141,20 +157,36 @@ kr:
   browse: 찾아보기
   reset_all: 모두 재설정
   reset_common: 공통 옵션 재설정
-zh:
+zh-tw:
+  play_sound: 完成時播放聲音
+  volume: 聲音音量
+  notify: 桌面通知
+  notify_hint: 如果您在系統設置中禁用了通知，則可能無法收到通知。
+  ignore_jpeg: 忽略 JPEG
+  ignore_jpeg_hint: JPEG 圖像已經過壓縮，因此將它們轉換為除 JPEG XL 之外的格式可能會增加文件大小。此選項允許您忽略 JPEG 圖像。
+  overwrite: 覆蓋
+  same_directory: 輸出到相同目錄
+  delete_original: 刪除原始文件
+  delete_original_hint: ⚠️請小心，因為刪除原始文件後無法恢復。
+  recursive: 包括子目錄
+  output_path: 預設輸出路徑
+  browse: 瀏覽
+  reset_all: 重置所有設定
+  reset_common: 重置常用選項
+zh-cn:
   play_sound: 完成时播放声音
   volume: 声音音量
   notify: 桌面通知
-  notify_hint: 如果您在系统设置中禁用了通知，可能无法收到通知。
+  notify_hint: 如果您在系统设置中禁用了通知，则可能无法收到通知。
   ignore_jpeg: 忽略 JPEG
-  ignore_jpeg_hint: JPEG 图像已经是压缩格式，除非转换为 JPEG XL，否则转换可能会导致文件大小增加。启用此选项可忽略 JPEG 图像。
-  overwrite: 覆蓋
-  same_directory: 輸出到相同目錄
-  delete_original: 刪除原文件
-  delete_original_hint: ⚠️刪除原文件後將無法恢復，請謹慎操作。
-  recursive: 包含子目錄
-  output_path: 默認輸出路徑
-  browse: 瀏覽
-  reset_all: 全部重置
-  reset_common: 重置通用選項
+  ignore_jpeg_hint: JPEG 图像已经过压缩，因此将它们转换为除 JPEG XL 之外的格式可能会增加文件大小。此选项允许您忽略 JPEG 图像。
+  overwrite: 覆盖
+  same_directory: 输出到相同目录
+  delete_original: 删除原始文件
+  delete_original_hint: ⚠️请小心，因为删除原始文件后无法恢复。
+  recursive: 包括子目录
+  output_path: 默认输出路径
+  browse: 浏览
+  reset_all: 重置所有设置
+  reset_common: 重置常用选项
 </i18n>

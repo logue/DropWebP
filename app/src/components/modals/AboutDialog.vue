@@ -50,11 +50,15 @@ const openGitHub = async () => {
 
 <i18n lang="yaml">
 en:
-  about_title: 'About'
+  about_title: About this application
+fr:
+  about_title: À propos de cette application
 ja:
-  about_title: 'このアプリケーションについて'
-kr:
-  about_title: '정보'
-zh:
-  about_title: '關於'
+  about_title: このアプリケーションについて
+ko:
+  about_title: 이 애플리케이션에 대하여
+zhHant:
+  about_title: 關於這個應用程式
+zhHans:
+  about_title: 关于这个应用程序
 </i18n>

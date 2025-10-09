@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
+import { supportedLocales } from '@/plugins/i18n';
 
 const route = useRoute();
 const nuxtApp = useNuxtApp();
@@ -13,19 +14,18 @@ const currentLocale = computed(() => {
   if (i18n && i18n.locale) {
     return i18n.locale.value;
   }
-  return (route.params.locale as string) || 'ja';
+  return (route.params.locale as string) || 'en';
 });
-
-const supportedLocales = ['ja', 'en', 'ko', 'zh-tw'];
 
 const setLocale = async (newLocale: string) => {
   // i18nのロケールを更新
   if (i18n && i18n.locale) {
-    i18n.locale.value = newLocale as 'ja' | 'en' | 'ko' | 'zh-tw';
+    i18n.locale.value = newLocale;
   }
 
-  // ローカルストレージに保存
-  if (process.client) {
+  // HTML lang属性を更新
+  if (import.meta.client) {
+    document.documentElement.lang = newLocale;
     localStorage.setItem('locale', newLocale);
   }
 
@@ -77,24 +77,39 @@ const setLocale = async (newLocale: string) => {
 <i18n lang="yaml">
 en:
   en: 🇺🇸 English
+  fr: 🇫🇷 French
   ja: 🇯🇵 Japanese
   ko: 🇰🇷 Korean
-  zh-tw: 🇹🇼 Chinese
+  zhHant: 🇹🇼 Traditional Chinese
+  zhHans: 🇨🇳 Simplified Chinese
 ja:
   en: 🇺🇸 英語
+  fr: 🇫🇷 フランス語
   ja: 🇯🇵 日本語
   ko: 🇰🇷 韓国語
-  zh-tw: 🇹🇼 中国語
+  zhHant: 🇹🇼 繁体字中国語
+  zhHans: 🇨🇳 简体字中国語
 ko:
   en: 🇺🇸 영어
+  fr: 🇫🇷 프랑스어
   ja: 🇯🇵 일본어
   ko: 🇰🇷 한국어
-  zh-tw: 🇹🇼 중국어
-zh-tw:
+  zhHant: 🇹🇼 번체자 중국어
+  zhHans: 🇨🇳 간체자 중국어
+zhHant:
   en: 🇺🇸 英語
+  fr: 🇫🇷 法語
   ja: 🇯🇵 日語
   ko: 🇰🇷 韓語
-  zh-tw: 🇹🇼 中文
+  zhHant: 🇹🇼 繁体字中文
+  zhHans: 🇨🇳 簡体字中文
+zhHans:
+  en: 🇺🇸 英语
+  fr: 🇫🇷 法语
+  ja: 🇯🇵 日语
+  ko: 🇰🇷 韩语
+  zhHant: 🇹🇼 繁体字中文
+  zhHans: 🇨🇳 简体字中文
 </i18n>
 
 <style scoped>

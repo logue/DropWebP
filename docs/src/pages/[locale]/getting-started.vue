@@ -241,7 +241,7 @@ ko:
       lossless:
         title: 무손실 압축
         description: 무손실 압축 옵션으로 이미지 품질 유지
-zh-tw:
+zhHant:
   title: 入門指南
   meta_description: Drop Compress Image 使用指南
   subtitle: 輕鬆開始使用 Drop Compress Image
@@ -280,4 +280,43 @@ zh-tw:
       lossless:
         title: 無損壓縮
         description: 使用無損壓縮選項保持圖像品質
+zhHans:
+  title: 入门指南
+  meta_description: Drop Compress Image 使用指南
+  subtitle: 轻松开始使用 Drop Compress Image
+  installation:
+    title: 安装
+    download: 从官方网站下载最新版本
+    install: 按照安装程序指示安装应用程序
+    launch: 启动 Drop Compress Image
+  download: 下载
+  usage:
+    title: 使用方法
+    drag_drop:
+      title: 拖放操作
+      description: 只需将图像文件拖到应用程序窗口中
+    file_menu:
+      title: 文件菜单
+      description: 使用文件菜单打开图像文件
+    batch_convert:
+      title: 批量转换
+      description: 选择多个文件进行批量处理
+    settings:
+      title: 设置
+      description: 配置输出格式和质量设置
+  features:
+    title: 主要功能
+    list:
+      webp:
+        title: WebP 支持
+        description: 转换为具有优秀压缩率的现代 WebP 格式
+      avif:
+        title: AVIF 支持
+        description: 支持次世代 AVIF 格式
+      jxl:
+        title: JPEG XL 支持
+        description: 转换为具有卓越压缩率的 JPEG XL
+      lossless:
+        title: 无损压缩
+        description: 使用无损压缩选项保持图像质量
 </i18n>

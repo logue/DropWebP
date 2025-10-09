@@ -66,27 +66,41 @@ en:
   features:
     multiple_formats:
       title: Multiple Format Support
-      description: Support for modern image formats like WebP, AVIF, JXL
+      description: Support for modern image formats like PNG(Zopfli), WebP, AVIF, JPEG XL.
     high_speed:
       title: High-Speed Conversion
-      description: Fast image processing with Rust-based engine
+      description: Fast image processing with Rust-based engine.
     drag_drop:
       title: Drag & Drop
-      description: Easy batch conversion with simple operations
+      description: Easy batch conversion with simple operations.
+fr:
+  title: Site d'aide Drop Compress Image
+  subtitle: Aide et guide pour l'application de compression d'images
+  start_button: Commencer
+  features:
+    multiple_formats:
+      title: Prise en charge de plusieurs formats
+      description: Prise en charge des formats d'image modernes tels que PNG(Zopfli), WebP, AVIF, JXL.
+    high_speed:
+      title: Conversion haute vitesse
+      description: Traitement rapide des images avec un moteur basé sur Rust.
+    drag_drop:
+      title: Glisser-Déposer
+      description: Conversion par lots facile avec des opérations simples.
 ja:
   title: Drop Compress Image ヘルプサイト
   subtitle: 画像圧縮アプリのヘルプとガイド
-  start_button: 開始する
+  start_button: はじめに
   features:
     multiple_formats:
       title: 複数形式対応
-      description: WebP、AVIF、JXLなど最新の画像形式に対応
+      description: PNG(Zopfli)、WebP、AVIF、JPEG XLなどの最新画像形式に対応。
     high_speed:
       title: 高速変換
-      description: Rust基盤で高速な画像処理を実現
+      description: Rust基盤で高速な画像処理を実現。
     drag_drop:
       title: ドラッグ&ドロップ
-      description: 簡単な操作で画像を一括変換
+      description: 簡単な操作で画像を一括変換可能。
 ko:
   title: Drop Compress Image 도움말 사이트
   subtitle: 이미지 압축 앱의 도움말과 가이드
@@ -94,25 +108,39 @@ ko:
   features:
     multiple_formats:
       title: 다중 형식 지원
-      description: WebP, AVIF, JXL 등 최신 이미지 형식 지원
+      description: PNG(Zopfli), WebP, AVIF, JPEG XL 등 최신 이미지 형식 지원.
     high_speed:
       title: 고속 변환
-      description: Rust 기반의 고속 이미지 처리
+      description: Rust 기반의 고속 이미지 처리.
     drag_drop:
       title: 드래그 & 드롭
-      description: 간단한 조작으로 이미지 일괄 변환
-zh-tw:
+      description: 간단한 조작으로 이미지 일괄 변환 가능.
+zhHant:
   title: Drop Compress Image 幫助網站
   subtitle: 圖像壓縮應用程式的幫助和指南
-  start_button: 開始使用
+  start_button: 入門
   features:
     multiple_formats:
-      title: 多種格式支持
-      description: 支持 WebP、AVIF、JXL 等現代圖像格式
+      title: 多格式支援
+      description: 支援 PNG(Zopfli)、WebP、AVIF、JPEG XL 等現代圖像格式。
     high_speed:
       title: 高速轉換
-      description: 基於 Rust 的高速圖像處理
+      description: 使用基於 Rust 的引擎進行快速圖像處理。
     drag_drop:
-      title: 拖放操作
-      description: 簡單操作實現圖像批量轉換
+      title: 拖放功能
+      description: 通過簡單操作輕鬆進行批量轉換。
+zhHans:
+  title: Drop Compress Image 帮助网站
+  subtitle: 图像压缩应用程序的帮助和指南
+  start_button: 入门
+  features:
+    multiple_formats:
+      title: 多格式支持
+      description: 支持 PNG(Zopfli)、WebP、AVIF、JPEG XL 等现代图像格式。
+    high_speed:
+      title: 高速转换
+      description: 使用基于 Rust 的引擎进行快速图像处理。
+    drag_drop:
+      title: 拖放功能
+      description: 通过简单操作轻松进行批量转换。
 </i18n>

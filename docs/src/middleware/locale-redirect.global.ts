@@ -1,10 +1,10 @@
 export default defineNuxtRouteMiddleware(to => {
   // ルートパス（/）の場合のみリダイレクト処理
   if (to.path === '/') {
-    const supportedLocales = ['ja', 'en', 'ko', 'zh-tw'];
+    const supportedLocales = ['ja', 'en', 'ko', 'zhHant', 'zhHans'];
     let targetLocale = 'en'; // フォールバックは英語
 
-    if (process.client) {
+    if (import.meta.client) {
       // 1. localStorage から優先的に取得
       const savedLocale = localStorage.getItem('locale');
       if (savedLocale && supportedLocales.includes(savedLocale)) {
@@ -17,8 +17,14 @@ export default defineNuxtRouteMiddleware(to => {
           targetLocale = 'ja';
         } else if (browserLang.startsWith('ko')) {
           targetLocale = 'ko';
-        } else if (browserLang.startsWith('zh-tw') || browserLang.startsWith('zh-hant')) {
-          targetLocale = 'zh-tw';
+        } else if (browserLang.startsWith('zh-cn') || browserLang.startsWith('zh-sg')) {
+          targetLocale = 'zhHans'; // 簡体字中国語
+        } else if (
+          browserLang.startsWith('zh-tw') ||
+          browserLang.startsWith('zh-hk') ||
+          browserLang.startsWith('zh-hant')
+        ) {
+          targetLocale = 'zhHant'; // 繁体字中国語
         } else {
           // その他は英語（フォールバック）
           targetLocale = 'en';

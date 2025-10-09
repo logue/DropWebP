@@ -39,27 +39,27 @@ const configStore = useConfigStore();
 
 <i18n lang="yaml">
 en:
-  title: 'Drop Compress Image'
-  about_btn: 'About {appname}'
-  locale_btn: 'Select Language'
-  toggle_dark_mode_btn: 'Toggle Dark Mode'
-  github_btn: 'GitHub Repository'
+  locale_btn: Select Language
+  toggle_dark_mode_btn: Toggle Dark Mode
+  github_btn: GitHub Repository
+fr:
+  locale_btn: Choisir la langue
+  toggle_dark_mode_btn: Basculer en mode sombre
+  github_btn: Dépôt GitHub
 ja:
-  title: 'Drop Compress Image'
-  about_btn: '{appname}について'
-  locale_btn: '言語を選択'
-  toggle_dark_mode_btn: 'ダークモードを切り替え'
-  github_btn: 'GitHub リポジトリ'
+  locale_btn: 言語を選択
+  toggle_dark_mode_btn: ダークモード切り替え
+  github_btn: GitHub リポジトリ
 ko:
-  title: 'Drop Compress Image'
-  about_btn: '{appname} 정보'
-  locale_btn: '언어 선택'
-  toggle_dark_mode_btn: '다크 모드 전환'
-  github_btn: 'GitHub 저장소'
-zh-tw:
-  title: 'Drop Compress Image'
-  about_btn: '關於 {appname}'
-  locale_btn: '選擇語言'
-  toggle_dark_mode_btn: '切換深色模式'
-  github_btn: 'GitHub 倉庫'
+  locale_btn: 언어 선택
+  toggle_dark_mode_btn: 다크 모드 전환
+  github_btn: GitHub 저장소
+zhHant:
+  locale_btn: 選擇語言
+  toggle_dark_mode_btn: 切換深色模式
+  github_btn: GitHub 倉庫
+zhHans:
+  locale_btn: 选择语言
+  toggle_dark_mode_btn: 切换深色模式
+  github_btn: GitHub 仓库
 </i18n>

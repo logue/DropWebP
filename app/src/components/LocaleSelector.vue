@@ -31,30 +31,55 @@ function changeLocale(newLocale: string) {
 <i18n lang="yaml">
 en:
   locale: Locale
-  en: English
-  ja: Japanese
-  kr: Korean
-  zh: Chinese
+  en: 🇺🇸 English
+  fr: 🇫🇷 French
+  ja: 🇯🇵 Japanese
+  ko: 🇰🇷 Korean
+  zhHant: 🇹🇼 Traditional Chinese
+  zhHans: 🇨🇳 Simplified Chinese
   locale-changed: Locale {locale} has been changed.
+fr:
+  locale: Langue
+  en: 🇺🇸 Anglais
+  fr: 🇫🇷 Français
+  ja: 🇯🇵 Japonais
+  ko: 🇰🇷 Coréen
+  zhHant: 🇹🇼 Chinois traditionnel
+  zhHans: 🇨🇳 Chinois simplifié
+  locale-changed: La langue a été changée en {locale}.
 ja:
   locale: 言語
-  en: 英語
-  ja: 日本語
-  kr: 韓国語
-  zh: 中国語
+  en: 🇺🇸 英語
+  ja: 🇯🇵 日本語
+  ko: 🇰🇷 韓国語
+  zhHant: 🇹🇼 繁体字中国語
+  zhHans: 🇨🇳 簡体字中国語
   locale-changed: 言語は{locale}に変更されました。
-kr:
+ko:
   locale: 언어
-  en: 영어
-  ja: 일본어
-  kr: 한국어
-  zh: 중국어
+  en: 🇺🇸 영어
+  fr: 🇫🇷 프랑스어
+  ja: 🇯🇵 일본어
+  ko: 🇰🇷 한국어
+  zhHant: 🇹🇼 번체 중국어
+  zhHans: 🇨🇳 간체 중국어
   locale-changed: 언어가 {locale}(으)로 변경되었습니다.
-zh:
+zhHant:
   locale: 語言
-  en: 英語
-  ja: 日語
-  kr: 韓語
-  zh: 中文
-  locale-changed: 語言已更改為{locale}。
+  en: 🇺🇸 英文
+  fr: 🇫🇷 法文
+  ja: 🇯🇵 日文
+  ko: 🇰🇷 韓文
+  zhHant: 🇹🇼 繁體中文
+  zhHans: 🇨🇳 簡體中文
+  locale-changed: 語言已更改為 {locale}。
+zhHans:
+  locale: 语言
+  en: 🇺🇸 英语
+  fr: 🇫🇷 法语
+  ja: 🇯🇵 日语
+  ko: 🇰🇷 韩语
+  zhHant: 🇹🇼 繁体中文
+  zhHans: 🇨🇳 简体中文
+  locale-changed: 语言已更改为 {locale}。
 </i18n>
