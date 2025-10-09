@@ -77,7 +77,7 @@ export function useI18nLocale() {
 
   /** ロケール対応済みのルート */
   const r = (path: string) => {
-    return `/${currentLocale}${path}`;
+    return `/${i18n.locale.value}${path}`;
   };
 
   return {

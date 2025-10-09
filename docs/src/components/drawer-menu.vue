@@ -1,36 +1,32 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
+import { useI18nLocale } from '@/composables/useI18nLocale';
 
 import type DrawerMenuItem from '@/interfaces/DrawerMenuItemInterface';
 
 // 現在のルートから言語を取得
-const route = useRoute();
-const currentLocale = (route.params.locale as string) || 'ja';
-
+const { r } = useI18nLocale();
 // i18nのt関数を取得
 const { t } = useI18n();
-
-// 多言語対応のルート生成関数
-const getLocalizedRoute = (path: string) => {
-  // 全ての言語でロケールプレフィックスを使用
-  const locale = currentLocale || 'en'; // フォールバックは英語
-  return `/${locale}${path}`;
-};
 
 /** Drawer menu items */
 const items: ComputedRef<DrawerMenuItem[]> = computed(() => [
   {
     title: t('home'),
     icon: 'mdi-home',
-    to: getLocalizedRoute('/')
+    to: r('/')
   },
   {
     title: '-' // Divider
   },
   {
     title: t('getting_started'),
-    icon: 'mdi-power',
-    to: getLocalizedRoute('/getting-started')
+    icon: 'mdi-power'
+  },
+  {
+    title: t('format_guide'),
+    icon: 'mdi-file-image',
+    to: r('/format-guide')
   }
 ]);
 </script>
@@ -76,19 +72,25 @@ const items: ComputedRef<DrawerMenuItem[]> = computed(() => [
 en:
   home: Home
   getting_started: Getting Started
+  format_guide: Format Guide
 fr:
   home: Accueil
   getting_started: Commencer
+  format_guide: Guide des formats
 ja:
   home: ホーム
   getting_started: はじめに
+  format_guide: フォーマットガイド
 ko:
   home: 홈
   getting_started: 시작하기
+  format_guide: 포맷 가이드
 zhHant:
   home: 首頁
   getting_started: 入門
+  format_guide: 格式指南
 zhHans:
   home: 主页
   getting_started: 入门
+  format_guide: 格式指南
 </i18n>

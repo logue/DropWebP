@@ -6,6 +6,7 @@ import VueI18nVitePlugin from '@intlify/unplugin-vue-i18n/vite';
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
+  ssr: false, // 静的なサイトとしてビルド
 
   // 1. ソースコードディレクトリの変更
   srcDir: './src/',
