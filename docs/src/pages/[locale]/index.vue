@@ -1,10 +1,7 @@
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n';
-
 import logo from '@/assets/logo.png';
 import { useI18nLocale } from '@/composables/useI18nLocale';
 
-const { t } = useI18n();
 const { r } = useI18nLocale();
 const version = '2.2.1';
 const features = [
@@ -19,16 +16,30 @@ const features = [
   {
     icon: 'mdi-drag',
     key: 'drag_drop'
+  },
+  {
+    icon: 'mdi-earth',
+    key: 'i18n'
+  },
+  {
+    icon: 'mdi-theme-light-dark',
+    key: 'dark_mode'
+  },
+  {
+    icon: 'mdi-clipboard-outline',
+    key: 'paste'
   }
 ];
 
-const baseUrl = `https://github.com/logue/DropWebP/releases/download/${version}/`;
+const urlPrefix = `https://github.com/logue/DropWebP/releases/download/${version}/drop-compress-image_${version}_`;
 </script>
 
 <template>
   <v-card class="mb-6 bg-transparent" tag="section" elevation="0">
     <v-img :src="logo" alt="Drop Compress Image Logo" max-width="256" class="mx-auto mb-4" />
-    <v-card-title class="text-h4 text-center pa-3" tag="h2">Drop Compress Image</v-card-title>
+    <v-card-title class="text-h4 text-center pa-3" tag="h2">
+      Drop Compress Image v.{{ version }}
+    </v-card-title>
     <v-card-text class="text-center">
       <p class="text-h6 mb-4">{{ t('subtitle') }}</p>
       <p class="mb-6">{{ t('information[0]') }}</p>
@@ -36,8 +47,9 @@ const baseUrl = `https://github.com/logue/DropWebP/releases/download/${version}/
       <!-- Download Buttons -->
       <div class="d-flex justify-center flex-wrap">
         <v-btn
-          :href="`${baseUrl}drop-compress-image_${version}_x64_en-US.msi`"
+          :href="`${urlPrefix}x64_en-US.msi`"
           class="mr-1"
+          prepend-icon-color="blue"
           prepend-icon="mdi-microsoft-windows"
           size="large"
           stacked
@@ -47,7 +59,7 @@ const baseUrl = `https://github.com/logue/DropWebP/releases/download/${version}/
           <small class="text-secondary">({{ t('download.window_requirement') }})</small>
         </v-btn>
         <v-btn
-          :href="`drop-compress-image_${version}_aarch64.dmg`"
+          :href="`${urlPrefix}aarch64.dmg`"
           class="ml-1"
           prepend-icon="mdi-apple"
           size="large"
@@ -106,6 +118,15 @@ en:
     drag_drop:
       title: Drag & Drop
       description: Easy batch conversion with simple operations.
+    dark_mode:
+      title: Dark Mode
+      description: Enjoy a comfortable viewing experience with dark mode support.
+    i18n:
+      title: Internationalization
+      description: Supports multiple languages for a global user experience.
+    paste:
+      title: Paste from Clipboard
+      description: Directly paste images from clipboard for quick conversion. (Ctrl (⌘) + V)
 fr:
   subtitle: Le convertisseur d'images moderne
   start_button: Commencer
@@ -128,6 +149,15 @@ fr:
     drag_drop:
       title: Glisser-Déposer
       description: Conversion par lots facile avec des opérations simples.
+    dark_mode:
+      title: Mode Sombre
+      description: Profitez d'une expérience visuelle confortable avec la prise en charge du mode sombre.
+    i18n:
+      title: Internationalisation
+      description: Prend en charge plusieurs langues pour une expérience utilisateur mondiale.
+    paste:
+      title: Coller depuis le presse-papiers
+      description: Collez directement des images depuis le presse-papiers pour une conversion rapide. (Ctrl (⌘) + V)
 ja:
   subtitle: モダンな画像変換ツール
   start_button: はじめに
@@ -147,9 +177,18 @@ ja:
     high_speed:
       title: 高速変換
       description: Rust基盤で高速な画像処理を実現。
+    dark_mode:
+      title: ダークモード
+      description: ダークモード対応で快適な閲覧体験を提供。
     drag_drop:
       title: ドラッグ&ドロップ
       description: 簡単な操作で画像を一括変換可能。
+    i18n:
+      title: 多言語対応
+      description: 複数言語に対応し、グローバルなユーザー体験を提供。
+    paste:
+      title: クリップボードから貼り付け
+      description: クリップボードから直接画像を貼り付けて素早く変換。(Ctrl (⌘) + V)
 ko:
   subtitle: 모던 이미지 변환기
   start_button: 시작하기
@@ -172,6 +211,15 @@ ko:
     drag_drop:
       title: 드래그 & 드롭
       description: 간단한 조작으로 이미지 일괄 변환 가능.
+    dark_mode:
+      title: 다크 모드
+      description: 다크 모드 지원으로 편안한 시청 경험 제공.
+    i18n:
+      title: 다국어 지원
+      description: 글로벌 사용자 경험을 위한 다국어 지원.
+    paste:
+      title: 클립보드에서 붙여넣기
+      description: 클립보드에서 직접 이미지를 붙여넣어 빠르게 변환. (Ctrl (⌘) + V)
 zhHant:
   subtitle: 現代圖像轉換器
   start_button: 入門
@@ -194,6 +242,15 @@ zhHant:
     drag_drop:
       title: 拖放功能
       description: 通過簡單操作輕鬆進行批量轉換。
+    dark_mode:
+      title: 暗黑模式
+      description: 暗黑模式支援，享受舒適的瀏覽體驗。
+    i18n:
+      title: 多語言支援
+      description: 支援多種語言以提供全球用戶體驗。
+    paste:
+      title: 從剪貼簿貼上
+      description: 直接從剪貼簿貼上圖像以快速轉換。(Ctrl (⌘) + V)
 zhHans:
   subtitle: 现代图像转换器
   start_button: 入门
@@ -216,4 +273,13 @@ zhHans:
     drag_drop:
       title: 拖放功能
       description: 通过简单操作轻松进行批量转换。
+    dark_mode:
+      title: 暗黑模式
+      description: 暗黑模式支持，享受舒适的浏览体验。
+    i18n:
+      title: 多语言支持
+      description: 支持多种语言以提供全球用户体验。
+    paste:
+      title: 从剪贴板粘贴
+      description: 直接从剪贴板粘贴图像以快速转换。(Ctrl (⌘) + V)
 </i18n>

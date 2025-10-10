@@ -1,12 +1,12 @@
 import { fileURLToPath, URL } from 'node:url';
 
-import VueI18nVitePlugin from '@intlify/unplugin-vue-i18n/vite';
-
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  ssr: false, // 静的なサイトとしてビルド
+
+  // SSG設定
+  ssr: true,
 
   // 1. ソースコードディレクトリの変更
   srcDir: './src/',
@@ -40,20 +40,24 @@ export default defineNuxtConfig({
     prerender: {
       routes: [
         '/', // ルートはミドルウェアでリダイレクト
+        '/ja',
         '/en',
         '/fr',
-        '/ja',
         '/ko',
         '/zhHant',
         '/zhHans',
+        '/ja/format-guide',
+        '/en/format-guide',
+        '/fr/format-guide',
+        '/ko/format-guide',
+        '/zhHant/format-guide',
+        '/zhHans/format-guide',
         '/ja/getting-started',
         '/en/getting-started',
+        '/fr/getting-started',
         '/ko/getting-started',
         '/zhHant/getting-started',
-        '/ja/test',
-        '/en/test',
-        '/ko/test',
-        '/zhHant/test'
+        '/zhHans/getting-started'
       ]
     }
   },
@@ -100,11 +104,105 @@ export default defineNuxtConfig({
   build: {
     transpile: ['vue-i18n']
   },
+
+  imports: {
+    // Auto-import directories
+    dirs: ['~/composables', '~/utils'],
+    // グローバル関数のauto-import設定
+    global: true
+  },
+
   vite: {
-    plugins: [
-      VueI18nVitePlugin({
-        include: fileURLToPath(new URL('./src/locales', import.meta.url))
-      })
-    ]
+    // YAMLファイルをロードできるようにアセットとして処理
+    assetsInclude: ['**/*.yaml', '**/*.yml'],
+    plugins: []
+  },
+
+  hooks: {
+    'vite:extend': ({ config }) => {
+      config.plugins = config.plugins || [];
+
+      // 動的インポート不要な形でプラグインを追加
+      config.plugins.push({
+        name: 'vue-i18n-loader-inline',
+        enforce: 'pre',
+        transform(code: string, id: string) {
+          // .vueファイルで<i18n>ブロックが含まれている場合のみ処理
+          if (!id.endsWith('.vue') || !code.includes('<i18n')) {
+            return null;
+          }
+
+          console.log(`[i18n-loader] Processing: ${id}`);
+
+          // <i18n>ブロック抽出関数
+          const extractI18nBlocks = (code: string) => {
+            const blocks: Array<{ content: string; lang: string; start: number; end: number }> = [];
+
+            // YAML形式
+            const yamlRegex = /<i18n\s+lang=["']yaml["']>([\s\S]*?)<\/i18n>/g;
+            let match;
+            while ((match = yamlRegex.exec(code)) !== null) {
+              if (match[1]) {
+                blocks.push({
+                  content: match[1],
+                  lang: 'yaml',
+                  start: match.index,
+                  end: match.index + match[0].length
+                });
+              }
+            }
+            return blocks;
+          };
+
+          const i18nBlocks = extractI18nBlocks(code);
+          if (i18nBlocks.length === 0) return null;
+
+          // YAMLをパース
+          const yaml = require('yaml');
+          const messages: Record<string, any> = {};
+
+          for (const block of i18nBlocks) {
+            try {
+              const parsed = yaml.parse(block.content.trim());
+              Object.assign(messages, parsed);
+            } catch (error) {
+              console.error(`[i18n-loader] Failed to parse YAML:`, error);
+            }
+          }
+
+          // <i18n>ブロックを削除
+          let transformedCode = code;
+          for (let i = i18nBlocks.length - 1; i >= 0; i--) {
+            const block = i18nBlocks[i];
+            if (block) {
+              transformedCode =
+                transformedCode.slice(0, block.start) + transformedCode.slice(block.end);
+            }
+          }
+
+          // scriptタグに統合コードを追加
+          const scriptSetupRegex = /(<script[^>]*setup[^>]*>)/;
+          if (scriptSetupRegex.test(transformedCode)) {
+            const integrationCode = `
+// Auto-generated from <i18n> blocks
+import { useLocalI18n } from '@/composables/useLocalI18n';
+
+const __i18nMessages = ${JSON.stringify(messages, null, 2)};
+const { t } = useLocalI18n(__i18nMessages);
+
+// t関数をテンプレートで使用可能にする（自動expose）
+defineExpose({ t });
+`;
+
+            transformedCode = transformedCode.replace(scriptSetupRegex, `$1${integrationCode}`);
+            console.log(`[i18n-loader] Transformed: ${id}`);
+
+            return { code: transformedCode, map: null };
+          }
+
+          return null;
+        }
+      });
+    }
   }
 });

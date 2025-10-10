@@ -1,4 +1,16 @@
 /// <reference types="@nuxt/types" />
+/// <reference types="@nuxtjs/i18n" />
+
+// YAML ファイルの型定義
+declare module '*.yaml' {
+  const content: any;
+  export default content;
+}
+
+declare module '*.yml' {
+  const content: any;
+  export default content;
+}
 
 // Nuxt用の環境変数型定義
 interface ImportMetaEnv {

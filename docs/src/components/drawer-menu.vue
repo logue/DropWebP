@@ -1,13 +1,9 @@
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n';
-
 import { useI18nLocale } from '@/composables/useI18nLocale';
 import type DrawerMenuItem from '@/interfaces/DrawerMenuItemInterface';
 
 // 現在のルートから言語を取得
 const { r } = useI18nLocale();
-// i18nのt関数を取得
-const { t } = useI18n();
 
 /** Drawer menu items */
 const items: ComputedRef<DrawerMenuItem[]> = computed(() => [

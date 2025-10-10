@@ -7,7 +7,7 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "deploy": "nuxt generate && gh-pages -d dist -b main",
+    "deploy": "nuxt generate && gh-pages -d .output/public -b main",
     "lint": "eslint . --fix --cache --cache-location ./node_modules/.vite/vite-plugin-eslint && prettier src/**/*.{ts,vue,json} -w -u",
     "lint:style": "stylelint \"./src/**/*.{css,sass,scss,htm,html,vue}\" --fix --cache-location ./node_modules/.vite/vite-plugin-stylelint && prettier \"./src/**/*.{css,sass,scss,htm,html,vue}\" -w -u",
     "postinstall": "nuxt prepare"
@@ -15,7 +15,6 @@
   "dependencies": {
     "@mdi/font": "7.4.47",
     "@pinia/nuxt": "0.11.2",
-    "@types/js-yaml": "^4.0.9",
     "js-yaml": "^4.1.0",
     "nuxt": "^4.1.3",
     "pinia": "^3.0.3",
@@ -30,9 +29,13 @@
   "devDependencies": {
     "@intlify/unplugin-vue-i18n": "^11.0.1",
     "@nuxt/eslint": "1.9.0",
+    "@rollup/plugin-yaml": "^4.1.2",
     "@tsconfig/node-lts": "^22.0.2",
+    "@types/js-yaml": "^4.0.9",
     "eslint": "^9.37.0",
     "eslint-import-resolver-custom-alias": "^1.3.2",
-    "gh-pages": "^6.3.0"
+    "gh-pages": "^6.3.0",
+    "vite": "^7.1.9",
+    "yaml": "^2.8.1"
   }
 }

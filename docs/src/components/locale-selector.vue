@@ -3,7 +3,7 @@ import { useI18nLocale } from '@/composables/useI18nLocale';
 import { SupportedLocales, type SupportedLocale } from '@/types/SupportedLocales';
 
 // useI18nLocale composableを使用
-const { currentLocale, setLocaleAndNavigate, t } = useI18nLocale();
+const { currentLocale, setLocaleAndNavigate } = useI18nLocale();
 
 const setLocale = async (newLocale: SupportedLocale) => {
   await setLocaleAndNavigate(newLocale);

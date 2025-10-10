@@ -6,35 +6,40 @@ import { en, fr, ja, ko, zhHans, zhHant } from 'vuetify/locale';
 import type { SupportedLocale } from '@/types/SupportedLocales';
 import { detectBrowserLocale, getLocaleFromPath, updateHtmlLang } from '@/utils/locale';
 
+// メッセージにVuetifyロケールを統合
 const messages = {
   ja: {
-    $vuetify: { ja }
+    $vuetify: ja
   },
-  fr: { $vuetify: { fr } },
-  en: { $vuetify: { en } },
-  ko: { $vuetify: { ko } },
-  zhHant: { $vuetify: { zhHant } },
-  zhHans: { $vuetify: { zhHans } }
+  fr: {
+    $vuetify: fr
+  },
+  en: {
+    $vuetify: en
+  },
+  ko: {
+    $vuetify: ko
+  },
+  zhHant: {
+    $vuetify: zhHant
+  },
+  zhHans: {
+    $vuetify: zhHans
+  }
 };
 
 export default defineNuxtPlugin(nuxtApp => {
-  // URLから言語コードを取得（ユーティリティ関数を使用）
-  const getLocaleFromRoute = (): SupportedLocale => {
-    if (import.meta.client) {
-      const pathLocale = getLocaleFromPath(window.location.pathname);
-      return pathLocale || 'en';
-    }
-    return 'en';
-  };
+  // SSR対応: Nuxtアプリのrouteからロケールを取得
+  const route = useRoute();
+  const routeLocale = getLocaleFromPath(route.path);
 
-  // URLから言語を優先的に取得
-  const routeLocale = getLocaleFromRoute();
-  let locale: SupportedLocale = routeLocale;
+  // クライアントサイドでのフォールバック処理
+  let locale: SupportedLocale = routeLocale || 'ja';
 
-  // URLに言語コードがない場合はブラウザ設定から判定
-  if (!routeLocale || routeLocale === 'en') {
+  // クライアントサイドかつルートにロケールがない場合のみブラウザ設定から判定
+  if (import.meta.client && !routeLocale) {
     const browserLocale = detectBrowserLocale();
-    locale = browserLocale;
+    locale = browserLocale || 'ja';
   }
 
   // i18nインスタンスを作成
@@ -43,7 +48,7 @@ export default defineNuxtPlugin(nuxtApp => {
     locale,
     fallbackLocale: 'ja',
     messages,
-    globalInjection: true
+    globalInjection: false
   });
 
   // VueアプリインスタンスにVue I18nをインストール
