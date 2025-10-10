@@ -26,7 +26,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 8 # プロジェクトで使用しているバージョン
+          version: 10 # プロジェクトで使用しているバージョン
 
       # 3. Node.js環境をセットアップ
       - name: Setup Node.js
@@ -34,17 +34,15 @@ jobs:
         with:
           node-version: "22" # プロジェクトで使用しているバージョン
           cache: "pnpm"
-          cache-dependency-path: docs/pnpm-lock.yaml # docsディレクトリ内のlockファイルを指定
+          cache-dependency-path: pnpm-lock.yaml
 
       # 4. 依存パッケージをインストール
       - name: Install dependencies
         run: pnpm install
-        working-directory: ./docs # Nuxtプロジェクトのあるdocsディレクトリで実行
 
       # 5. Nuxtアプリをビルド
       - name: Build
-        run: pnpm exec nuxi generate
-        working-directory: ./docs # docsディレクトリで実行
+        run: pnpm --filter @drop-compress-image/docs generate
 
       # 6. GitHub Pages用の設定
       - name: Setup Pages
