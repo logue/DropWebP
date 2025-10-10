@@ -1,5 +1,5 @@
 import type { Composer } from 'vue-i18n';
-import { supportedLocales } from '@/plugins/i18n';
+import { SupportedLocales } from '@/types/SupportedLocales';
 import { getLocaleFromPath, updateHtmlLang } from '@/utils/locale';
 
 export default defineNuxtRouteMiddleware(to => {
@@ -7,7 +7,7 @@ export default defineNuxtRouteMiddleware(to => {
   const locale = getLocaleFromPath(to.path);
 
   // 言語コードがパスに含まれている場合、i18nの言語を設定
-  if (locale && supportedLocales.includes(locale)) {
+  if (locale && SupportedLocales.includes(locale)) {
     // クライアントサイドでi18nの言語を設定
     if (import.meta.client) {
       const { $i18n } = useNuxtApp();

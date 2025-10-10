@@ -3,6 +3,7 @@ import { createI18n } from 'vue-i18n';
 
 import { en, fr, ja, ko, zhHans, zhHant } from 'vuetify/locale';
 import { detectBrowserLocale, getLocaleFromPath, updateHtmlLang } from '@/utils/locale';
+import type { SupportedLocale } from '@/types/SupportedLocales';
 
 const messages = {
   ja: {
@@ -14,9 +15,6 @@ const messages = {
   zhHant: { $vuetify: { zhHant } },
   zhHans: { $vuetify: { zhHans } }
 };
-
-export const supportedLocales = ['en', 'fr', 'ja', 'ko', 'zhHant', 'zhHans'] as const;
-export type SupportedLocale = (typeof supportedLocales)[number];
 
 export default defineNuxtPlugin(nuxtApp => {
   // URLから言語コードを取得（ユーティリティ関数を使用）

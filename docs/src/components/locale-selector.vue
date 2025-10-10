@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { useI18nLocale } from '@/composables/useI18nLocale';
-import type { SupportedLocale } from '@/plugins/i18n';
+import { SupportedLocales, type SupportedLocale } from '@/types/SupportedLocales';
 
 // useI18nLocale composableを使用
-const { currentLocale, supportedLocales, setLocaleAndNavigate, t } = useI18nLocale();
+const { currentLocale, setLocaleAndNavigate, t } = useI18nLocale();
 
 const setLocale = async (newLocale: SupportedLocale) => {
   await setLocaleAndNavigate(newLocale);
@@ -17,7 +17,7 @@ const setLocale = async (newLocale: SupportedLocale) => {
     </template>
     <v-list>
       <v-list-item
-        v-for="locale of supportedLocales"
+        v-for="locale of SupportedLocales"
         :key="locale"
         :active="locale === currentLocale"
         @click="setLocale(locale)"

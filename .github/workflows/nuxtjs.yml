@@ -16,7 +16,7 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
       # 1. リポジトリのソースコードをチェックアウト
       - name: Checkout
@@ -32,8 +32,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20" # プロジェクトで使用しているバージョン
-          cache: 'pnpm'
+          node-version: "22" # プロジェクトで使用しているバージョン
+          cache: "pnpm"
           cache-dependency-path: docs/pnpm-lock.yaml # docsディレクトリ内のlockファイルを指定
 
       # 4. 依存パッケージをインストール
@@ -55,7 +55,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           # Nuxt3のデフォルト出力先は .output/public
-          path: 'docs/.output/public'
+          path: "docs/.output/public"
 
       # 8. GitHub Pagesにデプロイ
       - name: Deploy to GitHub Pages

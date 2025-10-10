@@ -1,7 +1,5 @@
 import { computed, type ComputedRef } from 'vue';
 import { useI18n, type Composer } from 'vue-i18n';
-
-import { supportedLocales, type SupportedLocale } from '@/plugins/i18n';
 import {
   getLocaleFromPath,
   removeLocaleFromPath,
@@ -12,6 +10,7 @@ import {
   saveLocaleToStorage,
   resolveLocale as utilResolveLocale
 } from '@/utils/locale';
+import type { SupportedLocale } from '@/types/SupportedLocales';
 
 /**
  * ロケール管理用composable
@@ -83,7 +82,6 @@ export function useI18nLocale() {
   return {
     // 状態
     currentLocale,
-    supportedLocales,
     i18n,
     t,
     r,

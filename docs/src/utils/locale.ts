@@ -1,4 +1,4 @@
-import { supportedLocales, type SupportedLocale } from '@/plugins/i18n';
+import { SupportedLocales, type SupportedLocale } from '@/types/SupportedLocales';
 
 /**
  * ロケール関連のユーティリティ関数
@@ -12,7 +12,7 @@ export function getLocaleFromPath(path: string): SupportedLocale | null {
   const pathSegments = path.split('/').filter(Boolean);
   const firstSegment = pathSegments[0] as SupportedLocale;
 
-  if (firstSegment && supportedLocales.includes(firstSegment)) {
+  if (firstSegment && SupportedLocales.includes(firstSegment)) {
     return firstSegment;
   }
   return null;
@@ -25,7 +25,7 @@ export function removeLocaleFromPath(path: string): string {
   const pathSegments = path.split('/').filter(Boolean);
   const firstSegment = pathSegments[0] as SupportedLocale;
 
-  if (firstSegment && supportedLocales.includes(firstSegment)) {
+  if (firstSegment && SupportedLocales.includes(firstSegment)) {
     const cleanPath = '/' + pathSegments.slice(1).join('/');
     return cleanPath === '/' ? '' : cleanPath;
   }
@@ -79,7 +79,7 @@ export function getLocaleFromStorage(): SupportedLocale | null {
   }
 
   const saved = localStorage.getItem('locale');
-  if (saved && supportedLocales.includes(saved as SupportedLocale)) {
+  if (saved && SupportedLocales.includes(saved as SupportedLocale)) {
     return saved as SupportedLocale;
   }
   return null;

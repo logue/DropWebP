@@ -21,6 +21,8 @@ const features = [
     key: 'drag_drop'
   }
 ];
+
+const baseUrl = `https://github.com/logue/DropWebP/releases/download/${version}/`;
 </script>
 
 <template>
@@ -34,7 +36,7 @@ const features = [
       <!-- Download Buttons -->
       <div class="d-flex justify-center flex-wrap">
         <v-btn
-          :href="`https://github.com/logue/DropWebP/releases/download/${version}/drop-compress-image_${version}_x64_en-US.msi`"
+          :href="`${baseUrl}drop-compress-image_${version}_x64_en-US.msi`"
           class="mr-1"
           prepend-icon="mdi-microsoft-windows"
           size="large"
@@ -45,7 +47,7 @@ const features = [
           <small class="text-secondary">({{ t('download.window_requirement') }})</small>
         </v-btn>
         <v-btn
-          :href="`https://github.com/logue/DropWebP/releases/download/${version}/drop-compress-image_${version}_aarch64.dmg`"
+          :href="`drop-compress-image_${version}_aarch64.dmg`"
           class="ml-1"
           prepend-icon="mdi-apple"
           size="large"
