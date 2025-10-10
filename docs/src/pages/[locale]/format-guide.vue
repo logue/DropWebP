@@ -15,7 +15,7 @@ useHead({
 </script>
 
 <template>
-  <h2>{{ t('title') }}</h2>
+  <h2 class="h2 mb-3">{{ t('title') }}</h2>
   <v-card class="mb-6" tag="section">
     <v-card-title tag="h3">
       {{ t('webp.title') }}
@@ -54,7 +54,7 @@ useHead({
           <p>{{ t('jxl.description[1]') }}</p>
           <p>{{ t('jxl.description[2]') }}</p>
         </div>
-        <v-img :src="jxlLogo" alt="JPEG XL Logo" width="256" class="mr-4" />
+        <v-img :src="jxlLogo" alt="JPEG XL Logo" width="256" />
       </div>
     </v-card-text>
   </v-card>
@@ -96,7 +96,7 @@ fr:
       - Il offre une meilleure compression et qualité, en particulier pour les images haute résolution.
       - JPEG XL prend en charge la compression avec et sans perte et est optimisé pour les performances sur le web.
 ja:
-  title: フォーマットガイド
+  title: 対応フォーマットガイド
   meta_description: Drop Compress Imageでサポートされている画像フォーマットのガイド。
   webp:
     title: WebP

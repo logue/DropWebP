@@ -1,3 +1,9 @@
+<div class="text-center">
+
+![logo](./app/src-tauri/icons/Square284x284Logo.png)
+
+</div>
+
 # 🚀 Drop Compress Image: The Modern Image Converter
 
 Drop Compress Image is a powerful, fast, and versatile GUI tool for converting your images into next-generation formats. Built with performance in mind, it leverages modern codecs to bring you the best in speed, quality, and file size. Say goodbye to outdated formats and hello to the future of web images!
@@ -41,6 +47,10 @@ Optimize your images by converting them to these modern, highly efficient format
 - **AVIF** (.avif)
 - **JPEG XL** (.jxl) - **_JPEG transcode_** supported. Lossy & lossless is experimental.
 - **WebP** (.webp) - **_Lossy & Lossless_** supported
+
+| WebP                                    | AVIF                                         | JPEG XL                                        |
+| --------------------------------------- | -------------------------------------------- | ---------------------------------------------- |
+| ![WebP](./docs/src/assets/WebPLogo.svg) | ![AVIF](./docs/src/assets/Avif-logo-rgb.svg) | ![JPEG XL](./docs/src/assets/JPEG_XL_logo.svg) |
 
 ## 🌐 Localization
 
