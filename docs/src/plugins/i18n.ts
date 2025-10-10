@@ -2,8 +2,9 @@ import { watch } from 'vue';
 import { createI18n } from 'vue-i18n';
 
 import { en, fr, ja, ko, zhHans, zhHant } from 'vuetify/locale';
-import { detectBrowserLocale, getLocaleFromPath, updateHtmlLang } from '@/utils/locale';
+
 import type { SupportedLocale } from '@/types/SupportedLocales';
+import { detectBrowserLocale, getLocaleFromPath, updateHtmlLang } from '@/utils/locale';
 
 const messages = {
   ja: {

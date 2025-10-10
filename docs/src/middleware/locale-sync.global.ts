@@ -1,4 +1,5 @@
 import type { Composer } from 'vue-i18n';
+
 import { SupportedLocales } from '@/types/SupportedLocales';
 import { getLocaleFromPath, updateHtmlLang } from '@/utils/locale';
 

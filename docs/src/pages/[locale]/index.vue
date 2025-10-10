@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { useI18nLocale } from '@/composables/useI18nLocale';
 
 import logo from '@/assets/logo.png';
+import { useI18nLocale } from '@/composables/useI18nLocale';
 
 const { t } = useI18n();
 const { r } = useI18nLocale();

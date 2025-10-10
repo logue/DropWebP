@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import webpLogo from '@/assets/WebPLogo.svg';
+
 import avifLogo from '@/assets/Avif-logo-rgb.svg';
 import jxlLogo from '@/assets/JPEG_XL_logo.svg';
+import webpLogo from '@/assets/WebPLogo.svg';
 
 const { t } = useI18n();
 

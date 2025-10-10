@@ -1,5 +1,7 @@
 import { computed, type ComputedRef } from 'vue';
 import { useI18n, type Composer } from 'vue-i18n';
+
+import type { SupportedLocale } from '@/types/SupportedLocales';
 import {
   getLocaleFromPath,
   removeLocaleFromPath,
@@ -10,7 +12,6 @@ import {
   saveLocaleToStorage,
   resolveLocale as utilResolveLocale
 } from '@/utils/locale';
-import type { SupportedLocale } from '@/types/SupportedLocales';
 
 /**
  * ロケール管理用composable

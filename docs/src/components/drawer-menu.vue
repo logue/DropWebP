@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { useI18nLocale } from '@/composables/useI18nLocale';
 
+import { useI18nLocale } from '@/composables/useI18nLocale';
 import type DrawerMenuItem from '@/interfaces/DrawerMenuItemInterface';
 
 // 現在のルートから言語を取得

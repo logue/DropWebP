@@ -1,4 +1,4 @@
-import { supportedLocales, type SupportedLocale } from '@/plugins/i18n';
+import { SupportedLocales, type SupportedLocale } from '@/types/SupportedLocales';
 
 export default defineNuxtRouteMiddleware(to => {
   // ルートパス（/）の場合のみリダイレクト処理
@@ -10,7 +10,7 @@ export default defineNuxtRouteMiddleware(to => {
   if (import.meta.client) {
     // 1. localStorage から優先的に取得
     const savedLocale = localStorage.getItem('locale') as SupportedLocale;
-    if (savedLocale && supportedLocales.includes(savedLocale)) {
+    if (savedLocale && SupportedLocales.includes(savedLocale)) {
       targetLocale = savedLocale;
     } else {
       // 2. ブラウザの言語設定から判定
@@ -23,7 +23,7 @@ export default defineNuxtRouteMiddleware(to => {
         } else {
           targetLocale = 'zhHant'; // 繁体字中国語
         }
-      } else if (supportedLocales.includes(locale as SupportedLocale)) {
+      } else if (SupportedLocales.includes(locale as SupportedLocale)) {
         targetLocale = locale;
       }
     }
