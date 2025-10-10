@@ -1,9 +1,9 @@
 name: Deploy Nuxt App to GitHub Pages
 
 on:
-  # mainブランチにプッシュされたときに実行
+  # masterブランチにプッシュされたときに実行
   push:
-    branches: ["main"]
+    branches: ["master"]
   # Actionsタブから手動で実行することも可能にする
   workflow_dispatch:
 
