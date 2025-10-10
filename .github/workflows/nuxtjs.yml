@@ -1,41 +1,63 @@
-# https://github.com/actions/deploy-pages#usage
-name: Deploy to GitHub Pages
+name: Deploy Nuxt App to GitHub Pages
+
 on:
-  workflow_dispatch:
+  # mainブランチにプッシュされたときに実行
   push:
-    branches:
-      - main
+    branches: ["main"]
+  # Actionsタブから手動で実行することも可能にする
+  workflow_dispatch:
+
+# GITHUB_TOKENの権限設定
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v4
-      - run: corepack enable
-      - uses: actions/setup-node@v4
+      # 1. リポジトリのソースコードをチェックアウト
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. pnpmをセットアップ (プロジェクトのパッケージマネージャーに合わせてください)
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
         with:
-          node-version: "20"
-      # Pick your own package manager and build script
-      - run: npm install
-      - run: npx nuxt build --preset github_pages
+          version: 8 # プロジェクトで使用しているバージョン
+
+      # 3. Node.js環境をセットアップ
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20" # プロジェクトで使用しているバージョン
+          cache: 'pnpm'
+          cache-dependency-path: docs/pnpm-lock.yaml # docsディレクトリ内のlockファイルを指定
+
+      # 4. 依存パッケージをインストール
+      - name: Install dependencies
+        run: pnpm install
+        working-directory: ./docs # Nuxtプロジェクトのあるdocsディレクトリで実行
+
+      # 5. Nuxtアプリをビルド
+      - name: Build
+        run: pnpm exec nuxi generate
+        working-directory: ./docs # docsディレクトリで実行
+
+      # 6. GitHub Pages用の設定
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      # 7. ビルド成果物をアップロード
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./docs/.output/public
-  # Deployment job
-  deploy:
-    # Add a dependency to the build job
-    needs: build
-    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
-    permissions:
-      pages: write      # to deploy to Pages
-      id-token: write   # to verify the deployment originates from an appropriate source
-    # Deploy to the github_pages environment
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    # Specify runner + deployment step
-    runs-on: ubuntu-latest
-    steps:
+          # Nuxt3のデフォルト出力先は .output/public
+          path: 'docs/.output/public'
+
+      # 8. GitHub Pagesにデプロイ
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
