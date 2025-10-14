@@ -3,6 +3,7 @@ import avifLogo from '@/assets/Avif-logo-rgb.svg';
 import jxlLogo from '@/assets/JPEG_XL_logo.svg';
 import webpLogo from '@/assets/WebPLogo.svg';
 
+const { t } = useI18n();
 // メタデータ設定
 useHead({
   title: t('title'),

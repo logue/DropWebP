@@ -1,16 +1,14 @@
 <script setup lang="ts">
-import { useI18nLocale } from '@/composables/useI18nLocale';
 import type DrawerMenuItem from '@/interfaces/DrawerMenuItemInterface';
 
-// 現在のルートから言語を取得
-const { r } = useI18nLocale();
+const { t } = useI18n();
 
 /** Drawer menu items */
 const items: ComputedRef<DrawerMenuItem[]> = computed(() => [
   {
     title: t('home'),
     icon: 'mdi-home',
-    to: r('/')
+    to: '/'
   },
   {
     title: '-' // Divider
@@ -22,7 +20,7 @@ const items: ComputedRef<DrawerMenuItem[]> = computed(() => [
   {
     title: t('format_guide'),
     icon: 'mdi-file-image',
-    to: r('/format-guide')
+    to: '/format-guide'
   }
 ]);
 </script>

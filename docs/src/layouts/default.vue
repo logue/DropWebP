@@ -2,57 +2,19 @@
 import { useTheme } from 'vuetify';
 
 import logo from '../assets/favicon.ico';
-import { useConfigStore, useGlobalStore } from '../store';
+import { useConfigStore } from '../store';
 
 /** Vuetify Theme */
 const theme = useTheme();
 
-/** Global Store */
-const globalStore = useGlobalStore();
-
 /** Config Store */
 const configStore = useConfigStore();
-
-/** Title */
-const title = 'Drop Compress Image';
 
 /** drawer visibility */
 const drawer: Ref<boolean> = ref(false);
 
-/** loading overlay visibility */
-const loading: WritableComputedRef<boolean> = computed({
-  get: () => globalStore.loading,
-  set: v => globalStore.setLoading(v)
-});
-
-/** Appbar progressbar value */
-const progress: ComputedRef<number | null> = computed(() => globalStore.progress);
-
-/** Snackbar visibility */
-const snackbarVisibility: Ref<boolean> = ref(false);
-
-/** Snackbar text */
-const snackbarText: ComputedRef<string> = computed(() => globalStore.message);
-
 /** Toggle Dark mode */
 const isDark: ComputedRef<string> = computed(() => (configStore.theme ? 'dark' : 'light'));
-
-// When snackbar text has been set, show snackbar.
-watch(
-  () => globalStore.message,
-  message => (snackbarVisibility.value = message !== '')
-);
-
-/** Clear store when snackbar hide */
-const onSnackbarChanged = async () => {
-  globalStore.setMessage();
-  await nextTick();
-};
-
-onMounted(() => {
-  document.title = title;
-  loading.value = false;
-});
 </script>
 
 <template>
@@ -65,14 +27,7 @@ onMounted(() => {
       <v-app-bar-nav-icon @click="drawer = !drawer" />
       <v-app-bar-title>Drop Compress Image</v-app-bar-title>
       <v-spacer />
-      <app-bar-menu />
-      <v-progress-linear
-        v-show="loading"
-        :active="loading"
-        :indeterminate="progress === null"
-        :model-value="progress !== null ? progress : 0"
-        color="blue-accent-3"
-      />
+      <app-bar-menu-component />
     </v-app-bar>
 
     <v-main>
@@ -80,17 +35,6 @@ onMounted(() => {
         <slot />
       </v-container>
     </v-main>
-
-    <v-overlay v-model="loading" app class="justify-center align-center" persistent>
-      <v-progress-circular indeterminate size="64" />
-    </v-overlay>
-
-    <v-snackbar v-model="snackbarVisibility" @update:model-value="onSnackbarChanged">
-      {{ snackbarText }}
-      <template #actions>
-        <v-btn icon="mdi-close" @click="onSnackbarChanged" />
-      </template>
-    </v-snackbar>
 
     <v-footer app elevation="3" color="primary">
       <span class="mr-5">2025 &copy; Logue</span>
@@ -104,37 +48,3 @@ onMounted(() => {
     <link rel="icon" :href="logo" type="image/x-icon" />
   </teleport>
 </template>
-
-<style lang="scss">
-/* stylelint-disable-next-line scss/load-no-partial-leading-underscore */
-@use 'vuetify/_settings';
-@use 'sass:map';
-
-body {
-  // Modern scrollbar style
-  scrollbar-width: thin;
-  scrollbar-color: map.get(settings.$grey, 'lighten-2') map.get(settings.$grey, 'base');
-}
-
-::-webkit-scrollbar {
-  width: 0.5rem;
-  height: 0.5rem;
-}
-
-::-webkit-scrollbar-track {
-  box-shadow: inset 0 0 0.5rem rgba(0, 0, 0, 0.1);
-  background-color: map.get(settings.$grey, 'lighten-2');
-}
-
-::-webkit-scrollbar-thumb {
-  border-radius: 0.5rem;
-  background-color: map.get(settings.$grey, 'base');
-  box-shadow: inset 0 0 0.5rem rgba(0, 0, 0, 0.1);
-}
-
-// Fix app-bar's progress-bar
-.v-app-bar .v-progress-linear {
-  position: absolute;
-  bottom: 0;
-}
-</style>

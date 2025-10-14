@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import logo from '@/assets/logo.png';
-import { useI18nLocale } from '@/composables/useI18nLocale';
 
-const { r } = useI18nLocale();
+const { t } = useI18n();
+
 const version = '2.2.1';
 const features = [
   {
@@ -70,7 +70,7 @@ const urlPrefix = `https://github.com/logue/DropWebP/releases/download/${version
           <small class="text-secondary">({{ t('download.macos_requirement') }})</small>
         </v-btn>
       </div>
-      <v-btn class="ma-4" color="primary" size="large" :to="r('/getting-started')">
+      <v-btn class="ma-4" color="primary" size="large" to="getting-started">
         <v-icon start>mdi-rocket</v-icon>
         {{ t('start_button') }}
       </v-btn>

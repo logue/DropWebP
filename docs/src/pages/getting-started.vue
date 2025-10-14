@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { t } = useI18n();
 // メタデータ設定
 useHead({
   title: t('getting_started.title'),

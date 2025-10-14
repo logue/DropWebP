@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import useConfigStore from '@/store/ConfigStore';
 
-import LocaleSelector from './locale-selector.vue';
+import LocaleSelector from './LocaleSelector.vue';
+
+const { t } = useI18n();
 /** Config Store */
 const configStore = useConfigStore();
 </script>
