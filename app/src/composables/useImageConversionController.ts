@@ -255,7 +255,7 @@ export function useImageConversionController(t: ComposerTranslation) {
   });
 
   // ドラッグ&ドロップイベントを監視
-  useDragAndDrop(async paths => {
+  const { isDragging } = useDragAndDrop(async paths => {
     const files = await scanFiles(paths);
     if (!files) {
       return;
@@ -270,6 +270,7 @@ export function useImageConversionController(t: ComposerTranslation) {
     currentFile,
     progress,
     message,
+    isDragging,
     // methods
     convertByDialog,
     convertByDirDialog

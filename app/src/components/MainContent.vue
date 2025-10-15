@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useSettingsStore } from '@/store';
-import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import ProgressDialog from './modals/ProgressDialog.vue';
@@ -12,21 +11,14 @@ const settingsStore = useSettingsStore();
 const { t } = useI18n();
 useLogger();
 
-const { dialog, inProgress, currentFile, progress, message, convertByDialog } =
+const { dialog, inProgress, currentFile, progress, message, isDragging, convertByDialog } =
   useImageConversionController(t);
-
-const isEnter = ref(false);
 </script>
 
 <template>
-  <v-container
-    class="fill-height pa-0 d-flex flex-column justify-center"
-    @dragenter="isEnter = true"
-    @dragleave="isEnter = false"
-    @drop.prevent="isEnter = false"
-  >
+  <v-container class="fill-height pa-0 d-flex flex-column justify-center">
     <v-sheet
-      :class="isEnter ? 'bg-green-lighten-5' : ''"
+      :class="isDragging ? 'bg-green-lighten-5' : ''"
       class="d-flex flex-grow-1 align-center justify-center my-4 px-15"
       rounded="xl"
     >
