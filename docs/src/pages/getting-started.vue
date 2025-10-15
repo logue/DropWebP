@@ -120,4 +120,106 @@ const supportedFeatures = [
   </v-card>
 </template>
 
-<i18n lang="yaml"></i18n>
+<i18n lang="yaml">
+ja:
+  getting_started:
+    title: はじめに
+    meta_description: Drop Compress Imageの使い方とインストール方法
+  title: Drop Compress Image - はじめに
+  subtitle: 高品質画像変換ツールの使い方をご紹介します
+  installation:
+    title: インストール
+    step1_title: ダウンロード
+    step1_desc: 公式サイトから最新版をダウンロードしてください
+    step2_title: インストール
+    step2_desc: ダウンロードしたファイルを実行してインストールを開始
+    step3_title: 完了
+    step3_desc: インストール完了後、アプリを起動してください
+  usage:
+    title: 使用方法
+    methods:
+      drag_drop:
+        title: ドラッグ&ドロップ
+        description: ファイルをアプリにドラッグ&ドロップするだけで変換開始
+      file_menu:
+        title: ファイルメニュー
+        description: メニューバーからファイルを選択して変換
+      batch_convert:
+        title: 一括変換
+        description: 複数ファイルを一度に変換可能
+      settings:
+        title: 設定
+        description: 品質や形式などの詳細設定が可能
+  features:
+    title: 対応機能
+    list:
+      webp_support:
+        title: WebP対応
+        description: 高品質でファイルサイズの小さいWebP形式に変換
+      avif_support:
+        title: AVIF対応
+        description: 次世代画像形式AVIFでさらに高い圧縮率を実現
+      jxl_support:
+        title: JPEG XL対応
+        description: 最新のJPEG XL形式で最高品質の画像変換
+      batch_processing:
+        title: 一括処理
+        description: 複数ファイルを同時に効率的に処理
+      quality_control:
+        title: 品質制御
+        description: 圧縮品質を細かく調整可能
+      cross_platform:
+        title: クロスプラットフォーム
+        description: Windows、macOSで動作
+
+en:
+  getting_started:
+    title: Getting Started
+    meta_description: How to install and use Drop Compress Image
+  title: Drop Compress Image - Getting Started
+  subtitle: Learn how to use this high-quality image conversion tool
+  installation:
+    title: Installation
+    step1_title: Download
+    step1_desc: Download the latest version from the official website
+    step2_title: Install
+    step2_desc: Run the downloaded file to start installation
+    step3_title: Complete
+    step3_desc: Launch the app after installation is complete
+  usage:
+    title: Usage
+    methods:
+      drag_drop:
+        title: Drag & Drop
+        description: Simply drag and drop files to the app to start conversion
+      file_menu:
+        title: File Menu
+        description: Select files from the menu bar for conversion
+      batch_convert:
+        title: Batch Convert
+        description: Convert multiple files at once
+      settings:
+        title: Settings
+        description: Configure quality and format settings
+  features:
+    title: Supported Features
+    list:
+      webp_support:
+        title: WebP Support
+        description: Convert to high-quality, small file size WebP format
+      avif_support:
+        title: AVIF Support
+        description: Achieve higher compression rates with next-gen AVIF format
+      jxl_support:
+        title: JPEG XL Support
+        description: Best quality image conversion with latest JPEG XL format
+      batch_processing:
+        title: Batch Processing
+        description: Process multiple files simultaneously and efficiently
+      quality_control:
+        title: Quality Control
+        description: Fine-tune compression quality settings
+      cross_platform:
+        title: Cross Platform
+        description: Works on Windows and macOS
+</i18n>

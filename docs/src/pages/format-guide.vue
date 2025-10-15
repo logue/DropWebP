@@ -13,48 +13,44 @@ useHead({
 
 <template>
   <h2 class="h2 mb-3">{{ t('title') }}</h2>
-  <v-card class="mb-6" tag="section">
-    <v-card-title tag="h3">
-      {{ t('webp.title') }}
-    </v-card-title>
-    <v-card-text>
-      <div class="d-flex justify-center mb-4">
-        <div class="mr-4">
+  <v-row>
+    <v-col cols="12" md="4">
+      <v-card tag="section">
+        <v-img :src="webpLogo" alt="WebP Logo" max-height="512" />
+        <v-card-title tag="h3">
+          {{ t('webp.title') }}
+        </v-card-title>
+        <v-card-text>
           <p>{{ t('webp.description') }}</p>
-        </div>
-        <v-img :src="webpLogo" alt="WebP Logo" width="256" />
-      </div>
-    </v-card-text>
-  </v-card>
-  <v-card class="mb-6" tag="section">
-    <v-card-title tag="h3">
-      {{ t('avif.title') }}
-    </v-card-title>
-    <v-card-text>
-      <div class="d-flex justify-center mb-4">
-        <div class="mr-4">
+        </v-card-text>
+      </v-card>
+    </v-col>
+    <v-col cols="12" md="4">
+      <v-card tag="section">
+        <v-img :src="avifLogo" alt="AVIF Logo" max-height="512" />
+        <v-card-title tag="h3">
+          {{ t('avif.title') }}
+        </v-card-title>
+        <v-card-text>
           <p>{{ t('avif.description[0]') }}</p>
           <p>{{ t('avif.description[1]') }}</p>
-        </div>
-        <v-img :src="avifLogo" alt="AVIF Logo" width="256" />
-      </div>
-    </v-card-text>
-  </v-card>
-  <v-card class="mb-6" tag="section">
-    <v-card-title tag="h3">
-      {{ t('jxl.title') }}
-    </v-card-title>
-    <v-card-text>
-      <div class="d-flex justify-center mb-4">
-        <div class="mr-4">
+        </v-card-text>
+      </v-card>
+    </v-col>
+    <v-col cols="12" md="4">
+      <v-card tag="section">
+        <v-img :src="jxlLogo" alt="JPEG XL Logo" max-height="512" />
+        <v-card-title tag="h3">
+          {{ t('jxl.title') }}
+        </v-card-title>
+        <v-card-text>
           <p>{{ t('jxl.description[0]') }}</p>
           <p>{{ t('jxl.description[1]') }}</p>
           <p>{{ t('jxl.description[2]') }}</p>
-        </div>
-        <v-img :src="jxlLogo" alt="JPEG XL Logo" width="256" />
-      </div>
-    </v-card-text>
-  </v-card>
+        </v-card-text>
+      </v-card>
+    </v-col>
+  </v-row>
 </template>
 
 <i18n lang="yaml">

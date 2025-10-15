@@ -5,15 +5,23 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
-  // SSG設定
-  ssr: true,
+  // SSG設定（CSS外部化対応）
+  ssr: true, // SSRで翻訳済みHTMLを生成
+
+  // CSSファイル（Vuetifyスタイル確保）
+  css: ['~/styles/settings.scss'],
+
+  // SSRスタイル設定（CSS最適化）
+  features: {
+    inlineStyles: false // CSS外部化
+  },
 
   // 1. ソースコードディレクトリの変更
   srcDir: './src/',
 
   // 2. アプリ設定
   app: {
-    baseURL: process.env.NODE_ENV === 'production' ? '/DropWebP/' : '/',
+    baseURL: process.env.GITHUB_PAGES ? '/DropWebP/' : '/',
     buildAssetsDir: '_nuxt/',
     head: {
       link: [
@@ -35,7 +43,78 @@ export default defineNuxtConfig({
     }
   },
 
-  // 3. SSG設定（静的サイト生成）
+  // i18n設定（<i18n>ブロック使用）
+  i18n: {
+    locales: [
+      { code: 'ja', language: 'ja-JP', name: '🇯🇵 日本語' },
+      { code: 'en', language: 'en-US', name: '🇺🇸 English' },
+      { code: 'fr', language: 'fr-FR', name: '🇫🇷 Français' },
+      { code: 'ko', language: 'ko-KR', name: '🇰🇷 한국어' },
+      { code: 'zhHans', language: 'zh-CN', name: '🇨🇳 简体中文' },
+      { code: 'zhHant', language: 'zh-TW', name: '🇹🇼 繁體中文' }
+    ],
+    defaultLocale: 'en',
+    strategy: 'prefix_and_default'
+  },
+
+  // モジュール
+  modules: ['@pinia/nuxt', 'vuetify-nuxt-module', '@nuxtjs/i18n'],
+
+  // Vuetify設定（CSS完全外部化）
+  vuetify: {
+    moduleOptions: {
+      /* CSS外部化を強制 */
+      styles: true
+    },
+    vuetifyOptions: {
+      theme: {
+        // テーマCSS外部化
+        variations: false
+      }
+    }
+  },
+
+  // TypeScript パスエイリアス設定
+  alias: {
+    '@': fileURLToPath(new URL('./src', import.meta.url))
+  },
+
+  build: {
+    transpile: ['vue-i18n']
+  },
+
+  // Vite設定（VuetifyCSS外部化強制）
+  vite: {
+    css: {
+      postcss: {}
+    },
+    ssr: {
+      // VuetifyをSSR時に外部化
+      noExternal: ['vuetify']
+    },
+    build: {
+      rollupOptions: {
+        output: {
+          // CSS外部化設定（_nuxtディレクトリに統一）
+          assetFileNames: assetInfo => {
+            if (assetInfo.name && assetInfo.name.endsWith('.css')) {
+              // VuetifyのCSSを_nuxtディレクトリに出力
+              return '_nuxt/vuetify-[hash].css';
+            }
+            return '_nuxt/[name]-[hash][extname]';
+          },
+          // CSSチャンクを単一ファイルに統合
+          manualChunks: undefined
+        }
+      },
+      // CSS分割を無効化してVuetify CSSを統合
+      cssCodeSplit: false,
+      // CSS最適化を有効化
+      cssMinify: true
+    }
+  },
+
+  // Nitro設定（SSG + CSS最適化）
   nitro: {
     prerender: {
       routes: [
@@ -59,77 +138,19 @@ export default defineNuxtConfig({
         '/zhHant/getting-started',
         '/zhHans/getting-started'
       ]
-    }
-  },
-
-  // i18n設定（<i18n>ブロック使用）
-  i18n: {
-    locales: [
-      { code: 'ja', language: 'ja-JP', name: '🇯🇵 日本語' },
-      { code: 'en', language: 'en-US', name: '🇺🇸 English' },
-      { code: 'fr', language: 'fr-FR', name: '🇫🇷 Français' },
-      { code: 'ko', language: 'ko-KR', name: '🇰🇷 한국어' },
-      { code: 'zhHans', language: 'zh-CN', name: '🇨🇳 简体中文' },
-      { code: 'zhHant', language: 'zh-TW', name: '🇹🇼 繁體中文' }
-    ],
-    defaultLocale: 'ja',
-    strategy: 'prefix_and_default',
-    detectBrowserLanguage: {
-      useCookie: true,
-      cookieKey: 'i18n_redirected',
-      redirectOn: 'root'
     },
-    vueI18n: './i18n.config.ts',
-    compilation: {
-      strictMessage: false,
-      escapeHtml: false
-    }
-  },
-
-  // モジュール
-  modules: ['@pinia/nuxt', 'vuetify-nuxt-module', '@nuxtjs/i18n'],
-
-  // CSS設定
-  css: ['@/styles/settings.scss'],
-  // Vuetify設定
-  vuetify: {
-    vuetifyOptions: {
-      theme: {
-        defaultTheme: 'light',
-        themes: {
-          light: {
-            colors: {
-              primary: '#1976d2',
-              secondary: '#424242',
-              accent: '#82b1ff',
-              error: '#ff5252',
-              info: '#2196f3',
-              success: '#4caf50',
-              warning: '#ffc107'
-            }
-          },
-          dark: {
-            colors: {
-              primary: '#2196f3',
-              secondary: '#424242',
-              accent: '#ff4081',
-              error: '#ff5252',
-              info: '#2196f3',
-              success: '#4caf50',
-              warning: '#fb8c00'
-            }
+    inlineDynamicImports: false,
+    minify: true,
+    // CSS外部化を強制（_nuxtディレクトリに統一）
+    rollupConfig: {
+      output: {
+        assetFileNames: assetInfo => {
+          if (assetInfo.name && assetInfo.name.endsWith('.css')) {
+            return '_nuxt/[name]-[hash].css';
           }
+          return '_nuxt/[name]-[hash][extname]';
         }
       }
     }
-  },
-
-  // TypeScript パスエイリアス設定
-  alias: {
-    '@': fileURLToPath(new URL('./src', import.meta.url))
-  },
-
-  build: {
-    transpile: ['vue-i18n']
   }
 });

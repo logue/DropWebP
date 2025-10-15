@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useTheme } from 'vuetify';
 
-import logo from '../assets/favicon.ico';
 import { useConfigStore } from '../store';
 
 /** Vuetify Theme */
@@ -45,6 +44,5 @@ const isDark: ComputedRef<string> = computed(() => (configStore.theme ? 'dark' :
       name="theme-color"
       :content="theme.computedThemes.value?.[isDark]?.colors?.primary ?? '#1976D2'"
     />
-    <link rel="icon" :href="logo" type="image/x-icon" />
   </teleport>
 </template>
