@@ -1,0 +1,7 @@
+{
+  "reject": [
+    "nuxt",
+    "@pinia/nuxt"
+  ],
+  "packageManager": "pnpm"
+}

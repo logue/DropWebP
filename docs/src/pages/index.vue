@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import logo from '@/assets/logo.png';
+import ogp from '@/assets/ogp.png';
 
 const { t, locale } = useI18n();
 const config = useRuntimeConfig();
@@ -42,14 +43,16 @@ const currentUrl = computed(() => {
   return `${baseUrl}${sitePath}${path}`;
 });
 
-// OGP画像（ロゴ）- logoはすでにbasePathを含むので、ドメインのみ追加
-const ogImage = `${baseUrl}${logo}`;
+// OGP画像（ロゴ）- ogpはすでにbasePathを含むので、ドメインのみ追加
+const ogImage = `${baseUrl}${ogp}`;
 
 // SEO メタデータ
 useSeoMeta({
-  title: computed(() => `Drop Compress Image v.${version} - ${t('subtitle')}`),
+  title: 'Drop Compress Image',
+  titleTemplate: title => `${title} v.${version}`,
+  ogSiteName: 'Drop Compress Image',
   description: computed(() => t('information[0]')),
-  ogTitle: computed(() => `Drop Compress Image v.${version}`),
+  ogTitle: 'Drop Compress Image',
   ogDescription: computed(() => t('subtitle')),
   ogImage: ogImage,
   ogUrl: currentUrl,
@@ -135,37 +138,41 @@ useHead({
       <p class="text-h6 mb-4">{{ t('subtitle') }}</p>
       <p class="mb-6">{{ t('information[0]') }}</p>
       <p class="mb-6">{{ t('information[1]') }}</p>
-      <!-- Download Buttons -->
-      <div class="d-flex justify-center flex-wrap">
-        <v-btn
-          :href="`${urlPrefix}x64_en-US.msi`"
-          class="mr-1"
-          prepend-icon-color="blue"
-          prepend-icon="mdi-microsoft-windows"
-          size="large"
-          stacked
-        >
-          {{ t('download.windows') }}
-          <br />
-          <small class="text-secondary">({{ t('download.window_requirement') }})</small>
-        </v-btn>
-        <v-btn
-          :href="`${urlPrefix}aarch64.dmg`"
-          class="ml-1"
-          prepend-icon="mdi-apple"
-          size="large"
-          stacked
-        >
-          {{ t('download.macos') }}
-          <br />
-          <small class="text-secondary">({{ t('download.macos_requirement') }})</small>
-        </v-btn>
-      </div>
-      <v-btn class="ma-4" color="primary" size="large" to="getting-started">
-        <v-icon start>mdi-rocket</v-icon>
-        {{ t('start_button') }}
-      </v-btn>
     </v-card-text>
+  </v-card>
+
+  <v-card class="mb-6 bg-transparent" tag="section" elevation="0">
+    <v-card-title class="text-h5 text-center pa-6" tag="h2">
+      {{ t('download.download') }}
+    </v-card-title>
+    <!-- Download Buttons -->
+    <v-card-actions class="justify-center">
+      <v-btn
+        :href="`${urlPrefix}x64_en-US.msi`"
+        class="mr-1"
+        prepend-icon-color="blue"
+        prepend-icon="mdi-microsoft-windows"
+        size="large"
+        stacked
+        variant="elevated"
+      >
+        {{ t('download.windows') }}
+        <br />
+        <small class="text-secondary">({{ t('download.window_requirement') }})</small>
+      </v-btn>
+      <v-btn
+        :href="`${urlPrefix}aarch64.dmg`"
+        class="ml-1"
+        prepend-icon="mdi-apple"
+        size="large"
+        stacked
+        variant="elevated"
+      >
+        {{ t('download.macos') }}
+        <br />
+        <small class="text-secondary">({{ t('download.macos_requirement') }})</small>
+      </v-btn>
+    </v-card-actions>
   </v-card>
 
   <v-card class="mb-6 bg-transparent" tag="section" elevation="0">
@@ -184,6 +191,13 @@ useHead({
       </v-row>
     </v-card-text>
   </v-card>
+
+  <!--
+  <v-btn class="ma-4" color="primary" size="large" to="getting-started">
+    <v-icon start>mdi-rocket</v-icon>
+    {{ t('start_button') }}
+  </v-btn>
+  -->
 </template>
 
 <i18n lang="yaml">
@@ -194,6 +208,7 @@ en:
     - This project was created to provide a comprehensive conversion solution, supporting a wide range of input formats and exporting to highly efficient formats like AVIF, JPEG XL, and WebP.
   start_button: Get Started
   download:
+    download: Download
     windows: Download for Windows
     window_requirement: Windows 11 or later
     macos: Download for MacOS
@@ -225,6 +240,7 @@ fr:
     - Drop Compress Image est un outil GUI puissant, rapide et polyvalent pour convertir vos images en formats de nouvelle génération. Conçu pour la performance, il utilise des codecs modernes pour vous offrir le meilleur en termes de vitesse, de qualité et de taille de fichier. Dites adieu aux formats obsolètes et bonjour à l'avenir des images web !
     - Ce projet a été créé pour fournir une solution de conversion complète, prenant en charge une large gamme de formats d'entrée et exportant vers des formats très efficaces comme AVIF, JPEG XL et WebP.
   download:
+    download: Télécharger
     windows: Télécharger pour Windows
     window_requirement: Windows 11 ou version ultérieure
     macos: Télécharger pour MacOS
@@ -256,6 +272,7 @@ ja:
     - Drop Compress Imageは、次世代フォーマットへの画像変換を強力かつ高速に行う多機能なGUIツールです。パフォーマンスを重視して設計されており、最新のコーデックを活用して、速度、品質、ファイルサイズのすべてにおいて最高の体験を提供します。古いフォーマットに別れを告げ、ウェブ画像の未来へようこそ！
     - このプロジェクトは、幅広い入力フォーマットに対応し、AVIF、JPEG XL、WebPなどの高効率フォーマットへのエクスポートをサポートする包括的な変換ソリューションを提供するために作成されました。
   download:
+    download: ダウンロード
     windows: Windows版をダウンロード
     window_requirement: Windows 11以降
     macos: MacOS版をダウンロード
@@ -287,6 +304,7 @@ ko:
     - Drop Compress Image는 차세대 포맷으로 이미지를 변환하는 강력하고 빠르며 다재다능한 GUI 도구입니다. 성능을 염두에 두고 설계되었으며 최신 코덱을 활용하여 속도, 품질 및 파일 크기 측면에서 최고의 경험을 제공합니다. 구식 포맷과 작별하고 웹 이미지의 미래에 오신 것을 환영합니다!
     - 이 프로젝트는 광범위한 입력 포맷을 지원하고 AVIF, JPEG XL 및 WebP와 같은 고효율 포맷으로 내보내는 포괄적인 변환 솔루션을 제공하기 위해 만들어졌습니다.
   download:
+    download: 다운로드
     windows: Windows용 다운로드
     window_requirement: Windows 11 이상
     macos: MacOS용 다운로드
@@ -318,6 +336,7 @@ zhHant:
     - Drop Compress Image 是一款強大、快速且多功能的 GUI 工具，可將您的圖像轉換為新一代格式。它以性能為設計理念，利用現代編解碼器為您帶來速度、質量和文件大小方面的最佳體驗。告別過時的格式，迎接網絡圖像的未來！
     - 該項目旨在提供全面的轉換解決方案，支持廣泛的輸入格式，並導出高效的格式，如 AVIF、JPEG XL 和 WebP。
   download:
+    download: 下載
     windows: 下載 Windows 版
     window_requirement: Windows 11 或更新版本
     macos: 下載 MacOS 版
@@ -349,6 +368,7 @@ zhHans:
     - Drop Compress Image 是一款强大、快速且多功能的 GUI 工具，可将您的图像转换为新一代格式。它以性能为设计理念，利用现代编解码器为您带来速度、质量和文件大小方面的最佳体验。告别过时的格式，迎接网络图像的未来！
     - 该项目旨在提供全面的转换解决方案，支持广泛的输入格式，并导出高效的格式，如 AVIF、JPEG XL 和 WebP。
   download:
+    download: 下载安装
     windows: 下载安装 Windows 版
     window_requirement: Windows 11 或更新版本
     macos: 下载安装 MacOS 版
