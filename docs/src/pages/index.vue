@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import logo from '@/assets/logo.png';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const config = useRuntimeConfig();
 
 const version = '2.2.1';
 const features = [
@@ -32,6 +33,96 @@ const features = [
 ];
 
 const urlPrefix = `https://github.com/logue/DropWebP/releases/download/${version}/drop-compress-image_${version}_`;
+
+// サイトのベースURL
+const baseUrl = 'https://logue.dev';
+const sitePath = '/DropWebP';
+const currentUrl = computed(() => {
+  const path = locale.value === 'ja' ? '' : `/${locale.value}`;
+  return `${baseUrl}${sitePath}${path}`;
+});
+
+// OGP画像（ロゴ）- logoはすでにbasePathを含むので、ドメインのみ追加
+const ogImage = `${baseUrl}${logo}`;
+
+// SEO メタデータ
+useSeoMeta({
+  title: computed(() => `Drop Compress Image v.${version} - ${t('subtitle')}`),
+  description: computed(() => t('information[0]')),
+  ogTitle: computed(() => `Drop Compress Image v.${version}`),
+  ogDescription: computed(() => t('subtitle')),
+  ogImage: ogImage,
+  ogUrl: currentUrl,
+  ogType: 'website',
+  ogLocale: computed(() => {
+    const localeMap: Record<string, string> = {
+      ja: 'ja_JP',
+      en: 'en_US',
+      fr: 'fr_FR',
+      ko: 'ko_KR',
+      zhHans: 'zh_CN',
+      zhHant: 'zh_TW'
+    };
+    return localeMap[locale.value] || 'en_US';
+  }),
+  twitterCard: 'summary_large_image',
+  twitterTitle: computed(() => `Drop Compress Image v.${version}`),
+  twitterDescription: computed(() => t('subtitle')),
+  twitterImage: ogImage
+});
+
+// JSON-LD 構造化データ
+useHead({
+  script: [
+    {
+      type: 'application/ld+json',
+      innerHTML: computed(() => {
+        const languageMap: Record<string, string> = {
+          ja: 'ja',
+          en: 'en',
+          fr: 'fr',
+          ko: 'ko',
+          zhHans: 'zh-CN',
+          zhHant: 'zh-TW'
+        };
+
+        return JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'SoftwareApplication',
+          name: 'Drop Compress Image',
+          applicationCategory: 'DesignApplication',
+          operatingSystem: 'Windows 11, macOS',
+          offers: {
+            '@type': 'Offer',
+            price: '0',
+            priceCurrency: 'USD'
+          },
+          description: t('information[0]'),
+          url: `${baseUrl}${sitePath}`,
+          image: ogImage,
+          softwareVersion: version,
+          releaseNotes: `https://github.com/logue/DropWebP/releases/tag/${version}`,
+          downloadUrl: `https://github.com/logue/DropWebP/releases/download/${version}/`,
+          author: {
+            '@type': 'Person',
+            name: 'Logue',
+            url: 'https://github.com/logue'
+          },
+          featureList: [
+            t('features.multiple_formats.title'),
+            t('features.high_speed.title'),
+            t('features.drag_drop.title'),
+            t('features.i18n.title'),
+            t('features.dark_mode.title'),
+            t('features.paste.title')
+          ],
+          screenshot: ogImage,
+          inLanguage: languageMap[locale.value] || 'en'
+        });
+      })
+    }
+  ]
+});
 </script>
 
 <template>

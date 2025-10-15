@@ -43,6 +43,9 @@ jobs:
       # 5. Nuxtアプリをビルド
       - name: Build
         run: pnpm --filter @drop-compress-image/docs generate
+        env:
+          GITHUB_PAGES: true
+          NUXT_APP_BASE_URL: /DropWebP/
 
       # 6. GitHub Pages用の設定
       - name: Setup Pages

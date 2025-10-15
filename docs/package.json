@@ -7,6 +7,7 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
+    "clean": "rimraf .nuxt .output public/_nuxt",
     "deploy": "nuxt generate && gh-pages -d .output/public -b main",
     "lint": "eslint . --fix --cache --cache-location ./node_modules/.vite/vite-plugin-eslint && prettier src/**/*.{ts,vue,json} -w -u",
     "lint:style": "stylelint \"./src/**/*.{css,sass,scss,htm,html,vue}\" --fix --cache-location ./node_modules/.vite/vite-plugin-stylelint && prettier \"./src/**/*.{css,sass,scss,htm,html,vue}\" -w -u",

@@ -21,7 +21,7 @@ export default defineNuxtConfig({
 
   // 2. アプリ設定
   app: {
-    baseURL: process.env.GITHUB_PAGES ? '/DropWebP/' : '/',
+    baseURL: process.env.NUXT_APP_BASE_URL || (process.env.GITHUB_PAGES ? '/DropWebP/' : '/'),
     buildAssetsDir: '_nuxt/',
     head: {
       link: [
