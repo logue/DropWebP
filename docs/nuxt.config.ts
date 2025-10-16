@@ -46,15 +46,17 @@ export default defineNuxtConfig({
   // i18n設定（<i18n>ブロック使用）
   i18n: {
     locales: [
-      { code: 'ja', language: 'ja-JP', name: '🇯🇵 日本語' },
-      { code: 'en', language: 'en-US', name: '🇺🇸 English' },
-      { code: 'fr', language: 'fr-FR', name: '🇫🇷 Français' },
-      { code: 'ko', language: 'ko-KR', name: '🇰🇷 한국어' },
-      { code: 'zhHans', language: 'zh-CN', name: '🇨🇳 简体中文' },
-      { code: 'zhHant', language: 'zh-TW', name: '🇹🇼 繁體中文' }
+      { code: 'ja', language: 'ja-JP', name: '🇯🇵 日本語', iso: 'ja-JP' },
+      { code: 'en', language: 'en-US', name: '🇺🇸 English', iso: 'en-US' },
+      { code: 'fr', language: 'fr-FR', name: '🇫🇷 Français', iso: 'fr-FR' },
+      { code: 'ko', language: 'ko-KR', name: '🇰🇷 한국어', iso: 'ko-KR' },
+      { code: 'zhHans', language: 'zh-CN', name: '🇨🇳 简体中文', iso: 'zh-CN' },
+      { code: 'zhHant', language: 'zh-TW', name: '🇹🇼 繁體中文', iso: 'zh-TW' }
     ],
     defaultLocale: 'en',
-    strategy: 'prefix_and_default'
+    strategy: 'prefix_and_default',
+    baseUrl: 'https://logue.dev/DropWebP',
+    detectBrowserLanguage: false
   },
 
   // モジュール

@@ -2,25 +2,27 @@
 import type DrawerMenuItem from '@/interfaces/DrawerMenuItemInterface';
 
 const { t } = useI18n();
+const localePath = useLocalePath();
 
 /** Drawer menu items */
 const items: ComputedRef<DrawerMenuItem[]> = computed(() => [
   {
     title: t('home'),
     icon: 'mdi-home',
-    to: '/'
+    to: localePath('/')
   },
   {
     title: '-' // Divider
   },
   {
     title: t('getting_started'),
-    icon: 'mdi-power'
+    icon: 'mdi-power',
+    to: localePath('/getting-started')
   },
   {
     title: t('format_guide'),
     icon: 'mdi-file-image',
-    to: '/format-guide'
+    to: localePath('/format-guide')
   }
 ]);
 </script>

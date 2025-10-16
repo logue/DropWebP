@@ -4,6 +4,7 @@ import ogp from '@/assets/ogp.png';
 
 const { t, locale } = useI18n();
 const config = useRuntimeConfig();
+const localePath = useLocalePath();
 
 const version = '2.2.1';
 const features = [
@@ -46,10 +47,12 @@ const currentUrl = computed(() => {
 // OGP画像（ロゴ）- ogpはすでにbasePathを含むので、ドメインのみ追加
 const ogImage = `${baseUrl}${ogp}`;
 
+// hreflangタグを生成
+useHead(useLocaleHead());
+
 // SEO メタデータ
 useSeoMeta({
-  title: 'Drop Compress Image',
-  titleTemplate: title => `${title} v.${version}`,
+  title: computed(() => `Drop Compress Image - ${t('subtitle')}`),
   ogSiteName: 'Drop Compress Image',
   description: computed(() => t('information[0]')),
   ogTitle: 'Drop Compress Image',
@@ -69,7 +72,7 @@ useSeoMeta({
     return localeMap[locale.value] || 'en_US';
   }),
   twitterCard: 'summary_large_image',
-  twitterTitle: computed(() => `Drop Compress Image v.${version}`),
+  twitterTitle: 'Drop Compress Image',
   twitterDescription: computed(() => t('subtitle')),
   twitterImage: ogImage
 });
@@ -131,14 +134,25 @@ useHead({
 <template>
   <v-card class="mb-6 bg-transparent" tag="section" elevation="0">
     <v-img :src="logo" alt="Drop Compress Image Logo" max-width="256" class="mx-auto mb-4" />
-    <v-card-title class="text-h4 text-center pa-3" tag="h2">
-      Drop Compress Image v.{{ version }}
-    </v-card-title>
+    <v-card-title class="text-h4 text-center pa-3" tag="h2">Drop Compress Image</v-card-title>
     <v-card-text class="text-center">
       <p class="text-h6 mb-4">{{ t('subtitle') }}</p>
       <p class="mb-6">{{ t('information[0]') }}</p>
       <p class="mb-6">{{ t('information[1]') }}</p>
     </v-card-text>
+    <v-card-actions class="justify-center">
+      <v-btn
+        disabled
+        :to="localePath('getting-started')"
+        class="ma-4"
+        color="primary"
+        prepend-icon="mdi-rocket"
+        size="large"
+        variant="elevated"
+      >
+        {{ t('start_button') }}
+      </v-btn>
+    </v-card-actions>
   </v-card>
 
   <v-card class="mb-6 bg-transparent" tag="section" elevation="0">
@@ -191,13 +205,6 @@ useHead({
       </v-row>
     </v-card-text>
   </v-card>
-
-  <!--
-  <v-btn class="ma-4" color="primary" size="large" to="getting-started">
-    <v-icon start>mdi-rocket</v-icon>
-    {{ t('start_button') }}
-  </v-btn>
-  -->
 </template>
 
 <i18n lang="yaml">
