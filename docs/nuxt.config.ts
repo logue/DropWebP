@@ -56,7 +56,11 @@ export default defineNuxtConfig({
     defaultLocale: 'en',
     strategy: 'prefix_and_default',
     baseUrl: 'https://logue.dev/DropWebP',
-    detectBrowserLanguage: false
+    detectBrowserLanguage: false,
+    compilation: {
+      // HTMLを含むメッセージの警告を無効化
+      strictMessage: false
+    }
   },
 
   // モジュール
