@@ -3,7 +3,6 @@ import logo from '@/assets/logo.png';
 import ogp from '@/assets/ogp.png';
 
 const { t, locale } = useI18n();
-const config = useRuntimeConfig();
 const localePath = useLocalePath();
 
 const version = '2.2.1';

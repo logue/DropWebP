@@ -1,6 +1,6 @@
 export default defineNuxtPlugin(() => {
   // クライアントサイドでVuetifyテーマスタイルシートを外部化
-  if (process.client) {
+  if (import.meta.client) {
     const extractThemeStyles = () => {
       const themeStylesheet = document.getElementById('vuetify-theme-stylesheet');
       if (themeStylesheet) {

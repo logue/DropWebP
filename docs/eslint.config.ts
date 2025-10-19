@@ -13,6 +13,7 @@ export default withNuxt(
     name: 'docs/files-to-lint',
     files: ['**/*.{ts,mts,tsx,vue}']
   },
+  // @ts-expect-error
   globalIgnores([
     '.nuxt/',
     '.output/',
@@ -144,9 +145,12 @@ export default withNuxt(
           }
         }
       ],
+      '@typescript-eslint/no-explicit-any': 'warn',
       // Nuxtのページコンポーネントは単一ファイルコンポーネントではないため、multi-word-component-namesを無効化
       'vue/multi-word-component-names': 'off',
-      'vue/no-multiple-template-root': 'off'
+      'vue/no-multiple-template-root': 'off',
+      // i18n用
+      'vue/valid-v-slot': 'off'
     }
   },
   configPrettier

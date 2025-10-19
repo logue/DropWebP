@@ -1,6 +1,6 @@
 <template>
   <v-menu>
-    <template v-slot:activator="{ props }">
+    <template #activator="{ props }">
       <v-btn icon v-bind="props">
         <v-icon>mdi-translate</v-icon>
       </v-btn>
@@ -10,8 +10,8 @@
       <v-list-item
         v-for="localeItem in availableLocales"
         :key="localeItem.code"
-        @click="switchLanguage(localeItem.code)"
         :class="{ 'v-list-item--active': localeItem.code === locale }"
+        @click="switchLanguage(localeItem.code)"
       >
         <v-list-item-title>{{ localeItem.name }}</v-list-item-title>
       </v-list-item>

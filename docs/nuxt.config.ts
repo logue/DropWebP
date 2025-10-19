@@ -64,7 +64,7 @@ export default defineNuxtConfig({
   },
 
   // モジュール
-  modules: ['@pinia/nuxt', 'vuetify-nuxt-module', '@nuxtjs/i18n'],
+  modules: ['@pinia/nuxt', 'vuetify-nuxt-module', '@nuxtjs/i18n', '@nuxt/eslint'],
 
   // Vuetify設定（CSS完全外部化）
   vuetify: {
@@ -103,7 +103,7 @@ export default defineNuxtConfig({
         output: {
           // CSS外部化設定（_nuxtディレクトリに統一）
           assetFileNames: assetInfo => {
-            if (assetInfo.name && assetInfo.name.endsWith('.css')) {
+            if (assetInfo.name?.endsWith('.css')) {
               // VuetifyのCSSを_nuxtディレクトリに出力
               return '_nuxt/vuetify-[hash].css';
             }
@@ -151,7 +151,7 @@ export default defineNuxtConfig({
     rollupConfig: {
       output: {
         assetFileNames: assetInfo => {
-          if (assetInfo.name && assetInfo.name.endsWith('.css')) {
+          if (assetInfo.name?.endsWith('.css')) {
             return '_nuxt/[name]-[hash].css';
           }
           return '_nuxt/[name]-[hash][extname]';
