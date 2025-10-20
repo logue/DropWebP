@@ -21,11 +21,14 @@
     "eslint": "^9.38.0",
     "nuxt": "3.19.3",
     "pinia": "^3.0.3",
+    "prismjs": "^1.30.0",
     "sass-embedded": "^1.93.2",
     "vue": "3.5.22",
-    "vue-codemirror6": "^1.4.1",
     "vue-router": "^4.6.3",
     "vuetify": "3.10.5",
     "vuetify-nuxt-module": "0.18.8"
+  },
+  "devDependencies": {
+    "@types/prismjs": "^1.26.5"
   }
 }

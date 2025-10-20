@@ -16,6 +16,8 @@ export default defineNuxtConfig({
     inlineStyles: false // CSS外部化
   },
 
+  plugins: ['~/plugins/prism.client.ts'],
+
   // 1. ソースコードディレクトリの変更
   srcDir: './src/',
 
@@ -97,6 +99,9 @@ export default defineNuxtConfig({
     ssr: {
       // VuetifyをSSR時に外部化
       noExternal: ['vuetify']
+    },
+    optimizeDeps: {
+      include: ['prismjs', 'prismjs/components/prism-bash', 'prismjs/components/prism-powershell']
     },
     build: {
       rollupOptions: {

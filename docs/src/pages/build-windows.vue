@@ -1,49 +1,47 @@
 <template>
   <TableOfContents />
+
   <div class="content-with-toc">
     <h2>{{ t('title') }}</h2>
+
     <v-card tag="section" class="mb-6">
       <v-card-title tag="h3">1. {{ t('sec1.title') }}</v-card-title>
       <v-card-text>
-        <ol>
-          <li>
-            {{ t('sec1.text.0') }}
-            <v-card variant="outlined" class="pa-2 mb-2">
-              <pre style="margin: 0">
-Set-ExecutionPolicy Bypass -Scope Process -Force;
+        <v-list tag="ol">
+          <v-list-item tag="li">
+            <v-list-item-title class="text-wrap">{{ t('sec1.text[0]') }}</v-list-item-title>
+            <pre class="language-powershell"><code>Set-ExecutionPolicy Bypass -Scope Process -Force;
 `[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072;`
-iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-              </pre>
-            </v-card>
-          </li>
-          <li>
-            {{ t('sec1.text.2') }}
-            <v-card variant="outlined" class="pa-2 mb-2">
-              <pre style="margin: 0">choco -v</pre>
-            </v-card>
-          </li>
-        </ol>
+iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))</code></pre>
+          </v-list-item>
+          <v-list-item tag="li">
+            <v-list-item-title class="text-wrap">{{ t('sec1.text[1]') }}</v-list-item-title>
+            <pre class="language-powershell"><code>choco -v</code></pre>
+          </v-list-item>
+        </v-list>
       </v-card-text>
     </v-card>
 
     <v-card tag="section" class="mb-6">
       <v-card-title tag="h3">2. {{ t('sec2.title') }}</v-card-title>
       <v-card-text>
-        <ol>
-          <li>
-            {{ t('sec2.text.0') }}
-            <v-card variant="outlined" class="pa-2 mb-2">
-              <pre style="margin: 0">choco install visualstudio2022community -y</pre>
-            </v-card>
-          </li>
-          <li>
-            {{ t('sec2.text.1') }}
-            <v-card variant="outlined" class="pa-2 mb-2">
-              <pre style="margin: 0">choco install visualstudio2022-workload-nativedesktop -y</pre>
-            </v-card>
-          </li>
-          <li>{{ t('sec2.text.2') }}</li>
-        </ol>
+        <v-list tag="ol">
+          <v-list-item tag="li">
+            <v-list-item-title class="text-wrap">{{ t('sec2.text[0]') }}</v-list-item-title>
+            <pre
+              class="language-powershell"
+            ><code>choco install visualstudio2022community -y</code></pre>
+          </v-list-item>
+          <v-list-item tag="li">
+            <v-list-item-title class="text-wrap">{{ t('sec2.text[1]') }}</v-list-item-title>
+            <pre
+              class="language-powershell"
+            ><code>choco install visualstudio2022-workload-nativedesktop -y</code></pre>
+          </v-list-item>
+          <v-list-item tag="li">
+            <v-list-item-title class="text-wrap">{{ t('sec2.text[2]') }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
         <v-alert variant="tonal" type="info" class="mt-4">
           <strong>{{ t('notice') }}</strong>
           {{ t('sec2.notice') }}
@@ -54,26 +52,20 @@ iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocola
     <v-card tag="section" class="mb-6">
       <v-card-title tag="h3">3. {{ t('sec3.title') }}</v-card-title>
       <v-card-text>
-        <ol>
-          <li>
-            {{ t('sec3.text.0') }}
-            <v-card variant="outlined" class="pa-2 mb-2">
-              <pre style="margin: 0">choco install nasm ninja -y</pre>
-            </v-card>
-          </li>
-          <li>
-            {{ t('sec3.text.1') }}
-            <v-card variant="outlined" class="pa-2 mb-2">
-              <pre style="margin: 0">
-nasm -v
-ninja --version
-              </pre>
-            </v-card>
-          </li>
-        </ol>
+        <v-list tag="ol">
+          <v-list-item tag="li">
+            <v-list-item-title class="text-wrap">{{ t('sec3.text[0]') }}</v-list-item-title>
+            <pre class="language-powershell"><code>choco install nasm ninja -y</code></pre>
+          </v-list-item>
+          <v-list-item tag="li">
+            <v-list-item-title class="text-wrap">{{ t('sec3.text[1]') }}</v-list-item-title>
+            <pre class="language-powershell"><code>nasm -v
+ninja --version</code></pre>
+          </v-list-item>
+        </v-list>
         <v-alert variant="tonal" type="info" class="mt-4">
           <strong>{{ t('notice') }}</strong>
-          <template v-html="t('sec3.notice')" />
+          {{ t('sec3.notice') }}
         </v-alert>
       </v-card-text>
     </v-card>
@@ -81,45 +73,35 @@ ninja --version
     <v-card tag="section" class="mb-6">
       <v-card-title tag="h3">4. {{ t('sec4.title') }}</v-card-title>
       <v-card-text>
-        <ol>
-          <li>
-            {{ t('sec4.text.0') }}
-            <v-card variant="outlined" class="pa-2 mb-2">
-              <pre style="margin: 0">choco install nodejs pnpm -y</pre>
-            </v-card>
-          </li>
-          <li>
-            {{ t('sec4.text.1') }}
-            <v-card variant="outlined" class="pa-2 mb-2">
-              <pre style="margin: 0">
-node -v
-pnpm -v
-              </pre>
-            </v-card>
-          </li>
-        </ol>
+        <v-list tag="ol">
+          <v-list-item tag="li">
+            <v-list-item-title class="text-wrap">{{ t('sec4.text[0]') }}</v-list-item-title>
+            <pre class="language-powershell"><code>choco install nodejs pnpm -y</code></pre>
+          </v-list-item>
+          <v-list-item tag="li">
+            <v-list-item-title class="text-wrap">{{ t('sec4.text[1]') }}</v-list-item-title>
+            <pre class="language-powershell"><code>node -v
+pnpm -v</code></pre>
+          </v-list-item>
+        </v-list>
       </v-card-text>
     </v-card>
 
     <v-card tag="section" class="mb-6">
       <v-card-title tag="h3">5. {{ t('sec5.title') }}</v-card-title>
       <v-card-text>
-        <ol>
-          <li>
-            {{ t('sec5.text.0') }}
-            <v-card variant="outlined" class="pa-2 mb-2">
-              <pre style="margin: 0">
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh</pre
-              >
-            </v-card>
-          </li>
-          <li>
-            {{ t('sec5.text.1') }}
-            <v-card variant="outlined" class="pa-2 mb-2">
-              <pre style="margin: 0">rustc --version</pre>
-            </v-card>
-          </li>
-        </ol>
+        <v-list tag="ol">
+          <v-list-item tag="li">
+            <v-list-item-title class="text-wrap">{{ t('sec5.text[0]') }}</v-list-item-title>
+            <pre
+              class="language-powershell"
+            ><code>curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh</code></pre>
+          </v-list-item>
+          <v-list-item tag="li">
+            <v-list-item-title class="text-wrap">{{ t('sec5.text[1]') }}</v-list-item-title>
+            <pre class="language-powershell"><code>rustc --version</code></pre>
+          </v-list-item>
+        </v-list>
         <v-alert type="warning" variant="tonal" class="mt-4">
           <strong>{{ t('warning') }}</strong>
           {{ t('sec5.notice') }}
@@ -130,35 +112,29 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh</pre
     <v-card tag="section" class="mb-6">
       <v-card-title tag="h3">6. {{ t('sec6.title') }}</v-card-title>
       <v-card-text>
-        <ol>
-          <li>
-            {{ t('sec6.text.0') }}
-            <v-card variant="outlined" class="pa-2 mb-2">
-              <pre style="margin: 0">git clone https://github.com/microsoft/vcpkg.git</pre>
-            </v-card>
-          </li>
-          <li>
-            {{ t('sec6.text.1') }}
-            <v-card variant="outlined" class="pa-2 mb-2">
-              <pre style="margin: 0">
-cd vcpkg
-.\bootstrap-vcpkg.bat
-              </pre>
-            </v-card>
-          </li>
-          <li>
-            <template v-html="t('sec6.text.2')" />
-          </li>
-          <li>
-            <template v-html="t('sec6.text.3')" />
-          </li>
-          <li>
-            {{ t('sec6.text.4') }}
-            <v-card variant="outlined" class="pa-2 mb-2">
-              <pre style="margin: 0">vcpkg version</pre>
-            </v-card>
-          </li>
-        </ol>
+        <v-list tag="ol">
+          <v-list-item tag="li">
+            <v-list-item-title class="text-wrap">{{ t('sec6.text[0]') }}</v-list-item-title>
+            <pre
+              class="language-powershell"
+            ><code>git clone https://github.com/microsoft/vcpkg.git</code></pre>
+          </v-list-item>
+          <v-list-item tag="li">
+            <v-list-item-title class="text-wrap">{{ t('sec6.text[1]') }}</v-list-item-title>
+            <pre class="language-powershell"><code>cd vcpkg
+.\bootstrap-vcpkg.bat</code></pre>
+          </v-list-item>
+          <v-list-item tag="li">
+            <v-list-item-title class="text-wrap">{{ t('sec6.text[2]') }}</v-list-item-title>
+          </v-list-item>
+          <v-list-item tag="li">
+            <v-list-item-title class="text-wrap">{{ t('sec6.text[3]') }}</v-list-item-title>
+          </v-list-item>
+          <v-list-item tag="li">
+            <v-list-item-title class="text-wrap">{{ t('sec6.text[4]') }}</v-list-item-title>
+            <pre class="language-powershell"><code>vcpkg version</code></pre>
+          </v-list-item>
+        </v-list>
         <v-alert variant="tonal" type="warning" class="mt-4">
           <strong>{{ t('warning') }}</strong>
           {{ t('sec6.notice') }}
@@ -169,36 +145,42 @@ cd vcpkg
     <v-card tag="section" class="mb-6">
       <v-card-title tag="h3">7. {{ t('sec7.title') }}</v-card-title>
       <v-card-text>
-        <ol>
-          <li>
-            {{ t('sec7.text.0') }}
-            <v-card variant="outlined" class="pa-2 mb-2">
-              <pre style="margin: 0">choco install git -y</pre>
-            </v-card>
-          </li>
-          <li>
-            {{ t('sec7.text.1') }}
-            <v-card variant="outlined" class="pa-2 mb-2">
-              <pre style="margin: 0">git --version</pre>
-            </v-card>
-          </li>
-        </ol>
+        <v-list tag="ol">
+          <v-list-item tag="li">
+            <v-list-item-title class="text-wrap">{{ t('sec7.text[0]') }}</v-list-item-title>
+            <pre class="language-powershell"><code>choco install git -y</code></pre>
+          </v-list-item>
+          <v-list-item tag="li">
+            <v-list-item-title class="text-wrap">{{ t('sec7.text[1]') }}</v-list-item-title>
+            <pre class="language-powershell"><code>git --version</code></pre>
+          </v-list-item>
+        </v-list>
       </v-card-text>
     </v-card>
 
     <v-card tag="section" class="mb-6">
       <v-card-title tag="h3">8. {{ t('sec8.title') }}</v-card-title>
       <v-card-text>
-        <ol>
-          <li>
-            {{ t('sec8.text.0') }}
-            <v-card variant="outlined" class="pa-2 mb-2">
-              <pre style="margin: 0">
-vcpkg install libavif libheif libjxl libwebp
-              </pre>
-            </v-card>
-          </li>
-        </ol>
+        <v-list tag="ol">
+          <v-list-item tag="li">
+            <v-list-item-title class="text-wrap">{{ t('sec8.text[0]') }}</v-list-item-title>
+            <pre class="language-powershell"><code>git --version</code></pre>
+          </v-list-item>
+        </v-list>
+      </v-card-text>
+    </v-card>
+
+    <v-card tag="section" class="mb-6">
+      <v-card-title tag="h3">8. {{ t('sec8.title') }}</v-card-title>
+      <v-card-text>
+        <v-list tag="ol">
+          <v-list-item tag="li">
+            <v-list-item-title class="text-wrap">{{ t('sec8.text[0]') }}</v-list-item-title>
+            <pre
+              class="language-powershell"
+            ><code>vcpkg install libavif libheif libjxl libwebp</code></pre>
+          </v-list-item>
+        </v-list>
         <v-alert variant="tonal" type="info" class="mt-4">
           <strong>{{ t('notice') }}</strong>
           {{ t('sec8.notice') }}
@@ -209,25 +191,83 @@ vcpkg install libavif libheif libjxl libwebp
 </template>
 
 <script setup lang="ts">
+import Prism from 'prismjs';
+
 import TableOfContents from '@/components/TableOfContents.vue';
 
 const { t } = useI18n();
+
+onMounted(() => {
+  Prism.highlightAll();
+});
 </script>
 
 <style scoped>
 .content-with-toc {
-  margin-left: 280px;
+  margin-right: 280px;
   padding: 24px;
 }
 
 @media (max-width: 1264px) {
   .content-with-toc {
-    margin-left: 0;
+    margin-right: 0;
   }
 }
 </style>
 
 <i18n lang="yaml">
+en:
+  notice: Note
+  warning: Warning
+  title: Setting Up Development Environment (Windows)
+  sec1:
+    title: Install Chocolatey
+    text:
+      - Open PowerShell as Administrator and run the following command to install Chocolatey.
+      - After installation, you can check the version with the command below.
+  sec2:
+    title: Install Visual Studio Community 2022
+    text:
+      - Open PowerShell or Command Prompt as Administrator and run the following command to install Visual Studio Community 2022.
+      - Next, install the C++ Desktop Development workload.
+      - Once installation is complete, you can verify the installed components using the Visual Studio Installer.
+    notice: The C++ Desktop Development workload includes tools necessary for building Rust native extensions, such as MSVC (Microsoft's compiler), Windows SDK, and CMake.
+  sec3:
+    title: Install NASM and Ninja
+    text:
+      - Install NASM and Ninja, which are required for building image codec libraries.
+      - After installation, verify the versions.
+    notice: <abbr title="Netwide Assembler">NASM</abbr> is an assembler used for building optimized codec libraries like libavif. Ninja is a fast build system often used in conjunction with CMake.
+  sec4:
+    title: Install Node.js and pnpm
+    text:
+      - Open PowerShell or Command Prompt as Administrator and run the following command to install Node.js and pnpm.
+      - After installation, verify the versions.
+  sec5:
+    title: Install Rust (Official Method)
+    text:
+      - Install Rust using the official method by running the following command in PowerShell or Command Prompt.
+      - After installation, verify the version.
+    notice: While it's possible to install Rust via Chocolatey, it installs with the MinGW toolchain, which may lead to compatibility issues with libraries.
+  sec6:
+    title: Set Up vcpkg (Official Instructions)
+    text:
+      - Run the following command in your desired directory to clone vcpkg.
+      - Navigate to the vcpkg directory and run the setup command.
+      - 'Add the path to vcpkg.exe (e.g., <code>C:\path\to\vcpkg</code>) to your environment variable PATH.<br />How to: Add the vcpkg directory to the "Path" in your system environment variables.'
+      - Additionally, add an environment variable VCPKG_DEFAULT_TRIPLET and set it to <code>x64-windows-static-md</code>. This ensures that static libraries for 64-bit Windows are installed by default.
+      - After installation, verify that the path is set and check the version with the command below.
+    notice: vcpkg may not function correctly if its path contains non-alphanumeric characters. It's recommended to clone it to a location like the root of a drive.
+  sec7:
+    title: Install Git
+    text:
+      - Install Git using Chocolatey. Optionally, install GUI clients like Tortoise Git if needed.
+      - After installation, verify the version.
+  sec8:
+    title: Install Required Libraries
+    text:
+      - Run the following command to install the libraries required for image conversion.
+    notice: Installation may take some time, and some libraries might fail to build. In such cases, please refer to the vcpkg documentation.
 ja:
   notice: 補足
   warning: 注意
