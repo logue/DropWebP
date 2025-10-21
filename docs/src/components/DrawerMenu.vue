@@ -23,6 +23,23 @@ const items: ComputedRef<DrawerMenuItem[]> = computed(() => [
     title: t('format_guide'),
     icon: 'mdi-file-image',
     to: localePath('/format-guide')
+  },
+  {
+    title: '-' // Divider
+  },
+  {
+    title: t('build_windows'),
+    icon: 'mdi-microsoft-windows',
+    to: localePath('/build-windows')
+  },
+  {
+    title: t('build_macos'),
+    icon: 'mdi-apple',
+    to: localePath('/build-macos')
+  },
+  {
+    title: t('build_linux'),
+    icon: 'mdi-linux'
   }
 ]);
 </script>
@@ -69,24 +86,42 @@ en:
   home: Home
   getting_started: Getting Started
   format_guide: Format Guide
+  build_windows: Windows Build Instructions
+  build_macos: macOS Build Instructions
+  build_linux: Linux Build Instructions
 fr:
   home: Accueil
   getting_started: Commencer
   format_guide: Guide des formats
+  build_windows: Windows Instructions de construction
+  build_macos: macOS Instructions de construction
+  build_linux: Linux Instructions de construction
 ja:
   home: ホーム
   getting_started: はじめに
   format_guide: フォーマットガイド
+  build_windows: Windows ビルド手順
+  build_macos: macOS ビルド手順
+  build_linux: Linux ビルド手順
 ko:
   home: 홈
   getting_started: 시작하기
   format_guide: 포맷 가이드
+  build_windows: Windows 빌드 지침
+  build_macos: macOS 빌드 지침
+  build_linux: Linux 빌드 지침
 zhHant:
   home: 首頁
   getting_started: 入門
   format_guide: 格式指南
+  build_windows: Windows 建置說明
+  build_macos: macOS 建置說明
+  build_linux: Linux 建置說明
 zhHans:
   home: 主页
   getting_started: 入门
   format_guide: 格式指南
+  build_windows: Windows 构建说明
+  build_macos: macOS 构建说明
+  build_linux: Linux 构建说明
 </i18n>

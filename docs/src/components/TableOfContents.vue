@@ -1,7 +1,7 @@
 <template>
   <v-navigation-drawer permanent location="right" width="280" class="toc-drawer">
     <v-list density="compact" nav>
-      <v-list-subheader>{{ $t('toc') }}</v-list-subheader>
+      <v-list-subheader>{{ t('toc') }}</v-list-subheader>
       <v-list-item
         v-for="heading in headings"
         :key="heading.id"
@@ -24,7 +24,7 @@ interface Heading {
   text: string;
   level: number;
 }
-
+const { t } = useI18n();
 const headings = ref<Heading[]>([]);
 const activeId = ref<string>('');
 

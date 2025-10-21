@@ -147,7 +147,19 @@ export default defineNuxtConfig({
         '/fr/getting-started',
         '/ko/getting-started',
         '/zhHant/getting-started',
-        '/zhHans/getting-started'
+        '/zhHans/getting-started',
+        '/ja/build-windows',
+        '/en/build-windows',
+        '/fr/build-windows',
+        '/ko/build-windows',
+        '/zhHant/build-windows',
+        '/zhHans/build-windows',
+        '/ja/build-macos',
+        '/en/build-macos',
+        '/fr/build-macos',
+        '/ko/build-macos',
+        '/zhHant/build-macos',
+        '/zhHans/build-macos'
       ]
     },
     inlineDynamicImports: false,
