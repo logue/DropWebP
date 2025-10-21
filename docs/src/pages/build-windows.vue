@@ -69,6 +69,12 @@ cd DropWebP</code></pre>
           </v-list-item>
           <v-list-item tag="li">
             <v-list-item-title class="text-wrap">{{ t('sec4.text[2]') }}</v-list-item-title>
+            <pre
+              class="language-powershell"
+            ><code>choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Llvm.Clang --add Microsoft.VisualStudio.Component.VC.Llvm.ClangToolset" -y</code></pre>
+          </v-list-item>
+          <v-list-item tag="li">
+            <v-list-item-title class="text-wrap">{{ t('sec4.text[3]') }}</v-list-item-title>
           </v-list-item>
         </v-list>
         <v-alert variant="tonal" type="info" class="mt-4">
@@ -90,6 +96,15 @@ cd DropWebP</code></pre>
             <v-list-item-title class="text-wrap">{{ t('sec5.text[1]') }}</v-list-item-title>
             <pre class="language-powershell"><code>nasm -v
 ninja --version</code></pre>
+          </v-list-item>
+          <v-list-item tag="li">
+            <v-list-item-title class="text-wrap">{{ t('sec5.text[2]') }}</v-list-item-title>
+            <pre
+              class="language-powershell"
+            ><code>[System.Environment]::SetEnvironmentVariable('PATH', [System.Environment]::GetEnvironmentVariable('PATH', 'User') + ';C:\Program Files\NASM', 'User')</code></pre>
+          </v-list-item>
+          <v-list-item tag="li">
+            <v-list-item-title class="text-wrap">{{ t('sec5.text[3]') }}</v-list-item-title>
           </v-list-item>
         </v-list>
         <v-alert variant="tonal" type="info" class="mt-4">
@@ -291,6 +306,7 @@ en:
     text:
       - Install Visual Studio Community 2022.
       - Next, install the C++ Desktop Development workload.
+      - Install Clang/LLVM build tools, which are required for building certain image codec libraries.
       - Once installation is complete, you can verify the installed components using the Visual Studio Installer.
     notice: The C++ Desktop Development workload includes tools necessary for building Rust native extensions, such as MSVC (Microsoft's compiler), Windows SDK, and CMake.
   sec5:
@@ -298,6 +314,8 @@ en:
     text:
       - Install NASM and Ninja, which are required for building image codec libraries.
       - After installation, verify the versions.
+      - Add NASM to your system PATH so that Cargo can find it during build time.
+      - Restart your terminal or PowerShell session for the PATH changes to take effect.
     notice: '{nasm} is an assembler used for building optimized codec libraries like libavif. Ninja is a fast build system often used in conjunction with CMake.'
   sec6:
     title: Install Node.js and pnpm
@@ -357,6 +375,7 @@ fr:
     text:
       - Installez Visual Studio Community 2022.
       - Ensuite, installez la charge de travail de développement de bureau C++.
+      - Installez les outils de construction Clang/LLVM, qui sont nécessaires pour construire certaines bibliothèques de codecs d'images.
       - Une fois l'installation terminée, vous pouvez vérifier les composants installés à l'aide de l'installateur Visual Studio.
     notice: La charge de travail de développement de bureau C++ comprend les outils nécessaires pour construire des extensions natives Rust, tels que MSVC (le compilateur de Microsoft), le SDK Windows et CMake.
   sec5:
@@ -364,6 +383,8 @@ fr:
     text:
       - Installez NASM et Ninja, qui sont nécessaires pour construire des bibliothèques de codecs d'images.
       - Après l'installation, vérifiez les versions.
+      - Ajoutez NASM à votre PATH système afin que Cargo puisse le trouver lors de la compilation.
+      - Redémarrez votre terminal ou session PowerShell pour que les modifications du PATH prennent effet.
     notice: '{nasm} est un assembleur utilisé pour construire des bibliothèques de codecs optimisées comme libavif. Ninja est un système de construction rapide souvent utilisé en conjonction avec CMake.'
     notice_abbr: Netwide Assembler
   sec6:
@@ -423,6 +444,7 @@ ja:
     text:
       - Visual Studio Community 2022をインストールします。
       - 続いて、C++デスクトップ開発ワークロードをインストールします。
+      - Clang/LLVMビルドツールをインストールします。これは一部の画像コーデックライブラリのビルドに必要です。
       - インストールが完了したら、Visual Studio Installerでインストール内容を確認できます。
     notice: C++デスクトップ開発ワークロードには、MSVC（Microsoftのコンパイラ）、Windows SDK、CMakeなど、Rustのネイティブ拡張ビルドに必要なツールが含まれています。
   sec5:
@@ -430,6 +452,8 @@ ja:
     text:
       - NASMとNinjaをインストールします。これらは画像コーデックライブラリのビルドに必要です。
       - インストール後、バージョンを確認しましょう。
+      - NASMをシステムのPATHに追加します。これによりCargoがビルド時にNASMを見つけられるようになります。
+      - 設定を反映させるため、ターミナルまたはPowerShellセッションを再起動してください。
     notice: '{nasm}はアセンブラで、libavifなどの高速化されたコーデックライブラリのビルドに使用されます。Ninjaは高速なビルドシステムで、CMakeと組み合わせて使用されます。'
     notice_abbr: Netwide Assembler
   sec6:
@@ -490,6 +514,7 @@ ko:
     text:
       - Visual Studio Community 2022를 설치합니다.
       - 다음으로 C++ 데스크톱 개발 워크로드를 설치합니다.
+      - Clang/LLVM 빌드 도구를 설치합니다. 이는 일부 이미지 코덱 라이브러리 빌드에 필요합니다.
       - 설치가 완료되면 Visual Studio Installer를 사용하여 설치된 구성 요소를 확인할 수 있습니다.
     notice: C++ 데스크톱 개발 워크로드에는 MSVC(마이크로소프트 컴파일러), Windows SDK 및 CMake와 같은 Rust 네이티브 확장 빌드에 필요한 도구가 포함되어 있습니다.
   sec5:
@@ -497,6 +522,8 @@ ko:
     text:
       - 이미지 코덱 라이브러리 빌드에 필요한 NASM 및 Ninja를 설치합니다.
       - 설치 후 버전을 확인합니다.
+      - Cargo가 빌드 시 NASM을 찾을 수 있도록 시스템 PATH에 NASM을 추가합니다.
+      - PATH 변경 사항이 적용되도록 터미널 또는 PowerShell 세션을 다시 시작합니다.
     notice: '{nasm}은 libavif와 같은 최적화된 코덱 라이브러리 빌드에 사용되는 어셈블러입니다. Ninja는 CMake와 함께 자주 사용되는 빠른 빌드 시스템입니다.'
     notice_abbr: Netwide Assembler
   sec6:
@@ -556,6 +583,7 @@ zhHans:
     text:
       - 安装Visual Studio Community 2022。
       - 接下来，安装C++桌面开发工作负载。
+      - 安装Clang/LLVM构建工具，这是构建某些图像编解码器库所必需的。
       - 安装完成后，您可以使用Visual Studio安装程序验证已安装的组件。
     notice: C++桌面开发工作负载包括构建Rust本机扩展所需的工具，例如MSVC（Microsoft的编译器）、Windows SDK和CMake。
   sec5:
@@ -563,6 +591,8 @@ zhHans:
     text:
       - 安装NASM和Ninja，这些是构建图像编解码器库所必需的。
       - 安装后，验证版本。
+      - 将NASM添加到系统PATH中，以便Cargo在构建时可以找到它。
+      - 重新启动终端或PowerShell会话以使PATH更改生效。
     notice: '{nasm}是一种汇编器，用于构建优化的编解码器库，如libavif。Ninja是一种快速的构建系统，通常与CMake一起使用。'
     notice_abbr: Netwide Assembler
   sec6:
@@ -622,6 +652,7 @@ zhHant:
     text:
       - 安裝Visual Studio Community 2022。
       - 接下來，安裝C++桌面開發工作負載。
+      - 安裝Clang/LLVM構建工具，這是構建某些圖像編解碼器庫所必需的。
       - 安裝完成後，您可以使用Visual Studio安裝程序驗證已安裝的組件。
     notice: C++桌面開發工作負載包括構建Rust本機擴展所需的工具，例如MSVC（Microsoft的編譯器）、Windows SDK和CMake。
   sec5:
@@ -629,6 +660,8 @@ zhHant:
     text:
       - 安裝NASM和Ninja，這些是構建圖像編解碼器庫所必需的。
       - 安裝後，驗證版本。
+      - 將NASM添加到系統PATH中，以便Cargo在構建時可以找到它。
+      - 重新啟動終端或PowerShell會話以使PATH更改生效。
     notice: '{nasm}是一種彙編器，用於構建優化的編解碼器庫，如libavif。Ninja是一種快速的構建系統，通常與CMake一起使用。'
     notice_abbr: Netwide Assembler
   sec6:
