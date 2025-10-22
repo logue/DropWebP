@@ -41,6 +41,19 @@ ja:
   embed_icc_profile_hint: 画像にICCプロファイルが含まれている場合、出力画像に埋め込みます。
   zopfli_iterations: Zopfliの反復回数
   zopfli_iterations_hint: Zopfli圧縮の反復回数を指定します。{min}〜{max}の範囲で設定可能です。値が大きいほど圧縮率が向上しますが、処理時間も長くなります。
+  interlace: インターレース設定
+  interlace_none: インターレスなし
+  interlace_none_hint: デフォルト。ファイルサイズ最小
+  interlace_adam7: Adam7インターレース
+  interlace_adam7_hint: 画像のプレビューを早く表示できますが、ファイルサイズが大きくなります。
+  bit_depth_reduction: ビット深度の削減
+  bit_depth_reduction_hint: 可能な場合、ビット深度を削減してファイルサイズを小さくします。
+  color_type_reduction: カラーモードの削減
+  color_type_reduction_hint: 可能な場合、カラーモードを削減してファイルサイズを小さくします。
+  palette_reduction: パレットの削減
+  palette_reduction_hint: 可能な場合、パレットを使用してファイルサイズを小さくします。
+  fast_evaluation: 高速評価モード
+  fast_evaluation_hint: 高速評価モードを有効にすると、圧縮処理が高速化されますが、圧縮率が低下する可能性があります。
 ko:
   embed_icc_profile: ICC 프로필 포함
   embed_icc_profile_hint: 이미지에 ICC 프로필이 포함된 경우 출력 이미지에 포함합니다.

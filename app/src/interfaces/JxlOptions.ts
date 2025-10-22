@@ -1,5 +1,15 @@
 import type { EncoderSpeed, ColorEncoding } from '@/types/JxlTypes';
 
+// 型と定数を再エクスポート
+export { EncoderSpeed, ColorEncoding } from '@/types/JxlTypes';
+export type {
+  EncoderSpeed as EncoderSpeedType,
+  ColorEncoding as ColorEncodingType
+} from '@/types/JxlTypes';
+
+/**
+ * JPEG XL最適化オプション
+ */
 export interface JxlOptions {
   /** ロスレス圧縮するか */
   lossless: boolean;

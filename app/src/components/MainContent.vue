@@ -6,6 +6,7 @@ import ProgressDialog from './modals/ProgressDialog.vue';
 
 import { useImageConversionController } from '@/composables/useImageConversionController';
 import { useLogger } from '@/composables/useLogger';
+import { OutputFormat } from '@/types/SettingsTypes';
 
 const settingsStore = useSettingsStore();
 const { t } = useI18n();
@@ -38,27 +39,43 @@ const { dialog, inProgress, currentFile, progress, message, isDragging, convertB
       >
         <v-tooltip :text="t('type.png_description')" location="top">
           <template #activator="{ props }">
-            <v-radio v-bind="props" :label="t('type.png')" value="png" color="purple" />
+            <v-radio v-bind="props" :label="t('type.png')" :value="OutputFormat.PNG" color="pink" />
           </template>
         </v-tooltip>
         <v-tooltip :text="t('type.jpeg_description')" location="top">
           <template #activator="{ props }">
-            <v-radio v-bind="props" :label="t('type.jpeg')" value="jpeg" color="purple" />
+            <v-radio
+              v-bind="props"
+              :label="t('type.jpeg')"
+              :value="OutputFormat.JPEG"
+              color="orange"
+              disabled
+            />
           </template>
         </v-tooltip>
         <v-tooltip :text="t('type.webp_description')" location="top">
           <template #activator="{ props }">
-            <v-radio v-bind="props" :label="t('type.webp')" value="webp" color="green" />
+            <v-radio
+              v-bind="props"
+              :label="t('type.webp')"
+              :value="OutputFormat.WebP"
+              color="green"
+            />
           </template>
         </v-tooltip>
         <v-tooltip :text="t('type.avif_description')" location="top">
           <template #activator="{ props }">
-            <v-radio v-bind="props" :label="t('type.avif')" value="avif" color="red" />
+            <v-radio
+              v-bind="props"
+              :label="t('type.avif')"
+              :value="OutputFormat.AVIF"
+              color="red"
+            />
           </template>
         </v-tooltip>
         <v-tooltip :text="t('type.jxl_description')" location="top">
           <template #activator="{ props }">
-            <v-radio v-bind="props" :label="t('type.jxl')" value="jxl" color="blue">
+            <v-radio v-bind="props" :label="t('type.jxl')" :value="OutputFormat.JXL" color="blue">
               <template #label>
                 {{ t('type.jxl') }}&nbsp;
                 <small class="text-grey">({{ t('experimental') }})</small>

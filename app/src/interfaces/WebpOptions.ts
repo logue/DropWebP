@@ -1,5 +1,9 @@
 import type { WebPImageHint } from '@/types/WebpTypes';
 
+// 型と定数を再エクスポート
+export { WebPImageHint } from '@/types/WebpTypes';
+export type { WebPImageHint as WebPImageHintType } from '@/types/WebpTypes';
+
 /**
  * Rustの `WebpOptions` 構造体に対応
  */

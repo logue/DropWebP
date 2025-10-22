@@ -4,19 +4,19 @@ import { ref, type Ref } from 'vue';
 import { documentDir } from '@tauri-apps/api/path';
 import { open } from '@tauri-apps/plugin-dialog';
 
-import type { AvifOptions } from '@/interfaces/AvifOptions';
-import type { CommonOptions } from '@/interfaces/CommonOptions';
-import type { JxlOptions } from '@/interfaces/JxlOptions';
-import type { PngOptions } from '@/interfaces/PngOptions';
-import type { WebpOptions } from '@/interfaces/WebpOptions';
+import { BitDepth, ColorModel, type AvifOptions } from '@/interfaces/AvifOptions';
+import { OutputFormat, type CommonOptions } from '@/interfaces/CommonOptions';
+import { ColorEncoding, EncoderSpeed, type JxlOptions } from '@/interfaces/JxlOptions';
+import { PngFilter, PngInterlace, type PngOptions } from '@/interfaces/PngOptions';
+import { WebPImageHint, type WebpOptions } from '@/interfaces/WebpOptions';
 
 // デフォルト設定を定義
 const defaultAvifOptions: AvifOptions = {
   quality: 80.0,
-  bitDepth: 'Auto',
+  bitDepth: BitDepth.Auto,
   alphaQuality: 80.0,
   speed: 5,
-  colorModel: 'YCbCr',
+  colorModel: ColorModel.YCbCr,
   threads: undefined,
   alphaColorMode: 'Premultiplied'
 } as const;
@@ -24,32 +24,37 @@ const defaultAvifOptions: AvifOptions = {
 const defaultWebpOptions: WebpOptions = {
   quality: 80,
   lossless: true,
-  hint: 'Default',
+  hint: WebPImageHint.Default,
   method: 6,
   autofilter: false
 } as const;
 
 const defaultJxlOptions: JxlOptions = {
   lossless: true,
-  speed: 'Squirrel',
+  speed: EncoderSpeed.Squirrel,
   quality: 1,
   useContainer: false,
   usesOriginalProfile: false,
   decodingSpeed: 0,
   initBufferSize: 512,
-  colorEncoding: 'Srgb'
+  colorEncoding: ColorEncoding.Srgb
 };
 
 const defaultPngOptions: PngOptions = {
   zopfliIterations: 15,
-  embedIccProfile: true
+  embedIccProfile: true,
+  bitDepthReduction: true,
+  colorTypeReduction: true,
+  paletteReduction: true,
+  interlace: PngInterlace.None,
+  filter: PngFilter.MinSum
 } as const;
 
 const defaultCommonOptions: CommonOptions = {
   sound: true,
   volume: 1.0,
   notify: true,
-  format: 'webp',
+  format: OutputFormat.WebP,
   overwrite: true,
   deleteOriginal: false,
   recursive: false,

@@ -14,6 +14,8 @@ import { useImageConverter } from './useImageConverter'; // 汎用コンバー�
 import { useNotification } from './useNotification';
 import { usePaste } from './usePaste';
 
+import { OutputFormat } from '@/types/SettingsTypes';
+
 export function useImageConversionController(t: ComposerTranslation) {
   const globalStore = useGlobalStore();
   const fileSystem = useFileSystem();
@@ -218,10 +220,12 @@ export function useImageConversionController(t: ComposerTranslation) {
       // ファイルをUint8Arrayバイナリとして読み込む
       const buffer = new Uint8Array(await file.arrayBuffer());
 
-      const filtersMap = {
-        avif: { name: t('type.avif'), extensions: ['avif'] },
-        jxl: { name: t('type.jxl'), extensions: ['jxl'] },
-        webp: { name: t('type.webp'), extensions: ['webp'] }
+      const filtersMap: Record<OutputFormat, { name: string; extensions: string[] }> = {
+        [OutputFormat.AVIF]: { name: t('type.avif'), extensions: ['avif'] },
+        [OutputFormat.JXL]: { name: t('type.jxl'), extensions: ['jxl'] },
+        [OutputFormat.WebP]: { name: t('type.webp'), extensions: ['webp'] },
+        [OutputFormat.JPEG]: { name: t('type.jpeg'), extensions: ['jpeg', 'jpg'] },
+        [OutputFormat.PNG]: { name: t('type.png'), extensions: ['png'] }
       };
       type Format = keyof typeof filtersMap;
 

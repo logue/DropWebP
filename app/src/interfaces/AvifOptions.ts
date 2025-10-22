@@ -1,6 +1,15 @@
 import type { BitDepth, ColorModel, AlphaColorMode } from '@/types/AvifTypes';
+
+// 型と定数を再エクスポート
+export { BitDepth, ColorModel, AlphaColorMode } from '@/types/AvifTypes';
+export type {
+  BitDepth as BitDepthType,
+  ColorModel as ColorModelType,
+  AlphaColorMode as AlphaColorModeType
+} from '@/types/AvifTypes';
+
 /**
- * Rustの `AvifOptions` 構造体に対応
+ * AVIF最適化オプション
  */
 export interface AvifOptions {
   /** 品質 */

@@ -4,14 +4,98 @@ use oxipng::{optimize_from_memory, Deflaters, Options as OxiPngOptions};
 use serde::{Deserialize, Serialize};
 use std::io::Cursor;
 
-/// PNG最適化オプション（Zopfli専用）
+/// PNGフィルター戦略
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub enum PngFilter {
+    /// フィルターなし
+    None,
+    /// Subフィルター
+    Sub,
+    /// Upフィルター
+    Up,
+    /// Averageフィルター
+    Average,
+    /// Paethフィルター
+    Paeth,
+    /// 最小合計（すべてのフィルターを試して最小を選択）
+    MinSum,
+    /// エントロピー（最小エントロピーのフィルターを選択）
+    Entropy,
+    /// Bigrams（2グラム頻度分析）
+    Bigrams,
+    /// BigEnt（BigramsとEntropyの組み合わせ）
+    BigEnt,
+    /// Brute（すべての組み合わせを試行、最も遅いが最良の圧縮）
+    Brute,
+}
+
+impl Default for PngFilter {
+    fn default() -> Self {
+        Self::MinSum // バランスの良いデフォルト
+    }
+}
+
+impl From<PngFilter> for oxipng::RowFilter {
+    fn from(filter: PngFilter) -> Self {
+        match filter {
+            PngFilter::None => oxipng::RowFilter::None,
+            PngFilter::Sub => oxipng::RowFilter::Sub,
+            PngFilter::Up => oxipng::RowFilter::Up,
+            PngFilter::Average => oxipng::RowFilter::Average,
+            PngFilter::Paeth => oxipng::RowFilter::Paeth,
+            PngFilter::MinSum => oxipng::RowFilter::MinSum,
+            PngFilter::Entropy => oxipng::RowFilter::Entropy,
+            PngFilter::Bigrams => oxipng::RowFilter::Bigrams,
+            PngFilter::BigEnt => oxipng::RowFilter::BigEnt,
+            PngFilter::Brute => oxipng::RowFilter::Brute,
+        }
+    }
+}
+
+/// PNGインターレース設定
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub enum PngInterlace {
+    /// インターレースなし（最小ファイルサイズ）
+    None,
+    /// Adam7インターレース（プログレッシブ読み込み）
+    Adam7,
+}
+
+impl Default for PngInterlace {
+    fn default() -> Self {
+        Self::None
+    }
+}
+
+impl From<PngInterlace> for oxipng::Interlacing {
+    fn from(interlace: PngInterlace) -> Self {
+        match interlace {
+            PngInterlace::None => oxipng::Interlacing::None,
+            PngInterlace::Adam7 => oxipng::Interlacing::Adam7,
+        }
+    }
+}
+
+/// PNG最適化オプション（OxiPNG専用）
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct PngOptions {
-    /// Zopfliの反復回数
+    /// Zopfliの反復回数（15-255、高いほど高圧縮だが遅い）
     pub zopfli_iterations: u32,
     /// ICCプロファイルを含めるか
     pub embed_icc_profile: bool,
+    /// ビット深度削減を有効にする
+    pub bit_depth_reduction: bool,
+    /// カラータイプ削減を有効にする（RGBA→RGB、RGB→Grayscaleなど）
+    pub color_type_reduction: bool,
+    /// パレット削減を有効にする
+    pub palette_reduction: bool,
+    /// インターレース設定
+    pub interlace: PngInterlace,
+    /// フィルター戦略
+    pub filter: PngFilter,
 }
 
 impl Default for PngOptions {
@@ -19,6 +103,11 @@ impl Default for PngOptions {
         Self {
             zopfli_iterations: 15, // Zopfliのデフォルト
             embed_icc_profile: true,
+            bit_depth_reduction: true,
+            color_type_reduction: true,
+            palette_reduction: true,
+            interlace: PngInterlace::None,
+            filter: PngFilter::MinSum,
         }
     }
 }
@@ -81,14 +170,20 @@ fn encode_with_zopfli(
         .finish()
         .map_err(|e| AppError::Encode(format!("PNG encoding finish error: {}", e)))?;
 
-    // OxiPNGでZopfli最適化
-    let mut oxipng_options = OxiPngOptions::default();
-    oxipng_options.deflate = Deflaters::Zopfli {
-        iterations: std::num::NonZero::new(options.zopfli_iterations as u8)
-            .unwrap_or(std::num::NonZero::new(15).unwrap()),
+    // OxiPNGで最適化
+    let oxipng_options = oxipng::Options {
+        deflate: oxipng::Deflaters::Zopfli {
+            iterations: std::num::NonZeroU8::new(options.zopfli_iterations.min(255) as u8).unwrap(),
+        },
+        optimize_alpha: true,
+        strip: oxipng::StripChunks::Safe,
+        bit_depth_reduction: options.bit_depth_reduction,
+        color_type_reduction: options.color_type_reduction,
+        palette_reduction: options.palette_reduction,
+        interlace: Some(options.interlace.into()),
+        filter: vec![options.filter.into()],
+        ..Default::default()
     };
-    oxipng_options.optimize_alpha = true;
-    oxipng_options.strip = oxipng::StripChunks::Safe;
 
     println!(
         "PNG: Applying OxiPNG optimization with Zopfli ({} iterations)...",
