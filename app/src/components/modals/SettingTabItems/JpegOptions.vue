@@ -30,4 +30,12 @@ const settingsStore = useSettingsStore();
     type="number"
   />
   -->
+  <v-btn
+    color="warning"
+    prepend-icon="mdi-rotate-left"
+    variant="text"
+    @click="settingsStore.resetJpegOptions()"
+  >
+    {{ t('reset_jpeg_options') }}
+  </v-btn>
 </template>

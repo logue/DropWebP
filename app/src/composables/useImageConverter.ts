@@ -74,7 +74,9 @@ export function useImageConverter() {
     const optionsMap = {
       avif: settingsStore.avifOptions,
       jxl: settingsStore.jxlOptions,
-      webp: settingsStore.webpOptions
+      webp: settingsStore.webpOptions,
+      png: settingsStore.pngOptions,
+      jpeg: settingsStore.jpegOptions
     };
 
     // 型の一致を保証するためにキーの型を定義

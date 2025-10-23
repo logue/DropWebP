@@ -1,4 +1,5 @@
 import type { AvifOptions } from './AvifOptions';
+import type { JpegOptions } from './JpegOptions';
 import type { JxlOptions } from './JxlOptions';
 import type { PngOptions } from './PngOptions';
 import type { WebpOptions } from './WebpOptions';
@@ -10,4 +11,5 @@ export interface EncodeOptions {
   webp?: WebpOptions;
   jxl?: JxlOptions;
   png?: PngOptions;
+  jpeg?: JpegOptions;
 }

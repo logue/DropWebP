@@ -159,6 +159,10 @@ pub async fn estimate_size(
             EncodeOptions::Jxl(opts) => {
                 crate::encoder::jxl::estimate_size(&img, opts)
             }
+            EncodeOptions::Jpeg(_) => {
+                // JPEG is temporarily disabled
+                0
+            }
         };
 
         Ok::<usize, String>(size)

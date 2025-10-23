@@ -1,6 +1,7 @@
 use crate::error::AppError;
 use crate::options::HighBitDepthImage;
-use oxipng::{optimize_from_memory, Deflaters, Options as OxiPngOptions};
+use indexmap::IndexSet;
+use oxipng::optimize_from_memory;
 use serde::{Deserialize, Serialize};
 use std::io::Cursor;
 
@@ -181,7 +182,7 @@ fn encode_with_zopfli(
         color_type_reduction: options.color_type_reduction,
         palette_reduction: options.palette_reduction,
         interlace: Some(options.interlace.into()),
-        filter: vec![options.filter.into()],
+        filter: IndexSet::from([options.filter.into()]),
         ..Default::default()
     };
 

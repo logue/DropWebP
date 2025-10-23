@@ -111,8 +111,8 @@ en:
   type:
     png: PNG (Zopfli)
     png_description: PNG is a widely used lossless image format that supports transparency and is ideal for images with sharp edges and text. Zopfli is an advanced compression algorithm that can significantly reduce PNG file sizes while maintaining image quality, making it an excellent choice for web use and re-compressing textures for VRC.
-    jpeg: JPEG (Guetzli)
-    jpeg_description: JPEG is a commonly used lossy image format that is ideal for photographs and  complex images. Guetzli is an advanced compression algorithm developed by Google that can produce high-quality JPEG images with smaller file sizes compared to traditional JPEG encoders, making it a great choice for web use and reducing bandwidth usage.
+    jpeg: JPEG (MozJPEG)
+    jpeg_description: JPEG is a commonly used lossy image format that is ideal for photographs and complex images. MozJPEG is an advanced compression algorithm developed by Mozilla that produces high-quality JPEG images with smaller file sizes compared to traditional JPEG encoders. It offers a great balance between quality and encoding speed, making it an excellent choice for web use and bandwidth reduction.
     webp: WebP
     webp_description: WebP is a modern image format that provides superior lossless and lossy compression for images on the web. Using WebP, webmasters and web developers can create smaller, richer images that make the web faster.
     avif: AVIF
@@ -139,8 +139,8 @@ fr:
   type:
     png: PNG (Zopfli)
     png_description: PNG est un format d'image sans perte largement utilisé qui prend en charge la transparence et est idéal pour les images avec des bords nets et du texte. Zopfli est un algorithme de compression avancé qui peut réduire considérablement la taille des fichiers PNG tout en maintenant la qualité de l'image, ce qui en fait un excellent choix pour une utilisation sur le web et pour la recompression des textures pour VRC.
-    jpeg: JPEG (Guetzli)
-    jpeg_description: JPEG est un format d'image avec perte couramment utilisé, idéal pour les photographies et les images complexes. Guetzli est un algorithme de compression avancé développé par Google qui peut produire des images JPEG de haute qualité avec des tailles de fichiers plus petites par rapport aux encodeurs JPEG traditionnels, ce qui en fait un excellent choix pour une utilisation sur le web et pour réduire l'utilisation de la bande passante.
+    jpeg: JPEG (MonzJPEG)
+    jpeg_description: JPEG est un format d'image avec perte couramment utilisé, idéal pour les photographies et les images complexes. MozJPEG est un algorithme de compression avancé développé par Mozilla qui peut produire des images JPEG de haute qualité avec des tailles de fichiers plus petites par rapport aux encodeurs JPEG traditionnels, ce qui en fait un excellent choix pour une utilisation sur le web et pour réduire l'utilisation de la bande passante.
     webp: WebP
     webp_description: WebP est un format d'image moderne qui offre une compression sans perte et avec perte supérieure pour les images sur le web. En utilisant WebP, les webmasters et les développeurs web peuvent créer des images plus petites et plus riches qui rendent le web plus rapide.
     avif: AVIF
@@ -167,8 +167,8 @@ ja:
   type:
     png: PNG (Zopfli)
     png_description: PNGは、広く使用されているロスレス画像形式で、透明性をサポートし、シャープなエッジやテキストを含む画像に最適です。本プログラムで使用されているZopfliとは、より高度な圧縮アルゴリズムで、画像品質を維持しながら同じPNGファイルでもサイズを大幅に削減できるため、Webでの使用やVRC向けのテクスチャの再圧縮に最適な選択肢です。
-    jpeg: JPEG (Guetzli)
-    jpeg_description: JPEGは、一般的に使用されているロッシー画像形式で、写真や複雑な画像に最適です。Guetzliは、Googleが開発した高度な圧縮アルゴリズムで、従来のJPEGエンコーダーと比較して、より小さなファイルサイズで高品質のJPEG画像を生成できるため、Webでの使用や帯域幅の使用量の削減に最適な選択肢です。
+    jpeg: JPEG (MozJPEG)
+    jpeg_description: JPEGは、一般的に使用されているロッシー画像形式で、写真や複雑な画像に最適です。MozJPEGは、Mozillaが開発した高度な圧縮アルゴリズムで、従来のJPEGエンコーダーと比較して、より小さなファイルサイズで高品質のJPEG画像を生成できます。品質とエンコード速度のバランスが優れており、Webでの使用や帯域幅の削減に最適な選択肢です。
     webp: WebP
     webp_description: WebPは、Web上の画像に対して優れたロスレスおよびロス圧縮を提供する最新の画像形式です。WebPを使用すると、WebマスターやWeb開発者は、より小さく、より豊かな画像を作成して、Webを高速化できます。
     avif: AVIF
@@ -195,8 +195,8 @@ ko:
   type:
     png: PNG (Zopfli)
     png_description: PNG는 널리 사용되는 무손실 이미지 형식으로 투명도를 지원하며, 선명한 가장자리와 텍스트가 포함된 이미지에 적합합니다. Zopfli는 이미지 품질을 유지하면서 동일한 PNG 파일 크기를 크게 줄일 수 있는 고급 압축 알고리즘으로, 웹 사용 및 VRC용 텍스처 재압축에 탁월한 선택입니다.
-    jpeg: JPEG (Guetzli)
-    jpeg_description: JPEG는 일반적으로 사용되는 손실 이미지 형식으로 사진 및 복잡한 이미지에 적합합니다. Guetzli는 Google에서 개발한 고급 압축 알고리즘으로, 기존 JPEG 인코더에 비해 더 작은 파일 크기로 고품질 JPEG 이미지를 생성할 수 있어 웹 사용 및 대역폭 사용량 감소에 탁월한 선택입니다.
+    jpeg: JPEG (MozJPEG)
+    jpeg_description: JPEG는 일반적으로 사용되는 손실 이미지 형식으로 사진 및 복잡한 이미지에 적합합니다. MozJPEG는 Mozilla에서 개발한 고급 압축 알고리즘으로, 기존 JPEG 인코더에 비해 더 작은 파일 크기로 고품질 JPEG 이미지를 생성할 수 있어 웹 사용 및 대역폭 사용량 감소에 탁월한 선택입니다.
     webp: WebP
     webp_description: WebP는 웹의 이미지에 대해 우수한 무손실 및 손실 압축을 제공하는 최신 이미지 형식입니다. WebP를 사용하면 웹마스터와 웹 개발자가 더 작고 풍부한 이미지를 만들어 웹을 더 빠르게 만들 수 있습니다.
     avif: AVIF
@@ -223,8 +223,8 @@ zhHant:
   type:
     png: PNG (Zopfli)
     png_description: PNG 是一種廣泛使用的無損圖片格式，支持透明度，非常適合包含銳利邊緣和文字的圖片。本程序中使用的 Zopfli 是一種更先進的壓縮算法，可以在保持圖片質量的同時大幅減小相同 PNG 文件的大小，是網頁使用和 VRC 紋理重新壓縮的絕佳選擇。
-    jpeg: JPEG (Guetzli)
-    jpeg_description: JPEG 是一種常用的有損圖片格式，非常適合照片和複雜圖片。Guetzli 是 Google 開發的一種先進壓縮算法，與傳統 JPEG 編碼器相比，可以生成高質量且文件大小更小的 JPEG 圖片，是網頁使用和減少帶寬使用的絕佳選擇。
+    jpeg: JPEG (MozJPEG)
+    jpeg_description: JPEG 是一種常用的有損圖片格式，非常適合照片和複雜圖片。MozJPEG 是 Mozilla 開發的一種先進壓縮算法，與傳統 JPEG 編碼器相比，可以生成高質量且文件大小更小的 JPEG 圖片，是網頁使用和減少帶寬使用的絕佳選擇。
     webp: WebP
     webp_description: WebP 是一種現代圖片格式，為網頁上的圖片提供優異的無損和有損壓縮。使用 WebP，網站管理員和網頁開發人員可以創建更小、更豐富的圖片，使網頁加載更快。
     avif: AVIF
@@ -251,8 +251,8 @@ zhHans:
   type:
     png: PNG(Zopfli)
     png_description: PNG 是一种广泛使用的无损图片格式，支持透明度，非常适合包含锐利边缘和文字的图片。本程序中使用的 Zopfli 是一种更先进的压缩算法，可以在保持图片质量的同时大幅减小相同 PNG 文件的大小，是网页使用和 VRC 纹理重新压缩的绝佳选择。
-    jpeg: JPEG (Guetzli)
-    jpeg_description: JPEG 是一种常用的有损图片格式，非常适合照片和复杂图片。Guetzli 是 Google 开发的一种先进压缩算法，与传统 JPEG 编码器相比，可以生成高质量且文件大小更小的 JPEG 图片，是网页使用和减少带宽使用的绝佳选择。
+    jpeg: JPEG (MozJPEG)
+    jpeg_description: JPEG 是一种常用的有损图片格式，非常适合照片和复杂图片。MozJPEG 是 Mozilla 开发的一种先进压缩算法，与传统 JPEG 编码器相比，可以生成高质量且文件大小更小的 JPEG 图片，是网页使用和减少带宽使用的绝佳选择。
     webp: WebP
     webp_description: WebP 是一种现代图片格式，为网页上的图片提供优异的无损和有损压缩。使用 WebP，网站管理员和网页开发人员可以创建更小、更丰富的图片，使网页加载更快。
     avif: AVIF

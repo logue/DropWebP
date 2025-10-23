@@ -6,6 +6,7 @@ import { open } from '@tauri-apps/plugin-dialog';
 
 import { BitDepth, ColorModel, type AvifOptions } from '@/interfaces/AvifOptions';
 import { OutputFormat, type CommonOptions } from '@/interfaces/CommonOptions';
+import { type JpegOptions } from '@/interfaces/JpegOptions';
 import { ColorEncoding, EncoderSpeed, type JxlOptions } from '@/interfaces/JxlOptions';
 import { PngFilter, PngInterlace, type PngOptions } from '@/interfaces/PngOptions';
 import { WebPImageHint, type WebpOptions } from '@/interfaces/WebpOptions';
@@ -50,6 +51,8 @@ const defaultPngOptions: PngOptions = {
   filter: PngFilter.MinSum
 } as const;
 
+const defaultJpegOptions: JpegOptions = { quality: 95, progressive: true, optimize: true };
+
 const defaultCommonOptions: CommonOptions = {
   sound: true,
   volume: 1.0,
@@ -77,6 +80,8 @@ export default defineStore(
     const jxlOptions: Ref<JxlOptions> = ref({ ...defaultJxlOptions });
     /** PNGオプション */
     const pngOptions: Ref<PngOptions> = ref({ ...defaultPngOptions });
+    /** JPEGオプション */
+    const jpegOptions: Ref<JpegOptions> = ref({ ...defaultJpegOptions });
 
     /** 設定を初期化 */
     const reset = async () => {
@@ -85,6 +90,8 @@ export default defineStore(
       webpOptions.value = { ...defaultWebpOptions };
       jxlOptions.value = { ...defaultJxlOptions };
       pngOptions.value = { ...defaultPngOptions };
+      jpegOptions.value = { ...defaultJpegOptions };
+      // デフォルトは書類フォルダ
       commonOptions.value.outputPath = await documentDir();
     };
 
@@ -93,6 +100,7 @@ export default defineStore(
     const resetWebpOptions = () => (webpOptions.value = { ...defaultWebpOptions });
     const resetJxlOptions = () => (jxlOptions.value = { ...defaultJxlOptions });
     const resetPngOptions = () => (pngOptions.value = { ...defaultPngOptions });
+    const resetJpegOptions = () => (jpegOptions.value = { ...defaultJpegOptions });
 
     /** 出力先ディレクトリ選択ダイアログ */
     const browseOutputPath = async () => {
@@ -110,6 +118,7 @@ export default defineStore(
       webpOptions,
       jxlOptions,
       pngOptions,
+      jpegOptions,
       commonOptions,
       reset,
       resetAvifOptions,
@@ -117,6 +126,7 @@ export default defineStore(
       resetCommonOptions,
       resetJxlOptions,
       resetPngOptions,
+      resetJpegOptions,
       browseOutputPath
     };
   },

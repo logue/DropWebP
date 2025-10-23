@@ -32,7 +32,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 [build-dependencies]
 cc = "1.2.41"
 pkg-config = "0.3.32"
-tauri-build = { version = "2.5.0", features = [] }
+tauri-build = { version = "2.5.1", features = [] }
 vcpkg = "0.2.15"
 
 [dependencies]
@@ -41,9 +41,11 @@ chrono = { version = "0.4.42", features = ["serde"] }
 flate2 = "1.1.4"
 image = "0.25.8"
 imgref = "1.12.0"
+indexmap = "2.12.0"
 jpeg2k = "0.10.1"
-jpegxl-rs = "0.11.2"
+jpegxl-rs = { version = "0.11.2", features = ["vendored"] }
 kamadak-exif = "0.6.1"
+# mozjpeg = "0.10"
 libheif-rs = "2.5.1"
 openjpeg-sys = "1.0.12"
 oxipng = "9.1.3"
@@ -52,7 +54,7 @@ ravif = "0.12.0"
 rgb = "0.8.52"
 serde = "1.0.219"
 serde_json = "1.0.145"
-tauri = { version = "2.9.0", features = [] }
+tauri = { version = "2.9.1", features = [] }
 tauri-plugin-dialog = "2.4.0"
 tauri-plugin-fs = "2.4.2"
 tauri-plugin-log = "2.7.0"
