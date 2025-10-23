@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { parse, ready } from '@logue/markdown-wasm';
+import { marked } from 'marked';
 import Prism from 'prismjs';
 
 import { Locale } from '@/types/LocaleType';
@@ -62,10 +62,17 @@ const renderMarkdown = async () => {
       throw new Error('No markdown content found');
     }
 
-    // @logue/markdown-wasmでMarkdownをHTMLに変換
-    await ready();
-    const result = parse(markdownContent);
-    compiledHtml.value = typeof result === 'string' ? result : '<p>Error rendering markdown</p>';
+    // markedでMarkdownをHTMLに変換（SSR対応）
+    try {
+      compiledHtml.value = await marked(markdownContent, {
+        gfm: true,
+        breaks: true
+      });
+    } catch (parseError) {
+      console.error('Markdown parsing error:', parseError);
+      // フォールバック: プリフォーマット表示
+      compiledHtml.value = `<pre>${markdownContent}</pre>`;
+    }
     error.value = null;
   } catch (err) {
     console.error('Failed to render markdown:', err);
@@ -76,11 +83,46 @@ const renderMarkdown = async () => {
   }
 };
 
-// 初回レンダリング
-await renderMarkdown();
+// SSR/SSG対応: サーバー側でレンダリング
+if (import.meta.server) {
+  await renderMarkdown();
+}
+
+// クライアント側: マウント時にレンダリングとハイライト
+onMounted(async () => {
+  // SSRでレンダリングされていない場合のみ実行
+  if (!compiledHtml.value) {
+    await renderMarkdown();
+  }
+
+  // シンタックスハイライトを適用
+  nextTick(() => {
+    if (import.meta.client) {
+      Prism.highlightAll();
+    }
+  });
+});
 
 // ロケール変更時に再レンダリング
-watch(locale, renderMarkdown);
+watch(locale, async () => {
+  await renderMarkdown();
+
+  // 再ハイライト
+  if (import.meta.client) {
+    nextTick(() => {
+      Prism.highlightAll();
+    });
+  }
+});
+
+// コンテンツ変更時に再ハイライト
+watch(compiledHtml, () => {
+  if (import.meta.client) {
+    nextTick(() => {
+      Prism.highlightAll();
+    });
+  }
+});
 
 // SEO設定
 useHead({
@@ -91,20 +133,6 @@ useHead({
       content: props.description
     }
   ]
-});
-
-onMounted(() => {
-  // Highlight code blocks after markdown is rendered
-  nextTick(() => {
-    Prism.highlightAll();
-  });
-});
-
-// Re-highlight when content changes
-watch(compiledHtml, () => {
-  nextTick(() => {
-    Prism.highlightAll();
-  });
 });
 </script>
 
