@@ -8,8 +8,12 @@ export default defineNuxtConfig({
   // SSG設定（CSS外部化対応）
   ssr: true, // SSRで翻訳済みHTMLを生成
 
-  // CSSファイル（Vuetifyスタイル確保）
-  css: ['~/styles/settings.scss'],
+  // CSSファイル（Vuetifyスタイル確保 + GitHub Markdown CSS）
+  css: [
+    '~/styles/settings.scss',
+    'github-markdown-css/github-markdown-light.css',
+    'github-markdown-css/github-markdown-dark.css'
+  ],
 
   // SSRスタイル設定（CSS最適化）
   features: {
@@ -91,7 +95,7 @@ export default defineNuxtConfig({
     transpile: ['vue-i18n']
   },
 
-  // Vite設定（VuetifyCSS外部化強制）
+  // Vite設定（VuetifyCSS外部化強制 + Markdownローダー）
   vite: {
     css: {
       postcss: {}
@@ -103,6 +107,17 @@ export default defineNuxtConfig({
     optimizeDeps: {
       include: ['prismjs', 'prismjs/components/prism-bash', 'prismjs/components/prism-powershell']
     },
+    assetsInclude: ['**/*.md'],
+    plugins: [
+      {
+        name: 'markdown-loader',
+        transform(code, id) {
+          if (id.endsWith('.md')) {
+            return `export default ${JSON.stringify(code)};`;
+          }
+        }
+      }
+    ],
     build: {
       rollupOptions: {
         output: {

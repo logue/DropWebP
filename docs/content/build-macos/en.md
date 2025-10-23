@@ -1,0 +1,289 @@
+# Build DropWebP for macOS
+
+This guide walks you through setting up the development environment and building DropWebP on macOS systems.
+
+## Prerequisites
+
+Before you begin, make sure you have:
+
+- macOS 10.15 (Catalina) or later
+- Administrator privileges for installing software
+- Basic familiarity with Terminal commands
+
+## Step 1: Install Xcode Command Line Tools
+
+First, install the Xcode Command Line Tools which provide essential development tools including `clang` and `make`:
+
+```bash
+xcode-select --install
+```
+
+This will open a dialog asking if you want to install the command line developer tools. Click **Install** and wait for the installation to complete.
+
+### Verify Installation
+
+Check that the tools are installed correctly:
+
+```bash
+clang --version
+```
+
+You should see output similar to:
+
+```
+Apple clang version 15.0.0 (clang-1500.0.40.1)
+Target: arm64-apple-darwin23.0.0
+Thread model: posix
+```
+
+## Step 2: Install Homebrew
+
+Homebrew is a package manager for macOS that makes it easy to install development tools and libraries.
+
+### Install Homebrew
+
+Open Terminal and run:
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+### Add Homebrew to PATH
+
+For Apple Silicon Macs (M1/M2/M3), add Homebrew to your PATH:
+
+```bash
+echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+For Intel Macs, Homebrew is installed to `/usr/local` and should already be in your PATH.
+
+### Verify Homebrew Installation
+
+```bash
+brew --version
+```
+
+## Step 3: Install Rust
+
+DropWebP is built with Rust, so you'll need to install the Rust toolchain.
+
+### Install Rust via rustup
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
+When prompted, choose option 1 (default installation).
+
+### Configure Your Shell
+
+```bash
+source ~/.cargo/env
+```
+
+### Verify Rust Installation
+
+```bash
+rustc --version
+cargo --version
+```
+
+You should see version information for both `rustc` and `cargo`.
+
+## Step 4: Install Node.js
+
+The frontend of DropWebP is built with Vue.js and requires Node.js.
+
+### Install Node.js via Homebrew
+
+```bash
+brew install node
+```
+
+### Verify Node.js Installation
+
+```bash
+node --version
+npm --version
+```
+
+## Step 5: Install pnpm
+
+DropWebP uses pnpm as its package manager for better performance and disk efficiency.
+
+### Install pnpm
+
+```bash
+npm install -g pnpm
+```
+
+### Verify pnpm Installation
+
+```bash
+pnpm --version
+```
+
+## Step 6: Install Additional Dependencies
+
+Install additional tools required for building:
+
+```bash
+# Install CMake (needed for some native dependencies)
+brew install cmake
+
+# Install pkg-config (needed for linking libraries)
+brew install pkg-config
+```
+
+## Step 7: Clone and Build DropWebP
+
+Now you're ready to clone and build DropWebP.
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/logue/DropWebP.git
+cd DropWebP
+```
+
+### Install Frontend Dependencies
+
+```bash
+# Install all workspace dependencies
+pnpm install
+```
+
+### Install Tauri CLI v2
+
+```bash
+# Install Tauri CLI v2 globally
+pnpm add -g @tauri-apps/cli@next
+```
+
+### Build the Application
+
+For development:
+
+```bash
+# Run in development mode
+pnpm dev:tauri
+```
+
+For production:
+
+```bash
+# Build for production
+pnpm build:tauri
+```
+
+## Step 8: Platform-Specific Considerations
+
+### Apple Silicon (M1/M2/M3) Macs
+
+If you're using an Apple Silicon Mac, some dependencies might need to be compiled specifically for the `arm64` architecture. Most modern packages handle this automatically, but if you encounter issues:
+
+```bash
+# Check your architecture
+uname -m
+# Should output: arm64
+
+# If needed, you can force Rust to build for the correct target
+rustup target add aarch64-apple-darwin
+```
+
+### Intel Macs
+
+For Intel Macs, the default `x86_64` target should work without issues:
+
+```bash
+# Check your architecture
+uname -m
+# Should output: x86_64
+
+# Ensure the correct Rust target is installed
+rustup target add x86_64-apple-darwin
+```
+
+### Code Signing (Optional)
+
+If you want to distribute your built application, you'll need to sign it with an Apple Developer certificate:
+
+```bash
+# Check available signing identities
+security find-identity -v -p codesigning
+
+# If you have a developer certificate, Tauri can sign automatically
+# Add this to your tauri.conf.json:
+{
+  "bundle": {
+    "macOS": {
+      "signing": {
+        "identity": "Developer ID Application: Your Name (TEAM_ID)"
+      }
+    }
+  }
+}
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Permission Denied Errors**
+
+   ```bash
+   # Fix permissions for Homebrew
+   sudo chown -R $(whoami) /opt/homebrew
+   ```
+
+2. **Command Not Found After Installation**
+
+   ```bash
+   # Reload your shell profile
+   source ~/.zshrc
+   # Or restart your terminal
+   ```
+
+3. **Build Failures with Native Dependencies**
+
+   ```bash
+   # Clear build caches
+   cargo clean
+   pnpm clean
+
+   # Rebuild everything
+   pnpm install
+   pnpm tauri build
+   ```
+
+4. **Rust Target Issues**
+
+   ```bash
+   # List installed targets
+   rustup target list --installed
+
+   # Add the correct target for your system
+   rustup target add aarch64-apple-darwin  # Apple Silicon
+   rustup target add x86_64-apple-darwin   # Intel
+   ```
+
+### Getting Help
+
+If you encounter issues not covered here:
+
+1. Check the [DropWebP repository](https://github.com/logue/DropWebP) for known issues
+2. Review the [Tauri v2 documentation](https://v2.tauri.app/start/prerequisites/) for macOS-specific guidance
+3. Search existing GitHub issues or create a new one
+
+## Next Steps
+
+Once you have DropWebP built successfully:
+
+1. **Run Tests**: Execute `pnpm test` to ensure everything works correctly
+2. **Development**: Use `pnpm dev:tauri` for development with hot reloading
+3. **Customization**: Explore the codebase and make your modifications
+4. **Distribution**: Use `pnpm build:tauri` to create distributable packages
+
+You're now ready to develop and build DropWebP on macOS!

@@ -14,18 +14,22 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@logue/markdown-wasm": "^1.5.6",
     "@mdi/font": "7.4.47",
+    "@nuxt/content": "^3.7.1",
     "@nuxt/eslint": "1.9.0",
     "@nuxtjs/i18n": "10.1.1",
     "@pinia/nuxt": "^0.8.0",
+    "better-sqlite3": "^12.4.1",
     "eslint": "^9.38.0",
     "nuxt": "3.19.3",
     "pinia": "^3.0.3",
     "prismjs": "^1.30.0",
     "sass-embedded": "^1.93.2",
     "vue": "3.5.22",
+    "vue-markdown-wasm": "^1.0.1",
     "vue-router": "^4.6.3",
-    "vuetify": "3.10.5",
+    "vuetify": "3.10.6",
     "vuetify-nuxt-module": "0.18.8"
   },
   "devDependencies": {
