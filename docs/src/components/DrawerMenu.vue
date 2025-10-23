@@ -39,7 +39,8 @@ const items: ComputedRef<DrawerMenuItem[]> = computed(() => [
   },
   {
     title: t('build_linux'),
-    icon: 'mdi-linux'
+    icon: 'mdi-linux',
+    to: localePath('/build-linux')
   }
 ]);
 </script>

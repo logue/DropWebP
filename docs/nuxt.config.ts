@@ -1,4 +1,5 @@
 import { fileURLToPath, URL } from 'node:url';
+import { Locale } from './src/types/LocaleType';
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -52,14 +53,14 @@ export default defineNuxtConfig({
   // i18n設定（<i18n>ブロック使用）
   i18n: {
     locales: [
-      { code: 'ja', language: 'ja-JP', name: '🇯🇵 日本語', iso: 'ja-JP' },
-      { code: 'en', language: 'en-US', name: '🇺🇸 English', iso: 'en-US' },
-      { code: 'fr', language: 'fr-FR', name: '🇫🇷 Français', iso: 'fr-FR' },
-      { code: 'ko', language: 'ko-KR', name: '🇰🇷 한국어', iso: 'ko-KR' },
-      { code: 'zhHans', language: 'zh-CN', name: '🇨🇳 简体中文', iso: 'zh-CN' },
-      { code: 'zhHant', language: 'zh-TW', name: '🇹🇼 繁體中文', iso: 'zh-TW' }
+      { code: Locale.ja, language: 'ja-JP', name: '🇯🇵 日本語', iso: 'ja-JP' },
+      { code: Locale.en, language: 'en-US', name: '🇺🇸 English', iso: 'en-US' },
+      { code: Locale.fr, language: 'fr-FR', name: '🇫🇷 Français', iso: 'fr-FR' },
+      { code: Locale.ko, language: 'ko-KR', name: '🇰🇷 한국어', iso: 'ko-KR' },
+      { code: Locale.zhHans, language: 'zh-CN', name: '🇨🇳 简体中文', iso: 'zh-CN' },
+      { code: Locale.zhHant, language: 'zh-TW', name: '🇹🇼 繁體中文', iso: 'zh-TW' }
     ],
-    defaultLocale: 'en',
+    defaultLocale: Locale.en,
     strategy: 'prefix_and_default',
     baseUrl: 'https://logue.dev/DropWebP',
     detectBrowserLanguage: false,
@@ -174,7 +175,13 @@ export default defineNuxtConfig({
         '/fr/build-macos',
         '/ko/build-macos',
         '/zhHant/build-macos',
-        '/zhHans/build-macos'
+        '/zhHans/build-macos',
+        '/ja/build-linux',
+        '/en/build-linux',
+        '/fr/build-linux',
+        '/ko/build-linux',
+        '/zhHant/build-linux',
+        '/zhHans/build-linux'
       ]
     },
     inlineDynamicImports: false,

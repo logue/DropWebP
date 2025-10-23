@@ -11,6 +11,8 @@
 import { parse, ready } from '@logue/markdown-wasm';
 import Prism from 'prismjs';
 
+import { Locale } from '@/types/LocaleType';
+
 interface Props {
   contentPath: string; // 'build-windows' または 'build-macos'
   title?: string;
@@ -32,9 +34,7 @@ const error = ref<Error | null>(null);
 const importMarkdownFiles = async () => {
   const markdownMap: Record<string, string> = {};
 
-  const locales = ['en', 'ja', 'fr', 'ko', 'zhHans', 'zhHant'];
-
-  for (const loc of locales) {
+  for (const loc of Object.values(Locale)) {
     try {
       // 動的インポートでMarkdownファイルを取得
       const module = await import(`../../content/${props.contentPath}/${loc}.md?raw`);
