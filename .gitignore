@@ -41,6 +41,13 @@ playwright-report/
 .husky/
 Meta.ts
 
+# Tauri / Rust
+.cargo/
+/target/
+/gen/schemas
+**/*.rs.bk
+*.pdb
+
 # Package managers build artifacts
 .choco/*.nupkg
 .homebrew/*.rb.bak
