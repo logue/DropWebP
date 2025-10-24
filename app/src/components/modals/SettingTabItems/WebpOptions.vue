@@ -2,7 +2,7 @@
 import { useSettingsStore } from '@/store';
 import { useI18n } from 'vue-i18n';
 
-// import { WebPImageHint } from '@/types/WebpTypes';
+import { WebPImageHint } from '@/types/WebpTypes';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
@@ -26,10 +26,9 @@ const settingsStore = useSettingsStore();
     thumb-label="always"
     type="number"
   />
-  <!--
   <v-slider
     v-model="settingsStore.webpOptions.method"
-    :label="t('method') + ' (' + settingsStore.webpOptions.method + ')'"
+    :label="t('method', { min: 0, max: 6 })"
     :max="6"
     :min="0"
     color="primary"
@@ -56,7 +55,6 @@ const settingsStore = useSettingsStore();
     item-value="value"
     persistent-hint
   />
-  -->
   <v-btn
     color="warning"
     prepend-icon="mdi-rotate-left"

@@ -7,31 +7,30 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <v-col>
-    <v-row>
+  <v-row>
+    <v-col>
       <v-switch
         v-model="settingsStore.commonOptions.sound"
         :label="t('play_sound')"
         color="primary"
       />
-    </v-row>
-    <v-row>
+    </v-col>
+    <v-col>
       <v-slider
         v-model="settingsStore.commonOptions.volume"
-        :label="t('volume')"
-        :append-icon="
-          settingsStore.commonOptions.volume === 0 ? 'mdi-volume-off' : 'mdi-volume-high'
-        "
         :disabled="!settingsStore.commonOptions.sound"
-        :min="0"
+        :label="t('volume')"
         :max="1.0"
+        :min="0"
         :step="0.1"
-        class="mt-0"
+        append-icon="mdi-volume-high"
+        color="primary"
+        prepend-icon="mdi-volume-low"
       />
-    </v-row>
-  </v-col>
+    </v-col>
+  </v-row>
   <v-switch
-    v-model="settingsStore.commonOptions.ignoreJpeg"
+    v-model="settingsStore.commonOptions.notify"
     :hint="t('notify_hint')"
     :label="t('notify')"
     color="primary"

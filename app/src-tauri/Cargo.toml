@@ -38,7 +38,7 @@ vcpkg = "0.2.15"
 [dependencies]
 bytemuck = "1.24.0"
 chrono = { version = "0.4.42", features = ["serde"] }
-flate2 = "1.1.4"
+flate2 = "1.1.5"
 image = "0.25.8"
 imgref = "1.12.0"
 indexmap = "2.12.0"
@@ -47,6 +47,7 @@ jpegxl-rs = { version = "0.11.2+libjxl-0.11.1", features = [] }
 kamadak-exif = "0.6.1"
 # mozjpeg = "0.10"
 libheif-rs = "2.5.1"
+libwebp-sys2 = { version = "0.2.0", features = ["1_5"] }
 openjpeg-sys = "1.0.12"
 oxipng = "9.1.3"
 png = "0.18.0"
@@ -61,4 +62,3 @@ tauri-plugin-log = "2.7.0"
 tauri-plugin-notification = "2.3.1"
 tauri-plugin-opener = "2.5.0"
 thiserror = "2.0.17"
-webp = "0.3.1"

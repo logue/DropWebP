@@ -5,7 +5,13 @@ use super::common::{
 };
 use crate::{encoder::extract_pixel_data, error::AppError, options::HighBitDepthImage};
 use serde::{Deserialize, Serialize};
-use webp::{Encoder, WebPMemory};
+// 必要なものを use
+use libwebp_sys::{
+    WebPConfig, WebPConfigInit, WebPEncode, WebPFree, WebPMemoryWrite, WebPMemoryWriter,
+    WebPMemoryWriterInit, WebPPicture, WebPPictureFree, WebPPictureImportRGB,
+    WebPPictureImportRGBA, WebPPictureInit, WebPValidateConfig,
+};
+use std::ffi::{c_int, c_void};
 
 /// WebP format encoding options
 /// quality: 0-100 (0 is lowest quality, 100 is highest quality)
@@ -19,13 +25,12 @@ use webp::{Encoder, WebPMemory};
 pub struct WebpOptions {
     pub quality: f32,
     pub lossless: bool,
-    // pub method: u8,
-    // pub autofilter: bool,
-    // pub hint: WebPImageHint,
+    pub method: u8,
+    pub autofilter: bool,
+    pub hint: WebPImageHint,
     // pub preset: WebPPreset,
 }
 
-/*
 /// WebPの画像ヒント
 /// - Default: 標準的な用途
 /// - Picture: 写真やリアルな画像向け
@@ -40,7 +45,6 @@ pub enum WebPImageHint {
     Graph = libwebp_sys::WEBP_HINT_GRAPH as isize,
     Last = libwebp_sys::WEBP_HINT_LAST as isize,
 }
-*/
 
 /// Encode image to WebP format with advanced content analysis
 /// # Arguments
@@ -100,29 +104,94 @@ pub fn encode(
 
     // Convert f32 pixels to u8 (WebP encoders primarily work with 8-bit input)
     let pixels_u8 = convert_f32_to_u8(&processed_pixels);
+    println!(
+        "WebP: Encoding settings - Quality: {}, Lossless: {}, Method: {}, Hint: {:?}",
+        options.quality, options.lossless, options.method, options.hint
+    );
 
-    // ★ 4. RGB/RGBAに応じてエンコーダーを生成
-    let encoder = if is_rgba {
-        Encoder::from_rgba(&pixels_u8, width, height)
-    } else {
-        Encoder::from_rgb(&pixels_u8, width, height)
+    // ★ 4. & 5. を libwebp-sys2 (Advanced API) を使って置き換え
+    let webp_data = unsafe {
+        // 1. Config (エンコード設定) の初期化と設定
+        let mut config: WebPConfig = std::mem::zeroed();
+        if WebPConfigInit(&mut config) == 0 {
+            return Err(AppError::Encode("WebPConfigInit failed".into()));
+        }
+
+        // Options から Config に値を設定
+        config.quality = options.quality;
+        config.lossless = if options.lossless { 1 } else { 0 };
+        config.method = options.method as c_int;
+        config.image_hint = options.hint as u32; // enum の値を u32 として渡す
+        config.autofilter = if options.autofilter { 1 } else { 0 };
+        // config.sns_strength = ...; // 他にも多くの設定が可能
+
+        // 設定が妥当か検証
+        if WebPValidateConfig(&config) == 0 {
+            return Err(AppError::Encode("Invalid WebPConfig".into()));
+        }
+
+        // 2. Picture (画像データ) の初期化
+        let mut picture: WebPPicture = std::mem::zeroed();
+        if WebPPictureInit(&mut picture) == 0 {
+            return Err(AppError::Encode("WebPPictureInit failed".into()));
+        }
+        picture.width = width as c_int;
+        picture.height = height as c_int;
+
+        // 3. Picture へピクセルデータをインポート
+        let import_result = if is_rgba {
+            // RGBA
+            let stride = width as i32 * 4;
+            WebPPictureImportRGBA(&mut picture, pixels_u8.as_ptr(), stride)
+        } else {
+            // RGB
+            let stride = width as i32 * 3;
+            WebPPictureImportRGB(&mut picture, pixels_u8.as_ptr(), stride)
+        };
+
+        if import_result == 0 {
+            WebPPictureFree(&mut picture); // 失敗したら Picture を解放
+            return Err(AppError::Encode("WebPPictureImport failed".into()));
+        }
+
+        // 4. メモリ書き込み用の Writer を準備
+        let mut writer: WebPMemoryWriter = std::mem::zeroed();
+        WebPMemoryWriterInit(&mut writer);
+        picture.writer = std::mem::transmute(WebPMemoryWrite as *const ()); // 書き込み関数へのポインタ
+        picture.custom_ptr = &mut writer as *mut _ as *mut c_void; // 書き込み先
+
+        // 5. エンコード実行
+        let encode_result = WebPEncode(&config, &mut picture);
+
+        // 6. Picture リソースを解放 (必須)
+        // ピクセルデータはインポート時にコピーされているため、エンコード後すぐに解放してOK
+        WebPPictureFree(&mut picture);
+
+        if encode_result == 0 {
+            // エラー時も Writer のメモリを解放
+            WebPFree(writer.mem as *mut c_void);
+            return Err(AppError::Encode(format!(
+                "WebPEncode failed (error code: {})",
+                picture.error_code
+            )));
+        }
+
+        // 7. 成功：エンコードされたデータを取得
+        // writer.mem (ポインタ) と writer.size (長さ) から Rust の Vec<u8> を作成
+        let output_data = std::slice::from_raw_parts(writer.mem, writer.size).to_vec();
+
+        // 8. Writer が確保した C のメモリを解放 (必須)
+        WebPFree(writer.mem as *mut c_void);
+
+        output_data
     };
 
-    // ★ 5. オプションに応じてエンコード処理を呼び出し
-    let webp_memory: WebPMemory = if options.lossless {
-        // ロスレスエンコード
-        encoder.encode_lossless()
-    } else {
-        // 非可逆エンコード (品質指定)
-        encoder.encode(options.quality)
-    };
+    println!("WebP: Successfully encoded WebP data (using Advanced API)");
 
-    println!("WebP: Successfully encoded WebP data");
+    // ... (ICC プロファイルの処理は同じ) ...
+    let final_webp_data = handle_icc_profile_embedding(webp_data, icc_profile, "WebP");
 
-    // Handle ICC profile using common implementation
-    let final_webp_data = handle_icc_profile_embedding(webp_memory.to_vec(), icc_profile, "WebP");
-
-    // Provide format-specific ICC recommendations
+    // ... (ICC の推奨事項も同じ) ...
     provide_icc_recommendations("WebP", analysis.has_wide_gamut, analysis.has_hdr_content);
 
     Ok(final_webp_data)

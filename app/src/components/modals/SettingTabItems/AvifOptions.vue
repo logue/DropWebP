@@ -9,38 +9,6 @@ const settingsStore = useSettingsStore();
 </script>
 
 <template>
-  <v-row>
-    <v-col>
-      <v-select
-        v-model="settingsStore.avifOptions.bitDepth"
-        :items="[
-          { text: t('bit_depth_8'), value: BitDepth.Eight },
-          { text: t('bit_depth_10'), value: BitDepth.Ten },
-          { text: t('bit_depth_auto'), value: BitDepth.Auto }
-        ]"
-        :hint="t('bit_depth_hint')"
-        :label="t('bit_depth')"
-        item-title="text"
-        item-value="value"
-        persistent-hint
-      />
-    </v-col>
-    <v-col>
-      <v-select
-        v-model="settingsStore.avifOptions.alphaColorMode"
-        :items="[
-          { text: 'UnassociatedDirty', value: AlphaColorMode.UnassociatedDirty },
-          { text: 'UnassociatedClean', value: AlphaColorMode.UnassociatedClean },
-          { text: 'Premultiplied', value: AlphaColorMode.Premultiplied }
-        ]"
-        :hint="t('alpha_color_mode_hint')"
-        :label="t('alpha_color_mode')"
-        item-title="text"
-        item-value="value"
-        persistent-hint
-      />
-    </v-col>
-  </v-row>
   <v-slider
     v-model="settingsStore.avifOptions.quality"
     :label="t('quality', { min: 1, max: 100 })"
@@ -62,6 +30,44 @@ const settingsStore = useSettingsStore();
     thumb-label="always"
     persistent-hint
   />
+  <v-select
+    v-model="settingsStore.avifOptions.bitDepth"
+    :items="[
+      { text: t('bit_depth_8'), value: BitDepth.Eight },
+      { text: t('bit_depth_10'), value: BitDepth.Ten },
+      { text: t('bit_depth_auto'), value: BitDepth.Auto }
+    ]"
+    :hint="t('bit_depth_hint')"
+    :label="t('bit_depth')"
+    item-title="text"
+    item-value="value"
+    persistent-hint
+  />
+  <v-select
+    v-model="settingsStore.avifOptions.colorModel"
+    :items="[
+      { text: 'YCbCr', value: ColorModel.YCbCr },
+      { text: 'RGB', value: ColorModel.RGB }
+    ]"
+    :hint="t('color_model_hint')"
+    :label="t('color_model')"
+    item-title="text"
+    item-value="value"
+    persistent-hint
+  />
+  <v-select
+    v-model="settingsStore.avifOptions.alphaColorMode"
+    :items="[
+      { text: 'UnassociatedDirty', value: AlphaColorMode.UnassociatedDirty },
+      { text: 'UnassociatedClean', value: AlphaColorMode.UnassociatedClean },
+      { text: 'Premultiplied', value: AlphaColorMode.Premultiplied }
+    ]"
+    :hint="t('alpha_color_mode_hint')"
+    :label="t('alpha_color_mode')"
+    item-title="text"
+    item-value="value"
+    persistent-hint
+  />
   <v-slider
     v-model="settingsStore.avifOptions.speed"
     :hint="t('speed_hint')"
@@ -74,34 +80,16 @@ const settingsStore = useSettingsStore();
     thumb-label="always"
     type="number"
   />
-  <v-row>
-    <v-col>
-      <v-select
-        v-model="settingsStore.avifOptions.colorModel"
-        :items="[
-          { text: 'YCbCr', value: ColorModel.YCbCr },
-          { text: 'RGB', value: ColorModel.RGB }
-        ]"
-        :hint="t('color_model_hint')"
-        :label="t('color_model')"
-        item-title="text"
-        item-value="value"
-        persistent-hint
-      />
-    </v-col>
-    <v-col>
-      <v-number-input
-        v-model="settingsStore.avifOptions.threads"
-        :hint="t('threads_hint')"
-        :label="t('threads')"
-        :max="10"
-        :min="1"
-        clearable
-        type="number"
-        persistent-hint
-      />
-    </v-col>
-  </v-row>
+  <v-number-input
+    v-model="settingsStore.avifOptions.threads"
+    :hint="t('threads_hint')"
+    :label="t('threads')"
+    :max="10"
+    :min="1"
+    clearable
+    type="number"
+    persistent-hint
+  />
   <v-btn
     color="warning"
     prepend-icon="mdi-rotate-left"

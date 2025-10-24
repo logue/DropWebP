@@ -47,20 +47,8 @@ const settingsStore = useSettingsStore();
     persistent-hint
   />
   <v-radio-group v-model="settingsStore.pngOptions.interlace" :label="t('interlace')">
-    <v-radio
-      :label="t('interlace_none')"
-      :hint="t('interlace_none_hint')"
-      value="none"
-      color="primary"
-      persistent-hint
-    />
-    <v-radio
-      :label="t('interlace_adam7')"
-      :hint="t('interlace_adam7_hint')"
-      value="adam7"
-      color="primary"
-      persistent-hint
-    />
+    <v-radio :label="t('interlace_item.none')" color="primary" persistent-hint value="none" />
+    <v-radio :label="t('interlace_item.adam7')" color="primary" persistent-hint value="adam7" />
   </v-radio-group>
   <v-select
     v-model="settingsStore.pngOptions.filter"

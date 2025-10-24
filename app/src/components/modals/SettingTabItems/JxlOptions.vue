@@ -49,27 +49,35 @@ const settingsStore = useSettingsStore();
     item-value="value"
     persistent-hint
   />
-  <v-row>
-    <v-col>
-      <v-switch
-        v-model="settingsStore.jxlOptions.useContainer"
-        :hint="t('use_container_hint')"
-        :label="t('use_container')"
-        color="primary"
-        persistent-hint
-      />
-    </v-col>
-    <v-col>
-      <v-switch
-        v-model="settingsStore.jxlOptions.usesOriginalProfile"
-        :disabled="settingsStore.jxlOptions.lossless"
-        :hint="t('uses_original_profile_hint')"
-        :label="t('uses_original_profile')"
-        color="primary"
-        persistent-hint
-      />
-    </v-col>
-  </v-row>
+  <v-switch
+    v-model="settingsStore.jxlOptions.useContainer"
+    :hint="t('use_container_hint')"
+    :label="t('use_container')"
+    color="primary"
+    persistent-hint
+  />
+  <v-switch
+    v-model="settingsStore.jxlOptions.usesOriginalProfile"
+    :disabled="settingsStore.jxlOptions.lossless"
+    :hint="t('uses_original_profile_hint')"
+    :label="t('uses_original_profile')"
+    color="primary"
+    persistent-hint
+  />
+  <v-select
+    v-model="settingsStore.jxlOptions.colorEncoding"
+    :items="[
+      { text: 'Srgb', value: ColorEncoding.Srgb },
+      { text: 'LinearSrgb', value: ColorEncoding.LinearSrgb },
+      { text: 'SrgbLuma', value: ColorEncoding.SrgbLuma },
+      { text: 'LinearSrgbLuma', value: ColorEncoding.LinearSrgbLuma }
+    ]"
+    :hint="t('color_encoding_hint')"
+    :label="t('color_encoding')"
+    item-title="text"
+    item-value="value"
+    persistent-hint
+  />
   <v-slider
     v-model="settingsStore.jxlOptions.decodingSpeed"
     :hint="t('decoding_speed_hint', { min: 0, max: 4 })"
@@ -82,36 +90,17 @@ const settingsStore = useSettingsStore();
     thumb-label="always"
     type="number"
   />
-  <v-row>
-    <v-col>
-      <v-number-input
-        v-model="settingsStore.jxlOptions.initBufferSize"
-        :hint="t('init_buffer_size_hint')"
-        :label="t('init_buffer_size')"
-        :min="32"
-        :step="32"
-        clearable
-        persistent-hint
-        type="number"
-      />
-    </v-col>
-    <v-col>
-      <v-select
-        v-model="settingsStore.jxlOptions.colorEncoding"
-        :items="[
-          { text: 'Srgb', value: ColorEncoding.Srgb },
-          { text: 'LinearSrgb', value: ColorEncoding.LinearSrgb },
-          { text: 'SrgbLuma', value: ColorEncoding.SrgbLuma },
-          { text: 'LinearSrgbLuma', value: ColorEncoding.LinearSrgbLuma }
-        ]"
-        :hint="t('color_encoding_hint')"
-        :label="t('color_encoding')"
-        item-title="text"
-        item-value="value"
-        persistent-hint
-      />
-    </v-col>
-  </v-row>
+  <v-number-input
+    v-model="settingsStore.jxlOptions.initBufferSize"
+    :hint="t('init_buffer_size_hint')"
+    :label="t('init_buffer_size')"
+    :min="32"
+    :step="32"
+    clearable
+    persistent-hint
+    type="number"
+  />
+
   <v-btn
     color="warning"
     prepend-icon="mdi-rotate-left"
