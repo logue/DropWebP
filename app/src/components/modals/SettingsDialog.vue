@@ -37,6 +37,7 @@ const tab = ref('common');
           <v-tabs v-model="tab" color="primary">
             <v-tab value="common">{{ t('common_options') }}</v-tab>
             <v-tab value="png">{{ t('png_options') }}</v-tab>
+            <v-tab value="jpeg">{{ t('jpeg_options') }}</v-tab>
             <v-tab value="webp">{{ t('webp_options') }}</v-tab>
             <v-tab value="avif">{{ t('avif_options') }}</v-tab>
             <v-tab value="jxl">{{ t('jxl_options') }}</v-tab>
@@ -48,6 +49,9 @@ const tab = ref('common');
             </v-window-item>
             <v-window-item value="png">
               <png-options />
+            </v-window-item>
+            <v-window-item value="jpeg">
+              <jpeg-options />
             </v-window-item>
             <v-window-item value="webp">
               <webp-options />
@@ -70,6 +74,7 @@ en:
   settings: Settings
   common_options: Common Options
   png_options: PNG(Zopfli) Options
+  jpeg_options: JPEG(MozJPEG) Options
   webp_options: WebP Options
   avif_options: AVIF Options
   jxl_options: JPEG XL Options
@@ -77,6 +82,7 @@ fr:
   settings: Paramètres
   common_options: Options communes
   png_options: Options PNG(Zopfli)
+  jpeg_options: Options JPEG(MozJPEG)
   webp_options: Options WebP
   avif_options: Options AVIF
   jxl_options: Options JPEG XL
@@ -84,6 +90,7 @@ ja:
   settings: 設定
   common_options: 共通設定
   png_options: PNG(Zopfli)設定
+  jpeg_options: JPEG(MozJPEG)設定
   webp_options: WebP設定
   avif_options: AVIF設定
   jxl_options: JPEG XL設定
@@ -91,6 +98,7 @@ ko:
   settings: 설정
   common_options: 공통 설정
   png_options: PNG(Zopfli) 설정
+  jpeg_options: JPEG(MozJPEG) 설정
   webp_options: WebP 설정
   avif_options: AVIF 설정
   jxl_options: JPEG XL 설정
@@ -98,6 +106,7 @@ zhHant:
   settings: 設定
   common_options: 共通設定
   png_options: PNG(Zopfli)設定
+  jpeg_options: JPEG(MozJPEG)設定
   webp_options: WebP設定
   avif_options: AVIF設定
   jxl_options: JPEG XL設定
@@ -105,6 +114,7 @@ zhHans:
   settings: 设置
   common_options: 通用设置
   png_options: PNG(Zopfli)设置
+  jpeg_options: JPEG(MozJPEG)设置
   webp_options: WebP设置
   avif_options: AVIF设置
   jxl_options: JPEG XL设置

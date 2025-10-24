@@ -45,7 +45,7 @@ indexmap = "2.12.0"
 jpeg2k = "0.10.1"
 jpegxl-rs = { version = "0.11.2+libjxl-0.11.1", features = [] }
 kamadak-exif = "0.6.1"
-# mozjpeg = "0.10"
+mozjpeg = "0.10.13"
 libheif-rs = "2.5.1"
 libwebp-sys2 = { version = "0.2.0", features = ["1_5"] }
 openjpeg-sys = "1.0.12"

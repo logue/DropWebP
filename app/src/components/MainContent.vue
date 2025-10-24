@@ -49,7 +49,6 @@ const { dialog, inProgress, currentFile, progress, message, isDragging, convertB
               :label="t('type.jpeg')"
               :value="OutputFormat.JPEG"
               color="orange"
-              disabled
             />
           </template>
         </v-tooltip>
