@@ -1,6 +1,6 @@
-# Linux用DropWebPのビルド
+# Linux用Drop Compress Imageのビルド
 
-このガイドでは、Ubuntu 24.04 LTS（および類似のDebianベースディストリビューション）での開発環境のセットアップとDropWebPのビルド手順を説明します。
+このガイドでは、Ubuntu 24.04 LTS（および類似のDebianベースディストリビューション）での開発環境のセットアップとDrop Compress Imageのビルド手順を説明します。
 
 ## 前提条件
 
@@ -58,7 +58,7 @@ GCCバージョン13.x以降が表示されます。
 
 ## ステップ 3: Rustのインストール
 
-DropWebPはRustで構築されているため、Rustツールチェインをインストールする必要があります。
+Drop Compress ImageはRustで構築されているため、Rustツールチェインをインストールする必要があります。
 
 ### rustup経由でRustをインストール
 
@@ -92,7 +92,7 @@ cargo --version
 
 ## ステップ 4: Node.jsのインストール
 
-DropWebPのフロントエンドはVue.jsで構築されており、Node.jsが必要です。
+Drop Compress ImageのフロントエンドはVue.jsで構築されており、Node.jsが必要です。
 
 ### NodeSourceリポジトリ経由でNode.jsをインストール
 
@@ -113,7 +113,7 @@ Node.jsバージョン22.x以降が表示されます。
 
 ## ステップ 5: pnpmのインストール
 
-DropWebPは、パフォーマンスとディスク効率を向上させるためにpnpmをパッケージマネージャーとして使用します。
+Drop Compress Imageは、パフォーマンスとディスク効率を向上させるためにpnpmをパッケージマネージャーとして使用します。
 
 ### pnpmのインストール
 
@@ -139,9 +139,9 @@ sudo apt install -y cmake
 sudo apt install -y pkg-config
 ```
 
-## ステップ 7: DropWebPのクローンとビルド
+## ステップ 7: Drop Compress Imageのクローンとビルド
 
-これでDropWebPをクローンしてビルドする準備が整いました。
+これでDrop Compress Imageをクローンしてビルドする準備が整いました。
 
 ### リポジトリのクローン
 
@@ -292,17 +292,17 @@ sudo apt install -y intel-media-va-driver
 
 ここでカバーされていない問題が発生した場合：
 
-1. [DropWebPリポジトリ](https://github.com/logue/DropWebP)で既知の問題を確認
+1. [Drop Compress Imageリポジトリ](https://github.com/logue/DropWebP)で既知の問題を確認
 2. Linux固有のガイダンスについて[Tauri v2ドキュメント](https://v2.tauri.app/start/prerequisites/)を確認
 3. 既存のGitHub Issueを検索するか、新しいIssueを作成
 
 ## 次のステップ
 
-DropWebPのビルドが成功したら：
+Drop Compress Imageのビルドが成功したら：
 
 1. **テストの実行**: `pnpm test`を実行してすべてが正しく動作することを確認
 2. **開発**: ホットリロードでの開発には`pnpm dev:tauri`を使用
 3. **カスタマイズ**: コードベースを探索して変更を加える
 4. **配布**: 配布可能なパッケージを作成するには`pnpm build:tauri`を使用
 
-これでLinuxでDropWebPを開発およびビルドする準備が整いました！
+これでLinuxでDrop Compress Imageを開発およびビルドする準備が整いました！

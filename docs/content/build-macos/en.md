@@ -1,6 +1,6 @@
-# Build DropWebP for macOS
+# Build Drop Compress Image for macOS
 
-This guide walks you through setting up the development environment and building DropWebP on macOS systems.
+This guide walks you through setting up the development environment and building Drop Compress Image on macOS systems.
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ brew --version
 
 ## Step 3: Install Rust
 
-DropWebP is built with Rust, so you'll need to install the Rust toolchain.
+Drop Compress Image is built with Rust, so you'll need to install the Rust toolchain.
 
 ### Install Rust via rustup
 
@@ -94,7 +94,7 @@ You should see version information for both `rustc` and `cargo`.
 
 ## Step 4: Install Node.js
 
-The frontend of DropWebP is built with Vue.js and requires Node.js.
+The frontend of Drop Compress Image is built with Vue.js and requires Node.js.
 
 ### Install Node.js via Homebrew
 
@@ -111,7 +111,7 @@ npm --version
 
 ## Step 5: Install pnpm
 
-DropWebP uses pnpm as its package manager for better performance and disk efficiency.
+Drop Compress Image uses pnpm as its package manager for better performance and disk efficiency.
 
 ### Install pnpm
 
@@ -137,9 +137,9 @@ brew install cmake
 brew install pkg-config
 ```
 
-## Step 7: Clone and Build DropWebP
+## Step 7: Clone and Build Drop Compress Image
 
-Now you're ready to clone and build DropWebP.
+Now you're ready to clone and build Drop Compress Image.
 
 ### Clone the Repository
 
@@ -273,17 +273,17 @@ security find-identity -v -p codesigning
 
 If you encounter issues not covered here:
 
-1. Check the [DropWebP repository](https://github.com/logue/DropWebP) for known issues
+1. Check the [Drop Compress Image repository](https://github.com/logue/DropWebP) for known issues
 2. Review the [Tauri v2 documentation](https://v2.tauri.app/start/prerequisites/) for macOS-specific guidance
 3. Search existing GitHub issues or create a new one
 
 ## Next Steps
 
-Once you have DropWebP built successfully:
+Once you have Drop Compress Image built successfully:
 
 1. **Run Tests**: Execute `pnpm test` to ensure everything works correctly
 2. **Development**: Use `pnpm dev:tauri` for development with hot reloading
 3. **Customization**: Explore the codebase and make your modifications
 4. **Distribution**: Use `pnpm build:tauri` to create distributable packages
 
-You're now ready to develop and build DropWebP on macOS!
+You're now ready to develop and build Drop Compress Image on macOS!

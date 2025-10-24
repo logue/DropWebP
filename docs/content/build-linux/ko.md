@@ -1,6 +1,6 @@
-# Linux용 DropWebP 빌드
+# Linux용 Drop Compress Image 빌드
 
-이 가이드는 Ubuntu 24.04 LTS(및 유사한 Debian 기반 배포판)에서 개발 환경을 설정하고 DropWebP를 빌드하는 과정을 안내합니다。
+이 가이드는 Ubuntu 24.04 LTS(및 유사한 Debian 기반 배포판)에서 개발 환경을 설정하고 Drop Compress Image를 빌드하는 과정을 안내합니다。
 
 ## 사전 요구사항
 
@@ -58,7 +58,7 @@ GCC 버전 13.x 이상이 표시되어야 합니다.
 
 ## 단계 3: Rust 설치
 
-DropWebP는 Rust로 빌드되므로 Rust 툴체인을 설치해야 합니다.
+Drop Compress Image는 Rust로 빌드되므로 Rust 툴체인을 설치해야 합니다.
 
 ### rustup을 통한 Rust 설치
 
@@ -92,7 +92,7 @@ cargo --version
 
 ## 단계 4: Node.js 설치
 
-DropWebP의 프론트엔드는 Vue.js로 빌드되어 Node.js가 필요합니다.
+Drop Compress Image의 프론트엔드는 Vue.js로 빌드되어 Node.js가 필요합니다.
 
 ### NodeSource 저장소를 통한 Node.js 설치
 
@@ -113,7 +113,7 @@ Node.js 버전 22.x 이상이 표시되어야 합니다.
 
 ## 단계 5: pnpm 설치
 
-DropWebP는 성능과 디스크 효율성을 위해 pnpm을 패키지 관리자로 사용합니다.
+Drop Compress Image는 성능과 디스크 효율성을 위해 pnpm을 패키지 관리자로 사용합니다.
 
 ### pnpm 설치
 
@@ -139,9 +139,9 @@ sudo apt install -y cmake
 sudo apt install -y pkg-config
 ```
 
-## 단계 7: DropWebP 복제 및 빌드
+## 단계 7: Drop Compress Image 복제 및 빌드
 
-이제 DropWebP를 복제하고 빌드할 준비가 되었습니다.
+이제 Drop Compress Image를 복제하고 빌드할 준비가 되었습니다.
 
 ### 리포지토리 복제
 
@@ -292,17 +292,17 @@ sudo apt install -y intel-media-va-driver
 
 여기서 다루지 않은 문제가 발생하면:
 
-1. 알려진 문제에 대해 [DropWebP 리포지토리](https://github.com/logue/DropWebP) 확인
+1. 알려진 문제에 대해 [Drop Compress Image 리포지토리](https://github.com/logue/DropWebP) 확인
 2. Linux 관련 가이드는 [Tauri v2 문서](https://v2.tauri.app/start/prerequisites/) 참고
 3. 기존 GitHub 이슈 검색하거나 새 이슈 생성
 
 ## 다음 단계
 
-DropWebP가 성공적으로 빌드되면:
+Drop Compress Image가 성공적으로 빌드되면:
 
 1. **테스트 실행**: `pnpm test`를 실행하여 모든 것이 올바르게 작동하는지 확인
 2. **개발**: 핫 리로딩이 포함된 개발에는 `pnpm dev:tauri` 사용
 3. **사용자 정의**: 코드베이스를 탐색하고 수정 사항 적용
 4. **배포**: 배포 가능한 패키지를 만들려면 `pnpm build:tauri` 사용
 
-이제 Linux에서 DropWebP를 개발하고 빌드할 준비가 되었습니다!
+이제 Linux에서 Drop Compress Image를 개발하고 빌드할 준비가 되었습니다!

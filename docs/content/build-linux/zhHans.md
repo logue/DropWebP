@@ -1,6 +1,6 @@
-# 为 Linux 构建 DropWebP
+# 为 Linux 构建 Drop Compress Image
 
-本指南将引导您在 Ubuntu 24.04 LTS（和类似的基于 Debian 的发行版）上设置开发环境并构建 DropWebP。
+本指南将引导您在 Ubuntu 24.04 LTS（和类似的基于 Debian 的发行版）上设置开发环境并构建 Drop Compress Image。
 
 ## 前提条件
 
@@ -58,7 +58,7 @@ gcc --version
 
 ## 步骤 3：安装 Rust
 
-DropWebP 使用 Rust 构建，因此您需要安装 Rust 工具链。
+Drop Compress Image 使用 Rust 构建，因此您需要安装 Rust 工具链。
 
 ### 通过 rustup 安装 Rust
 
@@ -92,7 +92,7 @@ cargo --version
 
 ## 步骤 4：安装 Node.js
 
-DropWebP 的前端使用 Vue.js 构建，需要 Node.js。
+Drop Compress Image 的前端使用 Vue.js 构建，需要 Node.js。
 
 ### 通过 NodeSource 存储库安装 Node.js
 
@@ -113,7 +113,7 @@ npm --version
 
 ## 步骤 5：安装 pnpm
 
-DropWebP 使用 pnpm 作为包管理器，以获得更好的性能和磁盘效率。
+Drop Compress Image 使用 pnpm 作为包管理器，以获得更好的性能和磁盘效率。
 
 ### 安装 pnpm
 
@@ -139,9 +139,9 @@ sudo apt install -y cmake
 sudo apt install -y pkg-config
 ```
 
-## 步骤 7：克隆和构建 DropWebP
+## 步骤 7：克隆和构建 Drop Compress Image
 
-现在您已准备好克隆和构建 DropWebP。
+现在您已准备好克隆和构建 Drop Compress Image。
 
 ### 克隆存储库
 
@@ -292,17 +292,17 @@ sudo apt install -y intel-media-va-driver
 
 如果您遇到此处未涵盖的问题：
 
-1. 检查 [DropWebP 存储库](https://github.com/logue/DropWebP) 的已知问题
+1. 检查 [Drop Compress Image 存储库](https://github.com/logue/DropWebP) 的已知问题
 2. 查看 [Tauri v2 文档](https://v2.tauri.app/start/prerequisites/) 以获取 Linux 特定指导
 3. 搜索现有的 GitHub 问题或创建新问题
 
 ## 下一步
 
-成功构建 DropWebP 后：
+成功构建 Drop Compress Image 后：
 
 1. **运行测试**：执行 `pnpm test` 确保一切正常工作
 2. **开发**：使用 `pnpm dev:tauri` 进行热重载开发
 3. **自定义**：探索代码库并进行修改
 4. **分发**：使用 `pnpm build:tauri` 创建可分发的包
 
-您现在已准备好在 Linux 上开发和构建 DropWebP！
+您现在已准备好在 Linux 上开发和构建 Drop Compress Image！

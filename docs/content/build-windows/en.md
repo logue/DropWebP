@@ -1,6 +1,6 @@
 # Windows Build Environment Setup
 
-This guide walks you through setting up the development environment for building DropWebP on Windows.
+This guide walks you through setting up the development environment for building Drop Compress Image on Windows.
 
 ## 1. Install Chocolatey
 

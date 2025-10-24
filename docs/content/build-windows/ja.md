@@ -1,6 +1,6 @@
 # Windows ビルド環境セットアップ
 
-このガイドでは、WindowsでDropWebPをビルドするための開発環境のセットアップ手順を説明します。
+このガイドでは、WindowsでDrop Compress Imageをビルドするための開発環境のセットアップ手順を説明します。
 
 ## 1. Chocolateyのインストール
 

@@ -1,6 +1,6 @@
-# 為 macOS 建構 DropWebP
+# 為 macOS 建構 Drop Compress Image
 
-本指南將引導您在 macOS 系統上設置開發環境並建構 DropWebP。
+本指南將引導您在 macOS 系統上設置開發環境並建構 Drop Compress Image。
 
 ## 先決條件
 
@@ -67,7 +67,7 @@ brew --version
 
 ## 步驟 3：安裝 Rust
 
-DropWebP 使用 Rust 建構，因此您需要安裝 Rust 工具鏈。
+Drop Compress Image 使用 Rust 建構，因此您需要安裝 Rust 工具鏈。
 
 ### 透過 rustup 安裝 Rust
 
@@ -94,7 +94,7 @@ cargo --version
 
 ## 步驟 4：安裝 Node.js
 
-DropWebP 的前端使用 Vue.js 建構，需要 Node.js。
+Drop Compress Image 的前端使用 Vue.js 建構，需要 Node.js。
 
 ### 透過 Homebrew 安裝 Node.js
 
@@ -111,7 +111,7 @@ npm --version
 
 ## 步驟 5：安裝 pnpm
 
-DropWebP 使用 pnpm 作為套件管理器，以獲得更好的效能和磁碟效率。
+Drop Compress Image 使用 pnpm 作為套件管理器，以獲得更好的效能和磁碟效率。
 
 ### 安裝 pnpm
 
@@ -137,9 +137,9 @@ brew install cmake
 brew install pkg-config
 ```
 
-## 步驟 7：複製和建構 DropWebP
+## 步驟 7：複製和建構 Drop Compress Image
 
-現在您已準備好複製和建構 DropWebP。
+現在您已準備好複製和建構 Drop Compress Image。
 
 ### 複製存儲庫
 
@@ -273,17 +273,17 @@ security find-identity -v -p codesigning
 
 如果您遇到此處未涵蓋的問題：
 
-1. 檢查 [DropWebP 存儲庫](https://github.com/logue/DropWebP) 的已知問題
+1. 檢查 [Drop Compress Image 存儲庫](https://github.com/logue/DropWebP) 的已知問題
 2. 查看 [Tauri v2 文件](https://v2.tauri.app/start/prerequisites/) 以獲取 macOS 特定指導
 3. 搜尋現有的 GitHub 問題或建立新問題
 
 ## 下一步
 
-成功建構 DropWebP 後：
+成功建構 Drop Compress Image 後：
 
 1. **執行測試**：執行 `pnpm test` 確保一切正常工作
 2. **開發**：使用 `pnpm tauri dev` 進行熱重載開發
 3. **自訂**：探索程式碼基礎並進行修改
 4. **分發**：使用 `pnpm tauri build` 建立可分發的套件
 
-您現在已準備好在 macOS 上開發和建構 DropWebP！
+您現在已準備好在 macOS 上開發和建構 Drop Compress Image！

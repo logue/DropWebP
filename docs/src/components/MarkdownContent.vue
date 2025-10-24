@@ -2,16 +2,20 @@
   <div class="content-with-toc">
     <!-- eslint-disable-next-line vue/no-v-html -->
     <div v-if="compiledHtml" class="markdown-body" v-html="compiledHtml" />
-    <div v-else-if="pending" class="loading">Loading...</div>
-    <div v-else-if="error" class="error">Error loading content: {{ error.message }}</div>
+    <v-alert v-else-if="pending" :title="t('loading')" color="info" />
+    <v-alert v-else-if="error" :title="t('error')" color="error">{{ error.message }}</v-alert>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { marked } from 'marked';
 import Prism from 'prismjs';
 
 import { Locale } from '@/types/LocaleType';
+
+const { t } = useI18n();
 
 interface Props {
   contentPath: string; // 'build-windows' または 'build-macos'
@@ -148,20 +152,6 @@ useHead({
   }
 }
 
-.loading,
-.error {
-  padding: 20px;
-  text-align: center;
-  font-size: 16px;
-}
-
-.error {
-  color: #f44336;
-  background-color: #ffebee;
-  border-radius: 4px;
-  border: 1px solid #e57373;
-}
-
 /* GitHub Markdown CSS ダークモード切り替え */
 .markdown-body {
   box-sizing: border-box;
@@ -226,3 +216,24 @@ useHead({
   }
 }
 </style>
+
+<i18n lang="yaml">
+en:
+  loading: Loading...
+  error: 'Error loading content:'
+fr:
+  loading: Chargement...
+  error: 'Erreur lors du chargement du contenu :'
+ja:
+  loading: 読み込んでいます…
+  error: 内容を取得時にエラーが発生しました：
+ko:
+  loading: 로딩 중...
+  error: '콘텐츠를 불러오는 중 오류 발생:'
+zhHant:
+  loading: 加載中...
+  error: '載入內容時出錯：'
+zhHans:
+  loading: 加载中...
+  error: '加载内容时出错：'
+</i18n>
