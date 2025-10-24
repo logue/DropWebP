@@ -52,6 +52,31 @@ Optimize your images by converting them to these modern, highly efficient format
 | --------------------------------------- | -------------------------------------------- | ---------------------------------------------- |
 | ![WebP](./docs/src/assets/WebPLogo.svg) | ![AVIF](./docs/src/assets/Avif-logo-rgb.svg) | ![JPEG XL](./docs/src/assets/JPEG_XL_logo.svg) |
 
+## 📦 Installation
+
+### Package Managers
+
+#### Windows (Chocolatey)
+
+```powershell
+choco install drop-compress-image
+```
+
+#### macOS (Homebrew)
+
+```bash
+brew tap logue/tap
+brew install drop-compress-image
+```
+
+### Manual Installation
+
+Download the latest release from the [Releases page](https://github.com/logue/DropWebP/releases):
+
+- **Windows**: `.msi` installer
+- **macOS**: `.dmg` disk image (Intel & Apple Silicon)
+- **Linux**: `.deb` or `.AppImage`
+
 ## 🌐 Localization
 
 The user interface is available in the following languages:

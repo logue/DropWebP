@@ -33,6 +33,8 @@
     "build:analyze": "pnpm --filter app build:analyze",
     "build:clean": "pnpm --recursive exec rimraf dist",
     "build:tauri": "pnpm --filter app build:tauri",
+    "package:chocolatey": "pwsh ./scripts/build-chocolatey.ps1",
+    "package:homebrew": "bash ./scripts/build-homebrew.sh",
     "generate": "pnpm --filter docs generate",
     "deploy": "pnpm --filter docs deploy",
     "lint": "pnpm --filter app lint && pnpm --filter docs lint",
