@@ -1,6 +1,6 @@
 pub mod avif;
 pub mod common;
-// pub mod jpeg;
+pub mod jpeg;
 pub mod jxl;
 pub mod png;
 pub mod webp;
@@ -43,11 +43,9 @@ pub fn encode(
             println!("Adapter: Converting PngOptions for zopfli encoder...");
             png::encode(&img, icc_profile, opts)
         }
-        EncodeOptions::Jpeg(_opts) => {
-            println!("Adapter: JPEG encoder is currently disabled");
-            Err(AppError::Encode(
-                "JPEG encoder is temporarily disabled".to_string(),
-            ))
+        EncodeOptions::Jpeg(opts) => {
+            println!("Adapter: Converting JpegOptions for mozjpeg encoder...");
+            jpeg::encode(&img, icc_profile, opts)
         }
     };
 

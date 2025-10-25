@@ -1,16 +1,7 @@
 use crate::encoder::{
-    avif::AvifOptions, /* jpeg::JpegOptions, */ jxl::JxlOptions, png::PngOptions,
-    webp::WebpOptions,
+    avif::AvifOptions, jpeg::JpegOptions, jxl::JxlOptions, png::PngOptions, webp::WebpOptions,
 };
 use serde::{Deserialize, Serialize};
-
-// 一時的なJpegOptions定義（jpegモジュールが無効化されているため）
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct JpegOptions {
-    pub quality: u8,
-    pub progressive: bool,
-    pub optimize: bool,
-}
 
 /// 高ビット深度画像を表す列挙型
 /// RGB、RGBA、ARGBの3種類をサポート

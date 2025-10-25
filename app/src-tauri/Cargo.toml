@@ -12,6 +12,7 @@ keywords = [
   "tauri",
   "webp",
   "avif",
+  "jpeg",
   "jpeg-xl",
   "image",
   "compress",
@@ -30,7 +31,7 @@ name = "drop_compress_image_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-cc = "1.2.41"
+cc = "1.2.43"
 pkg-config = "0.3.32"
 tauri-build = { version = "2.5.1", features = [] }
 vcpkg = "0.2.15"
