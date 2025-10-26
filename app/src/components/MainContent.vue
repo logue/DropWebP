@@ -27,63 +27,73 @@ const { dialog, inProgress, currentFile, progress, message, isDragging, convertB
         {{ t('hero_text') }}
       </h2>
     </v-sheet>
-    <v-sheet class="d-flex bg-transparent">
-      <v-btn prepend-icon="mdi-file-multiple" class="mr-2" @click="convertByDialog">
-        {{ t('select_files') }}
-      </v-btn>
-      <v-radio-group
-        v-model="settingsStore.commonOptions.format"
-        :label="t('convert_to')"
-        class="d-flex justify-end"
-        inline
-      >
-        <v-tooltip :text="t('type.png_description')" location="top">
-          <template #activator="{ props }">
-            <v-radio v-bind="props" :label="t('type.png')" :value="OutputFormat.PNG" color="pink" />
-          </template>
-        </v-tooltip>
-        <v-tooltip :text="t('type.jpeg_description')" location="top">
-          <template #activator="{ props }">
-            <v-radio
-              v-bind="props"
-              :label="t('type.jpeg')"
-              :value="OutputFormat.JPEG"
-              color="orange"
-            />
-          </template>
-        </v-tooltip>
-        <v-tooltip :text="t('type.webp_description')" location="top">
-          <template #activator="{ props }">
-            <v-radio
-              v-bind="props"
-              :label="t('type.webp')"
-              :value="OutputFormat.WebP"
-              color="green"
-            />
-          </template>
-        </v-tooltip>
-        <v-tooltip :text="t('type.avif_description')" location="top">
-          <template #activator="{ props }">
-            <v-radio
-              v-bind="props"
-              :label="t('type.avif')"
-              :value="OutputFormat.AVIF"
-              color="red"
-            />
-          </template>
-        </v-tooltip>
-        <v-tooltip :text="t('type.jxl_description')" location="top">
-          <template #activator="{ props }">
-            <v-radio v-bind="props" :label="t('type.jxl')" :value="OutputFormat.JXL" color="blue">
-              <template #label>
-                {{ t('type.jxl') }}&nbsp;
-                <small class="text-grey">({{ t('experimental') }})</small>
-              </template>
-            </v-radio>
-          </template>
-        </v-tooltip>
-      </v-radio-group>
-    </v-sheet>
+    <v-card class="d-flex bg-transparent" flat>
+      <v-card-actions>
+        <v-btn
+          :text="t('select_files')"
+          prepend-icon="mdi-file-multiple"
+          variant="elevated"
+          @click="convertByDialog"
+        />
+        <v-radio-group
+          v-model="settingsStore.commonOptions.format"
+          :label="t('convert_to')"
+          class="d-flex justify-end"
+          inline
+        >
+          <v-tooltip :text="t('type.png_description')" location="top">
+            <template #activator="{ props }">
+              <v-radio
+                v-bind="props"
+                :label="t('type.png')"
+                :value="OutputFormat.PNG"
+                color="purple"
+              />
+            </template>
+          </v-tooltip>
+          <v-tooltip :text="t('type.jpeg_description')" location="top">
+            <template #activator="{ props }">
+              <v-radio
+                v-bind="props"
+                :label="t('type.jpeg')"
+                :value="OutputFormat.JPEG"
+                color="orange"
+              />
+            </template>
+          </v-tooltip>
+          <v-tooltip :text="t('type.webp_description')" location="top">
+            <template #activator="{ props }">
+              <v-radio
+                v-bind="props"
+                :label="t('type.webp')"
+                :value="OutputFormat.WebP"
+                color="green"
+              />
+            </template>
+          </v-tooltip>
+          <v-tooltip :text="t('type.avif_description')" location="top">
+            <template #activator="{ props }">
+              <v-radio
+                v-bind="props"
+                :label="t('type.avif')"
+                :value="OutputFormat.AVIF"
+                color="red"
+              />
+            </template>
+          </v-tooltip>
+          <v-tooltip :text="t('type.jxl_description')" location="top">
+            <template #activator="{ props }">
+              <v-radio v-bind="props" :label="t('type.jxl')" :value="OutputFormat.JXL" color="blue">
+                <template #label>
+                  {{ t('type.jxl') }}&nbsp;
+                  <small class="text-grey">({{ t('experimental') }})</small>
+                </template>
+              </v-radio>
+            </template>
+          </v-tooltip>
+        </v-radio-group>
+      </v-card-actions>
+    </v-card>
   </v-container>
   <progress-dialog
     v-model:current-file="currentFile"

@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 
 import AvifOptions from './SettingTabItems/AvifOptions.vue';
 import CommonOptions from './SettingTabItems/CommonOptions.vue';
+import JpegOptions from './SettingTabItems/JpegOptions.vue';
 import JxlOptions from './SettingTabItems/JxlOptions.vue';
 import PngOptions from './SettingTabItems/PngOptions.vue';
 import WebpOptions from './SettingTabItems/WebpOptions.vue';
@@ -27,14 +28,14 @@ const tab = ref('common');
       </v-tooltip>
     </template>
     <template #default="{ isActive }">
-      <v-card>
+      <v-card flat>
         <v-toolbar>
           <v-toolbar-title>{{ t('settings') }}</v-toolbar-title>
           <v-spacer />
           <v-btn icon="mdi-close" @click="isActive.value = false" />
         </v-toolbar>
-        <v-card-text>
-          <v-tabs v-model="tab" color="primary">
+        <v-card-text class="d-flex flex-row pa-0" style="height: calc(100vh - 64px)">
+          <v-tabs v-model="tab" color="primary" direction="vertical" class="flex-shrink-0">
             <v-tab value="common">{{ t('common_options') }}</v-tab>
             <v-tab value="png">{{ t('png_options') }}</v-tab>
             <v-tab value="jpeg">{{ t('jpeg_options') }}</v-tab>
@@ -42,27 +43,30 @@ const tab = ref('common');
             <v-tab value="avif">{{ t('avif_options') }}</v-tab>
             <v-tab value="jxl">{{ t('jxl_options') }}</v-tab>
           </v-tabs>
-          <v-divider />
-          <v-window v-model="tab" class="mt-4">
-            <v-window-item value="common">
+          <v-tabs-window
+            v-model="tab"
+            class="flex-grow-1"
+            style="max-height: 100%; overflow-y: auto"
+          >
+            <v-tabs-window-item value="common">
               <common-options />
-            </v-window-item>
-            <v-window-item value="png">
+            </v-tabs-window-item>
+            <v-tabs-window-item value="png">
               <png-options />
-            </v-window-item>
-            <v-window-item value="jpeg">
+            </v-tabs-window-item>
+            <v-tabs-window-item value="jpeg">
               <jpeg-options />
-            </v-window-item>
-            <v-window-item value="webp">
+            </v-tabs-window-item>
+            <v-tabs-window-item value="webp">
               <webp-options />
-            </v-window-item>
-            <v-window-item value="avif">
+            </v-tabs-window-item>
+            <v-tabs-window-item value="avif">
               <avif-options />
-            </v-window-item>
-            <v-window-item value="jxl">
+            </v-tabs-window-item>
+            <v-tabs-window-item value="jxl">
               <jxl-options />
-            </v-window-item>
-          </v-window>
+            </v-tabs-window-item>
+          </v-tabs-window>
         </v-card-text>
       </v-card>
     </template>

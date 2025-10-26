@@ -63,7 +63,7 @@ const defaultCommonOptions: CommonOptions = {
   recursive: false,
   sameDirectory: true,
   ignoreJpeg: false,
-  outputPath: ''
+  outputPath: await documentDir()
 } as const;
 
 /** Global Store */

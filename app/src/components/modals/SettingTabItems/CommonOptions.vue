@@ -7,94 +7,100 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <v-row>
-    <v-col>
+  <v-card flat>
+    <v-card-text>
+      <div class="d-flex">
+        <v-switch
+          v-model="settingsStore.commonOptions.sound"
+          :label="t('play_sound')"
+          color="primary"
+        />
+        <v-slider
+          v-model="settingsStore.commonOptions.volume"
+          :disabled="!settingsStore.commonOptions.sound"
+          :label="t('volume')"
+          :max="1.0"
+          :min="0"
+          :step="0.1"
+          append-icon="mdi-volume-high"
+          color="primary"
+          thumb-label="always"
+          prepend-icon="mdi-volume-low"
+        />
+      </div>
       <v-switch
-        v-model="settingsStore.commonOptions.sound"
-        :label="t('play_sound')"
+        v-model="settingsStore.commonOptions.notify"
+        :hint="t('notify_hint')"
+        :label="t('notify')"
         color="primary"
+        persistent-hint
       />
-    </v-col>
-    <v-col>
-      <v-slider
-        v-model="settingsStore.commonOptions.volume"
-        :disabled="!settingsStore.commonOptions.sound"
-        :label="t('volume')"
-        :max="1.0"
-        :min="0"
-        :step="0.1"
-        append-icon="mdi-volume-high"
+      <v-switch
+        v-model="settingsStore.commonOptions.ignoreJpeg"
+        :hint="t('ignore_jpeg_hint')"
+        :label="t('ignore_jpeg')"
         color="primary"
-        prepend-icon="mdi-volume-low"
+        persistent-hint
       />
-    </v-col>
-  </v-row>
-  <v-switch
-    v-model="settingsStore.commonOptions.notify"
-    :hint="t('notify_hint')"
-    :label="t('notify')"
-    color="primary"
-    persistent-hint
-  />
-  <v-switch
-    v-model="settingsStore.commonOptions.ignoreJpeg"
-    :hint="t('ignore_jpeg_hint')"
-    :label="t('ignore_jpeg')"
-    color="primary"
-    persistent-hint
-  />
-  <v-switch
-    v-model="settingsStore.commonOptions.overwrite"
-    :label="t('overwrite')"
-    color="primary"
-    hide-details
-  />
-  <v-switch
-    v-model="settingsStore.commonOptions.deleteOriginal"
-    :hint="t('delete_original_hint')"
-    :label="t('delete_original')"
-    color="red"
-    persistent-hint
-  />
-  <v-switch
-    v-model="settingsStore.commonOptions.recursive"
-    :label="t('recursive')"
-    color="primary"
-    hide-details
-  />
-  <v-switch
-    v-model="settingsStore.commonOptions.sameDirectory"
-    :label="t('same_directory')"
-    color="primary"
-    hide-details
-  />
-  <v-text-field
-    v-model="settingsStore.commonOptions.outputPath"
-    :disabled="settingsStore.commonOptions.sameDirectory"
-    :label="t('output_path')"
-    readonly
-  >
-    <template #append>
-      <v-btn icon="mdi-folder-open" variant="plain" @click="settingsStore.browseOutputPath()" />
-    </template>
-  </v-text-field>
-  <v-btn
-    color="warning"
-    prepend-icon="mdi-rotate-left"
-    variant="text"
-    @click="settingsStore.resetCommonOptions()"
-  >
-    {{ t('reset_common') }}
-  </v-btn>
-  <v-btn color="red" prepend-icon="mdi-rotate-left" variant="text" @click="settingsStore.reset()">
-    {{ t('reset_all') }}
-  </v-btn>
+      <v-switch
+        v-model="settingsStore.commonOptions.overwrite"
+        :label="t('overwrite')"
+        color="primary"
+        hide-details
+      />
+      <v-switch
+        v-model="settingsStore.commonOptions.deleteOriginal"
+        :hint="t('delete_original_hint')"
+        :label="t('delete_original')"
+        color="red"
+        persistent-hint
+      />
+      <v-switch
+        v-model="settingsStore.commonOptions.recursive"
+        :label="t('recursive')"
+        color="primary"
+        hide-details
+      />
+      <v-switch
+        v-model="settingsStore.commonOptions.sameDirectory"
+        :label="t('same_directory')"
+        color="primary"
+        hide-details
+      />
+      <v-text-field
+        v-model="settingsStore.commonOptions.outputPath"
+        :disabled="settingsStore.commonOptions.sameDirectory"
+        :label="t('output_path')"
+        readonly
+      >
+        <template #append>
+          <v-btn icon="mdi-folder-open" variant="plain" @click="settingsStore.browseOutputPath()" />
+        </template>
+      </v-text-field>
+    </v-card-text>
+    <v-card-actions>
+      <v-btn
+        :text="t('reset_common')"
+        color="warning"
+        prepend-icon="mdi-rotate-left"
+        variant="tonal"
+        @click="settingsStore.resetCommonOptions()"
+      />
+      <v-btn
+        :text="t('reset_all')"
+        color="red"
+        prepend-icon="mdi-rotate-left"
+        variant="tonal"
+        @click="settingsStore.reset()"
+      />
+    </v-card-actions>
+  </v-card>
 </template>
 
 <i18n lang="yaml">
 en:
   play_sound: Play sound when done
-  volume: Sound Volume
+  volume: Volume
   notify: Notify in Desktop
   notify_hint: You may not receive notifications if you have disabled them in your system settings.
   ignore_jpeg: Ignore JPEG
@@ -110,7 +116,7 @@ en:
   reset_common: Reset common options
 fr:
   play_sound: Lire un son à la fin
-  volume: Volume du son
+  volume: Volume
   notify: Notification sur le bureau
   notify_hint: Vous risquez de ne pas recevoir de notifications si vous les avez désactivées dans les paramètres de votre système.
   ignore_jpeg: Ignorer le JPEG
@@ -126,8 +132,8 @@ fr:
   reset_common: Réinitialiser les options communes
 ja:
   play_sound: 完了時にサウンドを再生
-  volume: サウンドの音量
-  notify: デスクトップで通知
+  volume: 音量
+  notify: デスクトップ通知
   notify_hint: システム設定で通知を無効にしている場合、通知が届かないことがあります。
   ignore_jpeg: JPEGを無視
   ignore_jpeg_hint: JPEG画像はもともと圧縮されているため、JPEG XL以外の場合、変換すると容量がかえって増えてしまうことがあります。このオプションでJPEG画像を無視できます。
@@ -142,7 +148,7 @@ ja:
   reset_common: 共通オプションをリセット
 ko:
   play_sound: 완료 시 소리 재생
-  volume: 소리 크기
+  volume: 볼륨
   notify: 데스크탑 알림
   notify_hint: 시스템 설정에서 알림을 비활성화한 경우 알림을 받지 못할 수 있습니다.
   ignore_jpeg: JPEG 무시
@@ -158,7 +164,7 @@ ko:
   reset_common: 공통 옵션 재설정
 zh-tw:
   play_sound: 完成時播放聲音
-  volume: 聲音音量
+  volume: 音量
   notify: 桌面通知
   notify_hint: 如果您在系統設置中禁用了通知，則可能無法收到通知。
   ignore_jpeg: 忽略 JPEG
@@ -174,7 +180,7 @@ zh-tw:
   reset_common: 重置常用選項
 zh-cn:
   play_sound: 完成时播放声音
-  volume: 声音音量
+  volume: 音量
   notify: 桌面通知
   notify_hint: 如果您在系统设置中禁用了通知，则可能无法收到通知。
   ignore_jpeg: 忽略 JPEG

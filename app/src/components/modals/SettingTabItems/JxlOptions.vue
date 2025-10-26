@@ -9,106 +9,120 @@ const settingsStore = useSettingsStore();
 </script>
 
 <template>
-  <v-switch
-    v-model="settingsStore.jxlOptions.lossless"
-    :hint="t('lossless_hint')"
-    :label="t('lossless')"
-    color="primary"
-    persistent-hint
-  />
-  <v-slider
-    v-model="settingsStore.jxlOptions.quality"
-    :disabled="settingsStore.jxlOptions.lossless"
-    :hint="t('quality_hint', { min: 0.1, max: 15.0 })"
-    :label="t('quality')"
-    color="primary"
-    max="15.0"
-    min="0.1"
-    persistent-hint
-    step="0.1"
-    thumb-label="always"
-    type="number"
-  />
-  <v-select
-    v-model="settingsStore.jxlOptions.speed"
-    :items="[
-      { text: '1, Lightning', value: EncoderSpeed.Lightning },
-      { text: '2, Thunder', value: EncoderSpeed.Thunder },
-      { text: '3, Falcon', value: EncoderSpeed.Falcon },
-      { text: '4, Cheetah', value: EncoderSpeed.Cheetah },
-      { text: '5, Hare', value: EncoderSpeed.Hare },
-      { text: '6, Wombat', value: EncoderSpeed.Wombat },
-      { text: '7, Squirrel', value: EncoderSpeed.Squirrel },
-      { text: '8, Tortoise', value: EncoderSpeed.Tortoise },
-      { text: '9, Kitten', value: EncoderSpeed.Kitten },
-      { text: '10, Glacier', value: EncoderSpeed.Glacier }
-    ]"
-    :hint="t('speed_hint')"
-    :label="t('speed')"
-    item-title="text"
-    item-value="value"
-    persistent-hint
-  />
-  <v-switch
-    v-model="settingsStore.jxlOptions.useContainer"
-    :hint="t('use_container_hint')"
-    :label="t('use_container')"
-    color="primary"
-    persistent-hint
-  />
-  <v-switch
-    v-model="settingsStore.jxlOptions.usesOriginalProfile"
-    :disabled="settingsStore.jxlOptions.lossless"
-    :hint="t('uses_original_profile_hint')"
-    :label="t('uses_original_profile')"
-    color="primary"
-    persistent-hint
-  />
-  <v-select
-    v-model="settingsStore.jxlOptions.colorEncoding"
-    :items="[
-      { text: 'Srgb', value: ColorEncoding.Srgb },
-      { text: 'LinearSrgb', value: ColorEncoding.LinearSrgb },
-      { text: 'SrgbLuma', value: ColorEncoding.SrgbLuma },
-      { text: 'LinearSrgbLuma', value: ColorEncoding.LinearSrgbLuma }
-    ]"
-    :hint="t('color_encoding_hint')"
-    :label="t('color_encoding')"
-    item-title="text"
-    item-value="value"
-    persistent-hint
-  />
-  <v-slider
-    v-model="settingsStore.jxlOptions.decodingSpeed"
-    :hint="t('decoding_speed_hint', { min: 0, max: 4 })"
-    :label="t('decoding_speed')"
-    color="primary"
-    max="4"
-    min="0"
-    persistent-hint
-    step="1"
-    thumb-label="always"
-    type="number"
-  />
-  <v-number-input
-    v-model="settingsStore.jxlOptions.initBufferSize"
-    :hint="t('init_buffer_size_hint')"
-    :label="t('init_buffer_size')"
-    :min="32"
-    :step="32"
-    clearable
-    persistent-hint
-    type="number"
-  />
-
-  <v-btn
-    color="warning"
-    prepend-icon="mdi-rotate-left"
-    variant="text"
-    @click="settingsStore.resetJxlOptions()"
-  >
-    {{ t('reset_jxl_options') }}
-  </v-btn>
+  <v-card flat>
+    <v-card-text>
+      <v-switch
+        v-model="settingsStore.jxlOptions.lossless"
+        :hint="t('lossless_hint')"
+        :label="t('lossless')"
+        color="primary"
+        persistent-hint
+      />
+      <v-slider
+        v-model="settingsStore.jxlOptions.quality"
+        :disabled="settingsStore.jxlOptions.lossless"
+        :hint="t('quality_hint')"
+        :label="t('quality', { min: 0.1, max: 15.0 })"
+        color="primary"
+        max="15.0"
+        min="0.1"
+        persistent-hint
+        step="0.1"
+        type="number"
+      >
+        <template #append>
+          <v-text-field v-model="settingsStore.jxlOptions.quality" readonly variant="underlined" />
+        </template>
+      </v-slider>
+      <v-select
+        v-model="settingsStore.jxlOptions.speed"
+        :items="[
+          { text: '1, Lightning', value: EncoderSpeed.Lightning },
+          { text: '2, Thunder', value: EncoderSpeed.Thunder },
+          { text: '3, Falcon', value: EncoderSpeed.Falcon },
+          { text: '4, Cheetah', value: EncoderSpeed.Cheetah },
+          { text: '5, Hare', value: EncoderSpeed.Hare },
+          { text: '6, Wombat', value: EncoderSpeed.Wombat },
+          { text: '7, Squirrel', value: EncoderSpeed.Squirrel },
+          { text: '8, Tortoise', value: EncoderSpeed.Tortoise },
+          { text: '9, Kitten', value: EncoderSpeed.Kitten },
+          { text: '10, Glacier', value: EncoderSpeed.Glacier }
+        ]"
+        :hint="t('speed_hint')"
+        :label="t('speed')"
+        item-title="text"
+        item-value="value"
+        persistent-hint
+      />
+      <v-switch
+        v-model="settingsStore.jxlOptions.useContainer"
+        :hint="t('use_container_hint')"
+        :label="t('use_container')"
+        color="primary"
+        persistent-hint
+      />
+      <v-switch
+        v-model="settingsStore.jxlOptions.usesOriginalProfile"
+        :disabled="settingsStore.jxlOptions.lossless"
+        :hint="t('uses_original_profile_hint')"
+        :label="t('uses_original_profile')"
+        color="primary"
+        persistent-hint
+      />
+      <v-select
+        v-model="settingsStore.jxlOptions.colorEncoding"
+        :items="[
+          { text: 'Srgb', value: ColorEncoding.Srgb },
+          { text: 'LinearSrgb', value: ColorEncoding.LinearSrgb },
+          { text: 'SrgbLuma', value: ColorEncoding.SrgbLuma },
+          { text: 'LinearSrgbLuma', value: ColorEncoding.LinearSrgbLuma }
+        ]"
+        :hint="t('color_encoding_hint')"
+        :label="t('color_encoding')"
+        item-title="text"
+        item-value="value"
+        persistent-hint
+      />
+      <v-slider
+        v-model="settingsStore.jxlOptions.decodingSpeed"
+        :hint="t('decoding_speed_hint')"
+        :label="t('decoding_speed', { min: 0, max: 4 })"
+        color="primary"
+        max="4"
+        min="0"
+        persistent-hint
+        step="1"
+        type="number"
+      >
+        <template #append>
+          <v-text-field
+            v-model="settingsStore.jxlOptions.decodingSpeed"
+            readonly
+            variant="underlined"
+          />
+        </template>
+      </v-slider>
+      <v-number-input
+        v-model="settingsStore.jxlOptions.initBufferSize"
+        :hint="t('init_buffer_size_hint')"
+        :label="t('init_buffer_size')"
+        :min="32"
+        :step="32"
+        clearable
+        persistent-hint
+        type="number"
+      />
+    </v-card-text>
+    <v-card-actions>
+      <v-btn
+        :text="t('reset_jxl_options')"
+        color="warning"
+        prepend-icon="mdi-rotate-left"
+        variant="tonal"
+        @click="settingsStore.resetJxlOptions()"
+      />
+    </v-card-actions>
+  </v-card>
 </template>
 
 <i18n lang="yaml">

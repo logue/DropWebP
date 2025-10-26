@@ -9,68 +9,108 @@ const settingsStore = useSettingsStore();
 </script>
 
 <template>
-  <v-slider
-    v-model="settingsStore.pngOptions.zopfliIterations"
-    :label="t('zopfli_iterations')"
-    :hint="t('zopfli_iterations_hint', { min: 15, max: 100 })"
-    :min="15"
-    :max="100"
-    color="primary"
-    persistent-hint
-  />
-  <v-switch
-    v-model="settingsStore.pngOptions.embedIccProfile"
-    :hint="t('embed_icc_profile_hint')"
-    :label="t('embed_icc_profile')"
-    color="primary"
-    persistent-hint
-  />
-  <v-switch
-    v-model="settingsStore.pngOptions.bitDepthReduction"
-    :label="t('bit_depth_reduction')"
-    :hint="t('bit_depth_reduction_hint')"
-    color="primary"
-    persistent-hint
-  />
-  <v-switch
-    v-model="settingsStore.pngOptions.colorTypeReduction"
-    :label="t('color_type_reduction')"
-    :hint="t('color_type_reduction_hint')"
-    color="primary"
-    persistent-hint
-  />
-  <v-switch
-    v-model="settingsStore.pngOptions.paletteReduction"
-    :label="t('palette_reduction')"
-    :hint="t('palette_reduction_hint')"
-    color="primary"
-    persistent-hint
-  />
-  <v-radio-group v-model="settingsStore.pngOptions.interlace" :label="t('interlace')">
-    <v-radio :label="t('interlace_item.none')" color="primary" persistent-hint value="none" />
-    <v-radio :label="t('interlace_item.adam7')" color="primary" persistent-hint value="adam7" />
-  </v-radio-group>
-  <v-select
-    v-model="settingsStore.pngOptions.filter"
-    :label="t('filter')"
-    :hint="t('filter_hint')"
-    :items="[
-      { text: t('filter_item.none'), value: PngFilter.None },
-      { text: t('filter_item.sub'), value: PngFilter.Sub },
-      { text: t('filter_item.up'), value: PngFilter.Up },
-      { text: t('filter_item.average'), value: PngFilter.Average },
-      { text: t('filter_item.paeth'), value: PngFilter.Paeth },
-      { text: t('filter_item.minSum'), value: PngFilter.MinSum },
-      { text: t('filter_item.entropy'), value: PngFilter.Entropy },
-      { text: t('filter_item.bigrams'), value: PngFilter.Bigrams },
-      { text: t('filter_item.bigEnt'), value: PngFilter.BigEnt },
-      { text: t('filter_item.brute'), value: PngFilter.Brute }
-    ]"
-    color="primary"
-    item-title="text"
-    item-value="value"
-    persistent-hint
-  />
+  <v-card flat>
+    <v-card-text>
+      <v-slider
+        v-model="settingsStore.pngOptions.zopfliIterations"
+        :label="t('zopfli_iterations')"
+        :hint="t('zopfli_iterations_hint', { min: 15, max: 100 })"
+        :min="15"
+        :max="100"
+        :step="1"
+        color="primary"
+        persistent-hint
+      >
+        <template #append>
+          <v-text-field
+            v-model="settingsStore.pngOptions.zopfliIterations"
+            readonly
+            variant="underlined"
+          />
+        </template>
+      </v-slider>
+      <v-switch
+        v-model="settingsStore.pngOptions.embedIccProfile"
+        :hint="t('embed_icc_profile_hint')"
+        :label="t('embed_icc_profile')"
+        color="primary"
+        persistent-hint
+      />
+      <v-switch
+        v-model="settingsStore.pngOptions.bitDepthReduction"
+        :label="t('bit_depth_reduction')"
+        :hint="t('bit_depth_reduction_hint')"
+        color="primary"
+        persistent-hint
+      />
+      <v-switch
+        v-model="settingsStore.pngOptions.colorTypeReduction"
+        :label="t('color_type_reduction')"
+        :hint="t('color_type_reduction_hint')"
+        color="primary"
+        persistent-hint
+      />
+      <v-switch
+        v-model="settingsStore.pngOptions.paletteReduction"
+        :label="t('palette_reduction')"
+        :hint="t('palette_reduction_hint')"
+        color="primary"
+        persistent-hint
+      />
+      <v-radio-group v-model="settingsStore.pngOptions.interlace" inline :label="t('interlace')">
+        <v-tooltip :text="t('interlace_item.none_hint')" location="top">
+          <template #activator="{ props }">
+            <v-radio
+              v-bind="props"
+              :label="t('interlace_item.none')"
+              color="primary"
+              value="none"
+            />
+          </template>
+        </v-tooltip>
+        <v-tooltip :text="t('interlace_item.adam7_hint')" location="top">
+          <template #activator="{ props }">
+            <v-radio
+              v-bind="props"
+              :label="t('interlace_item.adam7')"
+              color="primary"
+              value="adam7"
+            />
+          </template>
+        </v-tooltip>
+      </v-radio-group>
+      <v-select
+        v-model="settingsStore.pngOptions.filter"
+        :label="t('filter')"
+        :hint="t('filter_hint')"
+        :items="[
+          { text: t('filter_item.none'), value: PngFilter.None },
+          { text: t('filter_item.sub'), value: PngFilter.Sub },
+          { text: t('filter_item.up'), value: PngFilter.Up },
+          { text: t('filter_item.average'), value: PngFilter.Average },
+          { text: t('filter_item.paeth'), value: PngFilter.Paeth },
+          { text: t('filter_item.minSum'), value: PngFilter.MinSum },
+          { text: t('filter_item.entropy'), value: PngFilter.Entropy },
+          { text: t('filter_item.bigrams'), value: PngFilter.Bigrams },
+          { text: t('filter_item.bigEnt'), value: PngFilter.BigEnt },
+          { text: t('filter_item.brute'), value: PngFilter.Brute }
+        ]"
+        color="primary"
+        item-title="text"
+        item-value="value"
+        persistent-hint
+      />
+    </v-card-text>
+    <v-card-actions>
+      <v-btn
+        :text="t('reset_png_options')"
+        color="warning"
+        prepend-icon="mdi-rotate-left"
+        variant="tonal"
+        @click="settingsStore.resetPngOptions()"
+      />
+    </v-card-actions>
+  </v-card>
 </template>
 
 <i18n lang="yaml">
@@ -104,6 +144,7 @@ en:
     bigrams: Bigrams (2-gram frequency analysis)
     bigEnt: BigEnt (combination of bigrams and entropy)
     brute: Brute (tries all combinations, slowest but best compression)
+  reset_png_options: Reset PNG Options
 fr:
   zopfli_iterations: Itérations Zopfli
   zopfli_iterations_hint: Spécifiez le nombre d'itérations pour la compression Zopfli. Il peut être défini dans la plage de {min} à {max}. Une valeur plus élevée améliore le ratio de compression mais augmente le temps de traitement.
@@ -134,6 +175,7 @@ fr:
     bigrams: Bigrammes (analyse de fréquence des 2-grammes)
     bigEnt: BigEnt (combinaison de bigrammes et d'entropie)
     brute: Brute (essaye toutes les combinaisons, le plus lent mais la meilleure compression)
+  reset_png_options: Réinitialiser les options PNG
 ja:
   zopfli_iterations: Zopfliの反復回数
   zopfli_iterations_hint: Zopfli圧縮の反復回数を指定します。{min}〜{max}の範囲で設定可能です。値が大きいほど圧縮率が向上しますが、処理時間も長くなります。
@@ -164,6 +206,7 @@ ja:
     bigrams: バイグラム（2グラム頻度分析）
     bigEnt: BigEnt（バイグラムとエントロピーの組み合わせ）
     brute: ブルートフォース（すべての組み合わせを試行、最も遅いが最良の圧縮）
+  reset_png_options: PNG設定をリセット
 ko:
   zopfli_iterations: Zopfli 반복 횟수
   zopfli_iterations_hint: Zopfli 압축의 반복 횟수를 지정합니다. {min}~{max} 범위 내에서 설정할 수 있습니다. 값이 높을수록 압축률이 향상되지만 처리 시간이 길어집니다.
@@ -194,7 +237,8 @@ ko:
     bigrams: Bigrams (2-그램 빈도 분석)
     bigEnt: BigEnt (바이그램과 엔트로피의 조합)
     brute: Brute (모든 조합 시도, 가장 느리지만 최고의 압축)
-zh-tw:
+  reset_png_options: PNG 옵션 재설정
+zhHant:
   zopfli_iterations: Zopfli 迭代次數
   zopfli_iterations_hint: 指定 Zopfli 壓縮的迭代次數。可以在 {min} 到 {max} 的範圍內設置。值越高，壓縮率越高，但處理時間也會增加。
   embed_icc_profile: 嵌入 ICC 配置文件
@@ -224,7 +268,8 @@ zh-tw:
     bigrams: Bigrams（2-gram 頻率分析）
     bigEnt: BigEnt（bigrams 和 entropy 的組合）
     brute: Brute（暴力破解）
-zh-cn:
+  reset_png_options: 重置 PNG 選項
+zhHans:
   zopfli_iterations: Zopfli 迭代次数
   zopfli_iterations_hint: 指定 Zopfli 压缩的迭代次数。可以在 {min} 到 {max} 的范围内设置。值越高，压缩率越高，但处理时间也会增加。
   embed_icc_profile: 嵌入 ICC 配置文件
@@ -254,4 +299,5 @@ zh-cn:
     bigrams: Bigrams（2-gram 频率分析）
     bigEnt: BigEnt（bigrams 和 entropy 的组合）
     brute: Brute（暴力破解）
+  reset_png_options: 重置 PNG 选项
 </i18n>

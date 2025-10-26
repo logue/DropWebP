@@ -9,60 +9,71 @@ const settingsStore = useSettingsStore();
 </script>
 
 <template>
-  <v-switch
-    v-model="settingsStore.webpOptions.lossless"
-    :label="t('lossless')"
-    color="primary"
-    inline
-  />
-  <v-slider
-    v-model="settingsStore.webpOptions.quality"
-    :disabled="settingsStore.webpOptions.lossless"
-    :label="t('quality', { min: 0, max: 100 })"
-    :max="100"
-    :min="0"
-    color="primary"
-    step="0.1"
-    thumb-label="always"
-    type="number"
-  />
-  <v-slider
-    v-model="settingsStore.webpOptions.method"
-    :label="t('method', { min: 0, max: 6 })"
-    :max="6"
-    :min="0"
-    color="primary"
-    step="1"
-    thumb-label="always"
-    type="number"
-  />
-  <v-switch
-    v-model="settingsStore.webpOptions.autofilter"
-    :label="t('autofilter')"
-    color="primary"
-    inline
-  />
-  <v-select
-    v-model="settingsStore.webpOptions.hint"
-    :items="[
-      { text: t('image_hint_default'), value: WebPImageHint.Default },
-      { text: t('image_hint_picture'), value: WebPImageHint.Picture },
-      { text: t('image_hint_photo'), value: WebPImageHint.Photo },
-      { text: t('image_hint_graph'), value: WebPImageHint.Graph }
-    ]"
-    :label="t('image_hint')"
-    item-title="text"
-    item-value="value"
-    persistent-hint
-  />
-  <v-btn
-    color="warning"
-    prepend-icon="mdi-rotate-left"
-    variant="text"
-    @click="settingsStore.resetWebpOptions()"
-  >
-    {{ t('reset_webp_options') }}
-  </v-btn>
+  <v-card flat>
+    <v-card-text>
+      <v-switch
+        v-model="settingsStore.webpOptions.lossless"
+        :label="t('lossless')"
+        color="primary"
+        inline
+      />
+      <v-slider
+        v-model="settingsStore.webpOptions.quality"
+        :disabled="settingsStore.webpOptions.lossless"
+        :label="t('quality', { min: 0, max: 100 })"
+        :max="100"
+        :min="0"
+        color="primary"
+        step="0.1"
+        type="number"
+      >
+        <template #append>
+          <v-text-field v-model="settingsStore.webpOptions.quality" readonly variant="underlined" />
+        </template>
+      </v-slider>
+      <v-slider
+        v-model="settingsStore.webpOptions.method"
+        :label="t('method', { min: 0, max: 6 })"
+        :max="6"
+        :min="0"
+        color="primary"
+        step="1"
+        type="number"
+      >
+        <template #append>
+          <v-text-field v-model="settingsStore.webpOptions.method" readonly variant="underlined" />
+        </template>
+      </v-slider>
+      <v-switch
+        v-model="settingsStore.webpOptions.autofilter"
+        :label="t('autofilter')"
+        color="primary"
+        inline
+      />
+      <v-select
+        v-model="settingsStore.webpOptions.hint"
+        :items="[
+          { text: t('image_hint_default'), value: WebPImageHint.Default },
+          { text: t('image_hint_picture'), value: WebPImageHint.Picture },
+          { text: t('image_hint_photo'), value: WebPImageHint.Photo },
+          { text: t('image_hint_graph'), value: WebPImageHint.Graph }
+        ]"
+        :label="t('image_hint')"
+        item-title="text"
+        item-value="value"
+        persistent-hint
+      />
+    </v-card-text>
+    <v-card-actions>
+      <v-btn
+        :text="t('reset_webp_options')"
+        color="warning"
+        prepend-icon="mdi-rotate-left"
+        variant="tonal"
+        @click="settingsStore.resetWebpOptions()"
+      />
+    </v-card-actions>
+  </v-card>
 </template>
 
 <i18n lang="yaml">
