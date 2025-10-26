@@ -1,3 +1,5 @@
+import type { ComposerTranslation } from 'vue-i18n';
+
 import {
   sendNotification,
   isPermissionGranted,
@@ -7,19 +9,22 @@ import {
 /**
  * デスクトップ通知を送信するためのcomposable
  */
-export const useNotification = () => {
+export const useNotification = (t: ComposerTranslation) => {
   /**
    * 通知権限を要求し、通知を送信
    */
   const notify = async (title: string, body?: string, icon?: string) => {
     try {
+      console.log('通知を送信しようとしています:', { title, body });
       // 通知権限を確認
       let permissionGranted = await isPermissionGranted();
+      console.log('通知権限の状態:', permissionGranted);
 
       // 権限がない場合は要求
       if (!permissionGranted) {
         const permission = await requestPermission();
         permissionGranted = permission === 'granted';
+        console.log('通知権限の要求結果:', permission);
       }
 
       if (permissionGranted) {
@@ -29,6 +34,7 @@ export const useNotification = () => {
           body,
           icon
         });
+        console.log('通知を送信しました');
       } else {
         console.warn('通知権限が許可されていません');
       }
@@ -41,29 +47,29 @@ export const useNotification = () => {
    * 画像変換完了通知
    */
   const notifyConversionComplete = async (fileName: string, format: string) => {
-    const title = '画像変換完了';
-    const body = `${fileName} を ${format.toUpperCase()} 形式に変換しました`;
-
-    await notify(title, body);
+    // 画像変換処理が完了したことを通知
+    await notify(
+      t('notification.complete.title'),
+      t('notification.complete.message', { file: fileName, format: format.toUpperCase() })
+    );
   };
 
   /**
    * 一括変換完了通知
    */
   const notifyBatchComplete = async (count: number, format: string) => {
-    const title = 'バッチ変換完了';
-    const body = `${count} 個のファイルを ${format.toUpperCase()} 形式に変換しました`;
-
-    await notify(title, body);
+    // 一括変換処理が完了したことを通知
+    await notify(
+      t('notification.batch_complete.title'),
+      t('notification.batch_complete.message', { count, format: format.toUpperCase() })
+    );
   };
 
   /**
    * エラー通知
    */
   const notifyError = async (message: string) => {
-    const title = 'エラー';
-
-    await notify(title, message);
+    await notify(t('notification.error.title'), message);
   };
 
   return {

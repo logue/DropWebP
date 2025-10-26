@@ -23,44 +23,28 @@ const { dialog, inProgress, currentFile, progress, message, isDragging, convertB
       class="d-flex flex-grow-1 align-center justify-center my-4 px-15"
       rounded="xl"
     >
-      <h2 class="text-center text-medium-emphasis">
-        {{ t('hero_text') }}
-      </h2>
-    </v-sheet>
-    <v-card class="d-flex bg-transparent" flat>
-      <v-card-actions>
+      <div class="text-center text-medium-emphasis">
+        <h2>
+          {{ t('hero_text') }}
+        </h2>
         <v-btn
           :text="t('select_files')"
+          class="mt-4"
           prepend-icon="mdi-file-multiple"
           variant="elevated"
           @click="convertByDialog"
         />
+      </div>
+    </v-sheet>
+
+    <v-card class="d-flex bg-transparent" flat>
+      <v-card-actions>
         <v-radio-group
           v-model="settingsStore.commonOptions.format"
           :label="t('convert_to')"
           class="d-flex justify-end"
           inline
         >
-          <v-tooltip :text="t('type.png_description')" location="top">
-            <template #activator="{ props }">
-              <v-radio
-                v-bind="props"
-                :label="t('type.png')"
-                :value="OutputFormat.PNG"
-                color="purple"
-              />
-            </template>
-          </v-tooltip>
-          <v-tooltip :text="t('type.jpeg_description')" location="top">
-            <template #activator="{ props }">
-              <v-radio
-                v-bind="props"
-                :label="t('type.jpeg')"
-                :value="OutputFormat.JPEG"
-                color="orange"
-              />
-            </template>
-          </v-tooltip>
           <v-tooltip :text="t('type.webp_description')" location="top">
             <template #activator="{ props }">
               <v-radio
@@ -91,6 +75,26 @@ const { dialog, inProgress, currentFile, progress, message, isDragging, convertB
               </v-radio>
             </template>
           </v-tooltip>
+          <v-tooltip :text="t('type.png_description')" location="top">
+            <template #activator="{ props }">
+              <v-radio
+                v-bind="props"
+                :label="t('type.png')"
+                :value="OutputFormat.PNG"
+                color="purple"
+              />
+            </template>
+          </v-tooltip>
+          <v-tooltip :text="t('type.jpeg_description')" location="top">
+            <template #activator="{ props }">
+              <v-radio
+                v-bind="props"
+                :label="t('type.jpeg')"
+                :value="OutputFormat.JPEG"
+                color="orange"
+              />
+            </template>
+          </v-tooltip>
         </v-radio-group>
       </v-card-actions>
     </v-card>
@@ -106,7 +110,7 @@ const { dialog, inProgress, currentFile, progress, message, isDragging, convertB
 
 <i18n lang="yaml">
 en:
-  hero_text: Drag and drop images here or paste to compress
+  hero_text: Drag and drop images here or paste to compress.
   select_files: Select Files
   select_folder: Select Folder
   progress: Compressing {type} format...
@@ -133,8 +137,18 @@ en:
     no_images_found_dropped: No images found in the dropped items.
     no_images_found_selected: No images found in the selected items.
     no_images_found_in_folder: No images found in the selected folder.
+  notification:
+    complete:
+      title: Image Conversion Complete
+      message: Conversion of {file} to {format} format is complete.
+    batch_complete:
+      title: Image Batch Conversion Complete
+      message: Conversion of {count} images to {format} format is complete.
+    error:
+      title: Image Conversion Error
+      message: '{message}'
 fr:
-  hero_text: Faites glisser et déposez des images ici ou collez-les pour les compresser
+  hero_text: Faites glisser et déposez des images ici ou collez-les pour les compresser.
   select_files: Sélectionner des fichiers
   select_folder: Sélectionner un dossier
   progress: Compression au format {type}...
@@ -160,7 +174,17 @@ fr:
   error:
     no_images_found_dropped: Aucune image trouvée dans les éléments déposés.
     no_images_found_selected: Aucune image trouvée dans les éléments sélectionnés.
-    no_images_found_in_folder: Aucune image trouvée dans le dossier sélectionné
+    no_images_found_in_folder: Aucune image trouvée dans le dossier sélectionné.
+  notification:
+    complete:
+      title: Conversion d'image terminée
+      message: La conversion de {file} au format {format} est terminée.
+    batch_complete:
+      title: Conversion par lot d'images terminée
+      message: La conversion de {count} images au format {format} est terminée.
+    error:
+      title: Erreur de conversion d'image
+      message: '{message}'
 ja:
   hero_text: 画像をここにドラッグ＆ドロップするかペースト
   select_files: ファイルを選択
@@ -189,6 +213,16 @@ ja:
     no_images_found_dropped: ドロップされたアイテムに画像が見つかりませんでした。
     no_images_found_selected: 選択されたアイテムに画像が見つかりませんでした。
     no_images_found_in_folder: フォルダ内に画像が見つかりませんでした。
+  notification:
+    complete:
+      title: 画像変換完了
+      message: '{file}の{format}形式への変換が完了しました。'
+    batch_complete:
+      title: 画像バッチ変換完了
+      message: '{count}個の画像の{format}形式への変換が完了しました。'
+    error:
+      title: 画像変換エラー
+      message: '{message}'
 ko:
   hero_text: 이미지를 여기에 끌어다 놓거나 붙여넣기하여 압축합니다.
   select_files: 파일 선택
@@ -217,6 +251,16 @@ ko:
     no_images_found_dropped: 드롭된 항목에서 이미지를 찾을 수 없습니다
     no_images_found_selected: 선택한 항목에서 이미지를 찾을 수 없습니다.
     no_images_found_in_folder: 폴더에서 이미지를 찾을 수 없습니다.
+  notification:
+    complete:
+      title: 이미지 변환 완료
+      message: '{file}의 {format} 형식 변환이 완료되었습니다.'
+    batch_complete:
+      title: 이미지 일괄 변환 완료
+      message: '{count}개의 이미지의 {format} 형식 변환이 완료되었습니다.'
+    error:
+      title: 이미지 변환 오류
+      message: '{message}'
 zhHant:
   hero_text: 將圖片拖放到此處或貼上以進行壓縮
   select_files: 選擇文件
@@ -245,6 +289,16 @@ zhHant:
     no_images_found_dropped: 在拖放的項目中未找到圖片。
     no_images_found_selected: 在選定的項目中未找到圖片。
     no_images_found_in_folder: 在所選文件夾中未找到圖片。
+  notification:
+    complete:
+      title: 圖片轉換完成
+      message: '{file} 的 {format} 格式轉換已完成。'
+    batch_complete:
+      title: 圖片批量轉換完成
+      message: '{count} 個圖片的 {format} 格式轉換已完成。'
+    error:
+      title: 圖片轉換錯誤
+      message: '{message}'
 zhHans:
   hero_text: 将图片拖放到此处或粘贴以进行压缩
   select_files: 选择文件
@@ -273,4 +327,14 @@ zhHans:
     no_images_found_dropped: 在拖放的项目中未找到图片。
     no_images_found_selected: 在选定的项目中未找到图片。
     no_images_found_in_folder: 在所选文件夹中未找到图片。
+  notification:
+    complete:
+      title: 图片转换完成
+      message: '{file} 的 {format} 格式转换已完成。'
+    batch_complete:
+      title: 图片批量转换完成
+      message: '{count} 个图片的 {format} 格式转换已完成。'
+    error:
+      title: 图片转换错误
+      message: '{message}'
 </i18n>

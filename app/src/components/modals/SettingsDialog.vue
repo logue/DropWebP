@@ -36,12 +36,12 @@ const tab = ref('common');
         </v-toolbar>
         <v-card-text class="d-flex flex-row pa-0" style="height: calc(100vh - 64px)">
           <v-tabs v-model="tab" color="primary" direction="vertical" class="flex-shrink-0">
-            <v-tab value="common">{{ t('common_options') }}</v-tab>
-            <v-tab value="png">{{ t('png_options') }}</v-tab>
-            <v-tab value="jpeg">{{ t('jpeg_options') }}</v-tab>
-            <v-tab value="webp">{{ t('webp_options') }}</v-tab>
-            <v-tab value="avif">{{ t('avif_options') }}</v-tab>
-            <v-tab value="jxl">{{ t('jxl_options') }}</v-tab>
+            <v-tab class="text-none" value="common">{{ t('common_options') }}</v-tab>
+            <v-tab class="text-none" value="webp">{{ t('webp_options') }}</v-tab>
+            <v-tab class="text-none" value="avif">{{ t('avif_options') }}</v-tab>
+            <v-tab class="text-none" value="jxl">{{ t('jxl_options') }}</v-tab>
+            <v-tab class="text-none" value="png">{{ t('png_options') }}</v-tab>
+            <v-tab class="text-none" value="jpeg">{{ t('jpeg_options') }}</v-tab>
           </v-tabs>
           <v-tabs-window
             v-model="tab"

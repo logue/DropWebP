@@ -29,7 +29,7 @@ export function useImageConversionController(t: ComposerTranslation) {
   });
 
   const { convert, compress, extensions } = useImageConverter(); // コアロジックを取得
-  const { notifyConversionComplete, notifyBatchComplete, notifyError } = useNotification();
+  const { notifyConversionComplete, notifyBatchComplete, notifyError } = useNotification(t);
 
   // --- UIの状態管理 ---
   const dialog = ref(false); // 進捗ダイアログ表示制御
@@ -91,7 +91,9 @@ export function useImageConversionController(t: ComposerTranslation) {
         globalStore.setMessage(errorMessage, 'red');
 
         // エラー通知を送信
-        notifyError(errorMessage);
+        if (settingsStore.commonOptions.notify) {
+          notifyError(errorMessage);
+        }
         if (settingsStore.commonOptions.sound) {
           playErrorSound();
         }
@@ -101,13 +103,15 @@ export function useImageConversionController(t: ComposerTranslation) {
     }
 
     // すべての変換が完了した場合の通知
-    const format = settingsStore.commonOptions.format;
-    if (files.length > 1) {
-      notifyBatchComplete(files.length, format);
-    } else if (files.length === 1 && files[0]) {
-      // 単一ファイルの場合はファイル名を取得
-      const pathInfo = await fileSystem.pathInfo(files[0]);
-      notifyConversionComplete(pathInfo.fileName, format);
+    if (settingsStore.commonOptions.notify) {
+      const format = settingsStore.commonOptions.format;
+      if (files.length > 1) {
+        notifyBatchComplete(files.length, format);
+      } else if (files.length === 1 && files[0]) {
+        // 単一ファイルの場合はファイル名を取得
+        const pathInfo = await fileSystem.pathInfo(files[0]);
+        notifyConversionComplete(pathInfo.fileName, format);
+      }
     }
 
     globalStore.setMessage(t('completed'), 'success');
