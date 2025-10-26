@@ -116,7 +116,7 @@ Drop Compress Image utilise pnpm comme gestionnaire de paquets pour de meilleure
 ### Installer pnpm
 
 ```bash
-npm install -g pnpm
+brew install pnpm
 ```
 
 ### Vérifier l'Installation de pnpm
@@ -127,7 +127,7 @@ pnpm --version
 
 ## Étape 6 : Installer les Dépendances Supplémentaires
 
-Installez des outils supplémentaires requis pour la construction :
+Installez des outils supplémentaires et des bibliothèques de traitement d'images requis pour la construction :
 
 ```bash
 # Installer CMake (nécessaire pour certaines dépendances natives)
@@ -135,6 +135,18 @@ brew install cmake
 
 # Installer pkg-config (nécessaire pour lier les bibliothèques)
 brew install pkg-config
+
+# Installer les bibliothèques de traitement de format d'image
+brew install libavif  # Support du format AVIF
+brew install libheif  # Support du format HEIF/HEIC
+brew install jpeg-xl  # Support du format JPEG XL
+```
+
+### Vérifier l'Installation des Bibliothèques de Dépendance
+
+```bash
+# Vérifier les versions des bibliothèques installées
+brew list --versions libavif libheif jpeg-xl
 ```
 
 ## Étape 7 : Cloner et Construire Drop Compress Image

@@ -116,7 +116,7 @@ Drop Compress Image 使用 pnpm 作為套件管理器，以獲得更好的效能
 ### 安裝 pnpm
 
 ```bash
-npm install -g pnpm
+brew install pnpm
 ```
 
 ### 驗證 pnpm 安裝
@@ -127,7 +127,7 @@ pnpm --version
 
 ## 步驟 6：安裝附加相依性
 
-安裝建構所需的附加工具：
+安裝建構所需的附加工具和圖像處理程式庫：
 
 ```bash
 # 安裝 CMake（一些原生相依性需要）
@@ -135,6 +135,18 @@ brew install cmake
 
 # 安裝 pkg-config（連結程式庫需要）
 brew install pkg-config
+
+# 安裝圖像格式處理程式庫
+brew install libavif  # AVIF 格式支援
+brew install libheif  # HEIF/HEIC 格式支援
+brew install jpeg-xl  # JPEG XL 格式支援
+```
+
+### 驗證相依程式庫安裝
+
+```bash
+# 檢查已安裝程式庫的版本
+brew list --versions libavif libheif jpeg-xl
 ```
 
 ## 步驟 7：複製和建構 Drop Compress Image

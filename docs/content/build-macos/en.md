@@ -127,7 +127,7 @@ pnpm --version
 
 ## Step 6: Install Additional Dependencies
 
-Install additional tools required for building:
+Install additional tools and image processing libraries required for building:
 
 ```bash
 # Install CMake (needed for some native dependencies)
@@ -135,6 +135,18 @@ brew install cmake
 
 # Install pkg-config (needed for linking libraries)
 brew install pkg-config
+
+# Install image format processing libraries
+brew install libavif  # AVIF format support
+brew install libheif  # HEIF/HEIC format support
+brew install jpeg-xl  # JPEG XL format support
+```
+
+### Verify Dependency Libraries Installation
+
+```bash
+# Check the versions of installed libraries
+brew list --versions libavif libheif jpeg-xl
 ```
 
 ## Step 7: Clone and Build Drop Compress Image

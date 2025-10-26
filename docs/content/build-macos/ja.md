@@ -116,7 +116,7 @@ Drop Compress Imageは、パフォーマンスとディスク効率を向上さ�
 ### pnpmのインストール
 
 ```bash
-npm install -g pnpm
+brew install pnpm
 ```
 
 ### pnpmインストールの確認
@@ -127,7 +127,7 @@ pnpm --version
 
 ## ステップ 6: 追加の依存関係のインストール
 
-ビルドに必要な追加ツールをインストールします：
+ビルドに必要な追加ツールと画像処理ライブラリをインストールします：
 
 ```bash
 # CMakeのインストール（一部のネイティブ依存関係に必要）
@@ -135,6 +135,18 @@ brew install cmake
 
 # pkg-configのインストール（ライブラリのリンクに必要）
 brew install pkg-config
+
+# 画像フォーマット処理ライブラリのインストール
+brew install libavif  # AVIF形式のサポート
+brew install libheif  # HEIF/HEIC形式のサポート
+brew install jpeg-xl  # JPEG XL形式のサポート
+```
+
+### 依存ライブラリのインストール確認
+
+```bash
+# インストールされたライブラリのバージョンを確認
+brew list --versions libavif libheif jpeg-xl
 ```
 
 ## ステップ 7: Drop Compress Imageのクローンとビルド

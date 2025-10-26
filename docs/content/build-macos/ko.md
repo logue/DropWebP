@@ -116,7 +116,7 @@ Drop Compress Image는 성능과 디스크 효율성을 위해 pnpm을 패키지
 ### pnpm 설치
 
 ```bash
-npm install -g pnpm
+brew install pnpm
 ```
 
 ### pnpm 설치 확인
@@ -127,7 +127,7 @@ pnpm --version
 
 ## 단계 6: 추가 종속성 설치
 
-빌드에 필요한 추가 도구를 설치합니다:
+빌드에 필요한 추가 도구와 이미지 처리 라이브러리를 설치합니다:
 
 ```bash
 # CMake 설치 (일부 네이티브 종속성에 필요)
@@ -135,6 +135,18 @@ brew install cmake
 
 # pkg-config 설치 (라이브러리 링킹에 필요)
 brew install pkg-config
+
+# 이미지 포맷 처리 라이브러리 설치
+brew install libavif  # AVIF 형식 지원
+brew install libheif  # HEIF/HEIC 형식 지원
+brew install jpeg-xl  # JPEG XL 형식 지원
+```
+
+### 종속성 라이브러리 설치 확인
+
+```bash
+# 설치된 라이브러리의 버전 확인
+brew list --versions libavif libheif jpeg-xl
 ```
 
 ## 단계 7: Drop Compress Image 복제 및 빌드
