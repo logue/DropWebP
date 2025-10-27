@@ -64,3 +64,23 @@ tauri-plugin-notification = "2.3.3"
 tauri-plugin-opener = "2.5.2"
 tauri-plugin-os = "2"
 thiserror = "2.0.17"
+
+[profile.release]
+lto = true        # Link Time Optimization
+codegen-units = 1 # 単一コード生成で最適化
+panic = "abort"   # 高速パニック処理
+strip = true      # シンボル除去
+opt-level = "z"   # サイズ最適化優先
+
+# Windows 固有の最適化
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.62.2", features = ["Win32_Foundation"] }
+
+# macOS 固有の最適化
+[target.'cfg(target_os = "macos")'.dependencies]
+cocoa = "0.26.1"
+objc = "0.2"
+
+# Linux 固有の最適化
+[target.'cfg(unix)'.dependencies]
+nix = "0.30.1"

@@ -50,6 +50,7 @@ fr:
 ja:
   locale: 言語
   en: 🇺🇸 英語
+  fr: 🇫🇷 フランス語
   ja: 🇯🇵 日本語
   ko: 🇰🇷 韓国語
   zhHant: 🇹🇼 繁体字中国語
