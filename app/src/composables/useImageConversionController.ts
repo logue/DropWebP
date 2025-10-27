@@ -205,8 +205,8 @@ export function useImageConversionController(t: ComposerTranslation) {
     await processFiles(files);
   };
 
-  // クリップボードからのペーストイベントを監視
-  usePaste(async (event: ClipboardEvent) => {
+  // ペースト処理の関数
+  const handlePaste = async (event: ClipboardEvent) => {
     // クリップボード内のデータを取得
     const items = event.clipboardData?.items;
     if (!items) return;
@@ -260,7 +260,10 @@ export function useImageConversionController(t: ComposerTranslation) {
     if (settingsStore.commonOptions.sound) {
       playCompleteSound();
     }
-  });
+  };
+
+  // クリップボードからのペーストイベントを監視
+  usePaste(handlePaste);
 
   // ドラッグ&ドロップイベントを監視
   const { isDragging } = useDragAndDrop(async paths => {
@@ -281,6 +284,7 @@ export function useImageConversionController(t: ComposerTranslation) {
     isDragging,
     // methods
     convertByDialog,
-    convertByDirDialog
+    convertByDirDialog,
+    handlePaste
   };
 }

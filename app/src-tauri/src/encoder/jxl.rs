@@ -1,12 +1,12 @@
 use super::common::{
-    get_encoding_recommendations, log_encoding_analysis, provide_icc_recommendations,
-    EncodingAnalysis,
+    EncodingAnalysis, get_encoding_recommendations, log_encoding_analysis,
+    provide_icc_recommendations,
 };
 use crate::{
-    encoder::{extract_pixel_data, HighBitDepthImage},
+    encoder::{HighBitDepthImage, extract_pixel_data},
     error::AppError,
 };
-use jpegxl_rs::encode::{encoder_builder, EncoderFrame, EncoderResult, EncoderSpeed::*};
+use jpegxl_rs::encode::{EncoderFrame, EncoderResult, EncoderSpeed::*, encoder_builder};
 use serde::{Deserialize, Serialize};
 
 /// Image type classification based on pixel data and ICC profile
@@ -563,7 +563,7 @@ pub fn encode(
                     rgb.push(chunk[0]); // R
                     rgb.push(chunk[1]); // G
                     rgb.push(chunk[2]); // B
-                                        // Discard alpha channel
+                    // Discard alpha channel
                 }
                 rgb
             } else {

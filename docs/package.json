@@ -17,7 +17,7 @@
     "@mdi/font": "7.4.47",
     "@nuxt/content": "^3.7.1",
     "@nuxt/eslint": "1.9.0",
-    "@nuxtjs/i18n": "10.1.1",
+    "@nuxtjs/i18n": "10.1.2",
     "@pinia/nuxt": "^0.8.0",
     "eslint": "^9.38.0",
     "github-markdown-css": "^5.8.1",
