@@ -1,6 +1,6 @@
 [package]
 name = "drop-compress-image"
-version = "2.3.0"
+version = "3.0.0"
 authors = ["Logue"]
 edition = "2024"
 rust-version = "1.90.0"
@@ -62,7 +62,7 @@ tauri-plugin-fs = "2.4.4"
 tauri-plugin-log = "2.7.1"
 tauri-plugin-notification = "2.3.3"
 tauri-plugin-opener = "2.5.2"
-tauri-plugin-os = "2"
+tauri-plugin-os = "2.3.2"
 thiserror = "2.0.17"
 
 [profile.release]
