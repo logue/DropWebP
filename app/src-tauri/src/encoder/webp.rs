@@ -5,11 +5,11 @@ use super::common::{
 };
 use crate::{encoder::extract_pixel_data, error::AppError, options::HighBitDepthImage};
 use serde::{Deserialize, Serialize};
-// 必要なものを use
+// WebPエンコーディング: ロスレス時はSimple API、ロッシー時はAdvanced API
 use libwebp_sys::{
-    WebPConfig, WebPConfigInit, WebPEncode, WebPFree, WebPMemoryWrite, WebPMemoryWriter,
-    WebPMemoryWriterInit, WebPPicture, WebPPictureFree, WebPPictureImportRGB,
-    WebPPictureImportRGBA, WebPPictureInit, WebPValidateConfig,
+    WebPConfig, WebPEncode, WebPEncodeLosslessRGB, WebPEncodeLosslessRGBA, WebPFree,
+    WebPImageHint as LibWebPImageHint, WebPMemoryWrite, WebPMemoryWriter, WebPMemoryWriterInit,
+    WebPPicture, WebPPictureFree, WebPPictureImportRGB, WebPPictureImportRGBA, WebPValidateConfig,
 };
 use std::ffi::{c_int, c_void};
 
@@ -19,6 +19,11 @@ use std::ffi::{c_int, c_void};
 /// method: 0-6 (0 is fast, 6 is high quality)
 /// autofilter: true/false (whether to use automatic filtering)
 /// hint: Image hint (WebPImageHint enumeration)
+/// preset: WebP preset for different image types
+/// filter_strength: 0-100 (filter strength for reducing artifacts)
+/// filter_sharpness: 0-7 (sharpness of the filtering)
+/// sns_strength: 0-100 (spatial noise shaping strength)
+/// alpha_quality: 0-100 (alpha channel compression quality)
 /// Note: When lossless is true, quality is ignored)
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -28,7 +33,11 @@ pub struct WebpOptions {
     pub method: u8,
     pub autofilter: bool,
     pub hint: WebPImageHint,
-    // pub preset: WebPPreset,
+    pub preset: WebPPreset,
+    pub filter_strength: u8,
+    pub filter_sharpness: u8,
+    pub sns_strength: u8,
+    pub alpha_quality: u8,
 }
 
 /// WebPの画像ヒント
@@ -37,13 +46,93 @@ pub struct WebpOptions {
 /// - Photo: 写真向け
 /// - Graph: 図やイラスト向け
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(isize)]
 pub enum WebPImageHint {
-    Default = libwebp_sys::WEBP_HINT_DEFAULT as isize,
-    Picture = libwebp_sys::WEBP_HINT_PICTURE as isize,
-    Photo = libwebp_sys::WEBP_HINT_PHOTO as isize,
-    Graph = libwebp_sys::WEBP_HINT_GRAPH as isize,
-    Last = libwebp_sys::WEBP_HINT_LAST as isize,
+    Default,
+    Picture,
+    Photo,
+    Graph,
+    Last,
+}
+
+impl WebPImageHint {
+    fn to_libwebp_hint(&self) -> LibWebPImageHint {
+        match self {
+            WebPImageHint::Default => LibWebPImageHint::WEBP_HINT_DEFAULT,
+            WebPImageHint::Picture => LibWebPImageHint::WEBP_HINT_PICTURE,
+            WebPImageHint::Photo => LibWebPImageHint::WEBP_HINT_PHOTO,
+            WebPImageHint::Graph => LibWebPImageHint::WEBP_HINT_GRAPH,
+            WebPImageHint::Last => LibWebPImageHint::WEBP_HINT_LAST,
+        }
+    }
+}
+
+/// WebPプリセット
+/// 異なる画像タイプに最適化された設定
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+pub enum WebPPreset {
+    Default, // 標準設定
+    Picture, // デジタル写真（ポートレートやインドアショット）
+    Photo,   // 写真（アウトドア、自然光）
+    Drawing, // 描画やライン画像
+    Icon,    // アイコンやファビコン
+    Text,    // テキストライクな画像
+}
+
+impl WebPPreset {
+    /// プリセットに基づいて品質を調整
+    fn adjust_quality(&self, base_quality: f32) -> f32 {
+        match self {
+            WebPPreset::Photo => (base_quality * 1.05).min(100.0), // 写真は少し高品質
+            WebPPreset::Picture => base_quality,
+            WebPPreset::Drawing => (base_quality * 0.9).max(50.0), // 描画は少し品質下げてサイズ重視
+            WebPPreset::Icon => (base_quality * 0.8).max(40.0),    // アイコンはさらにサイズ重視
+            WebPPreset::Text => 100.0, // テキストは最高品質（通常ロスレス）
+            WebPPreset::Default => base_quality,
+        }
+    }
+
+    /// プリセットに基づいてロスレス推奨かどうか
+    fn prefers_lossless(&self) -> bool {
+        matches!(self, WebPPreset::Text | WebPPreset::Icon)
+    }
+
+    /// プリセットに基づいたデフォルト設定を適用
+    fn apply_preset_defaults(&self, config: &mut WebPConfig) {
+        match self {
+            WebPPreset::Photo => {
+                config.sns_strength = 80;
+                config.filter_sharpness = 4;
+                config.filter_strength = 35;
+                config.autofilter = 1;
+            }
+            WebPPreset::Picture => {
+                config.sns_strength = 80;
+                config.filter_sharpness = 3;
+                config.filter_strength = 30;
+                config.autofilter = 1;
+            }
+            WebPPreset::Drawing => {
+                config.sns_strength = 25;
+                config.filter_sharpness = 6;
+                config.filter_strength = 10;
+                config.autofilter = 0;
+            }
+            WebPPreset::Icon => {
+                config.sns_strength = 0;
+                config.filter_strength = 0;
+                config.autofilter = 0;
+            }
+            WebPPreset::Text => {
+                config.sns_strength = 0;
+                config.filter_strength = 0;
+                config.autofilter = 0;
+                config.lossless = 1;
+            }
+            WebPPreset::Default => {
+                // デフォルト設定はWebPConfigInitで設定済み
+            }
+        }
+    }
 }
 
 /// Encode image to WebP format with advanced content analysis
@@ -105,90 +194,199 @@ pub fn encode(
     // Convert f32 pixels to u8 (WebP encoders primarily work with 8-bit input)
     let pixels_u8 = convert_f32_to_u8(&processed_pixels);
     println!(
-        "WebP: Encoding settings - Quality: {}, Lossless: {}, Method: {}, Hint: {:?}",
-        options.quality, options.lossless, options.method, options.hint
+        "WebP: Encoding settings - Quality: {}, Lossless: {}, Method: {}, Hint: {:?}, Preset: {:?}",
+        options.quality, options.lossless, options.method, options.hint, options.preset
+    );
+    println!(
+        "WebP: Advanced settings - Filter: {}, Sharpness: {}, SNS: {}, Alpha Quality: {}",
+        options.filter_strength,
+        options.filter_sharpness,
+        options.sns_strength,
+        options.alpha_quality
     );
 
-    // ★ 4. & 5. を libwebp-sys (Advanced API) を使って置き換え
-    let webp_data = unsafe {
-        // 1. Config (エンコード設定) の初期化と設定
-        let mut config: WebPConfig = std::mem::zeroed();
-        if WebPConfigInit(&mut config) == 0 {
-            return Err(AppError::Encode("WebPConfigInit failed".into()));
+    // プリセットがロスレス推奨かつユーザーがロスレス指定していない場合の調整
+    let use_lossless = options.lossless || options.preset.prefers_lossless();
+
+    // ロスレス時はSimple API（高速）、ロッシー時はAdvanced API（全オプション使用）
+    let webp_data = if use_lossless {
+        println!("WebP: Using Simple API for lossless encoding");
+
+        unsafe {
+            let mut output_ptr: *mut u8 = std::ptr::null_mut();
+
+            let result_size = if is_rgba {
+                // ロスレスRGBA
+                WebPEncodeLosslessRGBA(
+                    pixels_u8.as_ptr(),
+                    width as i32,
+                    height as i32,
+                    (width * 4) as i32, // stride
+                    &mut output_ptr,
+                )
+            } else {
+                // ロスレスRGB
+                WebPEncodeLosslessRGB(
+                    pixels_u8.as_ptr(),
+                    width as i32,
+                    height as i32,
+                    (width * 3) as i32, // stride
+                    &mut output_ptr,
+                )
+            };
+
+            if result_size == 0 || output_ptr.is_null() {
+                return Err(AppError::Encode("WebP lossless encoding failed".into()));
+            }
+
+            // ポインタからVec<u8>を作成
+            let output_data = std::slice::from_raw_parts(output_ptr, result_size).to_vec();
+
+            // libwebpが確保したメモリを解放
+            WebPFree(output_ptr as *mut c_void);
+
+            output_data
         }
+    } else {
+        println!("WebP: Using Advanced API for lossy encoding with full options");
 
-        // Options から Config に値を設定
-        config.quality = options.quality;
-        config.lossless = if options.lossless { 1 } else { 0 };
-        config.method = options.method as c_int;
-        config.image_hint = options.hint as u32; // enum の値を u32 として渡す
-        config.autofilter = if options.autofilter { 1 } else { 0 };
-        // config.sns_strength = ...; // 他にも多くの設定が可能
+        unsafe {
+            // 1. Config (エンコード設定) の初期化
+            let mut config: WebPConfig = std::mem::zeroed();
 
-        // 設定が妥当か検証
-        if WebPValidateConfig(&config) == 0 {
-            return Err(AppError::Encode("Invalid WebPConfig".into()));
-        }
+            // 手動でConfigをデフォルト値で初期化
+            config.quality = 75.0;
+            config.target_size = 0;
+            config.target_PSNR = 0.0;
+            config.method = 4;
+            config.sns_strength = 50;
+            config.filter_strength = 60;
+            config.filter_sharpness = 0;
+            config.filter_type = 1;
+            config.autofilter = 0;
+            config.alpha_compression = 1;
+            config.alpha_filtering = 1;
+            config.alpha_quality = 100;
+            config.lossless = 0;
+            config.exact = 0;
+            config.image_hint = LibWebPImageHint::WEBP_HINT_DEFAULT;
+            config.emulate_jpeg_size = 0;
+            config.thread_level = 0;
+            config.low_memory = 0;
+            config.near_lossless = 100;
+            config.use_delta_palette = 0;
+            config.use_sharp_yuv = 0;
 
-        // 2. Picture (画像データ) の初期化
-        let mut picture: WebPPicture = std::mem::zeroed();
-        if WebPPictureInit(&mut picture) == 0 {
-            return Err(AppError::Encode("WebPPictureInit failed".into()));
-        }
-        picture.width = width as c_int;
-        picture.height = height as c_int;
+            // プリセットに基づいたデフォルト設定を適用
+            options.preset.apply_preset_defaults(&mut config);
 
-        // 3. Picture へピクセルデータをインポート
-        let import_result = if is_rgba {
-            // RGBA
-            let stride = width as i32 * 4;
-            WebPPictureImportRGBA(&mut picture, pixels_u8.as_ptr(), stride)
-        } else {
-            // RGB
-            let stride = width as i32 * 3;
-            WebPPictureImportRGB(&mut picture, pixels_u8.as_ptr(), stride)
-        };
+            // プリセットに基づく品質調整
+            let adjusted_quality = options.preset.adjust_quality(options.quality);
 
-        if import_result == 0 {
-            WebPPictureFree(&mut picture); // 失敗したら Picture を解放
-            return Err(AppError::Encode("WebPPictureImport failed".into()));
-        }
+            // ユーザー指定の詳細設定を適用（プリセットをオーバーライド）
+            // WebPの有効範囲内にクランプ
+            config.quality = adjusted_quality.clamp(0.0, 100.0);
+            config.lossless = 0; // ロッシーエンコーディング
+            config.method = (options.method as c_int).clamp(0, 6);
+            config.image_hint = options.hint.to_libwebp_hint();
+            config.autofilter = if options.autofilter { 1 } else { 0 };
+            config.filter_strength = (options.filter_strength as c_int).clamp(0, 100);
+            config.filter_sharpness = (options.filter_sharpness as c_int).clamp(0, 7);
+            config.sns_strength = (options.sns_strength as c_int).clamp(0, 100);
+            config.alpha_quality = (options.alpha_quality as c_int).clamp(0, 100);
 
-        // 4. メモリ書き込み用の Writer を準備
-        let mut writer: WebPMemoryWriter = std::mem::zeroed();
-        WebPMemoryWriterInit(&mut writer);
-        picture.writer = std::mem::transmute(WebPMemoryWrite as *const ()); // 書き込み関数へのポインタ
-        picture.custom_ptr = &mut writer as *mut _ as *mut c_void; // 書き込み先
+            println!(
+                "WebP: Final config - Quality: {:.1}, Method: {}, Hint: {:?}",
+                adjusted_quality, options.method, options.hint
+            );
+            println!(
+                "WebP: Filter settings - Strength: {}, Sharpness: {}, SNS: {}, Alpha: {}",
+                options.filter_strength,
+                options.filter_sharpness,
+                options.sns_strength,
+                options.alpha_quality
+            );
 
-        // 5. エンコード実行
-        let encode_result = WebPEncode(&config, &mut picture);
+            // 設定が妥当か検証（戻り値は0が失敗、1が成功）
+            let validation_result = WebPValidateConfig(&config);
+            println!("WebP: Config validation result: {}", validation_result);
 
-        // 6. Picture リソースを解放 (必須)
-        // ピクセルデータはインポート時にコピーされているため、エンコード後すぐに解放してOK
-        WebPPictureFree(&mut picture);
+            if validation_result == 0 {
+                println!("WebP: Invalid config detected!");
+                println!("  - quality: {}", config.quality);
+                println!("  - method: {}", config.method);
+                println!("  - filter_strength: {}", config.filter_strength);
+                println!("  - filter_sharpness: {}", config.filter_sharpness);
+                println!("  - sns_strength: {}", config.sns_strength);
+                println!("  - alpha_quality: {}", config.alpha_quality);
+                println!("  - lossless: {}", config.lossless);
+                return Err(AppError::Encode(format!(
+                    "Invalid WebPConfig - validation failed. Quality: {:.1}, Method: {}, Lossless: {}",
+                    config.quality, config.method, config.lossless
+                )));
+            }
 
-        if encode_result == 0 {
-            // エラー時も Writer のメモリを解放
+            // 2. Picture (画像データ) の初期化
+            let mut picture: WebPPicture = std::mem::zeroed();
+            if !libwebp_sys::WebPPictureInit(&mut picture) {
+                return Err(AppError::Encode("WebPPictureInit failed".into()));
+            }
+            picture.width = width as c_int;
+            picture.height = height as c_int;
+
+            // 3. Picture へピクセルデータをインポート
+            let import_result = if is_rgba {
+                // RGBA
+                let stride = width as i32 * 4;
+                WebPPictureImportRGBA(&mut picture, pixels_u8.as_ptr(), stride)
+            } else {
+                // RGB
+                let stride = width as i32 * 3;
+                WebPPictureImportRGB(&mut picture, pixels_u8.as_ptr(), stride)
+            };
+
+            if import_result == 0 {
+                WebPPictureFree(&mut picture); // 失敗したら Picture を解放
+                return Err(AppError::Encode("WebPPictureImport failed".into()));
+            }
+
+            // 4. メモリ書き込み用の Writer を準備
+            let mut writer: WebPMemoryWriter = std::mem::zeroed();
+            WebPMemoryWriterInit(&mut writer);
+            picture.writer = Some(WebPMemoryWrite);
+            picture.custom_ptr = &mut writer as *mut _ as *mut c_void;
+
+            // 5. エンコード実行
+            let encode_result = WebPEncode(&config, &mut picture);
+
+            // 6. Picture リソースを解放 (必須)
+            WebPPictureFree(&mut picture);
+
+            if encode_result == 0 {
+                // エラー時も Writer のメモリを解放
+                if !writer.mem.is_null() {
+                    WebPFree(writer.mem as *mut c_void);
+                }
+                return Err(AppError::Encode(format!(
+                    "WebPEncode failed (error code: {:?})",
+                    picture.error_code
+                )));
+            }
+
+            // 7. 成功：エンコードされたデータを取得
+            let output_data = std::slice::from_raw_parts(writer.mem, writer.size).to_vec();
+
+            // 8. Writer が確保した C のメモリを解放 (必須)
             WebPFree(writer.mem as *mut c_void);
-            return Err(AppError::Encode(format!(
-                "WebPEncode failed (error code: {})",
-                picture.error_code
-            )));
+
+            output_data
         }
-
-        // 7. 成功：エンコードされたデータを取得
-        // writer.mem (ポインタ) と writer.size (長さ) から Rust の Vec<u8> を作成
-        let output_data = std::slice::from_raw_parts(writer.mem, writer.size).to_vec();
-
-        // 8. Writer が確保した C のメモリを解放 (必須)
-        WebPFree(writer.mem as *mut c_void);
-
-        output_data
     };
 
-    println!("WebP: Successfully encoded WebP data (using Advanced API)");
-
-    // ... (ICC プロファイルの処理は同じ) ...
+    println!(
+        "WebP: Successfully encoded WebP data (Advanced API with all options applied: Preset: {:?})",
+        options.preset
+    ); // ... (ICC プロファイルの処理は同じ) ...
     let final_webp_data = handle_icc_profile_embedding(webp_data, icc_profile, "WebP");
 
     // ... (ICC の推奨事項も同じ) ...
