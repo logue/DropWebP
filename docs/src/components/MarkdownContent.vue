@@ -100,11 +100,10 @@ onMounted(async () => {
   }
 
   // シンタックスハイライトを適用
-  nextTick(() => {
-    if (import.meta.client) {
-      Prism.highlightAll();
-    }
-  });
+  await nextTick();
+  if (import.meta.client) {
+    Prism.highlightAll();
+  }
 });
 
 // ロケール変更時に再レンダリング
@@ -112,19 +111,17 @@ watch(locale, async () => {
   await renderMarkdown();
 
   // 再ハイライト
+  await nextTick();
   if (import.meta.client) {
-    nextTick(() => {
-      Prism.highlightAll();
-    });
+    Prism.highlightAll();
   }
 });
 
 // コンテンツ変更時に再ハイライト
-watch(compiledHtml, () => {
+watch(compiledHtml, async () => {
+  await nextTick();
   if (import.meta.client) {
-    nextTick(() => {
-      Prism.highlightAll();
-    });
+    Prism.highlightAll();
   }
 });
 
