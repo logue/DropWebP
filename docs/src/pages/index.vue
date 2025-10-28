@@ -46,6 +46,16 @@ const formats = [
   { key: 'jpeg', logo: jpeg }
 ];
 
+// 言語リスト定義
+const languages = [
+  { code: 'en', name: '🇺🇸 English' },
+  { code: 'ja', name: '🇯🇵 日本語' },
+  { code: 'fr', name: '🇫🇷 Français' },
+  { code: 'ko', name: '🇰🇷 한국어' },
+  { code: 'zhHans', name: '🇨🇳 简体中文' },
+  { code: 'zhHant', name: '🇹🇼 繁體中文' }
+];
+
 const urlPrefix = `https://github.com/logue/DropWebP/releases/download/${version}/drop-compress-image_${version}_`;
 
 // サイトのベースURL
@@ -144,16 +154,32 @@ useHead({
 </script>
 
 <template>
-  <v-card class="mb-6 bg-transparent" flat tag="section">
+  <v-card class="mb-6 bg-transparent mx-auto" flat tag="section" max-width="960">
     <v-img :src="logo" alt="Drop Compress Image Logo" max-width="256" class="mx-auto mb-4" />
     <v-card-title class="text-h4 text-center pa-3" tag="h2">Drop Compress Image</v-card-title>
     <v-card-subtitle class="text-center pb-4">{{ t('lead.subtitle') }}</v-card-subtitle>
     <v-card-text class="text-center">
+      <!-- Language Links -->
+      <v-chip-group class="flex justify-center mb-6">
+        <v-chip
+          v-for="lang in languages"
+          :key="lang.code"
+          :hreflang="lang.code"
+          :to="localePath('/', lang.code as any)"
+          :variant="locale === lang.code ? 'elevated' : 'outlined'"
+          :color="locale === lang.code ? 'primary' : 'default'"
+          class="block mx-auto"
+          rel="alternate"
+          size="small"
+        >
+          {{ lang.name }}
+        </v-chip>
+      </v-chip-group>
       <p v-for="description in tm(`lead.description`)" :key="description">
         {{ rt(description) }}
       </p>
     </v-card-text>
-    <v-card-actions class="justify-center">
+    <!--v-card-actions class="justify-center">
       <v-btn
         disabled
         :to="localePath('getting-started')"
@@ -165,7 +191,7 @@ useHead({
       >
         {{ t('lead.start_button') }}
       </v-btn>
-    </v-card-actions>
+    </!v-card-actions-->
   </v-card>
 
   <v-card class="mb-6 bg-transparent" flat tag="section">

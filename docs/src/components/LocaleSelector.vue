@@ -1,9 +1,7 @@
 <template>
   <v-menu>
     <template #activator="{ props }">
-      <v-btn icon variant="plain" v-bind="props">
-        <v-icon>mdi-translate</v-icon>
-      </v-btn>
+      <v-btn icon="mdi-translate" variant="plain" v-bind="props" />
     </template>
 
     <v-list>

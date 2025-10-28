@@ -1,7 +1,7 @@
 <template>
   <div class="content-with-toc">
     <!-- eslint-disable-next-line vue/no-v-html -->
-    <div v-if="compiledHtml" class="markdown-body" v-html="compiledHtml" />
+    <article v-if="compiledHtml" class="markdown-body" v-html="compiledHtml" />
     <v-alert v-else-if="pending" :title="t('loading')" color="info" />
     <v-alert v-else-if="error" :title="t('error')" color="error">{{ error.message }}</v-alert>
   </div>
@@ -125,16 +125,25 @@ watch(compiledHtml, async () => {
   }
 });
 
+const i18nHead = useLocaleHead();
+
+console.log(unref(i18nHead));
+
 // SEO設定
-useHead({
+useHead(() => ({
   title: props.title,
+  htmlAttrs: {
+    lang: i18nHead.value.htmlAttrs.lang
+  },
+  link: [...(i18nHead.value.link || [])],
   meta: [
     {
       name: 'description',
       content: props.description
-    }
+    },
+    ...(i18nHead.value.meta || [])
   ]
-});
+}));
 </script>
 
 <style scoped>

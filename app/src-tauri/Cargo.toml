@@ -47,7 +47,7 @@ jpeg2k = "0.10.1"
 jpegxl-rs = { version = "0.11.2+libjxl-0.11.1", features = [] }
 kamadak-exif = "0.6.1"
 libheif-rs = "2.5.1"
-libwebp-sys2 = { version = "0.2.0", features = ["1_5"] }
+libwebp-sys = "0.13.3"
 mozjpeg = "0.10.13"
 openjpeg-sys = "1.0.12"
 oxipng = "9.1.3"
