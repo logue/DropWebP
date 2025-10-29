@@ -254,11 +254,14 @@ pub fn encode(
             // 1. Config (エンコード設定) の初期化
             let mut config: WebPConfig = std::mem::zeroed();
 
-            // 手動でConfigをデフォルト値で初期化
+            // libwebpの推奨する安全なデフォルト値で初期化
+            config.lossless = 0;
             config.quality = 75.0;
+            config.method = 4;
+            config.image_hint = LibWebPImageHint::WEBP_HINT_DEFAULT;
             config.target_size = 0;
             config.target_PSNR = 0.0;
-            config.method = 4;
+            config.segments = 4;
             config.sns_strength = 50;
             config.filter_strength = 60;
             config.filter_sharpness = 0;
@@ -267,15 +270,22 @@ pub fn encode(
             config.alpha_compression = 1;
             config.alpha_filtering = 1;
             config.alpha_quality = 100;
-            config.lossless = 0;
-            config.exact = 0;
-            config.image_hint = LibWebPImageHint::WEBP_HINT_DEFAULT;
+            config.pass = 1;
+            config.show_compressed = 0;
+            config.preprocessing = 0;
+            config.partitions = 0;
+            config.partition_limit = 0;
             config.emulate_jpeg_size = 0;
             config.thread_level = 0;
             config.low_memory = 0;
             config.near_lossless = 100;
+            config.exact = 0;
             config.use_delta_palette = 0;
             config.use_sharp_yuv = 0;
+            config.qmin = 0;
+            config.qmax = 100;
+
+            println!("WebP: Config initialized with safe defaults");
 
             // プリセットに基づいたデフォルト設定を適用
             options.preset.apply_preset_defaults(&mut config);
@@ -312,14 +322,29 @@ pub fn encode(
             println!("WebP: Config validation result: {}", validation_result);
 
             if validation_result == 0 {
-                println!("WebP: Invalid config detected!");
+                println!("WebP: Invalid config detected! Full config dump:");
+                println!("  - lossless: {}", config.lossless);
                 println!("  - quality: {}", config.quality);
                 println!("  - method: {}", config.method);
+                println!("  - image_hint: {:?}", config.image_hint);
+                println!("  - target_size: {}", config.target_size);
+                println!("  - target_PSNR: {}", config.target_PSNR);
+                println!("  - segments: {}", config.segments);
+                println!("  - sns_strength: {}", config.sns_strength);
                 println!("  - filter_strength: {}", config.filter_strength);
                 println!("  - filter_sharpness: {}", config.filter_sharpness);
-                println!("  - sns_strength: {}", config.sns_strength);
+                println!("  - filter_type: {}", config.filter_type);
+                println!("  - autofilter: {}", config.autofilter);
+                println!("  - alpha_compression: {}", config.alpha_compression);
+                println!("  - alpha_filtering: {}", config.alpha_filtering);
                 println!("  - alpha_quality: {}", config.alpha_quality);
-                println!("  - lossless: {}", config.lossless);
+                println!("  - pass: {}", config.pass);
+                println!("  - preprocessing: {}", config.preprocessing);
+                println!("  - partitions: {}", config.partitions);
+                println!("  - partition_limit: {}", config.partition_limit);
+                println!("  - near_lossless: {}", config.near_lossless);
+                println!("  - qmin: {}", config.qmin);
+                println!("  - qmax: {}", config.qmax);
                 return Err(AppError::Encode(format!(
                     "Invalid WebPConfig - validation failed. Quality: {:.1}, Method: {}, Lossless: {}",
                     config.quality, config.method, config.lossless

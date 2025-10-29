@@ -25,11 +25,11 @@ const defaultAvifOptions: AvifOptions = {
 
 const defaultWebpOptions: WebpOptions = {
   quality: 80,
-  lossless: false,
+  lossless: true,
   method: 4,
   autofilter: true,
-  hint: WebPImageHint.Photo, // 写真向け最適化
-  preset: WebPPreset.Photo, // 写真プリセット（品質+5%）
+  hint: WebPImageHint.Default,
+  preset: WebPPreset.Default,
   filterStrength: 50, // 中程度のフィルタ
   filterSharpness: 4, // シャープネス
   snsStrength: 80, // ノイズシェーピング

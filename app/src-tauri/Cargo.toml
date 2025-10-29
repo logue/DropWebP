@@ -56,7 +56,7 @@ ravif = "0.12.0"
 rgb = "0.8.52"
 serde = "1.0.219"
 serde_json = "1.0.145"
-tauri = { version = "2.9.1", features = [] }
+tauri = { version = "2.9.2", features = [] }
 tauri-plugin-dialog = "2.4.2"
 tauri-plugin-fs = "2.4.4"
 tauri-plugin-log = "2.7.1"

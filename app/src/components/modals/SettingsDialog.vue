@@ -1,15 +1,17 @@
 <script setup lang="ts">
+import { useConfigStore } from '@/store';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import AvifOptions from './SettingTabItems/AvifOptions.vue';
-import CommonOptions from './SettingTabItems/CommonOptions.vue';
-import JpegOptions from './SettingTabItems/JpegOptions.vue';
-import JxlOptions from './SettingTabItems/JxlOptions.vue';
-import PngOptions from './SettingTabItems/PngOptions.vue';
-import WebpOptions from './SettingTabItems/WebpOptions.vue';
+import AvifOptions from './SettingItems/AvifOptions.vue';
+import CommonOptions from './SettingItems/CommonOptions.vue';
+import JpegOptions from './SettingItems/JpegOptions.vue';
+import JxlOptions from './SettingItems/JxlOptions.vue';
+import PngOptions from './SettingItems/PngOptions.vue';
+import WebpOptions from './SettingItems/WebpOptions.vue';
 
 const { t } = useI18n();
+const { theme } = useConfigStore();
 
 const tab = ref('common');
 </script>
@@ -35,7 +37,13 @@ const tab = ref('common');
           <v-btn icon="mdi-close" @click="isActive.value = false" />
         </v-toolbar>
         <v-card-text class="d-flex flex-row pa-0" style="height: calc(100vh - 64px)">
-          <v-tabs v-model="tab" color="primary" direction="vertical" class="flex-shrink-0">
+          <v-tabs
+            v-model="tab"
+            :bg-color="theme ? 'grey-darken-5' : 'grey-lighten-5'"
+            color="primary"
+            direction="vertical"
+            class="flex-shrink-0"
+          >
             <v-tab class="text-none" value="common">{{ t('common_options') }}</v-tab>
             <v-tab class="text-none" value="webp">{{ t('webp_options') }}</v-tab>
             <v-tab class="text-none" value="avif">{{ t('avif_options') }}</v-tab>
@@ -51,12 +59,6 @@ const tab = ref('common');
             <v-tabs-window-item value="common">
               <common-options />
             </v-tabs-window-item>
-            <v-tabs-window-item value="png">
-              <png-options />
-            </v-tabs-window-item>
-            <v-tabs-window-item value="jpeg">
-              <jpeg-options />
-            </v-tabs-window-item>
             <v-tabs-window-item value="webp">
               <webp-options />
             </v-tabs-window-item>
@@ -65,6 +67,12 @@ const tab = ref('common');
             </v-tabs-window-item>
             <v-tabs-window-item value="jxl">
               <jxl-options />
+            </v-tabs-window-item>
+            <v-tabs-window-item value="png">
+              <png-options />
+            </v-tabs-window-item>
+            <v-tabs-window-item value="jpeg">
+              <jpeg-options />
             </v-tabs-window-item>
           </v-tabs-window>
         </v-card-text>
