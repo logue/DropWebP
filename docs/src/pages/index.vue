@@ -60,10 +60,10 @@ const urlPrefix = `https://github.com/logue/DropWebP/releases/download/${version
 
 // サイトのベースURL
 const baseUrl = 'https://logue.dev';
-const sitePath = '/DropWebP';
 const currentUrl = computed(() => {
+  // Nuxtのi18n baseUrlを使用して正しいURLを生成
   const path = locale.value === 'ja' ? '' : `/${locale.value}`;
-  return `${baseUrl}${sitePath}${path}`;
+  return `${baseUrl}/DropWebP${path}`;
 });
 
 // OGP画像（ロゴ）- ogpはすでにbasePathを含むので、ドメインのみ追加
@@ -126,7 +126,7 @@ useHead({
             priceCurrency: 'USD'
           },
           description: t('lead.description[0]'),
-          url: `${baseUrl}${sitePath}`,
+          url: `${baseUrl}/DropWebP`,
           image: ogImage,
           softwareVersion: version,
           releaseNotes: `https://github.com/logue/DropWebP/releases/tag/${version}`,
@@ -353,7 +353,7 @@ en:
         - Zopfli, used in this program, is a special compression technique created by Google to make PNGs "smaller."
         - It supports transparency and maintains high-quality images.
         - Zopfli is an algorithm for compressing PNG images more efficiently. It uses advanced compression techniques to reduce file size while preserving image quality.
-    jpeg]:
+    jpeg:
       title: JPEG (MozJPEG Compression)
       description:
         - JPEG is a widely used image format known for its lossy compression capabilities.

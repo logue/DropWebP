@@ -46,7 +46,26 @@ export default defineNuxtConfig({
           rel: 'stylesheet',
           href: 'https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&family=Noto+Sans+JP:wght@100..900&family=Noto+Sans+KR:wght@100..900&family=Noto+Sans+Mono:wght@100..900&family=Noto+Sans+SC:wght@100..900&family=Noto+Sans+TC:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap'
         }
-      ]
+      ],
+      script:
+        process.env.NODE_ENV === 'production'
+          ? [
+              // Google Analytics 4
+              {
+                src: 'https://www.googletagmanager.com/gtag/js?id=G-2Y2FW3QEG4',
+                async: true
+              },
+              {
+                innerHTML: `
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-2Y2FW3QEG4');
+          `,
+                type: 'text/javascript'
+              }
+            ]
+          : []
     }
   },
 

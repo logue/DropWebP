@@ -1,10 +1,10 @@
 <template>
-  <div class="content-with-toc">
+  <v-sheet class="content-with-toc">
     <!-- eslint-disable-next-line vue/no-v-html -->
     <article v-if="compiledHtml" class="markdown-body" v-html="compiledHtml" />
     <v-alert v-else-if="pending" :title="t('loading')" color="info" />
     <v-alert v-else-if="error" :title="t('error')" color="error">{{ error.message }}</v-alert>
-  </div>
+  </v-sheet>
 </template>
 
 <script setup lang="ts">
@@ -125,6 +125,31 @@ watch(compiledHtml, async () => {
   }
 });
 
+// テーマ変更に対応するための強制リセット
+onMounted(() => {
+  if (import.meta.client) {
+    const observer = new MutationObserver(mutations => {
+      for (const mutation of mutations) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          // テーマクラスが変更された時にテーブルスタイルを強制適用
+          const tables = document.querySelectorAll('.markdown-body table');
+          for (const table of tables) {
+            // 強制的にスタイルを再適用
+            (table as HTMLElement).style.cssText = '';
+          }
+        }
+      }
+    });
+
+    const htmlElement = document.documentElement;
+    observer.observe(htmlElement, { attributes: true, attributeFilter: ['class'] });
+
+    onUnmounted(() => {
+      observer.disconnect();
+    });
+  }
+});
+
 const i18nHead = useLocaleHead();
 
 console.log(unref(i18nHead));
@@ -146,30 +171,30 @@ useHead(() => ({
 }));
 </script>
 
-<style scoped>
-.content-with-toc {
-  margin-left: 280px;
-  padding: 24px;
-}
-
-@media (max-width: 1264px) {
-  .content-with-toc {
-    margin-left: 0;
-  }
-}
-
+<style scoped lang="scss">
 /* GitHub Markdown CSS ダークモード切り替え */
 .markdown-body {
   box-sizing: border-box;
-  min-width: 200px;
-  max-width: 980px;
-  margin: 0 auto;
-  padding: 45px;
   /* OSのcolor-schemeに依存しない設定 */
   color-scheme: none;
   /* Vuetifyのライトテーマを明示的に適用 */
   background-color: rgb(var(--v-theme-surface));
   color: rgb(var(--v-theme-on-surface));
+}
+
+/* GitHub Markdown CSSより優先させるための基本テーブルスタイル */
+.markdown-body table {
+  background-color: transparent !important;
+  border-collapse: collapse !important;
+}
+
+.markdown-body table tr {
+  background-color: transparent !important;
+}
+
+.markdown-body table th,
+.markdown-body table td {
+  background-color: transparent !important;
 }
 
 /* Vuetifyのダークテーマと明示的に同期 */
@@ -200,9 +225,36 @@ useHead(() => ({
   color: rgb(var(--v-theme-on-surface-variant)) !important;
 }
 
+.v-theme--dark .markdown-body table,
+.v-theme--dark .markdown-body table tbody,
+.v-theme--dark .markdown-body table thead {
+  background-color: rgb(var(--v-theme-surface)) !important;
+}
+
 .v-theme--dark .markdown-body table th,
-.v-theme--dark .markdown-body table td {
+.v-theme--dark .markdown-body thead th {
+  background-color: rgb(var(--v-theme-surface-variant)) !important;
+  color: rgb(var(--v-theme-on-surface-variant)) !important;
   border-color: rgb(var(--v-theme-outline)) !important;
+}
+
+.v-theme--dark .markdown-body table td,
+.v-theme--dark .markdown-body tbody td {
+  background-color: rgb(var(--v-theme-surface)) !important;
+  color: rgb(var(--v-theme-on-surface)) !important;
+  border-color: rgb(var(--v-theme-outline)) !important;
+}
+
+.v-theme--dark .markdown-body table tr {
+  background-color: rgb(var(--v-theme-surface)) !important;
+}
+
+.v-theme--dark .markdown-body table tr:nth-child(even) {
+  background-color: rgba(var(--v-theme-on-surface), 0.1) !important;
+}
+
+.v-theme--dark .markdown-body table tr:nth-child(even) td {
+  background-color: rgba(var(--v-theme-on-surface), 0.1) !important;
 }
 
 .v-theme--dark .markdown-body a {
@@ -214,6 +266,62 @@ useHead(() => ({
   color-scheme: none !important;
   background-color: rgb(var(--v-theme-surface)) !important;
   color: rgb(var(--v-theme-on-surface)) !important;
+}
+
+.v-theme--light .markdown-body h1,
+.v-theme--light .markdown-body h2,
+.v-theme--light .markdown-body h3,
+.v-theme--light .markdown-body h4,
+.v-theme--light .markdown-body h5,
+.v-theme--light .markdown-body h6 {
+  color: rgb(var(--v-theme-on-surface)) !important;
+}
+
+.v-theme--light .markdown-body pre,
+.v-theme--light .markdown-body code {
+  background-color: rgb(var(--v-theme-surface-variant)) !important;
+  color: rgb(var(--v-theme-on-surface-variant)) !important;
+}
+
+.v-theme--light .markdown-body blockquote {
+  border-left-color: rgb(var(--v-theme-outline)) !important;
+  color: rgb(var(--v-theme-on-surface-variant)) !important;
+}
+
+.v-theme--light .markdown-body table,
+.v-theme--light .markdown-body table tbody,
+.v-theme--light .markdown-body table thead {
+  background-color: rgb(var(--v-theme-surface)) !important;
+}
+
+.v-theme--light .markdown-body table th,
+.v-theme--light .markdown-body thead th {
+  background-color: rgb(var(--v-theme-surface-variant)) !important;
+  color: rgb(var(--v-theme-on-surface-variant)) !important;
+  border-color: rgb(var(--v-theme-outline)) !important;
+}
+
+.v-theme--light .markdown-body table td,
+.v-theme--light .markdown-body tbody td {
+  background-color: rgb(var(--v-theme-surface)) !important;
+  color: rgb(var(--v-theme-on-surface)) !important;
+  border-color: rgb(var(--v-theme-outline)) !important;
+}
+
+.v-theme--light .markdown-body table tr {
+  background-color: rgb(var(--v-theme-surface)) !important;
+}
+
+.v-theme--light .markdown-body table tr:nth-child(even) {
+  background-color: rgba(var(--v-theme-on-surface), 0.05) !important;
+}
+
+.v-theme--light .markdown-body table tr:nth-child(even) td {
+  background-color: rgba(var(--v-theme-on-surface), 0.05) !important;
+}
+
+.v-theme--light .markdown-body a {
+  color: rgb(var(--v-theme-primary)) !important;
 }
 
 @media (max-width: 767px) {

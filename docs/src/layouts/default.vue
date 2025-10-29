@@ -18,7 +18,7 @@ const isDark: ComputedRef<string> = computed(() => (configStore.theme ? 'dark' :
 
 <template>
   <v-app :theme="isDark">
-    <v-navigation-drawer v-model="drawer" temporary>
+    <v-navigation-drawer v-model="drawer" permanent>
       <drawer-menu />
     </v-navigation-drawer>
 
