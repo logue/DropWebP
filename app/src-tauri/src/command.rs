@@ -153,10 +153,7 @@ pub async fn estimate_size(
             EncodeOptions::Webp(opts) => crate::encoder::webp::estimate_size(&img, opts),
             EncodeOptions::Avif(opts) => crate::encoder::avif::estimate_size(&img, opts),
             EncodeOptions::Jxl(opts) => crate::encoder::jxl::estimate_size(&img, opts),
-            EncodeOptions::Jpeg(_) => {
-                // JPEG is temporarily disabled
-                0
-            }
+            EncodeOptions::Jpeg(opts) => crate::encoder::jpeg::estimate_size(&img, opts),
         };
 
         Ok::<usize, String>(size)

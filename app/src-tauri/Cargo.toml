@@ -9,16 +9,22 @@ readme = "../../ReadMe.md"
 repository = "https://github.com/logue/DropWebP"
 license-file = "../../LICENSE"
 keywords = [
-  "tauri",
-  "webp",
+  "application",
   "avif",
-  "jpeg",
-  "jpeg-xl",
-  "image",
   "compress",
   "converter",
   "desktop",
-  "application",
+  "heic",
+  "heif",
+  "image",
+  "jpeg-xl",
+  "jpeg",
+  "jpeg2000",
+  "mozjpeg",
+  "png",
+  "tauri",
+  "webp",
+  "zopfli",
 ]
 categories = ["image-processing", "gui"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
