@@ -12,7 +12,7 @@ import png from '@/assets/zopfli-logo.png';
 const { locale, rt, t, tm } = useI18n();
 const localePath = useLocalePath();
 
-const version = '2.2.1';
+const version = '3.0.0';
 const features = [
   {
     icon: 'mdi-image-multiple',
