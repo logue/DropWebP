@@ -275,7 +275,7 @@ fn prepare_image_data(
 
 /// ICCプロファイルのiCCPチャンクを作成
 fn create_iccp_chunk(profile: &[u8]) -> Result<Vec<u8>, AppError> {
-    use flate2::{Compression, write::DeflateEncoder};
+    use flate2::{write::DeflateEncoder, Compression};
     use std::io::Write;
 
     println!(

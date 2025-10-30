@@ -53,6 +53,22 @@ pub fn encode(
     result
 }
 
+/// 指定された形式での画像ファイルサイズを推定します。
+/// # 引数
+/// - `img`: 変換対象の画像 (HighBitDepthImage)
+/// - `options`: エンコードオプション (EncodeOptions)
+/// # 戻り値
+/// - 推定されるファイルサイズをバイト単位で返します。
+pub fn estimate_size(img: &HighBitDepthImage, options: &EncodeOptions) -> usize {
+    match options {
+        EncodeOptions::Avif(opts) => avif::estimate_size(img, opts),
+        EncodeOptions::Webp(opts) => webp::estimate_size(img, opts),
+        EncodeOptions::Jxl(opts) => jxl::estimate_size(img, opts),
+        EncodeOptions::Png(opts) => png::estimate_size(img, opts),
+        EncodeOptions::Jpeg(opts) => jpeg::estimate_size(img, opts),
+    }
+}
+
 /// HighBitDepthImageからエンコード用のピクセルデータを効率的に抽出します。
 ///
 /// - 元の画像がRGB8/RGBA8形式の場合、データを借用して不要なコピーを避けます。

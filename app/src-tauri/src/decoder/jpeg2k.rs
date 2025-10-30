@@ -1,4 +1,4 @@
-use super::common::{BitDepthAnalysis, IccProfileInfo, log_icc_profile_details};
+use super::common::{log_icc_profile_details, BitDepthAnalysis, IccProfileInfo};
 use crate::error::AppError;
 use crate::options::HighBitDepthImage;
 use image::{ImageBuffer, Rgb, Rgba};

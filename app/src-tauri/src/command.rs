@@ -42,27 +42,97 @@ pub async fn convert(
         }
         // --- 上記のif条件に当てはまらなかった場合、通常のデコード→エンコード処理に進む ---
 
-        send_log_with_handle(&app_clone, LogLevel::Info, "Decoding image...");
+        // 入力データのサイズを保存
+        let input_size = data.len();
 
         // 画像デコード
-        let data = crate::decoder::decode(&data)
+        let decoded_data = crate::decoder::decode(&data)
             .log_error(Some("Image decoding"))
             .map_err(|e| format!("Failed to decode image: {}", e))?;
 
+        let (img, icc_profile) = decoded_data;
+
+        // 推計サイズの算出
+        send_log_with_handle(&app_clone, LogLevel::Info, "Estimating output size...");
+        let estimated_size = crate::encoder::estimate_size(&img, &options);
+
         // 画像エンコード
-        send_log_with_handle(&app_clone, LogLevel::Info, "Encoding image...");
-        let (img, icc_profile) = data;
-        let data = crate::encoder::encode(img, icc_profile, &options)
+        send_log_with_handle(
+            &app_clone,
+            LogLevel::Info,
+            &format!(
+                "Encoding image... (Input size: {} bytes / Estimated output size: {} bytes)",
+                input_size,
+                estimated_size
+            ),
+        );
+
+        let encoded_data = crate::encoder::encode(img, icc_profile, &options)
             .log_error(Some("Image encoding"))
             .map_err(|e| format!("Failed to encode image: {}", e))?;
 
-        Ok(data)
+        // 実際のエンコード結果のサイズをログ出力
+        send_log_with_handle(
+            &app_clone,
+            LogLevel::Info,
+            &format!(
+                "Encoding completed. Input: {} bytes -> Output: {} bytes (Estimated: {} bytes, Ratio: {:.2}%)",
+                input_size,
+                encoded_data.len(),
+                estimated_size,
+                (encoded_data.len() as f64 / input_size as f64) * 100.0
+            ),
+        );
+
+        Ok(encoded_data)
     })
     .await
     .map_err(|e| e.to_string())?;
 
     send_log_with_handle(&app, LogLevel::Info, "Compression completed successfully");
     converted_data
+}
+
+/// 圧縮後のファイルサイズを推定
+/// # 引数
+/// - `data`: 変換対象の画像データのバイト列
+/// - `options`: エンコードオプション
+/// # 戻り値
+/// - 成功した場合は推定サイズを `usize` として返します。
+/// - 失敗した場合はエラーメッセージを `String` として返します。
+#[tauri::command]
+pub async fn estimate_size(
+    data: Vec<u8>,
+    options: EncodeOptions,
+    app: AppHandle,
+) -> Result<usize, String> {
+    send_log_with_handle(&app, LogLevel::Info, "Estimating output size...");
+
+    let app_clone = app.clone();
+    let size = tauri::async_runtime::spawn_blocking(move || {
+        // まず画像をデコード
+        send_log_with_handle(
+            &app_clone,
+            LogLevel::Info,
+            "Decoding image for size estimation...",
+        );
+        let (img, _) = crate::decoder::decode(&data)
+            .log_error(Some("Image decoding for estimation"))
+            .map_err(|e| format!("Failed to decode image: {}", e))?;
+
+        // オプションに応じてサイズ推定
+        let size = crate::encoder::estimate_size(&img, &options);
+
+        Ok::<usize, String>(size)
+    })
+    .await
+    .map_err(|e| e.to_string())??;
+    send_log_with_handle(
+        &app,
+        LogLevel::Info,
+        &format!("Estimated size: {} bytes", size),
+    );
+    Ok(size)
 }
 
 /// ファイルパスを解析して、ファイル名、拡張子、親ディレクトリを抽出します。
@@ -124,46 +194,4 @@ pub async fn delete_path(path_str: String) -> Result<(), String> {
         }
     }
     Ok(())
-}
-
-/// 圧縮後のファイルサイズを推定
-#[tauri::command]
-pub async fn estimate_size(
-    data: Vec<u8>,
-    options: EncodeOptions,
-    app: AppHandle,
-) -> Result<usize, String> {
-    send_log_with_handle(&app, LogLevel::Info, "Estimating output size...");
-
-    let app_clone = app.clone();
-    let size = tauri::async_runtime::spawn_blocking(move || {
-        // まず画像をデコード
-        send_log_with_handle(
-            &app_clone,
-            LogLevel::Info,
-            "Decoding image for size estimation...",
-        );
-        let (img, _) = crate::decoder::decode(&data)
-            .log_error(Some("Image decoding for estimation"))
-            .map_err(|e| format!("Failed to decode image: {}", e))?;
-
-        // オプションに応じてサイズ推定
-        let size = match &options {
-            EncodeOptions::Png(opts) => crate::encoder::png::estimate_size(&img, opts),
-            EncodeOptions::Webp(opts) => crate::encoder::webp::estimate_size(&img, opts),
-            EncodeOptions::Avif(opts) => crate::encoder::avif::estimate_size(&img, opts),
-            EncodeOptions::Jxl(opts) => crate::encoder::jxl::estimate_size(&img, opts),
-            EncodeOptions::Jpeg(opts) => crate::encoder::jpeg::estimate_size(&img, opts),
-        };
-
-        Ok::<usize, String>(size)
-    })
-    .await
-    .map_err(|e| e.to_string())??;
-    send_log_with_handle(
-        &app,
-        LogLevel::Info,
-        &format!("Estimated size: {} bytes", size),
-    );
-    Ok(size)
 }

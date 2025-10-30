@@ -1,7 +1,7 @@
 use super::common::{
-    EncodingAnalysis, ToneMappingType, apply_tone_mapping, convert_f32_to_u8,
-    get_encoding_recommendations, handle_icc_profile_embedding, log_encoding_analysis,
-    provide_icc_recommendations,
+    apply_tone_mapping, convert_f32_to_u8, get_encoding_recommendations,
+    handle_icc_profile_embedding, log_encoding_analysis, provide_icc_recommendations,
+    EncodingAnalysis, ToneMappingType,
 };
 use crate::{encoder::extract_pixel_data, error::AppError, options::HighBitDepthImage};
 use imgref::Img;

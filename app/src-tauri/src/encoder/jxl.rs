@@ -1,12 +1,12 @@
 use super::common::{
-    EncodingAnalysis, get_encoding_recommendations, log_encoding_analysis,
-    provide_icc_recommendations,
+    get_encoding_recommendations, log_encoding_analysis, provide_icc_recommendations,
+    EncodingAnalysis,
 };
 use crate::{
-    encoder::{HighBitDepthImage, extract_pixel_data},
+    encoder::{extract_pixel_data, HighBitDepthImage},
     error::AppError,
 };
-use jpegxl_rs::encode::{EncoderFrame, EncoderResult, EncoderSpeed::*, encoder_builder};
+use jpegxl_rs::encode::{encoder_builder, EncoderFrame, EncoderResult, EncoderSpeed::*};
 use serde::{Deserialize, Serialize};
 
 /// Image type classification based on pixel data and ICC profile
@@ -92,7 +92,7 @@ pub struct JxlOptions {
 
 /// Encoding speed enumeration
 /// - Lightning: Fastest speed, lowest quality
-/// - Thunder: Very fast, low quality  
+/// - Thunder: Very fast, low quality
 /// - Falcon: Fast, slightly low quality
 /// - Cheetah: Balanced speed and quality
 /// - Hare: Slightly slow, good quality
@@ -141,7 +141,7 @@ impl EncoderSpeed {
 /// - SrgbLuma: sRGB color space with luminance information
 /// - LinearSrgbLuma: Linear sRGB color space with luminance information
 ///
-/// Note: Selecting appropriate color encoding optimizes image quality.  
+/// Note: Selecting appropriate color encoding optimizes image quality.
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ColorEncoding {
     Srgb,
@@ -563,7 +563,7 @@ pub fn encode(
                     rgb.push(chunk[0]); // R
                     rgb.push(chunk[1]); // G
                     rgb.push(chunk[2]); // B
-                    // Discard alpha channel
+                                        // Discard alpha channel
                 }
                 rgb
             } else {

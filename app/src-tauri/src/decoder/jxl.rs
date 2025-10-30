@@ -1,8 +1,8 @@
-use super::common::{IccProfileInfo, log_icc_profile_details};
+use super::common::{log_icc_profile_details, IccProfileInfo};
 use crate::error::AppError;
 use crate::options::HighBitDepthImage;
 
-use ::image::{ImageBuffer, Rgb, Rgba};
+use image::{ImageBuffer, Rgb, Rgba};
 use jpegxl_rs::decode::*;
 
 /// Decode JPEG XL image with ICC profile analysis
