@@ -23,6 +23,7 @@
     "github-markdown-css": "^5.8.1",
     "marked": "^16.4.1",
     "nuxt": "3.19.3",
+    "nuxt-gtag": "3.0.3",
     "pinia": "^3.0.3",
     "prismjs": "^1.30.0",
     "sass-embedded": "^1.93.2",

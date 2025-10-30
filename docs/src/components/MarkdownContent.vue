@@ -2,8 +2,10 @@
   <v-sheet class="content-with-toc">
     <!-- eslint-disable-next-line vue/no-v-html -->
     <article v-if="compiledHtml" class="markdown-body" v-html="compiledHtml" />
-    <v-alert v-else-if="pending" :title="t('loading')" color="info" />
-    <v-alert v-else-if="error" :title="t('error')" color="error">{{ error.message }}</v-alert>
+    <v-alert v-else-if="pending" :title="t('loading')" color="info" variant="tonal" />
+    <v-alert v-else-if="error" :title="t('error')" color="error" variant="tonal">
+      {{ error.message }}
+    </v-alert>
   </v-sheet>
 </template>
 

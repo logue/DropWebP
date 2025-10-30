@@ -28,7 +28,7 @@ export default defineNuxtConfig({
 
   // 2. アプリ設定
   app: {
-    baseURL: process.env.NUXT_APP_BASE_URL || (process.env.GITHUB_PAGES ? '/DropWebP/' : '/'),
+    baseURL: process.env.NUXT_APP_BASE_URL || '/DropWebP/',
     buildAssetsDir: '_nuxt/',
     head: {
       link: [
@@ -46,30 +46,19 @@ export default defineNuxtConfig({
           rel: 'stylesheet',
           href: 'https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&family=Noto+Sans+JP:wght@100..900&family=Noto+Sans+KR:wght@100..900&family=Noto+Sans+Mono:wght@100..900&family=Noto+Sans+SC:wght@100..900&family=Noto+Sans+TC:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap'
         }
-      ],
-      script:
-        process.env.NODE_ENV === 'production'
-          ? [
-              // Google Analytics 4
-              {
-                src: 'https://www.googletagmanager.com/gtag/js?id=G-2Y2FW3QEG4',
-                async: true
-              },
-              {
-                innerHTML: `
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', 'G-2Y2FW3QEG4');
-          `,
-                type: 'text/javascript'
-              }
-            ]
-          : []
+      ]
     }
   },
 
-  // i18n設定（<i18n>ブロック使用）
+  // 3. モジュール
+  modules: ['@pinia/nuxt', 'vuetify-nuxt-module', '@nuxtjs/i18n', '@nuxt/eslint', 'nuxt-gtag'],
+
+  // 4. Google Analytics設定
+  gtag: {
+    id: 'G-2Y2FW3QEG4'
+  },
+
+  // 5. i18n設定（<i18n>ブロック使用）
   i18n: {
     locales: [
       { code: Locale.ja, language: 'ja-JP', name: '🇯🇵 日本語', iso: 'ja-JP' },
@@ -81,7 +70,9 @@ gtag('config', 'G-2Y2FW3QEG4');
     ],
     defaultLocale: Locale.en,
     strategy: 'prefix_and_default',
-    baseUrl: 'https://logue.dev/DropWebP',
+    baseUrl:
+      process.env.NUXT_PUBLIC_SITE_URL ||
+      (process.env.GITHUB_PAGES ? 'https://logue.dev' : 'http://localhost:3000'),
     detectBrowserLanguage: false,
     compilation: {
       // HTMLを含むメッセージの警告を無効化
@@ -89,10 +80,7 @@ gtag('config', 'G-2Y2FW3QEG4');
     }
   },
 
-  // モジュール
-  modules: ['@pinia/nuxt', 'vuetify-nuxt-module', '@nuxtjs/i18n', '@nuxt/eslint'],
-
-  // Vuetify設定（CSS完全外部化）
+  // 6. Vuetify設定（CSS完全外部化）
   vuetify: {
     moduleOptions: {
       /* CSS外部化を強制 */

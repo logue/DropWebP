@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { unref } from 'vue';
 import avif from '@/assets/Avif-logo-rgb.svg';
 import jxl from '@/assets/JPEG_XL_logo.svg';
 import jpeg from '@/assets/Mozjpeg_logotype.svg';
@@ -58,19 +59,61 @@ const languages = [
 
 const urlPrefix = `https://github.com/logue/DropWebP/releases/download/${version}/drop-compress-image_${version}_`;
 
-// サイトのベースURL
+// サイトのベースURL - 本番環境ではhttps://logue.devを使用
 const baseUrl = 'https://logue.dev';
+const sitePath = '/DropWebP';
+
 const currentUrl = computed(() => {
-  // Nuxtのi18n baseUrlを使用して正しいURLを生成
-  const path = locale.value === 'ja' ? '' : `/${locale.value}`;
-  return `${baseUrl}/DropWebP${path}`;
+  const path = locale.value === 'en' ? '' : `/${locale.value}`;
+  return `${baseUrl}${sitePath}${path}`;
 });
 
-// OGP画像（ロゴ）- ogpはすでにbasePathを含むので、ドメインのみ追加
-const ogImage = `${baseUrl}${ogp}`;
+// OGP画像（ロゴ）- 完全なURLを構築
+const ogImage = computed(() => {
+  // ogp変数が相対パスの場合、適切にベースURLと結合
+  if (ogp.startsWith('/DropWebP/')) {
+    return `${baseUrl}${ogp}`;
+  } else if (ogp.startsWith('/')) {
+    return `${baseUrl}${sitePath}${ogp}`;
+  } else {
+    return `${baseUrl}${sitePath}/${ogp}`;
+  }
+});
 
-// hreflangタグを生成
-useHead(useLocaleHead());
+// hreflangタグを手動で生成（デプロイ環境での重複URL問題を回避）
+const hreflangLinks = computed(() => {
+  const links = [];
+
+  // x-default（英語）
+  links.push({
+    rel: 'alternate',
+    hreflang: 'x-default',
+    href: `${baseUrl}${sitePath}/`
+  });
+
+  // 各言語
+  languages.forEach(lang => {
+    if (lang.code === 'en') {
+      links.push({
+        rel: 'alternate',
+        hreflang: 'en',
+        href: `${baseUrl}${sitePath}/`
+      });
+    } else {
+      links.push({
+        rel: 'alternate',
+        hreflang: lang.code,
+        href: `${baseUrl}${sitePath}/${lang.code}/`
+      });
+    }
+  });
+
+  return links;
+});
+
+useHead({
+  link: hreflangLinks
+});
 
 // SEO メタデータ
 useSeoMeta({
@@ -100,54 +143,56 @@ useSeoMeta({
 });
 
 // JSON-LD 構造化データ
+const jsonLdData = computed(() => {
+  const languageMap: Record<string, string> = {
+    ja: 'ja',
+    en: 'en',
+    fr: 'fr',
+    ko: 'ko',
+    zhHans: 'zh-CN',
+    zhHant: 'zh-TW'
+  };
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'Drop Compress Image',
+    applicationCategory: 'DesignApplication',
+    operatingSystem: 'Windows 11, macOS',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD'
+    },
+    description: unref(t('lead.description[0]')),
+    url: `${unref(baseUrl)}/DropWebP`,
+    image: unref(ogImage),
+    softwareVersion: unref(version),
+    releaseNotes: `https://github.com/logue/DropWebP/releases/tag/${unref(version)}`,
+    downloadUrl: `https://github.com/logue/DropWebP/releases/download/${unref(version)}/`,
+    author: {
+      '@type': 'Person',
+      name: 'Logue',
+      url: 'https://github.com/logue'
+    },
+    featureList: [
+      unref(t('features.multiple_formats.title')),
+      unref(t('features.high_speed.title')),
+      unref(t('features.drag_drop.title')),
+      unref(t('features.i18n.title')),
+      unref(t('features.dark_mode.title')),
+      unref(t('features.paste.title'))
+    ],
+    screenshot: unref(ogImage),
+    inLanguage: languageMap[locale.value] || 'en'
+  };
+});
+
 useHead({
   script: [
     {
       type: 'application/ld+json',
-      innerHTML: computed(() => {
-        const languageMap: Record<string, string> = {
-          ja: 'ja',
-          en: 'en',
-          fr: 'fr',
-          ko: 'ko',
-          zhHans: 'zh-CN',
-          zhHant: 'zh-TW'
-        };
-
-        return JSON.stringify({
-          '@context': 'https://schema.org',
-          '@type': 'SoftwareApplication',
-          name: 'Drop Compress Image',
-          applicationCategory: 'DesignApplication',
-          operatingSystem: 'Windows 11, macOS',
-          offers: {
-            '@type': 'Offer',
-            price: '0',
-            priceCurrency: 'USD'
-          },
-          description: t('lead.description[0]'),
-          url: `${baseUrl}/DropWebP`,
-          image: ogImage,
-          softwareVersion: version,
-          releaseNotes: `https://github.com/logue/DropWebP/releases/tag/${version}`,
-          downloadUrl: `https://github.com/logue/DropWebP/releases/download/${version}/`,
-          author: {
-            '@type': 'Person',
-            name: 'Logue',
-            url: 'https://github.com/logue'
-          },
-          featureList: [
-            t('features.multiple_formats.title'),
-            t('features.high_speed.title'),
-            t('features.drag_drop.title'),
-            t('features.i18n.title'),
-            t('features.dark_mode.title'),
-            t('features.paste.title')
-          ],
-          screenshot: ogImage,
-          inLanguage: languageMap[locale.value] || 'en'
-        });
-      })
+      innerHTML: () => JSON.stringify(jsonLdData.value)
     }
   ]
 });
@@ -195,9 +240,12 @@ useHead({
   </v-card>
 
   <v-card class="mb-6 bg-transparent" flat tag="section">
-    <v-card-title class="text-h5 text-center pa-6" tag="h2">
+    <v-card-title class="text-h5 text-center" tag="h2">
       {{ t('download.download') }}
     </v-card-title>
+    <v-card-subtitle class="text-center">
+      <v-code>v.{{ version }}</v-code>
+    </v-card-subtitle>
     <!-- Download Buttons -->
     <v-card-actions class="justify-center">
       <v-btn
@@ -229,8 +277,8 @@ useHead({
   </v-card>
 
   <v-card class="mb-6 bg-transparent" flat tag="section">
-    <v-card-title class="text-h5 text-center pa-6" tag="h2">{{ t('features.title') }}</v-card-title>
-    <v-card-subtitle class="text-center pb-4">{{ t('features.subtitle') }}</v-card-subtitle>
+    <v-card-title class="text-h5 text-center" tag="h2">{{ t('features.title') }}</v-card-title>
+    <v-card-subtitle class="text-center">{{ t('features.subtitle') }}</v-card-subtitle>
     <v-card-text>
       <v-row class="mb-5">
         <v-col v-for="item in features" :key="item.key" cols="12" md="4">
@@ -249,8 +297,8 @@ useHead({
   </v-card>
 
   <v-card class="mb-6 bg-transparent" flat tag="section">
-    <v-card-title class="text-h5 text-center pa-6" tag="h2">{{ t('format.title') }}</v-card-title>
-    <v-card-subtitle class="text-center pb-4">{{ t('format.subtitle') }}</v-card-subtitle>
+    <v-card-title class="text-h5 text-center" tag="h2">{{ t('format.title') }}</v-card-title>
+    <v-card-subtitle class="text-center">{{ t('format.subtitle') }}</v-card-subtitle>
     <v-card-text>
       <v-row class="mb-5">
         <v-col v-for="item in formats" :key="item.key" cols="12" md="4">
