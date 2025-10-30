@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { platform } from '@tauri-apps/plugin-os';
@@ -25,10 +25,9 @@ const onPaste = () => {
   emit('update:show', false);
 };
 
-const platformName = ref<string>('');
-
-onMounted(async () => {
-  platformName.value = await platform();
+const shortcut = ref<string>('');
+onMounted(() => {
+  shortcut.value = platform() === 'macos' ? '⌘' : 'Ctrl+';
 });
 </script>
 
@@ -41,14 +40,8 @@ onMounted(async () => {
     @update:model-value="emit('update:show', $event)"
   >
     <v-list>
-      <v-list-item prepend-icon="mdi-content-paste" @click="onPaste">
-        <v-list-item-title>
-          {{ t('paste') }}
-        </v-list-item-title>
-        <template #append>
-          <template v-if="platformName === 'macos'">⌘V</template>
-          <template v-else>Ctrl+V</template>
-        </template>
+      <v-list-item :title="t('paste')" prepend-icon="mdi-content-paste" @click="onPaste">
+        <template #append>{{ shortcut }}V</template>
       </v-list-item>
     </v-list>
   </v-menu>

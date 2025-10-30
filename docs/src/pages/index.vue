@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { unref } from 'vue';
+
 import avif from '@/assets/Avif-logo-rgb.svg';
 import jxl from '@/assets/JPEG_XL_logo.svg';
 import jpeg from '@/assets/Mozjpeg_logotype.svg';

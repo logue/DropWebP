@@ -7,9 +7,7 @@ import Meta from '@/Meta';
 
 const { t } = useI18n();
 
-const openGitHub = async () => {
-  await openUrl('https://github.com/logue/DropWebP');
-};
+const PROJECT_SITE = 'https://logue.dev/DropWebP/';
 </script>
 
 <template>
@@ -38,8 +36,8 @@ const openGitHub = async () => {
             <small>(Build: {{ Meta.date }})</small>
           </p>
           <p>
-            <a href="https://github.com/logue/DropWebP" target="_blank" @click="openGitHub">
-              https://github.com/logue/DropWebP
+            <a :href="PROJECT_SITE" target="_blank" @click="openUrl(PROJECT_SITE)">
+              {{ PROJECT_SITE }}
             </a>
           </p>
         </v-card-text>

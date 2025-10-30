@@ -14,18 +14,23 @@ function changeLocale(newLocale: string) {
 </script>
 
 <template>
-  <v-list mandatory>
-    <v-list-item
-      v-for="lang in availableLocales"
-      :key="lang"
-      :active="configStore.locale === lang"
-      @click="changeLocale(lang)"
-    >
-      <v-list-item-title>
-        {{ t(`${lang}`) }}
-      </v-list-item-title>
-    </v-list-item>
-  </v-list>
+  <v-menu location="bottom">
+    <template #activator="{ props }">
+      <v-btn v-bind="props" icon variant="plain">
+        <v-icon>mdi-translate</v-icon>
+        <v-tooltip :text="t('locale')" activator="parent" location="bottom" />
+      </v-btn>
+    </template>
+    <v-list density="compact" mandatory>
+      <v-list-item
+        v-for="lang in availableLocales"
+        :key="lang"
+        :active="configStore.locale === lang"
+        :title="t(`${lang}`)"
+        @click="changeLocale(lang)"
+      />
+    </v-list>
+  </v-menu>
 </template>
 
 <i18n lang="yaml">

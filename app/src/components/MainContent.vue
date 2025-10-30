@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useSettingsStore } from '@/store';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import ContextMenu from './ContextMenu.vue';
@@ -24,6 +24,45 @@ const {
   convertByDialog,
   handlePaste
 } = useImageConversionController(t);
+
+// ラジオボタンの選択肢
+const FORMATS: Record<
+  OutputFormat,
+  { label: string; color: string; description: string; isExperimental?: boolean }
+> = {
+  [OutputFormat.WebP]: {
+    label: t('type.webp'),
+    color: 'orange',
+    description: t('type.webp_description')
+  },
+  [OutputFormat.AVIF]: {
+    label: t('type.avif'),
+    color: 'red',
+    description: t('type.avif_description')
+  },
+  [OutputFormat.JXL]: {
+    label: t('type.jxl'),
+    color: 'blue',
+    description: t('type.jxl_description'),
+    isExperimental: true
+  },
+  [OutputFormat.JPEG]: {
+    label: t('type.jpeg'),
+    color: 'green',
+    description: t('type.jpeg_description')
+  },
+  [OutputFormat.PNG]: {
+    label: t('type.png'),
+    color: 'pink',
+    description: t('type.png_description')
+  }
+};
+
+const highlightColor = computed(() => {
+  return isDragging.value
+    ? `bg-${FORMATS[settingsStore.commonOptions.format].color}-lighten-5`
+    : '';
+});
 
 // コンテキストメニューの状態
 const menuVisibility = ref(false);
@@ -70,7 +109,7 @@ const onPasteFromContextMenu = async () => {
     @contextmenu="onRightClick"
   >
     <v-sheet
-      :class="isDragging ? 'bg-green-lighten-5' : ''"
+      :class="highlightColor"
       class="d-flex flex-grow-1 align-center justify-center my-4 px-15"
       rounded="xl"
     >
@@ -88,7 +127,7 @@ const onPasteFromContextMenu = async () => {
       </div>
     </v-sheet>
 
-    <v-card class="d-flex bg-transparent" flat>
+    <v-card flat>
       <v-card-actions>
         <v-radio-group
           v-model="settingsStore.commonOptions.format"
@@ -96,62 +135,20 @@ const onPasteFromContextMenu = async () => {
           class="d-flex justify-end"
           inline
         >
-          <v-tooltip :text="t('type.webp_description')" location="top">
+          <v-tooltip
+            v-for="(format, key) in FORMATS"
+            :key="key"
+            :text="format.description"
+            location="top"
+          >
             <template #activator="{ props }">
-              <v-radio
-                v-bind="props"
-                :label="t('type.webp')"
-                :value="OutputFormat.WebP"
-                color="green"
-              />
-            </template>
-          </v-tooltip>
-          <v-tooltip :text="t('type.avif_description')" location="top">
-            <template #activator="{ props }">
-              <v-radio
-                v-bind="props"
-                :label="t('type.avif')"
-                :value="OutputFormat.AVIF"
-                color="red"
-              />
-            </template>
-          </v-tooltip>
-          <v-tooltip :text="t('type.jxl_description')" location="top">
-            <template #activator="{ props }">
-              <v-radio v-bind="props" :label="t('type.jxl')" :value="OutputFormat.JXL" color="blue">
+              <v-radio v-bind="props" :value="key" :color="format.color">
                 <template #label>
-                  {{ t('type.jxl') }}&nbsp;
-                  <v-chip size="x-small">{{ t('experimental') }}</v-chip>
-                </template>
-              </v-radio>
-            </template>
-          </v-tooltip>
-          <v-tooltip :text="t('type.png_description')" location="top">
-            <template #activator="{ props }">
-              <v-radio
-                v-bind="props"
-                :label="t('type.png')"
-                :value="OutputFormat.PNG"
-                color="purple"
-              >
-                <template #label>
-                  {{ t('type.png') }}&nbsp;
-                  <small class="text-grey">({{ t('zopfli') }})</small>
-                </template>
-              </v-radio>
-            </template>
-          </v-tooltip>
-          <v-tooltip :text="t('type.jpeg_description')" location="top">
-            <template #activator="{ props }">
-              <v-radio
-                v-bind="props"
-                :label="t('type.jpeg')"
-                :value="OutputFormat.JPEG"
-                color="orange"
-              >
-                <template #label>
-                  {{ t('type.jpeg') }}&nbsp;
-                  <small class="text-grey">({{ t('mozjpeg') }})</small>
+                  {{ format.label }}
+                  <template v-if="format.isExperimental">
+                    &nbsp;
+                    <v-chip size="x-small">{{ t('experimental') }}</v-chip>
+                  </template>
                 </template>
               </v-radio>
             </template>
