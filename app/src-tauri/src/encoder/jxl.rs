@@ -9,65 +9,16 @@ use crate::{
 use jpegxl_rs::encode::{encoder_builder, EncoderFrame, EncoderResult, EncoderSpeed::*};
 use serde::{Deserialize, Serialize};
 
-/// Image type classification based on pixel data and ICC profile
-#[derive(Debug, Clone, Copy)]
-enum ImageType {
-    Standard8Bit,
-    WideGamutSdr,
-    Hdr,
-}
-
-/// Encoding configuration optimized for different image types
-#[derive(Debug)]
-struct EncodingConfig {
-    image_type: ImageType,
-    use_8bit_data: bool,
-    color_encoding: jpegxl_rs::encode::ColorEncoding,
-    description: &'static str,
-}
-
-/// Estimate original bit depth from f32 pixel data
-/// This function reverse-engineers the likely source bit depth
-fn estimate_original_bit_depth(pixels_f32: &[f32], icc_profile: &Option<Vec<u8>>) -> u8 {
-    let profile_suggests_high_bit = icc_profile.as_ref().map_or(false, |p| p.len() > 400);
-
-    // Analyze pixel value precision
-    let sample_size = (pixels_f32.len() / 100).max(1000).min(10000);
-    let mut unique_values = std::collections::HashSet::new();
-
-    for &pixel in pixels_f32.iter().take(sample_size) {
-        if (0.0..=1.0).contains(&pixel) {
-            // Reverse-convert f32 value to 8-bit scale
-            let scaled_8bit = (pixel * 255.0).round() as u8;
-            let rescaled = scaled_8bit as f32 / 255.0;
-
-            // If the difference is small, it's likely from 8-bit source
-            if (pixel - rescaled).abs() < 0.002 {
-                unique_values.insert(scaled_8bit);
-            }
-        }
-    }
-
-    let appears_8bit_quantized =
-        unique_values.len() <= 256 && pixels_f32.iter().take(sample_size).all(|&p| p <= 1.0);
-
-    if appears_8bit_quantized && !profile_suggests_high_bit {
-        println!("JXL: Detected 8-bit quantization pattern - standard 8-bit image");
-        8
-    } else if profile_suggests_high_bit {
-        println!("JXL: ICC profile analysis suggests 10-bit equivalent");
-        10
-    } else {
-        println!("JXL: High bit-depth pattern detected");
-        16
-    }
-}
-
 /// JPEG XL encoding options
 ///
-/// Note: jpegxl-rs v0.11.2 has known issues with lossless encoding.
-/// RGBA images with lossless mode cause ApiUsage errors.
-/// This implementation automatically falls back to high quality mode.
+/// * `lossless` - Use lossless compression
+/// * `speed` - Encoding speed (0-10), lower values are faster but lower quality
+/// * `quality` - Quality (0.1-15.0), higher values mean better quality. Default 1.0, recommended 0.5-3.0
+/// * `use_container` - Configure encoder to use JPEG XL container format
+/// * `uses_original_profile` - Use original color profile (always enabled for lossless)
+/// * `decoding_speed` - Decoding speed setting (0-4), lower values mean higher quality
+/// * `init_buffer_size` - Initial output buffer size (UI sends KB, converted to bytes internally), minimum 32KB
+/// * `color_encoding` - Color encoding method, default is sRGB
 ///
 /// * `lossless` - Use lossless compression (auto-fallback for RGBA images)
 /// * `speed` - Encoding speed (0-10), lower values are faster but lower quality
@@ -249,13 +200,6 @@ pub fn encode(
     }
 
     builder = builder.init_buffer_size(safe_buffer_size);
-
-    // HDR画像の検出
-    let max_pixel_value = pixels_f32
-        .iter()
-        .max_by(|a, b| a.partial_cmp(b).unwrap())
-        .copied()
-        .unwrap_or(1.0);
 
     // Use analysis results from common module instead of local estimation
     let estimated_original_bit_depth = match analysis.recommended_bit_depth {

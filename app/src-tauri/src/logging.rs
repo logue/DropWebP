@@ -7,6 +7,7 @@ static APP_HANDLE: OnceLock<AppHandle> = OnceLock::new();
 
 /// ログレベル定義
 #[derive(Debug, Clone, Copy)]
+#[allow(dead_code)]
 pub enum LogLevel {
     Debug,
     Info,
@@ -50,7 +51,8 @@ pub fn send_log(level: LogLevel, message: &str) {
     }
 }
 
-/// Send log message with AppHandle (legacy compatibility)
+/// Send log message with AppHandle (for use in async contexts)
+#[allow(dead_code)]
 pub fn send_log_with_handle(app_handle: &AppHandle, level: LogLevel, message: &str) {
     let log_data = serde_json::json!({
         "level": level.as_str(),
@@ -74,25 +76,6 @@ pub fn log_app_error(error: &AppError, context: Option<&str>) {
 
     // Also log to console for debugging
     eprintln!("AppError: {}", message);
-}
-
-/// Log AppError with custom log level
-#[allow(dead_code)]
-pub fn log_app_error_with_level(error: &AppError, level: LogLevel, context: Option<&str>) {
-    let message = match context {
-        Some(ctx) => format!("{}: {}", ctx, error),
-        None => error.to_string(),
-    };
-
-    send_log(level, &message);
-
-    // Also log to console for debugging
-    match level {
-        LogLevel::Error => eprintln!("AppError: {}", message),
-        LogLevel::Warn => println!("AppWarning: {}", message),
-        LogLevel::Info => println!("AppInfo: {}", message),
-        LogLevel::Debug => println!("AppDebug: {}", message),
-    }
 }
 
 /// Convenience macros for logging
@@ -124,41 +107,15 @@ macro_rules! log_error {
     };
 }
 
-/// Extension trait for AppError to add logging capabilities
-pub trait AppErrorExt {
-    fn log(&self, context: Option<&str>) -> &Self;
-    fn log_with_level(&self, level: LogLevel, context: Option<&str>) -> &Self;
-}
-
-impl AppErrorExt for AppError {
-    fn log(&self, context: Option<&str>) -> &Self {
-        log_app_error(self, context);
-        self
-    }
-
-    fn log_with_level(&self, level: LogLevel, context: Option<&str>) -> &Self {
-        log_app_error_with_level(self, level, context);
-        self
-    }
-}
-
 /// Result extension for convenient error logging
 pub trait ResultExt<T, E> {
     fn log_error(self, context: Option<&str>) -> Self;
-    fn log_error_with_level(self, level: LogLevel, context: Option<&str>) -> Self;
 }
 
 impl<T> ResultExt<T, AppError> for Result<T, AppError> {
     fn log_error(self, context: Option<&str>) -> Self {
         if let Err(ref error) = self {
             log_app_error(error, context);
-        }
-        self
-    }
-
-    fn log_error_with_level(self, level: LogLevel, context: Option<&str>) -> Self {
-        if let Err(ref error) = self {
-            log_app_error_with_level(error, level, context);
         }
         self
     }

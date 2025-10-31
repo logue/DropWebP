@@ -1,5 +1,3 @@
-use std::io::Cursor;
-
 #[allow(dead_code)]
 /// ICC profile information for bit depth detection and color space analysis
 #[derive(Debug, Clone)]
@@ -73,6 +71,7 @@ pub enum ProcessingType {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub enum RecommendedFormat {
     U8Optimized,  // For simple 8-bit images
     F32Required,  // For wide gamut or high bit depth
@@ -84,7 +83,7 @@ impl BitDepthAnalysis {
     pub fn analyze(
         source_bit_depth: u8,
         icc_profile: Option<&IccProfileInfo>,
-        pixel_count: usize,
+        _pixel_count: usize,
     ) -> Self {
         let max_value = ((1 << source_bit_depth) - 1) as u32;
 
@@ -225,78 +224,4 @@ fn detect_high_precision_profile(profile: &[u8], color_space: &str) -> bool {
                 || profile.len() > 1000
             // Large profiles often indicate complex tone curves
         )
-}
-
-/// Extract ICC profile from various image formats
-pub fn extract_icc_profile(bytes: &[u8]) -> Option<Vec<u8>> {
-    // --- PNG format ---
-    if bytes.starts_with(&[0x89, 0x50, 0x4E, 0x47]) {
-        let decoder = png::Decoder::new(Cursor::new(bytes));
-        if let Ok(reader) = decoder.read_info() {
-            if let Some(profile) = &reader.info().icc_profile {
-                return Some(profile.to_vec());
-            }
-        }
-        return None;
-    }
-
-    // --- JPEG format ---
-    if bytes.starts_with(&[0xFF, 0xD8]) {
-        return extract_jpeg_icc_profile(bytes);
-    }
-
-    // Add more formats as needed
-    None
-}
-
-/// Extract ICC profile from JPEG APP2 segments
-fn extract_jpeg_icc_profile(bytes: &[u8]) -> Option<Vec<u8>> {
-    let mut icc_chunks = std::collections::BTreeMap::new();
-    let mut pos = 2; // Skip SOI marker
-
-    while pos < bytes.len() - 4 {
-        // Look for markers (starting with FF)
-        if bytes[pos] != 0xFF {
-            pos += 1;
-            continue;
-        }
-
-        let marker = bytes[pos + 1];
-
-        // Check for APP2 marker (FF E2)
-        if marker == 0xE2 {
-            let length = u16::from_be_bytes([bytes[pos + 2], bytes[pos + 3]]) as usize;
-            if pos + 2 + length > bytes.len() {
-                break;
-            }
-
-            let segment_data = &bytes[pos + 4..pos + 2 + length];
-
-            // Check for "ICC_PROFILE" identifier
-            if segment_data.starts_with(b"ICC_PROFILE\0") && segment_data.len() > 14 {
-                let chunk_index = segment_data[12];
-                let total_chunks = segment_data[13];
-                let profile_part = &segment_data[14..];
-
-                icc_chunks.insert(chunk_index, profile_part);
-
-                // Check if all chunks are collected
-                if icc_chunks.len() == total_chunks as usize {
-                    let mut full_profile = Vec::new();
-                    for i in 1..=total_chunks {
-                        if let Some(chunk) = icc_chunks.get(&i) {
-                            full_profile.extend_from_slice(chunk);
-                        }
-                    }
-                    return Some(full_profile);
-                }
-            }
-        }
-
-        // Move to next marker
-        let length = u16::from_be_bytes([bytes[pos + 2], bytes[pos + 3]]) as usize;
-        pos += 2 + length;
-    }
-
-    None
 }

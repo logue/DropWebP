@@ -292,6 +292,7 @@ pub fn calculate_optimal_quality(
 }
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct OptimalQuality {
     pub quality: f32,
     pub use_lossless: bool,
@@ -299,6 +300,7 @@ pub struct OptimalQuality {
 }
 
 /// Unified ICC profile embedding interface for all formats
+#[allow(dead_code)]
 pub trait IccProfileEmbedder {
     fn supports_icc_embedding(&self) -> bool;
     fn embed_icc_profile(&self, data: &[u8], profile: &[u8]) -> Result<Vec<u8>, String>;
@@ -321,6 +323,7 @@ pub fn warn_about_icc_limitations(format_name: &str, profile_size: usize) {
 
 /// Unified ICC profile embedding result
 #[derive(Debug)]
+#[allow(dead_code)]
 pub enum IccEmbeddingResult {
     Success(Vec<u8>),
     NotSupported(Vec<u8>),   // Returns original data with reason

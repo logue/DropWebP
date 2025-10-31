@@ -10,7 +10,7 @@ pub use decoder::decode;
 pub use encoder::encode;
 pub use encoder::estimate_size;
 pub use error::AppError;
-pub use logging::{init_logging, send_log, AppErrorExt, LogLevel, ResultExt};
+pub use logging::{init_logging, send_log, LogLevel, ResultExt};
 
 // オプションの型定義なども必要に応じて公開する
 pub use options::EncodeOptions;
