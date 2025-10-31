@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useSettingsStore } from '@/store';
-import { computed, ref } from 'vue';
+import { computed, ref, type ComputedRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import ContextMenu from './ContextMenu.vue';
@@ -26,10 +26,9 @@ const {
 } = useImageConversionController(t);
 
 // ラジオボタンの選択肢
-const FORMATS: Record<
-  OutputFormat,
-  { label: string; color: string; description: string; badge?: string }
-> = {
+const formats: ComputedRef<
+  Record<OutputFormat, { label: string; color: string; description: string; badge?: string }>
+> = computed(() => ({
   [OutputFormat.WebP]: {
     label: t('formats.webp.label'),
     color: 'orange',
@@ -58,11 +57,11 @@ const FORMATS: Record<
     description: t('formats.png.description'),
     badge: t('formats.png.badge')
   }
-};
+}));
 
 const highlightColor = computed(() => {
   return isDragging.value
-    ? `bg-${FORMATS[settingsStore.commonOptions.format].color}-lighten-5`
+    ? `bg-${formats.value[settingsStore.commonOptions.format].color}-lighten-5`
     : '';
 });
 
@@ -138,7 +137,7 @@ const onPasteFromContextMenu = async () => {
           inline
         >
           <v-tooltip
-            v-for="(format, key) in FORMATS"
+            v-for="(format, key) in formats"
             :key="key"
             :text="format.description"
             location="top"
@@ -193,14 +192,14 @@ en:
   formats:
     png:
       label: PNG
-      badge: Zopfli Compression
+      badge: Zopfli Comp.
       description:
         PNG is a widely used lossless image format that supports transparency and is ideal for images with sharp edges and text.
         Zopfli, used in this program, is a more advanced compression algorithm that requires more processing power but significantly reduces the size of the same PNG file while maintaining quality.
         This makes it an ideal choice for preserving original data or recompressing textures for VRC.
     jpeg:
       label: JPEG
-      badge: MozJPEG Compression
+      badge: MozJPEG Comp.
       description:
         JPEG is a format primarily used for photos, emphasizing "small size, even at the expense of some image quality loss."
         MozJPEG is a technology developed by Mozilla to make JPEG even smaller while minimizing visual degradation.
@@ -254,14 +253,14 @@ fr:
   formats:
     png:
       label: PNG
-      badge: Zopfli Compression
+      badge: Zopfli Comp.
       description:
         PNG est un format d'image sans perte largement utilisé qui prend en charge la transparence et est idéal pour les images aux contours nets et le texte.
         Zopfli, utilisé dans ce programme, est un algorithme de compression plus avancé qui nécessite plus de puissance de traitement, mais réduit considérablement la taille du fichier PNG tout en préservant la qualité.
         Il est donc idéal pour préserver les données d'origine ou recompresser les textures pour les applications VRC.
     jpeg:
       label: JPEG
-      badge: MozJPEG Compression
+      badge: MozJPEG Comp.
       description:
         JPEG est un format principalement utilisé pour les photos, privilégiant la «petite taille, même au prix d'une certaine perte de qualité d'image».
         MozJPEG est une technologie développée par Mozilla pour réduire la taille des fichiers JPEG tout en minimisant la dégradation visuelle.

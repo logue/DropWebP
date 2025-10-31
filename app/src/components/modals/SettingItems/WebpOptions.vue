@@ -333,7 +333,7 @@ ko:
   alpha_quality: 알파 품질 ({min}-{max})
   alpha_quality_hint: RGBA 이미지의 투명도 품질. 100=무손실 알파. 권장=80-100.
   reset_webp_options: WebP 옵션 재설정
-zh-tw:
+zhHant:
   lossless: 無損壓縮
   lossless_hint: 啟用無損壓縮（完美品質，檔案較大）
   quality: 品質 ({min}-{max})
@@ -365,7 +365,7 @@ zh-tw:
   alpha_quality: Alpha 品質 ({min}-{max})
   alpha_quality_hint: RGBA 圖像的透明度品質。100=無損 alpha。建議=80-100。
   reset_webp_options: 重置 WebP 選項
-zh-cn:
+zhHans:
   lossless: 无损压缩
   lossless_hint: 启用无损压缩（完美品质，文件较大）
   quality: 品质 ({min}-{max})

@@ -162,7 +162,7 @@ ko:
   browse: 찾아보기
   reset_all: 모두 재설정
   reset_common: 공통 옵션 재설정
-zh-tw:
+zhHant:
   play_sound: 完成時播放聲音
   volume: 音量
   notify: 桌面通知
@@ -178,7 +178,7 @@ zh-tw:
   browse: 瀏覽
   reset_all: 重置所有設定
   reset_common: 重置常用選項
-zh-cn:
+zhHans:
   play_sound: 完成时播放声音
   volume: 音量
   notify: 桌面通知

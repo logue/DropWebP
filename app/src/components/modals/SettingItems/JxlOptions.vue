@@ -128,7 +128,7 @@ const settingsStore = useSettingsStore();
 <i18n lang="yaml">
 en:
   lossless: Lossless compression
-  lossless_hint: If the input file is JPEG, it will be lossless regardless of this setting. It works for most images, but in rare cases it may not be applied (issue of jpegxl-rs).
+  lossless_hint: This works for most images, but in rare cases, it may not be applied (issue of jpegxl-rs).
   speed: Encoding speed
   speed_hint: Default is 7, Squirrel. Lower values are faster but lower quality.
   speed_items:
@@ -162,7 +162,7 @@ en:
   reset_jxl_options: Reset JPEG XL settings
 fr:
   lossless: Compression sans perte
-  lossless_hint: Si le fichier d'entrée est un JPEG, il sera sans perte quelle que soit cette configuration. Cela fonctionne pour la plupart des images, mais dans de rares cas, cela peut ne pas être appliqué (problème de jpegxl-rs).
+  lossless_hint: Cela fonctionne pour la plupart des images, mais dans de rares cas, cela peut ne pas être appliqué (problème de jpegxl-rs).
   speed: Vitesse d'encodage
   speed_hint: La valeur par défaut est 7, Écureuil. Des valeurs plus basses sont plus rapides mais de moindre qualité.
   speed_items:
@@ -196,7 +196,7 @@ fr:
   reset_jxl_options: Réinitialiser les paramètres JPEG XL
 ja:
   lossless: ロスレス圧縮
-  lossless_hint: JPEGが入力ファイルだった場合、ここの設定に関わらずロスレスになります。ほとんどの画像で機能しますが、稀に適用されないことがあります（jpegxl-rsの問題）。
+  lossless_hint: これはほとんどの画像で機能しますが、稀に適用されないことがあります（jpegxl-rsの問題）。
   speed: エンコード速度
   speed_hint: デフォルトは7, Squirrelです。値が低いほど高速ですが品質が低くなります。
   speed_items:
@@ -230,7 +230,7 @@ ja:
   reset_jxl_options: JPEG XL設定をリセット
 ko:
   lossless: 무손실 압축
-  lossless_hint: 입력 파일이 JPEG인 경우 이 설정과 관계없이 무손실이 됩니다. 대부분의 이미지에서 작동하지만 드문 경우에 적용되지 않을 수 있습니다(jpegxl-rs의 문제).
+  lossless_hint: 대부분의 이미지에서 작동하지만 드문 경우에 적용되지 않을 수 있습니다(jpegxl-rs의 문제).
   speed: 인코딩 속도
   speed_hint: 기본값은 7, Squirrel입니다. 값이 낮을수록 빠르지만 품질이 낮아집니다.
   speed_items:
@@ -262,9 +262,9 @@ ko:
     - SrgbLuma (휘도 정보가 포함된 sRGB 색상 공간)
     - LinearSrgbLuma (휘도 정보가 포함된 선형 sRGB 색상 공간)
   reset_jxl_options: JPEG XL 설정 재설정
-zh-tw:
+zhHants:
   lossless: 無損壓縮
-  lossless_hint: 如果輸入文件是 JPEG，則無論此設置如何，都將是無損的。大多數圖像均可使用，但極少數情況下可能無法應用（jpegxl-rs 的問題）。
+  lossless_hint: 大多數圖像均可使用，但極少數情況下可能無法應用（jpegxl-rs 的問題）。
   speed: 編碼速度
   speed_hint: 默認為 7, Squirrel。值越低，速度越快，但質量越低。
   speed_items:
@@ -296,9 +296,9 @@ zh-tw:
     - SrgbLuma (具有亮度信息的 sRGB 色彩空間)
     - LinearSrgbLuma (具有亮度信息的線性 sRGB 色彩空間)
   reset_jxl_options: 重置 JPEG XL 設置
-zh-cn:
+zhHans:
   lossless: 无损压缩
-  lossless_hint: 如果输入文件是 JPEG，则无论此设置如何，都会是无损的。大多数图像均可使用，但极少数情况下可能无法应用（jpegxl-rs 的问题）。
+  lossless_hint: 大多数图像均可使用，但极少数情况下可能无法应用（jpegxl-rs 的问题）。
   speed: 编码速度
   speed_hint: 默认值为 7, Squirrel。值越低，速度越快，但质量越低。
   speed_items:

@@ -206,7 +206,7 @@ ko:
   threads: 사용할 최대 스레드 수
   threads_hint: 비워 두면 시스템의 논리 코어 수에 따라 자동으로 설정됩니다
   reset_avif_options: AVIF 옵션 재설정
-zh-tw:
+zhHant:
   bit_depth: 位深
   bit_depth_hint: 選擇位深。較高的位深提供更好的質量，但會導致檔案大小增加。
   bit_depth_items:
@@ -228,7 +228,7 @@ zh-tw:
   threads: 使用的最大线程数
   threads_hint: 如果留空，将根据系统中的逻辑核心数自动设置
   reset_avif_options: 重置AVIF选项
-zh-cn:
+zhHans:
   bit_depth: 位深
   bit_depth_hint: 选择位深。较高的位深提供更好的质量，但会导致文件大小增加。
   bit_depth_items:
