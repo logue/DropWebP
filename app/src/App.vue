@@ -1,15 +1,6 @@
 <script setup lang="ts">
 import { useGlobalStore, useConfigStore } from '@/store';
-import {
-  computed,
-  nextTick,
-  onMounted,
-  ref,
-  watch,
-  type ComputedRef,
-  type Ref,
-  type WritableComputedRef
-} from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 
 // Components
 import AppBarMenuComponent from '@/components/AppBarMenuComponent.vue';
@@ -25,25 +16,25 @@ const configStore = useConfigStore();
 const title = import.meta.env.VITE_APP_TITLE ?? 'Drop Compress Image';
 
 /** loading overlay visibility */
-const loading: WritableComputedRef<boolean> = computed({
+const loading = computed({
   get: () => globalStore.loading,
-  set: v => globalStore.setLoading(v)
+  set: (v: boolean) => globalStore.setLoading(v)
 });
 
 /** Appbar progressbar value */
-const progress: WritableComputedRef<number | null> = computed({
+const progress = computed({
   get: () => globalStore.progress,
-  set: v => globalStore.setProgress(v)
+  set: (v: number | null) => globalStore.setProgress(v)
 });
 
 /** Snackbar visibility */
-const snackbarVisibility: Ref<boolean> = ref(false);
+const snackbarVisibility = ref(false);
 
 /** Snackbar text */
-const snackbarText: ComputedRef<string> = computed(() => globalStore.message);
+const snackbarText = computed(() => globalStore.message);
 
 /** Toggle Dark mode */
-const isDark: ComputedRef<string> = computed(() => (configStore.theme ? 'dark' : 'light'));
+const theme = computed(() => (configStore.theme ? 'dark' : 'light'));
 
 // When snackbar text has been set, show snackbar.
 watch(
@@ -57,14 +48,14 @@ const onSnackbarChanged = async () => {
   await nextTick();
 };
 
-onMounted(async () => {
+onMounted(() => {
   document.title = title;
   loading.value = false;
 });
 </script>
 
 <template>
-  <v-app :theme="isDark" data-tauri-drag-region="true">
+  <v-app :theme="theme" data-tauri-drag-region="true">
     <v-app-bar color="primary" density="compact">
       <v-app-bar-title tag="h1">{{ title }}</v-app-bar-title>
       <v-spacer />

@@ -15,28 +15,18 @@ export const useNotification = (t: ComposerTranslation) => {
    */
   const notify = async (title: string, body?: string, icon?: string) => {
     try {
-      console.log('通知を送信しようとしています:', { title, body });
       // 通知権限を確認
       let permissionGranted = await isPermissionGranted();
-      console.log('通知権限の状態:', permissionGranted);
 
       // 権限がない場合は要求
       if (!permissionGranted) {
         const permission = await requestPermission();
         permissionGranted = permission === 'granted';
-        console.log('通知権限の要求結果:', permission);
       }
 
       if (permissionGranted) {
         // 通知を送信
-        await sendNotification({
-          title,
-          body,
-          icon
-        });
-        console.log('通知を送信しました');
-      } else {
-        console.warn('通知権限が許可されていません');
+        await sendNotification({ title, body, icon });
       }
     } catch (error) {
       console.error('通知の送信に失敗しました:', error);

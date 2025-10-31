@@ -1,67 +1,28 @@
 <script setup lang="ts">
 import { useSettingsStore } from '@/store';
-import { computed, ref, type ComputedRef } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import ContextMenu from './ContextMenu.vue';
 import ProgressDialog from './modals/ProgressDialog.vue';
 
+import { useFormatConfig } from '@/composables/useFormatConfig';
 import { useImageConversionController } from '@/composables/useImageConversionController';
 import { useLogger } from '@/composables/useLogger';
-import { OutputFormat } from '@/types/SettingsTypes';
 
 const settingsStore = useSettingsStore();
 const { t } = useI18n();
 useLogger();
 
-const {
-  dialog,
-  inProgress,
-  currentFile,
-  progress,
-  message,
-  isDragging,
-  convertByDialog,
-  handlePaste
-} = useImageConversionController(t);
+const { dialog, inProgress, currentFile, progress, message, isDragging, convertByDialog } =
+  useImageConversionController(t);
 
-// ラジオボタンの選択肢
-const formats: ComputedRef<
-  Record<OutputFormat, { label: string; color: string; description: string; badge?: string }>
-> = computed(() => ({
-  [OutputFormat.WebP]: {
-    label: t('formats.webp.label'),
-    color: 'orange',
-    description: t('formats.webp.description')
-  },
-  [OutputFormat.AVIF]: {
-    label: t('formats.avif.label'),
-    color: 'red',
-    description: t('formats.avif.description')
-  },
-  [OutputFormat.JXL]: {
-    label: t('formats.jxl.label'),
-    color: 'blue',
-    description: t('formats.jxl.description'),
-    badge: t('formats.jxl.badge')
-  },
-  [OutputFormat.JPEG]: {
-    label: t('formats.jpeg.label'),
-    color: 'green',
-    description: t('formats.jpeg.description'),
-    badge: t('formats.jpeg.badge')
-  },
-  [OutputFormat.PNG]: {
-    label: t('formats.png.label'),
-    color: 'pink',
-    description: t('formats.png.description'),
-    badge: t('formats.png.badge')
-  }
-}));
+// フォーマット設定
+const { formats, getFormatColor } = useFormatConfig(t);
 
 const highlightColor = computed(() => {
   return isDragging.value
-    ? `bg-${formats.value[settingsStore.commonOptions.format].color}-lighten-5`
+    ? `bg-${getFormatColor(settingsStore.commonOptions.format)}-lighten-5`
     : '';
 });
 
@@ -78,29 +39,10 @@ const onRightClick = (e: MouseEvent) => {
   menuVisibility.value = true;
 };
 
-// ペースト処理
-const onPasteFromContextMenu = async () => {
-  try {
-    const items = await navigator.clipboard.read();
-    for (const item of items) {
-      for (const type of item.types) {
-        if (type.startsWith('image/')) {
-          const blob = await item.getType(type);
-          // ペーストイベントを模擬
-          const fakeEvent = new ClipboardEvent('paste', {
-            clipboardData: new DataTransfer()
-          });
-          // DataTransferにファイルを追加
-          const file = new File([blob], 'pasted-image.' + type.split('/')[1], { type });
-          fakeEvent.clipboardData?.items.add(file);
-          handlePaste?.(fakeEvent);
-          break;
-        }
-      }
-    }
-  } catch (error) {
-    console.error('クリップボードからの読み取りに失敗しました:', error);
-  }
+// ペースト処理（コンテキストメニューから）
+const onPasteFromContextMenu = () => {
+  // 既存のペースト処理を呼び出すだけ
+  document.dispatchEvent(new Event('paste'));
 };
 </script>
 

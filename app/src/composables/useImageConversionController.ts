@@ -1,5 +1,5 @@
 import { useGlobalStore, useSettingsStore } from '@/store';
-import { ref, type Ref, nextTick } from 'vue';
+import { nextTick } from 'vue';
 import type { ComposerTranslation } from 'vue-i18n';
 
 import { open, save } from '@tauri-apps/plugin-dialog';
@@ -8,19 +8,26 @@ import { useSound } from '@vueuse/sound';
 import completeSound from '../assets/sounds/complete.mp3';
 import errorSound from '../assets/sounds/error.mp3';
 
+import { useConversionState } from './useConversionState';
 import { useDragAndDrop } from './useDragAndDrop';
 import { useFileSystem } from './useFileSystem';
-import { useImageConverter } from './useImageConverter'; // 汎用コンバーターをインポート
+import { useFormatConfig } from './useFormatConfig';
+import { useImageConverter } from './useImageConverter';
 import { useNotification } from './useNotification';
 import { usePaste } from './usePaste';
 
-import { OutputFormat } from '@/types/SettingsTypes';
-
 export function useImageConversionController(t: ComposerTranslation) {
   const globalStore = useGlobalStore();
-  const fileSystem = useFileSystem();
   const settingsStore = useSettingsStore();
+  const fileSystem = useFileSystem();
 
+  // Composableの初期化
+  const state = useConversionState();
+  const { getFormatLabel } = useFormatConfig(t);
+  const { convert, compress, extensions } = useImageConverter();
+  const { notifyConversionComplete, notifyBatchComplete, notifyError } = useNotification(t);
+
+  // サウンド
   const { play: playCompleteSound } = useSound(completeSound, {
     volume: settingsStore.commonOptions.volume
   });
@@ -28,263 +35,185 @@ export function useImageConversionController(t: ComposerTranslation) {
     volume: settingsStore.commonOptions.volume
   });
 
-  const { convert, compress, extensions } = useImageConverter(); // コアロジックを取得
-  const { notifyConversionComplete, notifyBatchComplete, notifyError } = useNotification(t);
-
-  // --- UIの状態管理 ---
-  const dialog = ref(false); // 進捗ダイアログ表示制御
-  const currentFile: Ref<string | undefined> = ref(); // 現在のファイル
-  const inProgress = ref(false); // 処理中フラグ
-  const progress: Ref<number> = ref(0); // 進捗
-  const message: Ref<string> = ref(''); // ダイアログのメッセージ
-
   /**
    * 変換処理
    * @param files 変換対象のファイルパスのリスト
    */
   const processFiles = async (files: string[]) => {
-    dialog.value = true;
-    inProgress.value = true;
-    progress.value = 0;
-
+    const formatLabel = getFormatLabel(settingsStore.commonOptions.format);
+    state.start(t('progress', { type: formatLabel }));
     await nextTick();
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      if (!file) {
-        continue;
-      }
-      // 進捗メッセージを更新
-      const pathInfo = await fileSystem.pathInfo(file);
-      message.value = t('progress', {
-        type: t(`formats.${settingsStore.commonOptions.format}.label`)
-      });
-      if (!settingsStore.commonOptions.overwrite && pathInfo.exists) {
-        // 上書き禁止オプションが有効で、出力先に同名ファイルが存在する場合はスキップ
-        console.info(`Skipping ${file} as it already exists and overwrite is disabled.`);
-        continue;
-      }
-      if (!extensions.includes(pathInfo.extension)) {
-        // 拡張子がマッチしない場合はスキップ
-        continue;
-      }
+      if (!file) continue;
 
-      currentFile.value = file;
+      const pathInfo = await fileSystem.pathInfo(file);
+
+      // スキップ条件チェック
+      if (!settingsStore.commonOptions.overwrite && pathInfo.exists) {
+        console.info(`Skipping ${file} (already exists)`);
+        continue;
+      }
+      if (!extensions.includes(pathInfo.extension)) continue;
+
+      state.currentFile.value = file;
+
       try {
-        // 汎用コンバーターを呼び出す
         await convert(
           file,
           settingsStore.commonOptions.sameDirectory
             ? undefined
             : settingsStore.commonOptions.outputPath
         );
+
         if (settingsStore.commonOptions.deleteOriginal) {
-          // 元ファイル削除オプションが有効な場合、元ファイルを削除
           await fileSystem.del(file);
           console.info(`Deleted original file: ${file}`);
         }
       } catch (e) {
         console.error(file, e);
-        dialog.value = false;
-        inProgress.value = false;
+        state.complete();
         const errorMessage = e instanceof Error ? e.message : String(e);
         globalStore.setMessage(errorMessage, 'red');
 
-        // エラー通知を送信
-        if (settingsStore.commonOptions.notify) {
-          notifyError(errorMessage);
-        }
-        if (settingsStore.commonOptions.sound) {
-          playErrorSound();
-        }
+        if (settingsStore.commonOptions.notify) notifyError(errorMessage);
+        if (settingsStore.commonOptions.sound) playErrorSound();
         return;
       }
-      progress.value = Math.floor(((i + 1) / files.length) * 100);
+
+      state.updateProgress(i + 1, files.length);
     }
 
-    // すべての変換が完了した場合の通知
+    // 完了通知
     if (settingsStore.commonOptions.notify) {
       const format = settingsStore.commonOptions.format;
       if (files.length > 1) {
         notifyBatchComplete(files.length, format);
       } else if (files.length === 1 && files[0]) {
-        // 単一ファイルの場合はファイル名を取得
         const pathInfo = await fileSystem.pathInfo(files[0]);
         notifyConversionComplete(pathInfo.fileName, format);
       }
     }
 
     globalStore.setMessage(t('completed'), 'success');
-
-    dialog.value = false;
-    inProgress.value = false;
-    if (settingsStore.commonOptions.sound) {
-      playCompleteSound();
-    }
+    state.complete();
+    if (settingsStore.commonOptions.sound) playCompleteSound();
   };
 
-  /** パスリストからファイル一覧を出力する */
+  /**
+   * パスリストからファイル一覧を取得
+   */
   const scanFiles = async (paths: string[]): Promise<string[] | undefined> => {
-    dialog.value = true;
-    inProgress.value = true;
-    progress.value = 0;
-    currentFile.value = t('scanning');
+    state.start(t('scanning'));
+    state.currentFile.value = t('scanning');
     await nextTick();
 
-    // ファイルリストを作成
     let files: string[] = [];
     try {
       files = await fileSystem.collectFiles(paths, settingsStore.commonOptions.recursive);
     } catch (e) {
       console.error(paths, e);
-      if (e instanceof Error) {
-        globalStore.setMessage(e.message);
-      } else {
-        globalStore.setMessage(String(e));
-      }
+      globalStore.setMessage(e instanceof Error ? e.message : String(e));
     } finally {
-      dialog.value = false;
-      progress.value = 0;
-      inProgress.value = false;
+      state.complete();
     }
 
     if (!files.length) {
       globalStore.setMessage(t('error.no_images_found_selected'));
-      if (settingsStore.commonOptions.sound) {
-        playErrorSound();
-      }
+      if (settingsStore.commonOptions.sound) playErrorSound();
       return;
     }
 
     return files;
   };
 
-  // ファイル選択
+  /**
+   * ファイル選択ダイアログ
+   */
   const convertByDialog = async () => {
-    let selected: string[] | null = [];
-    try {
-      // ダイアログを表示
-      selected = await open({
-        title: t('select_files_title'),
-        multiple: true,
-        directory: false,
-        filters: [{ name: t('image'), extensions }]
-      });
-    } catch (e) {
-      console.error(e);
-    }
+    const selected = await open({
+      title: t('select_files_title'),
+      multiple: true,
+      directory: false,
+      filters: [{ name: t('image'), extensions }]
+    }).catch(console.error);
+
     if (!selected) return;
 
     const files = await scanFiles(selected);
-    if (!files) {
-      return;
-    }
-    await processFiles(files);
+    if (files) await processFiles(files);
   };
 
-  // フォルダを選択ボタンが押された
+  /**
+   * フォルダ選択ダイアログ
+   */
   const convertByDirDialog = async () => {
-    let picked: string | null = null;
-    try {
-      picked = await open({
-        title: t('select_directory_title'),
-        directory: true,
-        recursive: true
-      });
-    } catch (e) {
-      console.error(e);
-    }
+    const picked = await open({
+      title: t('select_directory_title'),
+      directory: true,
+      recursive: true
+    }).catch(console.error);
 
     if (!picked) return;
+
     const dir = Array.isArray(picked) ? picked[0] : picked;
-    // ディレクトリを走査
-    const files = await scanFiles(dir);
-    if (!files) {
-      return;
-    }
-    await processFiles(files);
+    const files = await scanFiles([dir]);
+    if (files) await processFiles(files);
   };
 
-  // ペースト処理の関数
+  /**
+   * クリップボードからのペースト処理
+   */
   const handlePaste = async (event: ClipboardEvent) => {
-    // クリップボード内のデータを取得
     const items = event.clipboardData?.items;
     if (!items) return;
 
     globalStore.setLoading(true);
+
     for (const item of items) {
-      // 画像でない場合はスキップ
-      if (!item.type.startsWith('image/')) {
-        continue;
-      }
-      // ドラッグ&ドロップされたものはファイルとする
+      if (!item.type.startsWith('image/')) continue;
+
       const file = item.getAsFile();
       if (!file) continue;
 
-      // ファイルをUint8Arrayバイナリとして読み込む
       const buffer = new Uint8Array(await file.arrayBuffer());
 
-      const filtersMap: Record<OutputFormat, { name: string; extensions: string[] }> = {
-        [OutputFormat.AVIF]: { name: t('formats.avif.label'), extensions: ['avif'] },
-        [OutputFormat.JXL]: { name: t('formats.jxl.label'), extensions: ['jxl'] },
-        [OutputFormat.WebP]: { name: t('formats.webp.label'), extensions: ['webp'] },
-        [OutputFormat.JPEG]: { name: t('formats.jpeg.label'), extensions: ['jpeg', 'jpg'] },
-        [OutputFormat.PNG]: { name: t('formats.png.label'), extensions: ['png'] }
-      };
-      type Format = keyof typeof filtersMap;
+      // 保存先ダイアログ
+      const format = settingsStore.commonOptions.format;
+      const formatLabel = getFormatLabel(format);
 
-      const format = settingsStore.commonOptions.format as Format;
-
-      if (!(format in filtersMap)) {
-        throw new Error('Unsupported format');
-      }
-
-      // 保存先のダイアログを表示
       const savePath = await save({
         title: t('save_as_title'),
-        defaultPath: `${settingsStore.commonOptions.outputPath}${fileSystem.sep()}image.${
-          settingsStore.commonOptions.format
-        }`,
-        filters: [filtersMap[format]]
+        defaultPath: `${settingsStore.commonOptions.outputPath}${fileSystem.sep()}image.${format}`,
+        filters: [{ name: formatLabel, extensions: [format] }]
       });
-      if (!savePath) {
-        // キャンセルボタンが押された場合処理しない
-        continue;
-      }
-      // 圧縮処理
+
+      if (!savePath) continue;
+
       const converted = await compress(buffer);
       await fileSystem.save(savePath, converted);
     }
+
     globalStore.setMessage(t('completed'), 'success');
     globalStore.setLoading(false);
-    if (settingsStore.commonOptions.sound) {
-      playCompleteSound();
-    }
+    if (settingsStore.commonOptions.sound) playCompleteSound();
   };
 
-  // クリップボードからのペーストイベントを監視
+  // イベント監視
   usePaste(handlePaste);
 
-  // ドラッグ&ドロップイベントを監視
   const { isDragging } = useDragAndDrop(async paths => {
     const files = await scanFiles(paths);
-    if (!files) {
-      return;
-    }
-    await processFiles(files);
+    if (files) await processFiles(files);
   });
 
   return {
     // state
-    dialog,
-    inProgress,
-    currentFile,
-    progress,
-    message,
+    ...state,
     isDragging,
     // methods
     convertByDialog,
-    convertByDirDialog,
-    handlePaste
+    convertByDirDialog
   };
 }
