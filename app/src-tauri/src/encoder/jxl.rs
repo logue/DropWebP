@@ -306,54 +306,26 @@ pub fn encode(
         builder = builder.uses_original_profile(true);
     }
 
-    // Comprehensive workaround for jpegxl-rs v0.11.2 lossless issues
-    // Known issues:
-    // 1. RGBA images + lossless = ApiUsage errors
-    // 2. Certain setting combinations are unstable
-    // 3. Strict pixel value range checking
-
-    let (use_lossless, fallback_reason) = if options.lossless {
-        if is_rgba {
-            (false, Some("RGBA image lossless mode issues"))
-        } else if width * height > 4096 * 4096 {
-            // Large images with lossless mode are also unstable
-            (false, Some("large image lossless mode instability"))
-        } else {
-            (true, None)
-        }
-    } else {
-        (false, None)
-    };
-
-    if let Some(reason) = fallback_reason {
-        println!("JXL: Falling back to high quality mode due to: {}", reason);
-    }
-
-    if use_lossless {
+    // ロスレス設定
+    // jpegxl-rs 0.11.2以降ではRGBAでもロスレスが安定しています
+    if options.lossless {
+        println!("JXL: Using lossless compression mode");
         builder = builder.lossless(true);
+        // ロスレス時はuses_original_profileを強制的に有効化
+        builder = builder.uses_original_profile(true);
     } else {
-        // Strictly validate quality values
-        // Use high quality settings for RGBA images
-        let target_quality = if is_rgba && options.lossless {
-            0.5 // Use high quality for lossless fallback
-        } else {
-            options.quality
-        };
-
-        let safe_quality = target_quality.clamp(0.1, 15.0);
+        // ロッシー圧縮時の品質設定
+        let safe_quality = options.quality.clamp(0.1, 15.0);
         if safe_quality != options.quality {
-            if is_rgba && options.lossless {
-                println!(
-                    "JXL: Set quality to {:.3} for RGBA lossless fallback",
-                    safe_quality
-                );
-            } else {
-                println!(
-                    "JXL: Adjusted quality value {:.3} -> {:.3}",
-                    options.quality, safe_quality
-                );
-            }
+            println!(
+                "JXL: Adjusted quality value {:.3} -> {:.3}",
+                options.quality, safe_quality
+            );
         }
+        println!(
+            "JXL: Using lossy compression with quality: {:.3}",
+            safe_quality
+        );
         builder = builder.quality(safe_quality);
     }
 
@@ -402,13 +374,7 @@ pub fn encode(
         } else {
             ""
         },
-        if is_rgba && options.lossless && !use_lossless {
-            " [lossless fallback]"
-        } else if use_lossless {
-            " [lossless]"
-        } else {
-            ""
-        }
+        if options.lossless { " [lossless]" } else { "" }
     );
 
     // Check pixel value range (HDR compatible version)
@@ -607,8 +573,7 @@ pub fn encode(
                     eprintln!("  - Width: {}, Height: {}", width, height);
                     eprintln!("  - Is RGBA: {}", is_rgba);
                     eprintln!("  - Data length: {}", final_data.len());
-                    eprintln!("  - Lossless (requested): {}", options.lossless);
-                    eprintln!("  - Lossless (actual): {}", use_lossless);
+                    eprintln!("  - Lossless: {}", options.lossless);
                     eprintln!("  - Quality: {}", options.quality);
                     eprintln!("  - Speed: {:?}", options.speed);
                     eprintln!("  - Use container: {}", options.use_container);
@@ -617,13 +582,8 @@ pub fn encode(
                         options.uses_original_profile
                     );
                     eprintln!("  - Color encoding: {:?}", options.color_encoding);
-                    if let Some(reason) = fallback_reason {
-                        println!("  - Fallback reason: {}", reason);
-                    }
-                    println!("JXL: Conversion failed due to known issues in jpegxl-rs v0.11.2");
-                    println!(
-                        "JXL: Consider using a newer version of the library or an alternative library"
-                    );
+                    println!("JXL: Conversion failed due to encoding issues");
+                    println!("JXL: Consider adjusting settings or using a different format");
                     return Err(AppError::Encode(format!(
                         "JXL encode failed even with fallback: original={:?}, fallback={:?}",
                         e, fallback_err
@@ -660,25 +620,17 @@ pub fn transcode(jpeg_data: &[u8], options: &JxlOptions) -> Result<Vec<u8>, AppE
         .init_buffer_size(options.init_buffer_size)
         .color_encoding(options.color_encoding.to_jxl());
 
-    // Apply lossless bug workarounds for JPEG transcode as well
-    // JPEG is inherently lossy, so lossless has little meaning,
-    // but use lossy mode to avoid library bugs
-    let use_transcode_lossless = false; // Always lossy for safety
-
-    if use_transcode_lossless && options.lossless {
+    // Apply lossless/lossy settings
+    if options.lossless {
+        println!("JXL: Using lossless mode for JPEG transcode");
         builder = builder.lossless(true);
     } else {
-        // Use high quality settings for JPEG transcode
-        let transcode_quality = if options.lossless {
-            0.5
-        } else {
-            options.quality
-        };
-        builder = builder.quality(transcode_quality.clamp(0.1, 15.0));
-
-        if options.lossless {
-            println!("JXL: Using high quality mode for JPEG transcode due to library issues");
-        }
+        let safe_quality = options.quality.clamp(0.1, 15.0);
+        println!(
+            "JXL: Using lossy mode for JPEG transcode with quality: {:.3}",
+            safe_quality
+        );
+        builder = builder.quality(safe_quality);
     }
 
     let mut encoder = builder

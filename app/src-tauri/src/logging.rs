@@ -77,6 +77,7 @@ pub fn log_app_error(error: &AppError, context: Option<&str>) {
 }
 
 /// Log AppError with custom log level
+#[allow(dead_code)]
 pub fn log_app_error_with_level(error: &AppError, level: LogLevel, context: Option<&str>) {
     let message = match context {
         Some(ctx) => format!("{}: {}", ctx, error),
