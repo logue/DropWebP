@@ -1,6 +1,6 @@
 {
   "name": "@drop-compress-image/app",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Drop Image Compress desktop application built with Tauri, Vite, Vue 3, and TypeScript",
   "license": "MIT",
   "type": "module",

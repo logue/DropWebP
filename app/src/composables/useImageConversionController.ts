@@ -57,7 +57,7 @@ export function useImageConversionController(t: ComposerTranslation) {
       // 進捗メッセージを更新
       const pathInfo = await fileSystem.pathInfo(file);
       message.value = t('progress', {
-        type: t(`type.${settingsStore.commonOptions.format}`)
+        type: t(`formats.${settingsStore.commonOptions.format}.label`)
       });
       if (!settingsStore.commonOptions.overwrite && pathInfo.exists) {
         // 上書き禁止オプションが有効で、出力先に同名ファイルが存在する場合はスキップ
@@ -225,11 +225,11 @@ export function useImageConversionController(t: ComposerTranslation) {
       const buffer = new Uint8Array(await file.arrayBuffer());
 
       const filtersMap: Record<OutputFormat, { name: string; extensions: string[] }> = {
-        [OutputFormat.AVIF]: { name: t('type.avif'), extensions: ['avif'] },
-        [OutputFormat.JXL]: { name: t('type.jxl'), extensions: ['jxl'] },
-        [OutputFormat.WebP]: { name: t('type.webp'), extensions: ['webp'] },
-        [OutputFormat.JPEG]: { name: t('type.jpeg'), extensions: ['jpeg', 'jpg'] },
-        [OutputFormat.PNG]: { name: t('type.png'), extensions: ['png'] }
+        [OutputFormat.AVIF]: { name: t('formats.avif.label'), extensions: ['avif'] },
+        [OutputFormat.JXL]: { name: t('formats.jxl.label'), extensions: ['jxl'] },
+        [OutputFormat.WebP]: { name: t('formats.webp.label'), extensions: ['webp'] },
+        [OutputFormat.JPEG]: { name: t('formats.jpeg.label'), extensions: ['jpeg', 'jpg'] },
+        [OutputFormat.PNG]: { name: t('formats.png.label'), extensions: ['png'] }
       };
       type Format = keyof typeof filtersMap;
 
