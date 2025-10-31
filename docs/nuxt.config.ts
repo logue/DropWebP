@@ -10,11 +10,7 @@ export default defineNuxtConfig({
   ssr: true, // SSRで翻訳済みHTMLを生成
 
   // CSSファイル（Vuetifyスタイル確保 + GitHub Markdown CSS）
-  css: [
-    '~/styles/settings.scss',
-    'github-markdown-css/github-markdown-light.css',
-    'github-markdown-css/github-markdown-dark.css'
-  ],
+  css: ['~/styles/settings.scss'],
 
   // SSRスタイル設定（CSS最適化）
   features: {

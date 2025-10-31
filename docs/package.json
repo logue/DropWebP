@@ -20,7 +20,6 @@
     "@nuxtjs/i18n": "10.1.2",
     "@pinia/nuxt": "^0.8.0",
     "eslint": "^9.38.0",
-    "github-markdown-css": "^5.8.1",
     "marked": "^16.4.1",
     "nuxt": "3.19.3",
     "nuxt-gtag": "3.0.3",
