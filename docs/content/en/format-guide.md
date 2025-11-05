@@ -27,7 +27,7 @@ Drop Compress Image supports the following input image formats:
 
 This section explains the supported output formats for this program.
 
-### PNG (Zopfli Compression)
+### PNG (Oxipng)
 
 PNG (Portable Network Graphics) is a format that allows you to save images without any loss of image quality.
 This program uses Zopfli, a special compression technology developed by Google that makes PNGs "smaller," though it takes longer to process.

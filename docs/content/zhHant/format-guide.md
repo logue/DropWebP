@@ -27,7 +27,7 @@ Drop Compress Image 支援以下輸入影像格式：
 
 本節介紹此程式支援的輸出格式。
 
-### PNG（Zopfli 壓縮）
+### PNG（Oxipng）
 
 PNG（Portable Network Graphic）是一種允許您保存圖像而不會損失圖像品質的格式。
 此程式使用 Zopfli，這是 Google 開發的一種特殊壓縮技術，可使 PNG 映像“更小”，但處理時間會更長。

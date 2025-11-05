@@ -1,181 +1,45 @@
+<script setup lang="ts">
+import type { Collections } from '@nuxt/content';
+import { useI18n } from 'vue-i18n';
+
+import { withLeadingSlash } from 'ufo';
+
+const route = useRoute();
+const { locale, t } = useI18n();
+const slug = computed(() => withLeadingSlash(String(route.params.slug)));
+
+const { data: page } = await useAsyncData(
+  'page-' + slug.value,
+  async () => {
+    // Build collection name based on current locale
+    const collection = ('content_' + locale.value) as keyof Collections;
+    const content = await queryCollection(collection).path(slug.value).first();
+
+    // Optional: fallback to default locale if content is missing
+    if (!content && locale.value !== 'en') {
+      return await queryCollection('content_en').path(slug.value).first();
+    }
+
+    return content;
+  },
+  {
+    watch: [locale] // Refetch when locale changes
+  }
+);
+</script>
+
 <template>
-  <v-sheet class="content-with-toc">
-    <!-- eslint-disable-next-line vue/no-v-html -->
-    <article v-if="compiledHtml" class="markdown-body" v-html="compiledHtml" />
-    <v-alert v-else-if="pending" :title="t('loading')" color="info" variant="tonal" />
-    <v-alert v-else-if="error" :title="t('error')" color="error" variant="tonal">
-      {{ error.message }}
+  <v-sheet class="markdown-body">
+    <content-renderer v-if="page" :value="page" tag="article" />
+    <v-alert v-else :title="t('error')" variant="tonal" type="error">
+      <p>This page doesn't exist in {{ locale }} language.</p>
     </v-alert>
   </v-sheet>
 </template>
 
-<script setup lang="ts">
-import { useI18n } from 'vue-i18n';
-
-import { marked } from 'marked';
-import Prism from 'prismjs';
-
-import { Locale } from '@/types/LocaleType';
-
-const { t } = useI18n();
-
-interface Props {
-  contentPath: string; // 'build-windows' または 'build-macos'
-  title?: string;
-  description?: string;
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  title: '',
-  description: ''
-});
-
-const { locale } = useI18n();
-
-const compiledHtml = ref('');
-const pending = ref(true);
-const error = ref<Error | null>(null);
-
-// Markdownファイルを動的にインポートする関数
-const importMarkdownFiles = async () => {
-  const markdownMap: Record<string, string> = {};
-
-  for (const loc of Object.values(Locale)) {
-    try {
-      // 動的インポートでMarkdownファイルを取得
-      const module = await import(`../../content/${props.contentPath}/${loc}.md?raw`);
-      markdownMap[loc] = module.default;
-    } catch (err) {
-      console.warn(`Failed to load ${loc}.md for ${props.contentPath}:`, err);
-      // フォールバック：英語版があれば使用
-      if (loc !== 'en' && markdownMap.en) {
-        markdownMap[loc] = markdownMap.en;
-      }
-    }
-  }
-
-  return markdownMap;
-};
-
-const renderMarkdown = async () => {
-  try {
-    pending.value = true;
-    const markdownMap = await importMarkdownFiles();
-    const localeCode = unref(locale);
-    const markdownContent = markdownMap[localeCode] || markdownMap.en || '';
-
-    if (!markdownContent) {
-      throw new Error('No markdown content found');
-    }
-
-    // markedでMarkdownをHTMLに変換（SSR対応）
-    try {
-      compiledHtml.value = await marked(markdownContent, {
-        gfm: true,
-        breaks: true
-      });
-    } catch (parseError) {
-      console.error('Markdown parsing error:', parseError);
-      // フォールバック: プリフォーマット表示
-      compiledHtml.value = `<pre>${markdownContent}</pre>`;
-    }
-    error.value = null;
-  } catch (err) {
-    console.error('Failed to render markdown:', err);
-    error.value = err as Error;
-    compiledHtml.value = '<p>Error loading content</p>';
-  } finally {
-    pending.value = false;
-  }
-};
-
-// SSR/SSG対応: サーバー側でレンダリング
-if (import.meta.server) {
-  await renderMarkdown();
-}
-
-// クライアント側: マウント時にレンダリングとハイライト
-onMounted(async () => {
-  // SSRでレンダリングされていない場合のみ実行
-  if (!compiledHtml.value) {
-    await renderMarkdown();
-  }
-
-  // シンタックスハイライトを適用
-  await nextTick();
-  if (import.meta.client) {
-    Prism.highlightAll();
-  }
-});
-
-// ロケール変更時に再レンダリング
-watch(locale, async () => {
-  await renderMarkdown();
-
-  // 再ハイライト
-  await nextTick();
-  if (import.meta.client) {
-    Prism.highlightAll();
-  }
-});
-
-// コンテンツ変更時に再ハイライト
-watch(compiledHtml, async () => {
-  await nextTick();
-  if (import.meta.client) {
-    Prism.highlightAll();
-  }
-});
-
-// テーマ変更に対応するための強制リセット
-onMounted(() => {
-  if (import.meta.client) {
-    const observer = new MutationObserver(mutations => {
-      for (const mutation of mutations) {
-        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-          // テーマクラスが変更された時にテーブルスタイルを強制適用
-          const tables = document.querySelectorAll('.markdown-body table');
-          for (const table of tables) {
-            // 強制的にスタイルを再適用
-            (table as HTMLElement).style.cssText = '';
-          }
-        }
-      }
-    });
-
-    const htmlElement = document.documentElement;
-    observer.observe(htmlElement, { attributes: true, attributeFilter: ['class'] });
-
-    onUnmounted(() => {
-      observer.disconnect();
-    });
-  }
-});
-
-const i18nHead = useLocaleHead();
-
-console.log(unref(i18nHead));
-
-// SEO設定
-useHead(() => ({
-  title: props.title,
-  htmlAttrs: {
-    lang: i18nHead.value.htmlAttrs.lang
-  },
-  link: [...(i18nHead.value.link || [])],
-  meta: [
-    {
-      name: 'description',
-      content: props.description
-    },
-    ...(i18nHead.value.meta || [])
-  ]
-}));
-</script>
-
 <style lang="scss">
+@use 'sass:map';
 /* Optimized GitHub Markdown Styles with SCSS and Vuetify Dark Mode Support */
-
 // Color variables for light and dark themes
 $colors-light: (
   link: #0969da,
@@ -217,22 +81,22 @@ $colors-dark: (
 
 // Mixin for theme colors
 @mixin theme-colors($theme-colors) {
-  --md-link: #{map-get($theme-colors, link)};
-  --md-text: #{map-get($theme-colors, text)};
-  --md-text-secondary: #{map-get($theme-colors, text-secondary)};
-  --md-bg: #{map-get($theme-colors, bg)};
-  --md-bg-secondary: #{map-get($theme-colors, bg-secondary)};
-  --md-border: #{map-get($theme-colors, border)};
-  --md-border-alpha: #{map-get($theme-colors, border-alpha)};
-  --md-code-bg: #{map-get($theme-colors, code-bg)};
-  --md-mark-bg: #{map-get($theme-colors, mark-bg)};
-  --md-kbd-bg: #{map-get($theme-colors, kbd-bg)};
-  --md-focus: #{map-get($theme-colors, focus)};
-  --md-alert-note: #{map-get($theme-colors, alert-note)};
-  --md-alert-tip: #{map-get($theme-colors, alert-tip)};
-  --md-alert-important: #{map-get($theme-colors, alert-important)};
-  --md-alert-warning: #{map-get($theme-colors, alert-warning)};
-  --md-alert-caution: #{map-get($theme-colors, alert-caution)};
+  --md-link: #{map.get($theme-colors, link)};
+  --md-text: #{map.get($theme-colors, text)};
+  --md-text-secondary: #{map.get($theme-colors, text-secondary)};
+  --md-bg: #{map.get($theme-colors, bg)};
+  --md-bg-secondary: #{map.get($theme-colors, bg-secondary)};
+  --md-border: #{map.get($theme-colors, border)};
+  --md-border-alpha: #{map.get($theme-colors, border-alpha)};
+  --md-code-bg: #{map.get($theme-colors, code-bg)};
+  --md-mark-bg: #{map.get($theme-colors, mark-bg)};
+  --md-kbd-bg: #{map.get($theme-colors, kbd-bg)};
+  --md-focus: #{map.get($theme-colors, focus)};
+  --md-alert-note: #{map.get($theme-colors, alert-note)};
+  --md-alert-tip: #{map.get($theme-colors, alert-tip)};
+  --md-alert-important: #{map.get($theme-colors, alert-important)};
+  --md-alert-warning: #{map.get($theme-colors, alert-warning)};
+  --md-alert-caution: #{map.get($theme-colors, alert-caution)};
 }
 
 // Apply light theme by default
@@ -1007,21 +871,15 @@ $colors-dark: (
 
 <i18n lang="yaml">
 en:
-  loading: Loading...
   error: 'Error loading content:'
 fr:
-  loading: Chargement...
   error: 'Erreur lors du chargement du contenu :'
 ja:
-  loading: 読み込んでいます…
-  error: 内容を取得時にエラーが発生しました：
+  error: 内容取得時にエラーが発生しました：
 ko:
-  loading: 로딩 중...
   error: '콘텐츠를 불러오는 중 오류 발생:'
 zhHant:
-  loading: 加載中...
   error: '載入內容時出錯：'
 zhHans:
-  loading: 加载中...
   error: '加载内容时出错：'
 </i18n>

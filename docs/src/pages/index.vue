@@ -62,7 +62,7 @@ const urlPrefix = `https://github.com/logue/DropWebP/releases/download/${version
 
 // サイトのベースURL - 本番環境ではhttps://logue.devを使用
 const baseUrl = 'https://logue.dev';
-const sitePath = '/DropWebP';
+const sitePath = useRuntimeConfig().app.baseURL;
 
 const currentUrl = computed(() => {
   const path = locale.value === 'en' ? '' : `/${locale.value}`;
@@ -396,7 +396,7 @@ en:
         - It provides better compression and quality, especially for high-resolution images.
         - JPEG XL supports both lossless and lossy compression. It is optimized for web performance.
     png:
-      title: PNG (Zopfli Compression)
+      title: PNG (Oxipng)
       description:
         - PNG (Portable Network Graphics) is a format that allows images to be saved "without any loss of quality."
         - Zopfli, used in this program, is a special compression technique created by Google to make PNGs "smaller."
@@ -465,7 +465,7 @@ fr:
         - Il offre une meilleure compression et qualité, en particulier pour les images haute résolution.
         - JPEG XL prend en charge à la fois la compression sans perte et avec perte. Il est optimisé pour les performances web.
     png:
-      title: PNG (Compression Zopfli)
+      title: PNG (Oxipng)
       description:
         - PNG (Portable Network Graphics) est un format qui permet de sauvegarder les images "sans aucune perte de qualité".
         - Zopfli, utilisé dans ce programme, est une technique de compression spéciale créée par Google pour rendre les PNG "plus petits".
@@ -534,7 +534,7 @@ ja:
         - 特に高解像度画像に対して、より優れた圧縮と品質を提供します。
         - JPEG XLは可逆圧縮と非可逆圧縮の両方をサポートしており、ウェブパフォーマンスに最適化されています。
     png:
-      title: PNG (Zopfli圧縮)
+      title: PNG (Oxipng)
       description:
         - PNG（Portable Network Graphics）は、画像を「画質を全く落とさずに」保存できる形式です。
         - 本プログラムで使用されているZopfli（ゾップフリ）とは、このPNGを「より小さく」するための、Googleが作った特別な圧縮技術です。
@@ -601,7 +601,7 @@ ko:
         - 특히 고해상도 이미지에 대해 더 나은 압축 및 품질을 제공합니다.
         - JPEG XL은 무손실 및 손실 압축을 모두 지원합니다. 웹 성능에 최적화되어 있습니다.
     png:
-      title: PNG (Zopfli 압축)
+      title: PNG (Oxipng)
       description:
         - PNG(Portable Network Graphics)는 이미지를 "품질 손실 없이" 저장할 수 있는 형식입니다.
         - 이 프로그램에서 사용되는 Zopfli는 PNG를 "더 작게" 만들기 위해 Google이 만든 특별한 압축 기술입니다.
@@ -670,7 +670,7 @@ zhHant:
         - 它提供更好的壓縮和質量，特別是對於高分辨率圖像。
         - JPEG XL 支援無損和有損壓縮。它針對網絡性能進行了優化。
     png:
-      title: PNG (Zopfli 壓縮)
+      title: PNG (Oxipng)
       description:
         - PNG（Portable Network Graphics）是一種允許將圖像「無任何質量損失」保存的格式。
         - 本程式中使用的 Zopfli 是 Google 創建的一種特殊壓縮技術，用於使 PNG「更小」。
@@ -739,7 +739,7 @@ zhHans:
         - 它提供更好的压缩和质量，特别是对于高分辨率图像。
         - JPEG XL 支持无损和有损压缩。它针对网络性能进行了优化。
     png:
-      title: PNG (Zopfli 压缩)
+      title: PNG (Oxipng)
       description:
         - PNG（Portable Network Graphics）是一种允许将图像「无任何质量损失」保存的格式。
         - 本程序中使用的 Zopfli 是 Google 创建的一种特殊压缩技术，用于使 PNG「更小」。

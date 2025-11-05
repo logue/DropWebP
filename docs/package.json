@@ -7,7 +7,7 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "clean": "rimraf2 .nuxt .output public/_nuxt",
+    "clean": "rimraf .nuxt .output public/_nuxt",
     "deploy": "nuxt generate && gh-pages -d .output/public -b main",
     "lint": "eslint . --fix --cache --cache-location ./node_modules/.vite/vite-plugin-eslint && prettier src/**/*.{ts,vue,json} -w -u",
     "lint:style": "stylelint \"./src/**/*.{css,sass,scss,htm,html,vue}\" --fix --cache-location ./node_modules/.vite/vite-plugin-stylelint && prettier \"./src/**/*.{css,sass,scss,htm,html,vue}\" -w -u",
@@ -15,24 +15,29 @@
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
-    "@nuxt/content": "^3.8.0",
-    "@nuxt/eslint": "^1.10.0",
-    "@nuxtjs/i18n": "^10.1.2",
+    "@nuxt/content": "3.8.0",
+    "@nuxt/eslint": "1.10.0",
+    "@nuxt/fonts": "0.11.4",
+    "@nuxtjs/i18n": "10.2.0",
     "@pinia/nuxt": "^0.11.2",
-    "eslint": "^9.38.0",
-    "marked": "^16.4.1",
+    "better-sqlite3": "^12.4.1",
     "nuxt": "^4.2.0",
     "nuxt-gtag": "^4.1.0",
     "pinia": "^3.0.3",
-    "prismjs": "^1.30.0",
-    "sass-embedded": "^1.93.2",
+    "ufo": "^1.6.1",
     "vue": "^3.5.22",
     "vue-router": "^4.6.3",
     "vuetify": "^3.10.8",
-    "vuetify-nuxt-module": "^0.18.8"
+    "vuetify-nuxt-module": "0.18.8",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@types/prismjs": "^1.26.5",
-    "rimraf2": "^2.8.2"
+    "@types/node": "^24.10.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.3",
+    "@vue/eslint-config-prettier": "^10.2.0",
+    "eslint": "^9.39.1",
+    "eslint-plugin-vuejs-accessibility": "^2.4.1",
+    "rimraf": "^6.1.0",
+    "sass-embedded": "^1.93.3"
   }
 }

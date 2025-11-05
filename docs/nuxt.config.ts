@@ -1,31 +1,23 @@
 import { fileURLToPath, URL } from 'node:url';
-import { Locale } from './src/types/LocaleType';
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: '2025-07-15',
-  devtools: { enabled: true },
-
   // SSG設定（CSS外部化対応）
   ssr: true, // SSRで翻訳済みHTMLを生成
-
+  // ソースコードディレクトリの変更
+  srcDir: './src/',
+  compatibilityDate: '2025-07-15',
+  devtools: { enabled: true },
   // CSSファイル（Vuetifyスタイル確保 + GitHub Markdown CSS）
   css: ['~/styles/settings.scss'],
-
   // SSRスタイル設定（CSS最適化）
   features: {
     inlineStyles: false // CSS外部化
   },
 
-  plugins: ['~/plugins/prism.client.ts'],
-
-  // 1. ソースコードディレクトリの変更
-  srcDir: './src/',
-
-  // 2. アプリ設定
+  // アプリ設定
   app: {
     baseURL: process.env.NUXT_APP_BASE_URL || '/DropWebP/',
-    buildAssetsDir: '_nuxt/',
     head: {
       link: [
         // app側と同じGoogle Fontsを読み込み
@@ -45,160 +37,47 @@ export default defineNuxtConfig({
       ]
     }
   },
+  // モジュール
+  modules: [
+    '@nuxt/content',
+    '@nuxt/eslint',
+    '@nuxtjs/i18n',
+    '@pinia/nuxt',
+    'nuxt-gtag',
+    'vuetify-nuxt-module'
+  ],
 
-  // 3. モジュール
-  modules: ['@pinia/nuxt', 'vuetify-nuxt-module', '@nuxtjs/i18n', '@nuxt/eslint', 'nuxt-gtag'],
-
-  // 4. Google Analytics設定
-  gtag: {
-    id: 'G-2Y2FW3QEG4'
-  },
-
-  // 5. i18n設定（<i18n>ブロック使用）
+  // i18n設定（<i18n>ブロック使用）
   i18n: {
     locales: [
-      { code: Locale.ja, language: 'ja-JP', name: '🇯🇵 日本語', iso: 'ja-JP' },
-      { code: Locale.en, language: 'en-US', name: '🇺🇸 English', iso: 'en-US' },
-      { code: Locale.fr, language: 'fr-FR', name: '🇫🇷 Français', iso: 'fr-FR' },
-      { code: Locale.ko, language: 'ko-KR', name: '🇰🇷 한국어', iso: 'ko-KR' },
-      { code: Locale.zhHans, language: 'zh-CN', name: '🇨🇳 简体中文', iso: 'zh-CN' },
-      { code: Locale.zhHant, language: 'zh-TW', name: '🇹🇼 繁體中文', iso: 'zh-TW' }
+      { code: 'en', language: 'en-US', name: '🇺🇸 English', iso: 'en-US' },
+      { code: 'fr', language: 'fr-FR', name: '🇫🇷 Français', iso: 'fr-FR' },
+      { code: 'ja', language: 'ja-JP', name: '🇯🇵 日本語', iso: 'ja-JP' },
+      { code: 'ko', language: 'ko-KR', name: '🇰🇷 한국어', iso: 'ko-KR' },
+      { code: 'zhHans', language: 'zh-CN', name: '🇨🇳 简体中文', iso: 'zh-CN' },
+      { code: 'zhHant', language: 'zh-TW', name: '🇹🇼 繁體中文', iso: 'zh-TW' }
     ],
-    defaultLocale: Locale.en,
-    strategy: 'prefix_and_default',
+    strategy: 'prefix_except_default',
+    defaultLocale: 'en',
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'i18n_redirected',
+      redirectOn: 'root' // recommended
+    }
+    /*
     baseUrl:
       process.env.NUXT_PUBLIC_SITE_URL ||
-      (process.env.GITHUB_PAGES ? 'https://logue.dev' : 'http://localhost:3000'),
-    detectBrowserLanguage: false,
+      (process.env.GITHUB_PAGES
+        ? "https://logue.dev"
+        : "http://localhost:3000"),
     compilation: {
       // HTMLを含むメッセージの警告を無効化
-      strictMessage: false
-    }
-  },
-
-  // 6. Vuetify設定（CSS完全外部化）
-  vuetify: {
-    moduleOptions: {
-      /* CSS外部化を強制 */
-      styles: true
+      strictMessage: false,
     },
-    vuetifyOptions: {
-      theme: {
-        // テーマCSS外部化
-        variations: false
-      }
-    }
+    */
   },
-
-  // TypeScript パスエイリアス設定
-  alias: {
-    '@': fileURLToPath(new URL('./src', import.meta.url))
-  },
-
-  build: {
-    transpile: ['vue-i18n']
-  },
-
-  // Vite設定（VuetifyCSS外部化強制 + Markdownローダー）
-  vite: {
-    css: {
-      postcss: {}
-    },
-    ssr: {
-      // VuetifyをSSR時に外部化
-      noExternal: ['vuetify']
-    },
-    optimizeDeps: {
-      include: ['prismjs', 'prismjs/components/prism-bash', 'prismjs/components/prism-powershell']
-    },
-    assetsInclude: ['**/*.md'],
-    plugins: [
-      {
-        name: 'markdown-loader',
-        transform(code, id) {
-          if (id.endsWith('.md')) {
-            return `export default ${JSON.stringify(code)};`;
-          }
-        }
-      }
-    ],
-    build: {
-      rollupOptions: {
-        output: {
-          // CSS外部化設定（_nuxtディレクトリに統一）
-          assetFileNames: assetInfo => {
-            if (assetInfo.name?.endsWith('.css')) {
-              // VuetifyのCSSを_nuxtディレクトリに出力
-              return '_nuxt/vuetify-[hash].css';
-            }
-            return '_nuxt/[name]-[hash][extname]';
-          },
-          // CSSチャンクを単一ファイルに統合
-          manualChunks: undefined
-        }
-      },
-      // CSS分割を無効化してVuetify CSSを統合
-      cssCodeSplit: false,
-      // CSS最適化を有効化
-      cssMinify: true
-    }
-  },
-
-  // Nitro設定（SSG + CSS最適化）
-  nitro: {
-    prerender: {
-      routes: [
-        '/', // ルートはミドルウェアでリダイレクト
-        '/ja',
-        '/en',
-        '/fr',
-        '/ko',
-        '/zhHant',
-        '/zhHans',
-        '/ja/format-guide',
-        '/en/format-guide',
-        '/fr/format-guide',
-        '/ko/format-guide',
-        '/zhHant/format-guide',
-        '/zhHans/format-guide',
-        '/ja/getting-started',
-        '/en/getting-started',
-        '/fr/getting-started',
-        '/ko/getting-started',
-        '/zhHant/getting-started',
-        '/zhHans/getting-started',
-        '/ja/build-windows',
-        '/en/build-windows',
-        '/fr/build-windows',
-        '/ko/build-windows',
-        '/zhHant/build-windows',
-        '/zhHans/build-windows',
-        '/ja/build-macos',
-        '/en/build-macos',
-        '/fr/build-macos',
-        '/ko/build-macos',
-        '/zhHant/build-macos',
-        '/zhHans/build-macos',
-        '/ja/build-linux',
-        '/en/build-linux',
-        '/fr/build-linux',
-        '/ko/build-linux',
-        '/zhHant/build-linux',
-        '/zhHans/build-linux'
-      ]
-    },
-    inlineDynamicImports: false,
-    minify: true,
-    // CSS外部化を強制（_nuxtディレクトリに統一）
-    rollupConfig: {
-      output: {
-        assetFileNames: assetInfo => {
-          if (assetInfo.name?.endsWith('.css')) {
-            return '_nuxt/[name]-[hash].css';
-          }
-          return '_nuxt/[name]-[hash][extname]';
-        }
-      }
-    }
+  // Google Analytics設定
+  gtag: {
+    id: 'G-2Y2FW3QEG4'
   }
 });
