@@ -74,11 +74,8 @@ const ogImage = computed(() => {
   // ogp変数が相対パスの場合、適切にベースURLと結合
   if (ogp.startsWith('/DropWebP/')) {
     return `${baseUrl}${ogp}`;
-  } else if (ogp.startsWith('/')) {
-    return `${baseUrl}${sitePath}${ogp}`;
-  } else {
-    return `${baseUrl}${sitePath}/${ogp}`;
   }
+  return `${baseUrl}${sitePath}${ogp}`;
 });
 
 // hreflangタグを手動で生成（デプロイ環境での重複URL問題を回避）
@@ -89,7 +86,7 @@ const hreflangLinks = computed(() => {
   links.push({
     rel: 'alternate',
     hreflang: 'x-default',
-    href: `${baseUrl}${sitePath}/`
+    href: `${baseUrl}${sitePath}`
   });
 
   // 各言語
@@ -98,13 +95,13 @@ const hreflangLinks = computed(() => {
       links.push({
         rel: 'alternate',
         hreflang: 'en',
-        href: `${baseUrl}${sitePath}/`
+        href: `${baseUrl}${sitePath}`
       });
     } else {
       links.push({
         rel: 'alternate',
         hreflang: lang.code,
-        href: `${baseUrl}${sitePath}/${lang.code}/`
+        href: `${baseUrl}${sitePath}${lang.code}/`
       });
     }
   });
@@ -206,7 +203,7 @@ useHead({
     <v-card-subtitle class="text-center pb-4">{{ t('lead.subtitle') }}</v-card-subtitle>
     <v-card-text class="text-center">
       <!-- Language Links -->
-      <v-chip-group class="flex justify-center mb-6">
+      <v-chip-group class="flex justify-center mb-6" tag="nav">
         <v-chip
           v-for="lang in languages"
           :key="lang.code"
@@ -214,12 +211,11 @@ useHead({
           :to="localePath('/', lang.code as any)"
           :variant="locale === lang.code ? 'elevated' : 'outlined'"
           :color="locale === lang.code ? 'primary' : 'default'"
+          :text="lang.name"
           class="block mx-auto"
           rel="alternate"
           size="small"
-        >
-          {{ lang.name }}
-        </v-chip>
+        />
       </v-chip-group>
       <p v-for="description in tm(`lead.description`)" :key="description">
         {{ rt(description) }}
@@ -284,12 +280,12 @@ useHead({
       <v-row class="mb-5">
         <v-col v-for="item in features" :key="item.key" cols="12" md="4">
           <v-card class="h-100">
+            <v-icon :icon="item.icon" size="64" color="primary" class="ma-4 mx-auto w-100" />
+            <v-card-title class="text-h6 text-center mt-2" tag="h3">
+              {{ t(`features.${item.key}.title`) }}
+            </v-card-title>
             <v-card-text class="text-center">
-              <v-icon :icon="item.icon" size="64" color="primary" class="mb-4" />
-              <h3 class="text-h6 mb-2">{{ t(`features.${item.key}.title`) }}</h3>
-              <p>
-                {{ t(`features.${item.key}.description`) }}
-              </p>
+              {{ t(`features.${item.key}.description`) }}
             </v-card-text>
           </v-card>
         </v-col>
@@ -305,12 +301,11 @@ useHead({
         <v-col v-for="item in formats" :key="item.key" cols="12" md="4">
           <v-card class="h-100">
             <v-img
-              v-if="item.logo"
               :src="item.logo"
               :alt="t(`format.${item.key}.title`)"
-              max-height="100"
+              max-height="128"
               contain
-              class="mx-auto mt-4"
+              class="mx-auto my-4"
             />
             <v-card-title class="text-h6 text-center mt-4" tag="h3">
               {{ t(`format.${item.key}.title`) }}

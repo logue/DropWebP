@@ -109,8 +109,8 @@ JPEG XL is a new format developed to overcome the shortcomings of the previous J
 
 | Format         | Main Benefits                                                            | Suitable Use Cases                                        | Lossy | Lossless | Alpha | Compression Ratio | Load   |
 | -------------- | ------------------------------------------------------------------------ | --------------------------------------------------------- | ----- | -------- | ----- | ----------------- | ------ |
-| PNG (Zopfli)   | No image degradation, background transparency.                           | Logos, icons, diagrams.                                   | ❌️   | ✅️      | ✅️   | Medium            | High   |
+| PNG (Oxipng)   | No image degradation, background transparency.                           | Logos, icons, diagrams.                                   | ❌️   | ✅️      | ✅️   | Medium            | High   |
 | JPEG (MozJPEG) | Allows for very small photos.                                            | General photos on the web.                                | ✅️   | ❌️      | ❌️   | High              | Low    |
 | WebP           | High compression and high quality, supports transparency and animation.  | General-purpose images for websites.                      | ✅️   | ✅️      | ✅️   | Medium            | Medium |
 | AVIF           | **Highest compression rate and high quality**, wide color gamut support. | Websites that require both high quality and fast display. | ✅️   | ❌️      | ✅️   | High              | High   |
-| JPEG XL        | The ultimate format, compatible with everything and JPEG.                | For smaller JPEGs and future image unification.           | ✅️   | ✅️      | ✅️   | High              | Low    |
+| JPEG XL        | **The ultimate format**, compatible with everything and JPEG.            | For smaller JPEGs and future image unification.           | ✅️   | ✅️      | ✅️   | High              | Low    |

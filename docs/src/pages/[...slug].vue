@@ -9,7 +9,8 @@ const { locale, t } = useI18n();
 const slug = computed(() => withLeadingSlash(String(route.params.slug)));
 
 const { data: page } = await useAsyncData(
-  'page-' + slug.value,
+  // キーにロケールを含めてSSG時に各言語で別々にキャッシュされるようにする
+  () => `page-${locale.value}-${slug.value}`,
   async () => {
     // Build collection name based on current locale
     const collection = ('content_' + locale.value) as keyof Collections;
@@ -29,12 +30,10 @@ const { data: page } = await useAsyncData(
 </script>
 
 <template>
-  <v-sheet class="markdown-body">
-    <content-renderer v-if="page" :value="page" tag="article" />
-    <v-alert v-else :title="t('error')" variant="tonal" type="error">
-      <p>This page doesn't exist in {{ locale }} language.</p>
-    </v-alert>
-  </v-sheet>
+  <content-renderer v-if="page" :value="page" class="markdown-body" tag="article" />
+  <v-alert v-else :title="t('error')" type="error" variant="tonal">
+    {{ t('error_description', { locale }) }}
+  </v-alert>
 </template>
 
 <style lang="scss">
@@ -871,15 +870,21 @@ $colors-dark: (
 
 <i18n lang="yaml">
 en:
-  error: 'Error loading content:'
+  error: Page not found
+  error_description: "This page doesn't exist in {locale} language."
 fr:
-  error: 'Erreur lors du chargement du contenu :'
+  error: Page non trouvée
+  error_description: "Cette page n'existe pas dans la langue {locale}."
 ja:
-  error: 内容取得時にエラーが発生しました：
+  error: ページが見つかりません
+  error_description: このページは{locale}言語に存在しません。
 ko:
-  error: '콘텐츠를 불러오는 중 오류 발생:'
+  error: 페이지를 찾을 수 없습니다
+  error_description: 이 페이지는 {locale} 언어에 존재하지 않습니다.
 zhHant:
-  error: '載入內容時出錯：'
+  error: 頁面未找到
+  error_description: 此頁面在{locale}語言中不存在。
 zhHans:
-  error: '加载内容时出错：'
+  error: 页面未找到
+  error_description: 此页面在{locale}语言中不存在。
 </i18n>

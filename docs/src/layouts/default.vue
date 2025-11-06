@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useTheme } from "vuetify";
+import { useTheme } from 'vuetify';
 
-import { useConfigStore } from "../store";
+import { useConfigStore } from '../store';
 
 /** Vuetify Theme */
 const theme = useTheme();
@@ -13,9 +13,7 @@ const configStore = useConfigStore();
 const drawer: Ref<boolean> = ref(false);
 
 /** Toggle Dark mode */
-const isDark: ComputedRef<string> = computed(() =>
-  configStore.theme ? "dark" : "light"
-);
+const isDark: ComputedRef<string> = computed(() => (configStore.theme ? 'dark' : 'light'));
 </script>
 
 <template>
@@ -44,9 +42,7 @@ const isDark: ComputedRef<string> = computed(() =>
   <teleport to="head">
     <meta
       name="theme-color"
-      :content="
-        theme.computedThemes.value?.[isDark]?.colors?.primary ?? '#1976D2'
-      "
+      :content="theme.computedThemes.value?.[isDark]?.colors?.primary ?? '#1976D2'"
     />
   </teleport>
 </template>
