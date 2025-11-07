@@ -31,7 +31,7 @@ const getFormatDescriptions = (key: string) => {
   }
 };
 
-const version = '3.0.0';
+const version = '3.0.1';
 const features = [
   {
     icon: 'mdi-image-multiple',
@@ -339,15 +339,17 @@ useHead({
       </v-row>
     </v-card-text>
     <v-card-actions class="justify-center">
-      <v-btn
-        :text="t('format.more')"
-        href="format-guide"
-        class="ma-4"
-        color="primary"
-        prepend-icon="mdi-book-open-page-variant"
-        size="large"
-        variant="elevated"
-      />
+      <NuxtLink :to="localePath('/format-guide')" custom #="{ navigate }">
+        <v-btn
+          :text="t('format.more')"
+          class="ma-4"
+          color="primary"
+          prepend-icon="mdi-book-open-page-variant"
+          size="large"
+          variant="elevated"
+          @click="navigate"
+        />
+      </NuxtLink>
     </v-card-actions>
   </v-card>
 </template>
