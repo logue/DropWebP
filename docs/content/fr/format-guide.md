@@ -106,10 +106,20 @@ JPEG XL est un nouveau format développé pour pallier les lacunes de l'ancienne
 
 ## Résumé des formats de sortie
 
-| Format         | Principaux avantages                                                                                    | Cas d'utilisation                                                          | Avec perte | Sans perte | Alpha | Taux de compression | Charge |
-| -------------- | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ---------- | ---------- | ----- | ------------------- | ------ |
-| PNG (Oxipng)   | Aucune dégradation d'image, transparence d'arrière-plan.                                                | Logos, icônes, diagrammes.                                                 | ❌️        | ✅️        | ✅️   | Moyen               | Élevé  |
-| JPEG (MozJPEG) | Permet les très petites photos.                                                                         | Photos générales sur le web.                                               | ✅️        | ❌️        | ❌️   | Élevé               | Faible |
-| WebP           | Compression et qualité élevées, prend en charge la transparence et l'animation.                         | Images générales pour sites web.                                           | ✅️        | ✅️        | ✅️   | Moyen               | Moyen  |
-| AVIF           | **Taux de compression le plus élevé et qualité élevée**, prise en charge d'une large gamme de couleurs. | Sites web nécessitant à la fois une qualité élevée et un affichage rapide. | ✅️        | ❌️        | ✅️   | Élevé               | Élevé  |
-| JPEG XL        | **Le format ultime**, compatible avec tout et le format JPEG.                                           | Pour des JPEG plus petits et une future unification des images.            | ✅️        | ✅️        | ✅️   | Élevé               | Faible |
+| Format | Principaux avantages | Utilisations recommandées | Avec perte | Sans perte | Alpha | HDR | Taux de compression | Charge de compression |
+
+| --------------- | ---------------------------------------------------- | ------------------------------------------------------ | -------- | -------- | --- | ------ | -------- |
+
+| PNG (Oxipng) | Aucune dégradation de l'image, transparence du fond. | Logos, icônes, diagrammes. | ❌️ | ✅️ | ✅️ | ❌️ | Faible | Élevée |
+
+| JPEG (MozJPEG) | Possibilité de réduire considérablement la taille des photos. | Images couramment utilisées sur le web. | ✅️ | ❌️ | ❌️ | ❌️ | Élevée | Faible |
+
+| WebP | Compression élevée, haute qualité, prise en charge de la transparence et des animations. | Images à usage général pour les sites web. | ✅️ | ✅️ | ✅️ | ❌️ | Moyen | Moyen |
+
+| AVIF | **Taux de compression maximal et haute qualité d'image**, prise en charge d'une large gamme de couleurs (HDR). | Pour les sites web exigeant à la fois une haute qualité d'image et un affichage rapide. | ✅️ | ❌️[^1] | ✅️ | ✅️ | Élevé | Élevé |
+
+| JPEG XL | **Le format ultime**, compatible avec tous les formats et avec JPEG. | Pour réduire la taille des fichiers JPEG existants et unifier les formats d'image à l'avenir. | ✅️ | ✅️ | ✅️ | ✅️ | Élevé | Faible |
+
+[^1]:
+    Le format AVIF est sans perte par définition, mais ce programme ne l'implémente pas en raison de sa charge élevée et de la taille importante des fichiers.
+    Pour une utilisation sans perte, nous recommandons l'utilisation de JPEG XL. Référence : <https://github.com/AOMediaCodec/av1-avif/issues/111>

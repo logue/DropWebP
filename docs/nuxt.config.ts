@@ -38,14 +38,7 @@ export default defineNuxtConfig({
     }
   },
   // モジュール
-  modules: [
-    '@nuxt/content',
-    '@nuxt/eslint',
-    '@nuxtjs/i18n',
-    '@pinia/nuxt',
-    'nuxt-gtag',
-    'vuetify-nuxt-module'
-  ],
+  modules: ['@nuxt/content', '@nuxt/eslint', '@nuxtjs/i18n', '@pinia/nuxt', 'nuxt-gtag', 'vuetify-nuxt-module', '@nuxtjs/sitemap'],
 
   // i18n設定（<i18n>ブロック使用）
   i18n: {
