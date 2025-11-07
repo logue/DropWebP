@@ -7,7 +7,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <v-card flat>
+  <v-card flat :title="t('title')">
     <v-card-text>
       <div class="d-flex">
         <v-switch
@@ -99,6 +99,7 @@ const { t } = useI18n();
 
 <i18n lang="yaml">
 en:
+  title: Common Options
   play_sound: Play sound when done
   volume: Volume
   notify: Notify in Desktop
@@ -115,6 +116,7 @@ en:
   reset_all: Reset All
   reset_common: Reset common options
 fr:
+  title: Options communes
   play_sound: Lire un son à la fin
   volume: Volume
   notify: Notification sur le bureau
@@ -131,6 +133,7 @@ fr:
   reset_all: Réinitialiser tout
   reset_common: Réinitialiser les options communes
 ja:
+  title: 共通設定
   play_sound: 完了時にサウンドを再生
   volume: 音量
   notify: デスクトップ通知
@@ -145,8 +148,9 @@ ja:
   output_path: デフォルトの出力先のパス
   browse: ブラウズ
   reset_all: 全てをリセット
-  reset_common: 共通オプションをリセット
+  reset_common: 共通設定をリセット
 ko:
+  title: 공통 설정
   play_sound: 완료 시 소리 재생
   volume: 볼륨
   notify: 데스크탑 알림
@@ -161,8 +165,9 @@ ko:
   output_path: 기본 출력 경로
   browse: 찾아보기
   reset_all: 모두 재설정
-  reset_common: 공통 옵션 재설정
+  reset_common: 공통 설정 재설정
 zhHant:
+  title: 通用選項
   play_sound: 完成時播放聲音
   volume: 音量
   notify: 桌面通知
@@ -177,8 +182,9 @@ zhHant:
   output_path: 預設輸出路徑
   browse: 瀏覽
   reset_all: 重置所有設定
-  reset_common: 重置常用選項
+  reset_common: 重置常用选项
 zhHans:
+  title: 通用选项
   play_sound: 完成时播放声音
   volume: 音量
   notify: 桌面通知

@@ -9,7 +9,7 @@ const settingsStore = useSettingsStore();
 </script>
 
 <template>
-  <v-card flat>
+  <v-card flat :title="t('title')">
     <v-card-text>
       <v-switch
         v-model="settingsStore.jxlOptions.lossless"
@@ -127,6 +127,7 @@ const settingsStore = useSettingsStore();
 
 <i18n lang="yaml">
 en:
+  title: JPEG XL Options
   lossless: Lossless compression
   lossless_hint: This works for most images, but in rare cases, it may not be applied (issue of jpegxl-rs).
   speed: Encoding speed
@@ -161,6 +162,7 @@ en:
     - LinearSrgbLuma (Linear sRGB color space with luminance information)
   reset_jxl_options: Reset JPEG XL settings
 fr:
+  title: Options JPEG XL
   lossless: Compression sans perte
   lossless_hint: Cela fonctionne pour la plupart des images, mais dans de rares cas, cela peut ne pas être appliqué (problème de jpegxl-rs).
   speed: Vitesse d'encodage
@@ -195,6 +197,7 @@ fr:
     - LinearSrgbLuma (Espace colorimétrique sRGB linéaire avec information de luminance)
   reset_jxl_options: Réinitialiser les paramètres JPEG XL
 ja:
+  title: JPEG XL 設定
   lossless: ロスレス圧縮
   lossless_hint: これはほとんどの画像で機能しますが、稀に適用されないことがあります（jpegxl-rsの問題）。
   speed: エンコード速度
@@ -229,6 +232,7 @@ ja:
     - LinearSrgbLuma（輝度情報を含むリニアsRGBカラースペース）
   reset_jxl_options: JPEG XL設定をリセット
 ko:
+  title: JPEG XL 옵션
   lossless: 무손실 압축
   lossless_hint: 대부분의 이미지에서 작동하지만 드문 경우에 적용되지 않을 수 있습니다(jpegxl-rs의 문제).
   speed: 인코딩 속도
@@ -263,6 +267,7 @@ ko:
     - LinearSrgbLuma (휘도 정보가 포함된 선형 sRGB 색상 공간)
   reset_jxl_options: JPEG XL 설정 재설정
 zhHants:
+  title: JPEG XL 選項
   lossless: 無損壓縮
   lossless_hint: 大多數圖像均可使用，但極少數情況下可能無法應用（jpegxl-rs 的問題）。
   speed: 編碼速度
@@ -297,6 +302,7 @@ zhHants:
     - LinearSrgbLuma (具有亮度信息的線性 sRGB 色彩空間)
   reset_jxl_options: 重置 JPEG XL 設置
 zhHans:
+  title: JPEG XL 选项
   lossless: 无损压缩
   lossless_hint: 大多数图像均可使用，但极少数情况下可能无法应用（jpegxl-rs 的问题）。
   speed: 编码速度

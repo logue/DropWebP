@@ -9,7 +9,7 @@ const settingsStore = useSettingsStore();
 </script>
 
 <template>
-  <v-card flat>
+  <v-card flat :title="t('title')">
     <v-card-text>
       <v-slider
         v-model="settingsStore.pngOptions.zopfliIterations"
@@ -115,6 +115,7 @@ const settingsStore = useSettingsStore();
 
 <i18n lang="yaml">
 en:
+  title: PNG (Oxipng) Options
   zopfli_iterations: Zopfli Iterations
   zopfli_iterations_hint: Specify the number of iterations for Zopfli compression. It can be set in the range of {min} to {max}. A higher value improves compression ratio but increases processing time.
   embed_icc_profile: Embed ICC Profile
@@ -146,6 +147,7 @@ en:
     brute: Brute (tries all combinations, slowest but best compression)
   reset_png_options: Reset PNG Options
 fr:
+  title: Options PNG (Oxipng)
   zopfli_iterations: Itérations Zopfli
   zopfli_iterations_hint: Spécifiez le nombre d'itérations pour la compression Zopfli. Il peut être défini dans la plage de {min} à {max}. Une valeur plus élevée améliore le ratio de compression mais augmente le temps de traitement.
   embed_icc_profile: Intégrer le profil ICC
@@ -177,6 +179,7 @@ fr:
     brute: Brute (essaye toutes les combinaisons, le plus lent mais la meilleure compression)
   reset_png_options: Réinitialiser les options PNG
 ja:
+  title: PNG (Oxipng) 設定
   zopfli_iterations: Zopfliの反復回数
   zopfli_iterations_hint: Zopfli圧縮の反復回数を指定します。{min}〜{max}の範囲で設定可能です。値が大きいほど圧縮率が向上しますが、処理時間も長くなります。
   embed_icc_profile: ICCプロファイルを埋め込む
@@ -208,6 +211,7 @@ ja:
     brute: ブルートフォース（すべての組み合わせを試行、最も遅いが最良の圧縮）
   reset_png_options: PNG設定をリセット
 ko:
+  title: PNG (Oxipng) 옵션
   zopfli_iterations: Zopfli 반복 횟수
   zopfli_iterations_hint: Zopfli 압축의 반복 횟수를 지정합니다. {min}~{max} 범위 내에서 설정할 수 있습니다. 값이 높을수록 압축률이 향상되지만 처리 시간이 길어집니다.
   embed_icc_profile: ICC 프로필 포함
@@ -239,6 +243,7 @@ ko:
     brute: Brute (모든 조합 시도, 가장 느리지만 최고의 압축)
   reset_png_options: PNG 옵션 재설정
 zhHant:
+  title: PNG (Oxipng) 選項
   zopfli_iterations: Zopfli 迭代次數
   zopfli_iterations_hint: 指定 Zopfli 壓縮的迭代次數。可以在 {min} 到 {max} 的範圍內設置。值越高，壓縮率越高，但處理時間也會增加。
   embed_icc_profile: 嵌入 ICC 配置文件
@@ -268,8 +273,9 @@ zhHant:
     bigrams: Bigrams（2-gram 頻率分析）
     bigEnt: BigEnt（bigrams 和 entropy 的組合）
     brute: Brute（暴力破解）
-  reset_png_options: 重置 PNG 選項
+  reset_png_options: 重置 PNG 选项
 zhHans:
+  title: PNG (Oxipng) 选项
   zopfli_iterations: Zopfli 迭代次数
   zopfli_iterations_hint: 指定 Zopfli 压缩的迭代次数。可以在 {min} 到 {max} 的范围内设置。值越高，压缩率越高，但处理时间也会增加。
   embed_icc_profile: 嵌入 ICC 配置文件

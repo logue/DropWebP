@@ -7,7 +7,7 @@ const settingsStore = useSettingsStore();
 </script>
 
 <template>
-  <v-card flat>
+  <v-card flat :title="t('title')">
     <v-card-text>
       <v-switch
         v-model="settingsStore.jpegOptions.progressive"
@@ -62,15 +62,17 @@ const settingsStore = useSettingsStore();
 
 <i18n lang="yaml">
 en:
+  title: JPEG (MozJPEG) Options
   recommended: Recommended
   quality: Quality ({min}-{max})
   quality_hint: 'Set the JPEG quality. Lower quality results in smaller file size. (Recommended: 85 and above)'
-  progressive: Progressive (Recommended)
+  progressive: Progressive
   progressive_hint: Enable progressive encoding for JPEG images.
-  optimize: Optimize (Recommended)
+  optimize: Optimize
   optimize_hint: Enable optimization for JPEG images.
   reset_jpeg_options: Reset JPEG Options
 fr:
+  title: Options JPEG (MozJPEG)
   recommended: Recommandé
   quality: Qualité ({min}-{max})
   quality_hint: 'Définissez la qualité JPEG. Une qualité inférieure entraîne une taille de fichier plus petite. (Recommandé : 85 et plus)'
@@ -80,6 +82,7 @@ fr:
   optimize_hint: Activez l'optimisation pour les images JPEG.
   reset_jpeg_options: Réinitialiser les options JPEG
 ja:
+  title: JPEG (MozJPEG) 設定
   recommended: 推奨
   quality: 品質（{min}-{max}）
   quality_hint: JPEGの品質を設定します。 低い品質はファイルサイズの縮小につながります。（85以上を推奨）
@@ -89,6 +92,7 @@ ja:
   optimize_hint: JPEG画像の最適化を有効にします。
   reset_jpeg_options: JPEGオプションをリセット
 ko:
+  title: JPEG (MozJPEG) 옵션
   recommended: 권장
   quality: 품질 ({min}-{max})
   quality_hint: JPEG 품질 설정. 낮은 품질은 더 작은 파일 크기를 초래합니다. (85 이상 권장)
@@ -98,6 +102,7 @@ ko:
   optimize_hint: JPEG 이미지에 대한 최적화를 활성화합니다.
   reset_jpeg_options: JPEG 옵션 재설정
 zhHans:
+  title: JPEG (MozJPEG) 选项
   recommended: 推荐
   quality: 质量（{min}-{max}）
   quality_hint: '设置JPEG质量。较低的质量会导致更小的文件大小。 (推荐：85及以上)'
@@ -107,6 +112,7 @@ zhHans:
   optimize_hint: 为JPEG图像启用优化。
   reset_jpeg_options: 重置JPEG选项
 zhHant:
+  title: JPEG (MozJPEG) 選項
   recommended: 推薦
   quality: 質量（{min}-{max}）
   quality_hint: 設定JPEG質量。較低的質量會導致較小的檔案大小。 (建議：85及以上)

@@ -9,7 +9,7 @@ const settingsStore = useSettingsStore();
 </script>
 
 <template>
-  <v-card elevation="0">
+  <v-card :title="t('title')" flat>
     <v-card-text>
       <!-- ロスレス/ロッシー切り替え -->
       <v-switch
@@ -206,6 +206,7 @@ const settingsStore = useSettingsStore();
 
 <i18n lang="yaml">
 en:
+  title: WebP Options
   lossless: Lossless Compression
   lossless_hint: Enable lossless compression (perfect quality, larger file size)
   quality: Quality ({min}-{max})
@@ -238,6 +239,7 @@ en:
   alpha_quality_hint: Transparency quality for RGBA images. 100=lossless alpha. Recommended=80-100.
   reset_webp_options: Reset WebP Options
 fr:
+  title: Options WebP
   lossless: Compression sans perte
   lossless_hint: Activer la compression sans perte (qualité parfaite, taille de fichier plus grande)
   quality: Qualité ({min}-{max})
@@ -270,6 +272,7 @@ fr:
   alpha_quality_hint: Qualité de transparence pour les images RGBA. 100=alpha sans perte. Recommandé=80-100.
   reset_webp_options: Réinitialiser les options WebP
 ja:
+  title: WebP 設定
   lossless: ロスレス圧縮
   lossless_hint: ロスレス圧縮を有効化（完全な品質、ファイルサイズは大きくなります）
   quality: 品質（{min}～{max}）
@@ -300,7 +303,7 @@ ja:
   sns_strength_hint: 空間ノイズシェーピング強度。値が大きいとノイズとファイルサイズが減少。写真=50-80、イラスト=0-30。
   alpha_quality: アルファ品質（{min}～{max}）
   alpha_quality_hint: RGBA画像の透明度品質。100=ロスレスアルファ。推奨=80-100。
-  reset_webp_options: WebPオプションをリセット
+  reset_webp_options: WebP設定をリセット
 ko:
   lossless: 무손실 압축
   lossless_hint: 무손실 압축 활성화 (완벽한 품질, 파일 크기 증가)
@@ -332,8 +335,9 @@ ko:
   sns_strength_hint: 공간 노이즈 셰이핑 강도. 높은 값은 노이즈와 파일 크기를 줄입니다. 사진=50-80, 일러스트=0-30.
   alpha_quality: 알파 품질 ({min}-{max})
   alpha_quality_hint: RGBA 이미지의 투명도 품질. 100=무손실 알파. 권장=80-100.
-  reset_webp_options: WebP 옵션 재설정
+  reset_webp_options: WebP 설정 재설정
 zhHant:
+  title: WebP 設定
   lossless: 無損壓縮
   lossless_hint: 啟用無損壓縮（完美品質，檔案較大）
   quality: 品質 ({min}-{max})
@@ -364,8 +368,9 @@ zhHant:
   sns_strength_hint: 空間雜訊整形強度。較高的值會減少雜訊和檔案大小。照片=50-80，插圖=0-30。
   alpha_quality: Alpha 品質 ({min}-{max})
   alpha_quality_hint: RGBA 圖像的透明度品質。100=無損 alpha。建議=80-100。
-  reset_webp_options: 重置 WebP 選項
+  reset_webp_options: 重置 WebP 选项
 zhHans:
+  title: WebP 设置
   lossless: 无损压缩
   lossless_hint: 启用无损压缩（完美品质，文件较大）
   quality: 品质 ({min}-{max})

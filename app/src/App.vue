@@ -56,7 +56,7 @@ onMounted(() => {
 
 <template>
   <v-app :theme="theme" data-tauri-drag-region="true">
-    <v-app-bar color="primary" density="compact">
+    <v-app-bar color="primary">
       <v-app-bar-title tag="h1">{{ title }}</v-app-bar-title>
       <v-spacer />
       <app-bar-menu-component />

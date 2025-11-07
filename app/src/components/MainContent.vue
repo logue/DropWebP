@@ -134,7 +134,7 @@ en:
   formats:
     png:
       label: PNG
-      badge: Zopfli Comp.
+      badge: Oxipng
       description:
         PNG is a widely used lossless image format that supports transparency and is ideal for images with sharp edges and text.
         Zopfli, used in this program, is a more advanced compression algorithm that requires more processing power but significantly reduces the size of the same PNG file while maintaining quality.
@@ -195,7 +195,7 @@ fr:
   formats:
     png:
       label: PNG
-      badge: Zopfli Comp.
+      badge: Oxipng
       description:
         PNG est un format d'image sans perte largement utilisé qui prend en charge la transparence et est idéal pour les images aux contours nets et le texte.
         Zopfli, utilisé dans ce programme, est un algorithme de compression plus avancé qui nécessite plus de puissance de traitement, mais réduit considérablement la taille du fichier PNG tout en préservant la qualité.
@@ -256,7 +256,7 @@ ja:
   formats:
     png:
       label: PNG
-      badge: Zopfli圧縮
+      badge: Oxipng
       description:
         PNGは、広く使用されているロスレス画像形式で、透明性をサポートし、シャープなエッジやテキストを含む画像に最適です。
         本プログラムで使用されているZopfliは、より高度な圧縮アルゴリズムで、変換負荷は高めなものの、品質を維持しながら同じPNGファイルでもサイズを大幅に削減できるため、オリジナルデータの保存やVRC向けのテクスチャの再圧縮に最適な選択肢です。
@@ -316,7 +316,7 @@ ko:
   formats:
     png:
       label: PNG
-      badge: Zopfli 압축
+      badge: Oxipng
       description:
         PNG는 널리 사용되는 무손실 이미지 형식으로, 투명도를 지원하며 선명한 가장자리와 텍스트가 포함된 이미지에 적합합니다.
         이 프로그램에서 사용되는 Zopfli는 더 발전된 압축 알고리즘으로, 처리 부하는 높지만 품질을 유지하면서 동일한 PNG 파일의 크기를 크게 줄일 수 있어 원본 데이터를 보존하거나 VRC용 텍스처를 재압축하는 데 이상적인 선택입니다.
@@ -374,7 +374,7 @@ zhHans:
   formats:
     png:
       label: PNG
-      badge: Zopfli压缩
+      badge: Oxipng
       description: PNG 是一种广泛使用的无损影像格式，支持透明度，非常适合包含锐利边缘和文字的影像。
         本程序中使用的 Zopfli 是一种更先进的压缩算法，需要更高的处理能力，但在保持品质的同时显著减小了相同 PNG 文件的大小。
         这使得它成为保留原始数据或为 VRC 重新压缩纹理的理想选择。
@@ -431,7 +431,7 @@ zhHant:
   formats:
     png:
       label: PNG
-      badge: Zopfli 壓縮
+      badge: Oxipng
       description: PNG 是一種廣泛使用的無損影像格式，支援透明度，非常適合包含銳利邊緣和文字的影像。
         本程式中使用的 Zopfli 是一種更先進的壓縮演算法，需要更高的處理能力，但在保持品質的同時顯著減小了相同 PNG 檔案的大小。
         這使得它成為保留原始資料或為 VRC 重新壓縮紋理的理想選擇。

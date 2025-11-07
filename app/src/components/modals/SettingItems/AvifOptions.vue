@@ -9,7 +9,7 @@ const settingsStore = useSettingsStore();
 </script>
 
 <template>
-  <v-card elevation="0">
+  <v-card :title="t('title')" flat>
     <v-card-text>
       <v-slider
         v-model="settingsStore.avifOptions.quality"
@@ -119,6 +119,7 @@ const settingsStore = useSettingsStore();
 
 <i18n lang="yaml">
 en:
+  title: AVIF Options
   bit_depth: Bit Depth
   bit_depth_hint: Select the bit depth. Higher bit depth provides better quality but results in larger file sizes.
   bit_depth_items:
@@ -141,6 +142,7 @@ en:
   threads_hint: If left blank, it will be set automatically based on the number of logical cores in the system
   reset_avif_options: Reset AVIF Options
 fr:
+  title: Options AVIF
   bit_depth: Profondeur de bits
   bit_depth_hint: Sélectionnez la profondeur de bits. Une profondeur de bits plus élevée offre une meilleure qualité mais entraîne des tailles de fichier plus importantes.
   bit_depth_items:
@@ -163,6 +165,7 @@ fr:
   threads_hint: S'il est laissé vide, il sera défini automatiquement en fonction du nombre de cœurs logiques du système
   reset_avif_options: Réinitialiser les options AVIF
 ja:
+  title: AVIF 設定
   bit_depth: ビット深度
   bit_depth_hint: ビット深度を選択します。高いビット深度はより良い品質を提供しますが、ファイルサイズも大きくなります。
   bit_depth_items:
@@ -185,6 +188,7 @@ ja:
   threads_hint: 空欄の場合、システムの論理コア数に基づいて自動的に設定されます
   reset_avif_options: AVIFオプションをリセット
 ko:
+  title: AVIF 옵션
   bit_depth: 비트 깊이
   bit_depth_hint: 비트 깊이를 선택합니다. 더 높은 비트 깊이는 더 나은 품질을 제공하지만 파일 크기가 커집니다.
   bit_depth_items:
@@ -207,6 +211,7 @@ ko:
   threads_hint: 비워 두면 시스템의 논리 코어 수에 따라 자동으로 설정됩니다
   reset_avif_options: AVIF 옵션 재설정
 zhHant:
+  title: AVIF 選項
   bit_depth: 位深
   bit_depth_hint: 選擇位深。較高的位深提供更好的質量，但會導致檔案大小增加。
   bit_depth_items:
@@ -229,6 +234,7 @@ zhHant:
   threads_hint: 如果留空，将根据系统中的逻辑核心数自动设置
   reset_avif_options: 重置AVIF选项
 zhHans:
+  title: AVIF 设置
   bit_depth: 位深
   bit_depth_hint: 选择位深。较高的位深提供更好的质量，但会导致文件大小增加。
   bit_depth_items:
