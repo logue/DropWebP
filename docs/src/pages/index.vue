@@ -12,6 +12,25 @@ import png from '@/assets/zopfli-logo.png';
 const { locale, rt, t, tm } = useI18n();
 const localePath = useLocalePath();
 
+// 型安全なdescriptionの取得
+const leadDescriptions = computed(() => {
+  try {
+    const descriptions = tm('lead.description') as unknown;
+    return Array.isArray(descriptions) ? (descriptions as string[]) : [];
+  } catch {
+    return [];
+  }
+});
+
+const getFormatDescriptions = (key: string) => {
+  try {
+    const descriptions = tm(`format.${key}.description`) as unknown;
+    return Array.isArray(descriptions) ? (descriptions as string[]) : [];
+  } catch {
+    return [];
+  }
+};
+
 const version = '3.0.0';
 const features = [
   {
@@ -217,7 +236,7 @@ useHead({
           size="small"
         />
       </v-chip-group>
-      <p v-for="description in tm(`lead.description`)" :key="description">
+      <p v-for="description in leadDescriptions" :key="description">
         {{ rt(description) }}
       </p>
     </v-card-text>
@@ -311,7 +330,7 @@ useHead({
               {{ t(`format.${item.key}.title`) }}
             </v-card-title>
             <v-card-text>
-              <p v-for="description in tm(`format.${item.key}.description`)" :key="description">
+              <p v-for="description in getFormatDescriptions(item.key)" :key="description">
                 {{ rt(description) }}
               </p>
             </v-card-text>
@@ -321,15 +340,14 @@ useHead({
     </v-card-text>
     <v-card-actions class="justify-center">
       <v-btn
-        :to="localePath('format-guide')"
+        :text="t('format.more')"
+        href="format-guide"
         class="ma-4"
         color="primary"
         prepend-icon="mdi-book-open-page-variant"
         size="large"
         variant="elevated"
-      >
-        {{ t('format.more') }}
-      </v-btn>
+      />
     </v-card-actions>
   </v-card>
 </template>
@@ -396,7 +414,6 @@ en:
         - PNG (Portable Network Graphics) is a format that allows images to be saved "without any loss of quality."
         - Zopfli, used in this program, is a special compression technique created by Google to make PNGs "smaller."
         - It supports transparency and maintains high-quality images.
-        - Zopfli is an algorithm for compressing PNG images more efficiently. It uses advanced compression techniques to reduce file size while preserving image quality.
     jpeg:
       title: JPEG (MozJPEG Compression)
       description:
@@ -465,7 +482,6 @@ fr:
         - PNG (Portable Network Graphics) est un format qui permet de sauvegarder les images "sans aucune perte de qualité".
         - Zopfli, utilisé dans ce programme, est une technique de compression spéciale créée par Google pour rendre les PNG "plus petits".
         - Il prend en charge la transparence et maintient des images de haute qualité.
-        - Zopfli est un algorithme de compression des images PNG plus efficace. Il utilise des techniques de compression avancées pour réduire la taille des fichiers tout en préservant la qualité de l'image.
     jpeg:
       title: JPEG (Compression MozJPEG)
       description:
@@ -534,7 +550,6 @@ ja:
         - PNG（Portable Network Graphics）は、画像を「画質を全く落とさずに」保存できる形式です。
         - 本プログラムで使用されているZopfli（ゾップフリ）とは、このPNGを「より小さく」するための、Googleが作った特別な圧縮技術です。
         - 透明度をサポートし、高品質の画像を保持します。
-        - Zopfliは、PNG画像の圧縮を更に高効率で圧縮するためのアルゴリズムです。
     jpeg:
       title: JPEG (MozJPEG圧縮)
       description:
@@ -601,7 +616,6 @@ ko:
         - PNG(Portable Network Graphics)는 이미지를 "품질 손실 없이" 저장할 수 있는 형식입니다.
         - 이 프로그램에서 사용되는 Zopfli는 PNG를 "더 작게" 만들기 위해 Google이 만든 특별한 압축 기술입니다.
         - 투명도를 지원하며 고품질 이미지를 유지합니다.
-        - Zopfli는 PNG 이미지를 보다 효율적으로 압축하기 위한 알고리즘입니다. 고급 압축 기술을 사용하여 파일 크기를 줄이면서 이미지 품질을 유지합니다.
     jpeg:
       title: JPEG (MozJPEG 압축)
       description:
@@ -670,7 +684,6 @@ zhHant:
         - PNG（Portable Network Graphics）是一種允許將圖像「無任何質量損失」保存的格式。
         - 本程式中使用的 Zopfli 是 Google 創建的一種特殊壓縮技術，用於使 PNG「更小」。
         - 它支援透明度並保持高質量圖像。
-        - Zopfli 是一種更高效地壓縮 PNG 圖像的算法。它使用先進的壓縮技術來減少文件大小，同時保留圖像質量。
     jpeg:
       title: JPEG (MozJPEG 壓縮)
       description:
@@ -739,7 +752,6 @@ zhHans:
         - PNG（Portable Network Graphics）是一种允许将图像「无任何质量损失」保存的格式。
         - 本程序中使用的 Zopfli 是 Google 创建的一种特殊压缩技术，用于使 PNG「更小」。
         - 它支持透明度并保持高质量图像。
-        - Zopfli 是一种更高效地压缩 PNG 图像的算法。它使用先进的压缩技术来减少文件大小，同时保留图像质量。
     jpeg:
       title: JPEG (MozJPEG 压缩)
       description:
