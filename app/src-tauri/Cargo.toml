@@ -7,6 +7,7 @@ rust-version = "1.91.0"
 description = "Drop Compress Image is a desktop application that converts images to WebP/Avif/JPEG XL format using drag-and-drop functionality. Built with Vite, Vue 3, TypeScript, and Tauri."
 readme = "../../ReadMe.md"
 repository = "https://github.com/logue/DropWebP"
+homepage = "https://logue.dev/DropWebP/"
 license-file = "../../LICENSE"
 keywords = [
   "application",
@@ -21,6 +22,7 @@ keywords = [
   "jpeg",
   "jpeg2000",
   "mozjpeg",
+  "oxipng",
   "png",
   "tauri",
   "webp",

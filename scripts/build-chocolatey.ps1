@@ -2,7 +2,7 @@
 # Chocolatey パッケージ生成スクリプト
 
 param(
-    [string]$Version = "2.3.0"
+    [string]$Version = "3.0.1"
 )
 
 $ErrorActionPreference = "Stop"
