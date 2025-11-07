@@ -3,8 +3,7 @@ $ErrorActionPreference = 'Stop'
 $packageName = 'drop-compress-image'
 $toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
 $version = '3.0.1'
-$url64 = "https://github.com/logue/DropWebP/releases/download/v$version/Drop.Compress.Image_$($version)_x64_en-US.msi"
-
+$url64 = "https://github.com/logue/DropWebP/releases/download/$version/drop-compress-image_$($version)_x64_en-US.msi"
 $packageArgs = @{
   packageName    = $packageName
   fileType       = 'msi'
