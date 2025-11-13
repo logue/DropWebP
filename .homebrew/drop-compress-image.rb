@@ -14,7 +14,7 @@ class DropCompressImage < Formula
   end
 
   def install
-    prefix.install "Drop Compress Image.app"
+    prefix.install "drop-compress-image.app"
   end
 
   def caveats
@@ -24,11 +24,11 @@ class DropCompressImage < Formula
 
       To use it, you can:
         1. Open it from Applications folder
-        2. Or run: open "#{prefix}/Drop Compress Image.app"
+        2. Or run: open "#{prefix}/drop-compress-image.app"
     EOS
   end
 
   test do
-    assert_predicate prefix/"Drop Compress Image.app", :exist?
+    assert_predicate prefix/"drop-compress-image.app", :exist?
   end
 end

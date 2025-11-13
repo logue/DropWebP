@@ -15,6 +15,12 @@ export default defineNuxtConfig({
     inlineStyles: false // CSS外部化
   },
 
+  // サイト設定
+  site: {
+    url: 'https://logue.dev/DropWebP/',
+    name: 'Drop Compress Image'
+  },
+
   // アプリ設定
   app: {
     baseURL: process.env.NUXT_APP_BASE_URL || '/DropWebP/',
@@ -38,7 +44,15 @@ export default defineNuxtConfig({
     }
   },
   // モジュール
-  modules: ['@nuxt/content', '@nuxt/eslint', '@nuxtjs/i18n', '@pinia/nuxt', 'nuxt-gtag', 'vuetify-nuxt-module', '@nuxtjs/sitemap'],
+  modules: [
+    '@nuxt/content',
+    '@nuxt/eslint',
+    '@nuxtjs/i18n',
+    '@nuxtjs/sitemap',
+    '@pinia/nuxt',
+    'nuxt-gtag',
+    'vuetify-nuxt-module'
+  ],
 
   // i18n設定（<i18n>ブロック使用）
   i18n: {
@@ -57,17 +71,6 @@ export default defineNuxtConfig({
       cookieKey: 'i18n_redirected',
       redirectOn: 'root' // recommended
     }
-    /*
-    baseUrl:
-      process.env.NUXT_PUBLIC_SITE_URL ||
-      (process.env.GITHUB_PAGES
-        ? "https://logue.dev"
-        : "http://localhost:3000"),
-    compilation: {
-      // HTMLを含むメッセージの警告を無効化
-      strictMessage: false,
-    },
-    */
   },
   // Google Analytics設定
   gtag: {

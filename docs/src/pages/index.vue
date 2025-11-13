@@ -263,31 +263,37 @@ useHead({
       <v-code>v.{{ version }}</v-code>
     </v-card-subtitle>
     <!-- Download Buttons -->
-    <v-card-actions class="justify-center">
+    <v-card-actions class="d-flex flex-wrap align-center justify-center gap-3">
       <v-btn
         :href="`${urlPrefix}x64_en-US.msi`"
         class="mr-1"
+        download
         prepend-icon-color="blue"
         prepend-icon="mdi-microsoft-windows"
         size="large"
+        spaced="both"
         stacked
         variant="elevated"
       >
-        {{ t('download.windows') }}
-        <br />
-        <small class="text-secondary">({{ t('download.window_requirement') }})</small>
+        <span class="text-center">
+          <div class="mb-1">{{ t('download.windows') }}</div>
+          <small class="text-medium-emphasis">({{ t('download.window_requirement') }})</small>
+        </span>
       </v-btn>
       <v-btn
         :href="`${urlPrefix}aarch64.dmg`"
         class="ml-1"
+        download
         prepend-icon="mdi-apple"
         size="large"
+        spaced="both"
         stacked
         variant="elevated"
       >
-        {{ t('download.macos') }}
-        <br />
-        <small class="text-secondary">({{ t('download.macos_requirement') }})</small>
+        <span class="text-center">
+          <div class="mb-1">{{ t('download.macos') }}</div>
+          <small class="text-medium-emphasis">({{ t('download.macos_requirement') }})</small>
+        </span>
       </v-btn>
     </v-card-actions>
   </v-card>

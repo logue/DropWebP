@@ -13,7 +13,6 @@ export default withNuxt(
     name: 'docs/files-to-lint',
     files: ['**/*.{ts,mts,tsx,vue}']
   },
-  // @ts-expect-error
   globalIgnores([
     '.nuxt/',
     '.output/',

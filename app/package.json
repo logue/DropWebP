@@ -1,6 +1,6 @@
 {
   "name": "@drop-compress-image/app",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Drop Compress Image is a desktop application that converts images to WebP/Avif/JPEG XL/PNG/JPEG format using drag-and-drop functionality. Built with Vite, Vue 3, TypeScript, and Tauri.",
   "license": "MIT",
   "type": "module",
@@ -35,12 +35,12 @@
     "unified-network": "^0.6.4",
     "vue": "^3.5.24",
     "vue-i18n": "^11.1.12",
-    "vuetify": "^3.10.9"
+    "vuetify": "^3.10.10"
   },
   "devDependencies": {
     "@intlify/unplugin-vue-i18n": "^11.0.1",
     "@modyfi/vite-plugin-yaml": "^1.1.1",
-    "@tauri-apps/cli": "^2.9.3",
+    "@tauri-apps/cli": "^2.9.4",
     "@vitejs/plugin-vue": "^6.0.1",
     "eslint-import-resolver-custom-alias": "^1.3.2",
     "npm-run-all2": "^8.0.4",

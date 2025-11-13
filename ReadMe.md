@@ -1,4 +1,4 @@
-<div class="text-center">
+<div align="center">
 
 ![logo](./app/src-tauri/icons/Square284x284Logo.png)
 
@@ -28,15 +28,24 @@ ImageForge handles a vast array of file types for both input and output.
 
 We support a huge range of input formats, including:
 
-- **HEIF / HEIC** (.heif, .heic)
-- **JPEG 2000** (.jp2, .j2k)
-- **JPEG** (.jpg, .jpeg)
-- **JPEG XL** (.jpx)
-- **PNG** (.png)
-- **GIF** (.gif)
-- **BMP** (.bmp)
-- **TIFF** (.tif, .tiff)
-- **WebP** (.webp)
+- AV1 Image Format (`*.avif`)
+- Microsoft Windows Bitmap Image (`*.bmp`)
+- Direct Draw Surface (`*.dds`)
+- Farbfeld (`*.ff`)
+- Graphics Interchange Format (`*.gif`)
+- Radiance High Dynamic Range image file (`*.hdr`)
+- Computer icon encoded in ICO file format (`*.ico`)
+- Joint Photographic Experts Group (`*.jpg`, `*.jpeg`)
+- OpenEXR image (`*.exr`)
+- Portable Network Graphic (`*.png`)
+- Portable Any Map (`*.pnm`)
+- Quite OK Image Format (`*.qoi`)
+- Truevision Graphics Adapter (`*.tga`)
+- Tagged Image File Format (`*.tif`, `*.tiff`)
+- WebP (`*.webp`)
+- High Efficiency Image Container (`*.heic`, `*.heif`)
+- JPEG 2000 (`*.jp2`, `*.j2c`, `*.j2k`, `*.jpf`, `*.jpx`, `*.jpm`, `*.mj2`, `*.jph`)
+- JPEG XL (`*.jxl`)
 
 ...and all other formats supported by the excellent [Rust image crate](https://docs.rs/image/latest/image/codecs/index.html).
 
@@ -44,13 +53,11 @@ We support a huge range of input formats, including:
 
 Optimize your images by converting them to these modern, highly efficient formats:
 
-- **AVIF** (.avif)
-- **JPEG XL** (.jxl) - **_JPEG transcode_** supported. Lossy & lossless is experimental.
-- **WebP** (.webp) - **_Lossy & Lossless_** supported
-
-| WebP                                    | AVIF                                         | JPEG XL                                        |
-| --------------------------------------- | -------------------------------------------- | ---------------------------------------------- |
-| ![WebP](./docs/src/assets/WebPLogo.svg) | ![AVIF](./docs/src/assets/Avif-logo-rgb.svg) | ![JPEG XL](./docs/src/assets/JPEG_XL_logo.svg) |
+- **AVIF** (`.avif`)
+- **JPEG XL** (`.jxl`) - **_JPEG transcode_** supported.
+- **WebP** (`.webp`) - **_Lossy & Lossless_** supported (libwebp v1.6.0)
+- **PNG** (`.png`) - Implemented with Oxipng. Zopfli compression.
+- **JPEG** (`.jpg`) - Implemented with MozJPEG.
 
 ## 📦 Installation
 
@@ -74,7 +81,7 @@ brew install drop-compress-image
 Download the latest release from the [Releases page](https://github.com/logue/DropWebP/releases):
 
 - **Windows**: `.msi` installer
-- **macOS**: `.dmg` disk image (Intel & Apple Silicon)
+- **macOS**: `.dmg` disk image (Apple Silicon)
 - **Linux**: `.deb` or `.AppImage`
 
 ## 🌐 Localization
@@ -82,6 +89,7 @@ Download the latest release from the [Releases page](https://github.com/logue/Dr
 The user interface is available in the following languages:
 
 - 🇬🇧 **English**
+- 🇫🇷 **French**
 - 🇯🇵 **Japanese** (日本語)
 - 🇰🇷 **Korean** (한국어)
 - 🇨🇳 **Chinese** (中文)
