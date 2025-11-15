@@ -39,10 +39,36 @@ const onRightClick = (e: MouseEvent) => {
   menuVisibility.value = true;
 };
 
-// ペースト処理（コンテキストメニューから）
-const onPasteFromContextMenu = () => {
-  // 既存のペースト処理を呼び出すだけ
-  document.dispatchEvent(new Event('paste'));
+// ペースト処理(コンテキストメニューから)
+const onPasteFromContextMenu = async () => {
+  try {
+    // navigator.clipboard APIを使用してクリップボードから画像を読み取る
+    const clipboardItems = await navigator.clipboard.read();
+
+    // ClipboardEventを手動で作成して、既存のペーストハンドラに渡す
+    const clipboardData = new DataTransfer();
+
+    for (const clipboardItem of clipboardItems) {
+      for (const type of clipboardItem.types) {
+        if (type.startsWith('image/')) {
+          const blob = await clipboardItem.getType(type);
+          const file = new File([blob], 'pasted-image', { type });
+          clipboardData.items.add(file);
+        }
+      }
+    }
+
+    // ClipboardEventを作成してdispatch
+    const pasteEvent = new ClipboardEvent('paste', {
+      clipboardData,
+      bubbles: true,
+      cancelable: true
+    });
+
+    globalThis.dispatchEvent(pasteEvent);
+  } catch (error) {
+    console.error('Failed to paste from context menu:', error);
+  }
 };
 </script>
 
