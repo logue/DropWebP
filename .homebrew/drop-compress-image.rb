@@ -1,7 +1,7 @@
 class DropCompressImage < Formula
   desc "Desktop application that converts images to WebP/Avif/JPEG XL format"
   homepage "https://github.com/logue/DropWebP"
-  version "3.0.1"
+  version "3.0.2"
 
   on_macos do
     if Hardware::CPU.arm?
