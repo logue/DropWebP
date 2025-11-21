@@ -25,9 +25,6 @@ const PROJECT_SITE = 'https://logue.dev/DropWebP/';
     </template>
     <template #default="{ isActive }">
       <v-card width="360" :title="t('about_title')">
-        <template #actions>
-          <v-btn color="primary" class="ms-auto" text="OK" @click="isActive.value = false" />
-        </template>
         <v-card-text class="text-center">
           <h2>Drop Compress Image</h2>
           <p>
@@ -36,11 +33,15 @@ const PROJECT_SITE = 'https://logue.dev/DropWebP/';
             <small>(Build: {{ Meta.date }})</small>
           </p>
           <p>
-            <a :href="PROJECT_SITE" target="_blank" @click="openUrl(PROJECT_SITE)">
+            <a :href="PROJECT_SITE" target="_blank" @click.prevent="openUrl(PROJECT_SITE)">
               {{ PROJECT_SITE }}
             </a>
           </p>
         </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn color="primary" class="ms-auto" text="OK" @click="isActive.value = false" />
+        </v-card-actions>
       </v-card>
     </template>
   </v-dialog>

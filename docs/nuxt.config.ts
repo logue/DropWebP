@@ -17,7 +17,7 @@ export default defineNuxtConfig({
 
   // サイト設定
   site: {
-    url: 'https://logue.dev/DropWebP/',
+    url: process.env.NUXT_PUBLIC_SITE_URL || 'https://logue.dev',
     name: 'Drop Compress Image'
   },
 
