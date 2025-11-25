@@ -39,7 +39,7 @@ name = "drop_compress_image_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-cc = "1.2.46"
+cc = "1.2.47"
 pkg-config = "0.3.32"
 tauri-build = { version = "2.5.2", features = [] }
 vcpkg = "0.2.15"
@@ -55,7 +55,7 @@ jpeg2k = "0.10.1"
 jpegxl-rs = "0.11.2"
 kamadak-exif = "0.6.1"
 libheif-rs = "2.5.1"
-libwebp-sys = "0.14.0"
+libwebp-sys = "0.14.1"
 mozjpeg = "0.10.13"
 openjpeg-sys = "1.0.12"
 oxipng = "9.1.5"
