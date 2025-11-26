@@ -111,48 +111,48 @@ const tab = ref('common');
 en:
   settings: Settings
   common_options: Common Options
-  png_options: PNG (Oxipng) Options
-  jpeg_options: JPEG (MozJPEG) Options
+  png_options: PNG Options
+  jpeg_options: JPEG Options
   webp_options: WebP Options
   avif_options: AVIF Options
   jxl_options: JPEG XL Options
 fr:
   settings: Paramètres
   common_options: Options communes
-  png_options: Options PNG (Oxipng)
-  jpeg_options: Options JPEG (MozJPEG)
+  png_options: Options PNG
+  jpeg_options: Options JPEG
   webp_options: Options WebP
   avif_options: Options AVIF
   jxl_options: Options JPEG XL
 ja:
   settings: 設定
   common_options: 共通設定
-  png_options: PNG (Oxipng) 設定
-  jpeg_options: JPEG (MozJPEG) 設定
+  png_options: PNG 設定
+  jpeg_options: JPEG 設定
   webp_options: WebP 設定
   avif_options: AVIF 設定
   jxl_options: JPEG XL 設定
 ko:
   settings: 설정
   common_options: 공통 설정
-  png_options: PNG (Oxipng) 설정
-  jpeg_options: JPEG (MozJPEG) 설정
+  png_options: PNG 설정
+  jpeg_options: JPEG 설정
   webp_options: WebP 설정
   avif_options: AVIF 설정
   jxl_options: JPEG XL 설정
 zhHant:
   settings: 設定
   common_options: 共通設定
-  png_options: PNG (Oxipng) 設定
-  jpeg_options: JPEG (MozJPEG) 設定
+  png_options: PNG 設定
+  jpeg_options: JPEG 設定
   webp_options: WebP 設定
   avif_options: AVIF 設定
   jxl_options: JPEG XL 設定
 zhHans:
   settings: 设置
   common_options: 通用设置
-  png_options: PNG (Oxipng) 设置
-  jpeg_options: JPEG (MozJPEG) 设置
+  png_options: PNG 设置
+  jpeg_options: JPEG 设置
   webp_options: WebP 设置
   avif_options: AVIF 设置
   jxl_options: JPEG XL 设置
