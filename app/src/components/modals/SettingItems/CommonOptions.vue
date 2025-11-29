@@ -71,10 +71,41 @@ const { t } = useI18n();
         v-model="settingsStore.commonOptions.outputPath"
         :disabled="settingsStore.commonOptions.sameDirectory"
         :label="t('output_path')"
+        append-inner-icon="mdi-folder-open"
         readonly
+        @click:append-inner="settingsStore.browseOutputPath()"
       >
         <template #append>
-          <v-btn icon="mdi-folder-open" variant="plain" @click="settingsStore.browseOutputPath()" />
+          <v-tooltip :text="t('folder_home')" location="bottom">
+            <template #activator="{ props }">
+              <v-btn
+                v-bind="props"
+                icon="mdi-folder-home"
+                variant="plain"
+                @click="settingsStore.setOutputPath('home')"
+              />
+            </template>
+          </v-tooltip>
+          <v-tooltip :text="t('folder_document')" location="bottom">
+            <template #activator="{ props }">
+              <v-btn
+                v-bind="props"
+                icon="mdi-folder-file"
+                variant="plain"
+                @click="settingsStore.setOutputPath('document')"
+              />
+            </template>
+          </v-tooltip>
+          <v-tooltip :text="t('folder_picture')" location="bottom">
+            <template #activator="{ props }">
+              <v-btn
+                v-bind="props"
+                icon="mdi-folder-image"
+                variant="plain"
+                @click="settingsStore.setOutputPath('picture')"
+              />
+            </template>
+          </v-tooltip>
         </template>
       </v-text-field>
     </v-card-text>
@@ -112,7 +143,11 @@ en:
   delete_original_hint: ⚠️Be careful, as deleting the original file cannot be undone.
   recursive: Include Subdirectories
   output_path: Default output path
-  browse: Browse
+  folder_home: Home Folder
+  folder_document: Document Folder
+  folder_desktop: Desktop Folder
+  folder_picture: Picture Folder
+  browse: Browse...
   reset_all: Reset All
   reset_common: Reset common options
 fr:
@@ -129,7 +164,11 @@ fr:
   delete_original_hint: ⚠️Faites attention, car la suppression du fichier original ne peut pas être annulée.
   recursive: Inclure les sous-répertoires
   output_path: Chemin de sortie par défaut
-  browse: Parcourir
+  folder_home: Dossier personnel
+  folder_document: Dossier documents
+  folder_desktop: Bureau
+  folder_picture: Dossier images
+  browse: Parcourir...
   reset_all: Réinitialiser tout
   reset_common: Réinitialiser les options communes
 ja:
@@ -146,7 +185,11 @@ ja:
   delete_original_hint: ⚠️元ファイルを削除すると元に戻せなくなるので注意してください。
   recursive: サブディレクトリを含める
   output_path: デフォルトの出力先のパス
-  browse: ブラウズ
+  folder_home: ホームフォルダ
+  folder_document: ドキュメント（書類）フォルダ
+  folder_desktop: デスクトップフォルダ
+  folder_picture: ピクチャフォルダ
+  browse: 参照…
   reset_all: 全てをリセット
   reset_common: 共通設定をリセット
 ko:
@@ -163,7 +206,11 @@ ko:
   delete_original_hint: ⚠️원본 파일을 삭제하면 복구할 수 없으니 주의하세요.
   recursive: 하위 디렉토리 포함
   output_path: 기본 출력 경로
-  browse: 찾아보기
+  folder_home: 홈 폴더
+  folder_document: 문서 폴더
+  folder_desktop: 바탕화면 폴더
+  folder_picture: 그림 폴더
+  browse: 찾아보기...
   reset_all: 모두 재설정
   reset_common: 공통 설정 재설정
 zhHant:
@@ -180,7 +227,11 @@ zhHant:
   delete_original_hint: ⚠️請小心，因為刪除原始文件後無法恢復。
   recursive: 包括子目錄
   output_path: 預設輸出路徑
-  browse: 瀏覽
+  folder_home: 主目錄
+  folder_document: 文件目錄
+  folder_desktop: 桌面目錄
+  folder_picture: 圖片目錄
+  browse: 瀏覽...
   reset_all: 重置所有設定
   reset_common: 重置常用选项
 zhHans:
@@ -197,7 +248,11 @@ zhHans:
   delete_original_hint: ⚠️请小心，因为删除原始文件后无法恢复。
   recursive: 包括子目录
   output_path: 默认输出路径
-  browse: 浏览
+  folder_home: 主目录
+  folder_document: 文档目录
+  folder_desktop: 桌面目录
+  folder_picture: 图片目录
+  browse: 浏览...
   reset_all: 重置所有设置
   reset_common: 重置常用选项
 </i18n>

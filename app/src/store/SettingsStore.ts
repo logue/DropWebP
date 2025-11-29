@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, type Ref } from 'vue';
 
-import { documentDir } from '@tauri-apps/api/path';
 import { open } from '@tauri-apps/plugin-dialog';
 
 import { BitDepth, ColorModel, type AvifOptions } from '@/interfaces/AvifOptions';
@@ -10,6 +9,7 @@ import { type JpegOptions } from '@/interfaces/JpegOptions';
 import { ColorEncoding, EncoderSpeed, type JxlOptions } from '@/interfaces/JxlOptions';
 import { PngFilter, PngInterlace, type PngOptions } from '@/interfaces/PngOptions';
 import { WebPImageHint, type WebpOptions } from '@/interfaces/WebpOptions';
+import { FolderType } from '@/types/FolderType';
 import { WebPPreset } from '@/types/WebpTypes';
 
 // デフォルト設定を定義
@@ -69,7 +69,7 @@ const defaultCommonOptions: CommonOptions = {
   recursive: false,
   sameDirectory: true,
   ignoreJpeg: false,
-  outputPath: await documentDir()
+  outputPath: FolderType.Picture
 } as const;
 
 /** Global Store */
@@ -98,7 +98,7 @@ export default defineStore(
       pngOptions.value = { ...defaultPngOptions };
       jpegOptions.value = { ...defaultJpegOptions };
       // デフォルトは書類フォルダ
-      commonOptions.value.outputPath = await documentDir();
+      commonOptions.value.outputPath = FolderType.Picture;
     };
 
     const resetCommonOptions = () => (commonOptions.value = { ...defaultCommonOptions });
@@ -119,6 +119,23 @@ export default defineStore(
       }
     };
 
+    const setOutputPath = async (type?: FolderType) => {
+      switch (type) {
+        default:
+          commonOptions.value.outputPath = FolderType.Home;
+          break;
+        case 'document':
+          commonOptions.value.outputPath = FolderType.Document;
+          break;
+        case 'desktop':
+          commonOptions.value.outputPath = FolderType.Desktop;
+          break;
+        case 'picture':
+          commonOptions.value.outputPath = FolderType.Picture;
+          break;
+      }
+    };
+
     return {
       avifOptions,
       webpOptions,
@@ -133,6 +150,7 @@ export default defineStore(
       resetJxlOptions,
       resetPngOptions,
       resetJpegOptions,
+      setOutputPath,
       browseOutputPath
     };
   },

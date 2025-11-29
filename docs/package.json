@@ -16,11 +16,11 @@
   "dependencies": {
     "@mdi/font": "^7.4.47",
     "@nuxt/content": "^3.8.2",
-    "@nuxt/eslint": "^1.10.0",
+    "@nuxt/eslint": "^1.11.0",
     "@nuxtjs/i18n": "^10.2.1",
     "@nuxtjs/sitemap": "^7.4.7",
     "@pinia/nuxt": "^0.11.3",
-    "better-sqlite3": "^12.4.6",
+    "better-sqlite3": "^12.5.0",
     "nuxt": "^4.2.1",
     "nuxt-gtag": "^4.1.0",
     "pinia": "^3.0.4",
