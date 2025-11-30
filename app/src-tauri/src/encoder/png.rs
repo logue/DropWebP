@@ -1,9 +1,11 @@
+use super::progress::ProgressCallback;
 use crate::error::AppError;
 use crate::options::HighBitDepthImage;
 use indexmap::IndexSet;
 use oxipng::optimize_from_memory;
 use serde::{Deserialize, Serialize};
 use std::io::Cursor;
+use std::sync::Arc;
 
 /// PNGフィルター戦略
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
@@ -275,7 +277,7 @@ fn prepare_image_data(
 
 /// ICCプロファイルのiCCPチャンクを作成
 fn create_iccp_chunk(profile: &[u8]) -> Result<Vec<u8>, AppError> {
-    use flate2::{write::DeflateEncoder, Compression};
+    use flate2::{Compression, write::DeflateEncoder};
     use std::io::Write;
 
     println!(
@@ -338,4 +340,103 @@ pub fn estimate_size(img: &HighBitDepthImage, options: &PngOptions) -> usize {
     };
 
     (uncompressed_size as f64 * compression_ratio) as usize
+}
+
+/// Encode image to PNG format with progress callback support
+///
+/// # Arguments
+/// - `img`: Source image to encode (HighBitDepthImage)
+/// - `icc_profile`: ICC profile for color management
+/// - `options`: PNG encoding options (PngOptions)
+/// - `progress_callback`: Progress callback implementation
+///
+/// # Returns
+/// - Success: PNG format byte data as Vec<u8>
+/// - Failure: AppError
+///
+/// # Notes
+/// - Progress reporting is approximate as PNG encoding is multi-stage
+/// - Zopfli optimization stage provides the most granular progress updates
+pub fn encode_with_progress(
+    img: &HighBitDepthImage,
+    icc_profile: Option<Vec<u8>>,
+    options: &PngOptions,
+    progress_callback: Arc<dyn ProgressCallback>,
+) -> Result<Vec<u8>, AppError> {
+    progress_callback.on_progress(0.0, "Starting PNG encoding");
+    progress_callback.on_progress(10.0, "Preparing image data");
+
+    let (width, height, color_type, bit_depth, data) = prepare_image_data(img)?;
+
+    progress_callback.on_progress(20.0, "Writing PNG header and data");
+
+    // まず標準的なPNGを生成
+    let mut temp_buffer = Vec::new();
+    let cursor = Cursor::new(&mut temp_buffer);
+
+    let mut encoder = png::Encoder::new(cursor, width, height);
+    encoder.set_color(color_type);
+    encoder.set_depth(bit_depth);
+    encoder.set_compression(png::Compression::Fast);
+
+    let mut writer = encoder
+        .write_header()
+        .map_err(|e| AppError::Encode(format!("PNG header write error: {}", e)))?;
+
+    // ICCプロファイル埋め込み
+    if options.embed_icc_profile {
+        if let Some(profile) = icc_profile {
+            progress_callback.on_progress(30.0, "Embedding ICC profile");
+            writer
+                .write_chunk(png::chunk::iCCP, &create_iccp_chunk(&profile)?)
+                .map_err(|e| AppError::Encode(format!("ICC profile embedding error: {}", e)))?;
+        }
+    }
+
+    progress_callback.on_progress(40.0, "Writing image data");
+
+    writer
+        .write_image_data(&data)
+        .map_err(|e| AppError::Encode(format!("PNG image data write error: {}", e)))?;
+
+    writer
+        .finish()
+        .map_err(|e| AppError::Encode(format!("PNG encoding finish error: {}", e)))?;
+
+    progress_callback.on_progress(60.0, "Optimizing with OxiPNG");
+
+    // OxiPNGで最適化
+    let oxipng_options = oxipng::Options {
+        deflate: oxipng::Deflaters::Zopfli {
+            iterations: std::num::NonZeroU8::new(options.zopfli_iterations.min(255) as u8).unwrap(),
+        },
+        filter: {
+            let mut filters = IndexSet::new();
+            filters.insert(options.filter.into());
+            filters
+        },
+        interlace: Some(options.interlace.into()),
+        bit_depth_reduction: options.bit_depth_reduction,
+        color_type_reduction: options.color_type_reduction,
+        palette_reduction: options.palette_reduction,
+        ..Default::default()
+    };
+
+    progress_callback.on_progress(80.0, "Applying Zopfli compression");
+
+    let optimized = optimize_from_memory(&temp_buffer, &oxipng_options).map_err(|e| {
+        progress_callback.on_error(&e.to_string());
+        AppError::Encode(format!("OxiPNG optimization error: {}", e))
+    })?;
+
+    progress_callback.on_progress(95.0, "Finalizing");
+
+    println!(
+        "PNG: Encoding complete - Original: {} bytes, Optimized: {} bytes",
+        temp_buffer.len(),
+        optimized.len()
+    );
+
+    progress_callback.on_complete();
+    Ok(optimized)
 }

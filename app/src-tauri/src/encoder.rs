@@ -3,6 +3,7 @@ pub mod common;
 pub mod jpeg;
 pub mod jxl;
 pub mod png;
+pub mod progress;
 pub mod webp;
 
 use crate::error::AppError;

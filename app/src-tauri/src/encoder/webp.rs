@@ -1,8 +1,9 @@
 use super::common::{
-    apply_tone_mapping, convert_f32_to_u8, get_encoding_recommendations,
-    handle_icc_profile_embedding, log_encoding_analysis, provide_icc_recommendations,
-    EncodingAnalysis, ToneMappingType,
+    EncodingAnalysis, ToneMappingType, apply_tone_mapping, convert_f32_to_u8,
+    get_encoding_recommendations, handle_icc_profile_embedding, log_encoding_analysis,
+    provide_icc_recommendations,
 };
+use super::progress::ProgressCallback;
 use crate::{encoder::extract_pixel_data, error::AppError, options::HighBitDepthImage};
 use serde::{Deserialize, Serialize};
 // WebPエンコーディング: ロスレス時はSimple API、ロッシー時はAdvanced API
@@ -12,6 +13,7 @@ use libwebp_sys::{
     WebPPicture, WebPPictureFree, WebPPictureImportRGB, WebPPictureImportRGBA, WebPValidateConfig,
 };
 use std::ffi::{c_int, c_void};
+use std::sync::Arc;
 
 /// WebP format encoding options
 /// quality: 0-100 (0 is lowest quality, 100 is highest quality)
@@ -446,4 +448,220 @@ pub fn estimate_size(img: &HighBitDepthImage, options: &WebpOptions) -> usize {
     };
 
     (uncompressed_size as f64 * compression_ratio as f64) as usize
+}
+
+/// Encode image to WebP format with progress callback support
+///
+/// # Arguments
+/// - `pixel_data`: Source image to encode (HighBitDepthImage)
+/// - `icc_profile`: ICC profile for color management
+/// - `options`: WebP encoding options (WebpOptions)
+/// - `progress_callback`: Progress callback implementation
+///
+/// # Returns
+/// - Success: WebP format byte data as Vec<u8>
+/// - Failure: AppError
+///
+/// # Notes
+/// - This function supports progress reporting during encoding
+/// - Only available for Advanced API (lossy encoding)
+/// - Lossless encoding does not support progress callbacks
+pub fn encode_with_progress(
+    pixel_data: &HighBitDepthImage,
+    icc_profile: Option<Vec<u8>>,
+    options: &WebpOptions,
+    progress_callback: Arc<dyn ProgressCallback>,
+) -> Result<Vec<u8>, AppError> {
+    progress_callback.on_progress(0.0, "Starting WebP encoding");
+
+    // Perform content analysis for optimal encoding
+    let analysis = EncodingAnalysis::analyze(pixel_data, icc_profile.as_deref());
+    log_encoding_analysis(&analysis, "WebP");
+    get_encoding_recommendations(&analysis, "WebP");
+
+    progress_callback.on_progress(10.0, "Analysis complete");
+
+    // Get image dimensions and pixel data
+    let (width, height) = match pixel_data {
+        HighBitDepthImage::Rgb(buf) => buf.dimensions(),
+        HighBitDepthImage::Rgba(buf) => buf.dimensions(),
+        HighBitDepthImage::Argb(buf) => buf.dimensions(),
+    };
+    let (pixels_f32, is_rgba) = extract_pixel_data(pixel_data);
+
+    progress_callback.on_progress(20.0, "Extracting pixel data");
+
+    // Apply tone mapping if needed
+    let processed_pixels = if analysis.tone_mapping_required {
+        progress_callback.on_progress(30.0, "Applying tone mapping");
+        apply_tone_mapping(&pixels_f32, is_rgba, ToneMappingType::Reinhard, 1.0)
+    } else {
+        pixels_f32.to_vec()
+    };
+
+    progress_callback.on_progress(40.0, "Converting pixel format");
+    let pixels_u8 = convert_f32_to_u8(&processed_pixels);
+
+    let use_lossless = options.lossless || options.preset.prefers_lossless();
+
+    if use_lossless {
+        // Lossless encoding doesn't support progress callbacks
+        progress_callback.on_progress(50.0, "Encoding (lossless - no intermediate progress)");
+
+        let webp_data = unsafe {
+            let mut output_ptr: *mut u8 = std::ptr::null_mut();
+
+            let result_size = if is_rgba {
+                WebPEncodeLosslessRGBA(
+                    pixels_u8.as_ptr(),
+                    width as i32,
+                    height as i32,
+                    (width * 4) as i32,
+                    &mut output_ptr,
+                )
+            } else {
+                WebPEncodeLosslessRGB(
+                    pixels_u8.as_ptr(),
+                    width as i32,
+                    height as i32,
+                    (width * 3) as i32,
+                    &mut output_ptr,
+                )
+            };
+
+            if result_size == 0 || output_ptr.is_null() {
+                progress_callback.on_error("WebP lossless encoding failed");
+                return Err(AppError::Encode("WebP lossless encoding failed".into()));
+            }
+
+            let output_data = std::slice::from_raw_parts(output_ptr, result_size).to_vec();
+            WebPFree(output_ptr as *mut c_void);
+            output_data
+        };
+
+        progress_callback.on_progress(90.0, "Finalizing");
+        let final_webp_data = handle_icc_profile_embedding(webp_data, icc_profile, "WebP");
+        progress_callback.on_complete();
+        return Ok(final_webp_data);
+    }
+
+    // Lossy encoding with progress callback support
+    progress_callback.on_progress(50.0, "Configuring encoder");
+
+    unsafe {
+        // Setup WebPConfig
+        let mut config: WebPConfig = std::mem::zeroed();
+        config.lossless = 0;
+        config.quality = options.preset.adjust_quality(options.quality);
+        config.method = options.method as c_int;
+        config.image_hint = options.hint.to_libwebp_hint();
+        config.target_size = 0;
+        config.target_PSNR = 0.0;
+        config.segments = 4;
+        config.sns_strength = options.sns_strength as c_int;
+        config.filter_strength = options.filter_strength as c_int;
+        config.filter_sharpness = options.filter_sharpness as c_int;
+        config.filter_type = 1;
+        config.autofilter = if options.autofilter { 1 } else { 0 };
+        config.alpha_compression = 1;
+        config.alpha_filtering = 1;
+        config.alpha_quality = options.alpha_quality as c_int;
+        config.pass = 1;
+        config.show_compressed = 0;
+        config.preprocessing = 0;
+        config.partitions = 0;
+        config.partition_limit = 0;
+        config.emulate_jpeg_size = 0;
+        config.thread_level = 1;
+        config.low_memory = 0;
+        config.near_lossless = 100;
+        config.exact = 0;
+        config.use_delta_palette = 0;
+        config.use_sharp_yuv = 0;
+        config.qmin = 0;
+        config.qmax = 100;
+
+        options.preset.apply_preset_defaults(&mut config);
+
+        if WebPValidateConfig(&config) == 0 {
+            progress_callback.on_error("Invalid WebP configuration");
+            return Err(AppError::Encode("Invalid WebP configuration".into()));
+        }
+
+        progress_callback.on_progress(60.0, "Preparing image data");
+
+        // Setup WebPPicture with progress hook
+        let mut picture: WebPPicture = std::mem::zeroed();
+        picture.use_argb = 0;
+        picture.width = width as c_int;
+        picture.height = height as c_int;
+
+        // Setup progress hook
+        // Note: We use user_data field to store callback pointer
+        extern "C" fn progress_hook(percent: c_int, picture: *const WebPPicture) -> c_int {
+            unsafe {
+                if picture.is_null() {
+                    return 1;
+                }
+                let user_data = (*picture).user_data;
+                if !user_data.is_null() {
+                    let callback = &*(user_data as *const Arc<dyn ProgressCallback>);
+                    let adjusted_percent = 60.0 + (percent as f32 * 0.30); // 60-90%
+                    callback.on_progress(adjusted_percent, "Encoding");
+                }
+            }
+            1 // Continue encoding
+        }
+
+        // Store callback pointer in picture's user_data field
+        let callback_ptr = &progress_callback as *const Arc<dyn ProgressCallback>;
+        picture.progress_hook = Some(progress_hook);
+        picture.user_data = callback_ptr as *mut c_void;
+
+        // Import RGB/RGBA data
+        let import_result = if is_rgba {
+            WebPPictureImportRGBA(&mut picture, pixels_u8.as_ptr(), (width * 4) as c_int)
+        } else {
+            WebPPictureImportRGB(&mut picture, pixels_u8.as_ptr(), (width * 3) as c_int)
+        };
+
+        if import_result == 0 {
+            WebPPictureFree(&mut picture);
+            progress_callback.on_error("Failed to import pixel data");
+            return Err(AppError::Encode("Failed to import WebP pixel data".into()));
+        }
+
+        // Setup memory writer
+        let mut writer: WebPMemoryWriter = std::mem::zeroed();
+        WebPMemoryWriterInit(&mut writer);
+        picture.writer = Some(WebPMemoryWrite);
+        picture.custom_ptr = &mut writer as *mut _ as *mut c_void;
+
+        // Encode
+        let encode_result = WebPEncode(&config, &mut picture);
+
+        WebPPictureFree(&mut picture);
+
+        if encode_result == 0 {
+            if !writer.mem.is_null() {
+                WebPFree(writer.mem as *mut c_void);
+            }
+            progress_callback.on_error("WebP encoding failed");
+            return Err(AppError::Encode(format!(
+                "WebPEncode failed (error code: {:?})",
+                picture.error_code
+            )));
+        }
+
+        progress_callback.on_progress(90.0, "Finalizing");
+
+        let output_data = std::slice::from_raw_parts(writer.mem, writer.size).to_vec();
+        WebPFree(writer.mem as *mut c_void);
+
+        let final_webp_data = handle_icc_profile_embedding(output_data, icc_profile, "WebP");
+        provide_icc_recommendations("WebP", analysis.has_wide_gamut, analysis.has_hdr_content);
+
+        progress_callback.on_complete();
+        Ok(final_webp_data)
+    }
 }

@@ -19,6 +19,7 @@ fn main() {
         // Vue から呼び出せるコマンド関数を登録
         .invoke_handler(tauri::generate_handler![
             command::convert,
+            command::convert_with_progress,
             command::get_path_info,
             command::delete_path,
             command::estimate_size

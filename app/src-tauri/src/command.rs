@@ -1,7 +1,9 @@
+use crate::encoder::progress::{EncoderCapabilities, ProgressCallback, TauriProgressCallback};
 use crate::error::AppError;
 use crate::logging::{LogLevel, ResultExt, send_log_with_handle};
 use crate::options::{EncodeOptions, PathInfo};
 use image::{ImageFormat, guess_format};
+use std::sync::Arc;
 use std::{self, path::Path};
 use tauri::AppHandle;
 
@@ -90,6 +92,163 @@ pub async fn convert(
     .map_err(|e| e.to_string())?;
 
     send_log_with_handle(&app, LogLevel::Info, "Compression completed successfully");
+    converted_data
+}
+
+/// Uint8Arrayバイナリデータを圧縮してUint8Arrayで返します（進捗付き）
+/// # 引数
+/// - `data`: 変換対象の画像データのバイト列
+/// - `options`: エンコードオプション
+/// - `app`: Tauriアプリケーションハンドル
+/// # 戻り値
+/// - 成功した場合は圧縮されたバイト列を `Vec<u8>` として返します。
+/// - 失敗した場合はエラーメッセージを `String` として返します。
+/// # 進捗イベント
+/// - イベント名: "encoding-progress"
+/// - ペイロード: { percent: number, stage: string, status: "progress" | "complete" | "error" }
+/// # 注意
+/// - 進捗監視は WebP (lossy) と PNG でのみサポートされています
+/// - その他のフォーマットは通常の `convert` コマンドと同じ動作になります
+#[tauri::command]
+pub async fn convert_with_progress(
+    data: Vec<u8>,
+    options: EncodeOptions,
+    app: AppHandle,
+) -> Result<Vec<u8>, String> {
+    send_log_with_handle(
+        &app,
+        LogLevel::Info,
+        "Starting compression with progress monitoring...",
+    );
+
+    // フォーマット名を取得
+    let format_name = match &options {
+        EncodeOptions::Webp(_) => "webp",
+        EncodeOptions::Png(_) => "png",
+        EncodeOptions::Avif(_) => "avif",
+        EncodeOptions::Jxl(_) => "jxl",
+        EncodeOptions::Jpeg(_) => "jpeg",
+    };
+
+    // 進捗監視サポート確認
+    let supports_progress = EncoderCapabilities::supports_progress(format_name);
+
+    if !supports_progress {
+        send_log_with_handle(
+            &app,
+            LogLevel::Info,
+            &format!(
+                "Progress monitoring not supported for {}. Using standard conversion.",
+                format_name
+            ),
+        );
+        return convert(data, options, app).await;
+    }
+
+    send_log_with_handle(
+        &app,
+        LogLevel::Info,
+        &format!("Progress monitoring enabled for {}", format_name),
+    );
+
+    let app_clone = app.clone();
+    let converted_data = tauri::async_runtime::spawn_blocking(move || {
+        // 進捗コールバックを作成
+        let progress_callback = Arc::new(TauriProgressCallback::new(
+            app_clone.clone(),
+            "encoding-progress".to_string(),
+        ));
+
+        // JXLトランスコードチェック（進捗なし）
+        if let EncodeOptions::Jxl(jxl_opts) = &options {
+            if guess_format(&data).map_or(false, |format| format == ImageFormat::Jpeg) {
+                send_log_with_handle(
+                    &app_clone,
+                    LogLevel::Info,
+                    "JPEG detected for JPEG XL target. Using transcode path (no progress)...",
+                );
+
+                return crate::encoder::jxl::transcode(&data, jxl_opts)
+                    .log_error(Some("JPEG to JPEG XL transcode"))
+                    .map_err(|e| format!("Failed to transcode JPEG to JPEG XL: {}", e));
+            }
+        }
+
+        let input_size = data.len();
+
+        // 画像デコード
+        progress_callback.on_progress(0.0, "Decoding image");
+        let decoded_data = crate::decoder::decode(&data)
+            .log_error(Some("Image decoding"))
+            .map_err(|e| {
+                progress_callback.on_error(&format!("Failed to decode image: {}", e));
+                format!("Failed to decode image: {}", e)
+            })?;
+
+        let (img, icc_profile) = decoded_data;
+
+        // 推計サイズの算出
+        progress_callback.on_progress(5.0, "Estimating output size");
+        let estimated_size = crate::encoder::estimate_size(&img, &options);
+
+        send_log_with_handle(
+            &app_clone,
+            LogLevel::Info,
+            &format!(
+                "Encoding image with progress... (Input: {} bytes / Estimated: {} bytes)",
+                input_size, estimated_size
+            ),
+        );
+
+        // 進捗付きエンコード
+        let encoded_data = match &options {
+            EncodeOptions::Webp(webp_opts) => {
+                crate::encoder::webp::encode_with_progress(
+                    &img,
+                    icc_profile,
+                    webp_opts,
+                    progress_callback.clone(),
+                )
+            }
+            EncodeOptions::Png(png_opts) => {
+                crate::encoder::png::encode_with_progress(
+                    &img,
+                    icc_profile,
+                    png_opts,
+                    progress_callback.clone(),
+                )
+            }
+            // その他のフォーマットは通常のエンコード（ここには到達しないはず）
+            _ => crate::encoder::encode(img, icc_profile, &options),
+        }
+        .log_error(Some("Image encoding"))
+        .map_err(|e| {
+            progress_callback.on_error(&format!("Failed to encode image: {}", e));
+            format!("Failed to encode image: {}", e)
+        })?;
+
+        send_log_with_handle(
+            &app_clone,
+            LogLevel::Info,
+            &format!(
+                "Encoding completed. Input: {} bytes -> Output: {} bytes (Estimated: {} bytes, Ratio: {:.2}%)",
+                input_size,
+                encoded_data.len(),
+                estimated_size,
+                (encoded_data.len() as f64 / input_size as f64) * 100.0
+            ),
+        );
+
+        Ok(encoded_data)
+    })
+    .await
+    .map_err(|e| e.to_string())?;
+
+    send_log_with_handle(
+        &app,
+        LogLevel::Info,
+        "Compression with progress completed successfully",
+    );
     converted_data
 }
 
