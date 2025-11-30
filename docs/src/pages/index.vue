@@ -31,7 +31,7 @@ const getFormatDescriptions = (key: string) => {
   }
 };
 
-const version = '3.0.1';
+const version = '3.0.2';
 const features = [
   {
     icon: 'mdi-image-multiple',
