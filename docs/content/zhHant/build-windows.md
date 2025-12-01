@@ -153,10 +153,10 @@ vcpkg version
 運行以下命令以安裝圖像轉換所需的庫。
 
 ```powershell
-vcpkg install libavif libheif libjxl libwebp libjpeg-turbo libpng
+vcpkg install libavif libjxl libwebp libjpeg-turbo libpng
 ```
 
-> **注意：** 安裝可能需要一些時間，並且某些庫可能會構建失敗。在這種情況下，請參閱vcpkg文檔。
+> **注意：** JPEG XL (`libjxl`) 通過 `vendored` 功能靜態鏈接，因此將來可能不需要 vcpkg。安裝可能需要一些時間，並且某些庫可能會構建失敗。在這種情況下，請參閱vcpkg文檔。
 
 ## 10. 安裝依賴項並構建
 

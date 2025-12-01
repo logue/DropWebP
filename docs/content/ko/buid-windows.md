@@ -153,10 +153,10 @@ vcpkg version
 다음 명령어를 실행하여 이미지 변환에 필요한 라이브러리를 설치합니다.
 
 ```powershell
-vcpkg install libavif libheif libjxl libwebp libjpeg-turbo libpng
+vcpkg install libavif libjxl libwebp libjpeg-turbo libpng
 ```
 
-> **참고:** 설치하는 데 시간이 걸릴 수 있으며 일부 라이브러리는 빌드에 실패할 수 있습니다. 이 경우 vcpkg 문서를 참조하세요.
+> **참고:** JPEG XL (`libjxl`)은 `vendored` 기능을 통해 정적으로 링크되므로 향후 vcpkg가 필요하지 않을 수 있습니다. 설치하는 데 시간이 걸릴 수 있으며 일부 라이브러리는 빌드에 실패할 수 있습니다. 이 경우 vcpkg 문서를 참조하세요.
 
 ## 10. 종속성 설치 및 빌드
 

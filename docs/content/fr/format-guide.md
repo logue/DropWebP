@@ -19,7 +19,6 @@ Drop Compress Image prend en charge les formats d'image d'entrée suivants:
 - Truevision Graphics Adapter (`*.tga`)
 - Tagged Image File Format (`*.tif`, `*.tiff`)
 - WebP (`*.webp`)
-- High Efficiency Image Container (`*.heic`, `*.heif`)
 - JPEG 2000 (`*.jp2`, `*.j2c`, `*.j2k`, `*.jpf`, `*.jpx`, `*.jpm`, `*.mj2`, `*.jph`)
 - JPEG XL (`*.jxl`)
 

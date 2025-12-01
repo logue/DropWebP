@@ -1,5 +1,4 @@
 mod common;
-mod heif;
 mod jpeg2k;
 mod jxl;
 
@@ -9,16 +8,16 @@ use image::{self, DynamicImage, GenericImageView, ImageFormat};
 use std::io::Cursor;
 
 /// バイトデータから画像をデコードし、HighBitDepthImageとして返す
-/// サポートする形式: HEIC, JPEG 2000, そして imageクレートが対応する形式
+/// サポートする形式: JPEG 2000, JPEG XL, そして imageクレートが対応する形式
 /// # 引数
 /// - `image_bytes`: 画像のバイトデータ
 /// # 戻り値
 /// - 成功した場合は `HighBitDepthImage` を返します。
-/// - 失敗した場合は `Box<dyn Error>` を返します。
+/// - 失敗した場合は `AppError` を返します。
 /// # 注意
-/// - HEIC形式のデコードには `libheif-rs` クレートを使用しています。ビルド時に `libheif` ライブラリがシステムにインストールされている必要があります。
 /// - JPEG 2000形式のデコードには `jpeg2k` クレートを使用しています。
-///  ただし、このクレートはすべてのJPEG 2000ファイルに対応しているわけではないため、特定のファイルでエラーが発生する可能性があります。
+///   ただし、このクレートはすべてのJPEG 2000ファイルに対応しているわけではないため、特定のファイルでエラーが発生する可能性があります。
+/// - HEIC/HEIF形式はサポートしていません。macOSのプレビュー.appでJPEGに変換してください。
 pub fn decode(image_bytes: &[u8]) -> Result<(HighBitDepthImage, Option<Vec<u8>>), AppError> {
     // まず、バイトデータから画像形式を判別する
     let format = detect_format(image_bytes)
@@ -27,8 +26,8 @@ pub fn decode(image_bytes: &[u8]) -> Result<(HighBitDepthImage, Option<Vec<u8>>)
     // 判別した形式に応じて、適切なデコーダーを呼び出す
     match format {
         DetectedFormat::Heic => {
-            println!("Decoder: Using heif decoder...");
-            heif::decode(image_bytes)
+            // HEICはサポート外 - ユーザーにPreview.appでの変換を案内
+            Err(AppError::HeicNotSupported)
         }
         DetectedFormat::Jpeg2000 => {
             println!("Decoder: Using Jpeg2k decoder...");

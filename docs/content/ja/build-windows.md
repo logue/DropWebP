@@ -149,8 +149,10 @@
 1. 画像処理に必要なライブラリをインストールします：
 
    ```powershell
-   .\vcpkg install libavif libjxl libheif --triplet x64-windows-static-md
+   .\vcpkg install libavif libjxl --triplet x64-windows-static-md
    ```
+
+   > **注意:** JPEG XL (`libjxl`) は `vendored` 機能により静的リンクされるため、将来的には vcpkg 不要になる可能性があります。
 
 2. インストール後、ライブラリが正しくインストールされたことを確認できます：
 

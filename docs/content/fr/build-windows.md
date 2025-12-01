@@ -153,10 +153,10 @@ vcpkg version
 Exécutez la commande suivante pour installer les bibliothèques requises pour la conversion d'images.
 
 ```powershell
-vcpkg install libavif libheif libjxl libwebp libjpeg-turbo libpng
+vcpkg install libavif libjxl libwebp libjpeg-turbo libpng
 ```
 
-> **Remarque :** L'installation peut prendre un certain temps, et certaines bibliothèques peuvent échouer à se construire. Dans ce cas, veuillez vous référer à la documentation de vcpkg.
+> **Remarque :** JPEG XL (`libjxl`) est lié statiquement via la fonctionnalité `vendored`, donc vcpkg pourrait ne plus être nécessaire à l'avenir. L'installation peut prendre un certain temps, et certaines bibliothèques peuvent échouer à se construire. Dans ce cas, veuillez vous référer à la documentation de vcpkg.
 
 ## 10. Installer les dépendances et construire
 

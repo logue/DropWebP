@@ -24,6 +24,9 @@ pub enum AppError {
     #[error("Unsupported format")]
     UnsupportedFormat,
 
+    #[error("HEIC/HEIF format is not supported. Please convert to JPEG using macOS Preview app (File > Export > JPEG) and try again.")]
+    HeicNotSupported,
+
     #[error("Image processing Error: {0}")] // TODO: image::ImageErrorと混同
     ImageProcessing(String),
 }

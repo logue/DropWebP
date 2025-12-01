@@ -146,11 +146,13 @@ This guide walks you through setting up the development environment for building
 
 ## 9. Install Required Libraries
 
-1. Install the necessary libraries for image processing:
+1. Install required libraries for image processing:
 
    ```powershell
-   .\vcpkg install libavif libjxl libheif --triplet x64-windows-static-md
+   .\vcpkg install libavif libjxl --triplet x64-windows-static-md
    ```
+
+   > **Note:** JPEG XL (`libjxl`) is statically linked via the `vendored` feature, so vcpkg may not be required in the future.
 
 2. After installation, you can verify that the libraries are installed correctly:
 

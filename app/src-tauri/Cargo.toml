@@ -1,9 +1,9 @@
 [package]
 name = "drop-compress-image"
-version = "3.0.2"
+version = "3.0.3"
 authors = ["Logue"]
-edition = "2024"
-rust-version = "1.91.1"
+edition = "2021"
+rust-version = "1.70.0"
 description = "Drop Compress Image is a desktop application that converts images to WebP/Avif/JPEG XL format using drag-and-drop functionality. Built with Vite, Vue 3, TypeScript, and Tauri."
 readme = "../../ReadMe.md"
 repository = "https://github.com/logue/DropWebP"
@@ -15,8 +15,6 @@ keywords = [
   "compress",
   "converter",
   "desktop",
-  "heic",
-  "heif",
   "image",
   "jpeg-xl",
   "jpeg",
@@ -41,7 +39,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 [build-dependencies]
 cc = "1.2.47"
 pkg-config = "0.3.32"
-tauri-build = { version = "2.5.2", features = [] }
+tauri-build = { version = "2.5.3", features = [] }
 vcpkg = "0.2.15"
 
 [dependencies]
@@ -52,19 +50,18 @@ image = "0.25.9"
 imgref = "1.12.0"
 indexmap = "2.12.1"
 jpeg2k = "0.10.1"
-jpegxl-rs = "0.11.2"
+jpegxl-rs = { version = "0.11.2", features = ["vendored"] }
 kamadak-exif = "0.6.1"
-libheif-rs = "2.5.1"
 libwebp-sys = "0.14.1"
 mozjpeg = "0.10.13"
-openjpeg-sys = "1.0.12"
+openjpeg-sys = "1.0.12"                                     # Note: Requires system openjpeg or Homebrew
 oxipng = "9.1.5"
 png = "0.18.0"
 ravif = "0.12.0"
 rgb = "0.8.52"
 serde = "1.0.228"
 serde_json = "1.0.145"
-tauri = { version = "2.9.3", features = [] }
+tauri = { version = "2.9.4", features = [] }
 tauri-plugin-dialog = "2.4.2"
 tauri-plugin-fs = "2.4.4"
 tauri-plugin-log = "2.7.1"
@@ -77,11 +74,11 @@ thiserror = "2.0.17"
 glib = "0.21.4"
 
 [profile.release]
-lto = true        # Link Time Optimization
-codegen-units = 1 # 単一コード生成で最適化
-panic = "abort"   # 高速パニック処理
-strip = true      # シンボル除去
-opt-level = "z"   # サイズ最適化優先
+lto = "thin"       # Thin LTO (互換性重視)
+codegen-units = 16 # 並列コンパイルで互換性向上
+panic = "abort"    # 高速パニック処理
+strip = true       # シンボル除去
+opt-level = 3      # 速度最適化（互換性重視）
 
 # Windows 固有の最適化
 [target.'cfg(windows)'.dependencies]
@@ -91,6 +88,10 @@ windows = { version = "0.62.2", features = ["Win32_Foundation"] }
 [target.'cfg(target_os = "macos")'.dependencies]
 cocoa = "0.26.1"
 objc = "0.2.7"
+
+# Apple Silicon (ARM64) 向けの設定
+[target.aarch64-apple-darwin]
+rustflags = ["-C", "target-cpu=apple-a14"] # Apple Silicon互換性向上
 
 # Linux 固有の最適化
 [target.'cfg(unix)'.dependencies]

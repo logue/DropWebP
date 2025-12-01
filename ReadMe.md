@@ -43,9 +43,12 @@ We support a huge range of input formats, including:
 - Truevision Graphics Adapter (`*.tga`)
 - Tagged Image File Format (`*.tif`, `*.tiff`)
 - WebP (`*.webp`)
-- High Efficiency Image Container (`*.heic`, `*.heif`)
 - JPEG 2000 (`*.jp2`, `*.j2c`, `*.j2k`, `*.jpf`, `*.jpx`, `*.jpm`, `*.mj2`, `*.jph`)
 - JPEG XL (`*.jxl`)
+
+> **Note about HEIC/HEIF files**: HEIC/HEIF format is not supported due to licensing constraints (LGPL-3.0).
+> If you need to convert HEIC files, please use macOS Preview app (File → Export → JPEG) or other tools first.
+> Modern iPhones now capture photos in JPEG XL format, which is fully supported.
 
 ...and all other formats supported by the excellent [Rust image crate](https://docs.rs/image/latest/image/codecs/index.html).
 
