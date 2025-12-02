@@ -1264,7 +1264,7 @@ dependencies = [
 
 [[package]]
 name = "drop-compress-image"
-version = "3.0.3"
+version = "3.1.0"
 dependencies = [
  "bytemuck",
  "cc",
@@ -1276,10 +1276,10 @@ dependencies = [
  "imgref",
  "indexmap 2.12.1",
  "jpeg2k",
+ "jpegli",
  "jpegxl-rs",
  "kamadak-exif",
  "libwebp-sys",
- "mozjpeg",
  "nix",
  "objc",
  "openjpeg-sys",
@@ -2599,6 +2599,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "jpegli"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4ebb4c6197fc2ce2750101b0dda667c055d35bf88a624088b30056cf04ad0fbb"
+dependencies = [
+ "arrayvec",
+ "jpegli-sys",
+ "libc",
+ "rgb",
+]
+
+[[package]]
+name = "jpegli-sys"
+version = "0.1.0+0.10.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1f029b854497dee11f3fd279a23870520f245417adaa882f4310a666a53891a8"
+dependencies = [
+ "cmake",
+ "libc",
+ "pkg-config",
+]
+
+[[package]]
 name = "jpegxl-rs"
 version = "0.11.2+libjxl-0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2964,31 +2987,6 @@ checksum = "80986bbbcf925ebd3be54c26613d861255284584501595cf418320c078945608"
 dependencies = [
  "num-traits",
  "pxfm",
-]
-
-[[package]]
-name = "mozjpeg"
-version = "0.10.13"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b7891b80aaa86097d38d276eb98b3805d6280708c4e0a1e6f6aed9380c51fec9"
-dependencies = [
- "arrayvec",
- "bytemuck",
- "libc",
- "mozjpeg-sys",
- "rgb",
-]
-
-[[package]]
-name = "mozjpeg-sys"
-version = "2.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f0dc668bf9bf888c88e2fb1ab16a406d2c380f1d082b20d51dd540ab2aa70c1"
-dependencies = [
- "cc",
- "dunce",
- "libc",
- "nasm-rs",
 ]
 
 [[package]]

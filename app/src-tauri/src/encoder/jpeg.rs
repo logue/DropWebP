@@ -1,16 +1,16 @@
 use crate::error::AppError;
 use crate::options::HighBitDepthImage;
-use mozjpeg::{ColorSpace, Compress, ScanMode};
+use jpegli::{ColorSpace, Compress};
 use serde::{Deserialize, Serialize};
 
 /// デフォルトの画質
 const DEFAULT_QUALITY: u8 = 95;
 
-/// JPEG (MozJPEG) エンコードオプション
+/// JPEG (jpegli) エンコードオプション
 ///
-/// MozJPEGは、Mozillaが開発した高品質なJPEGエンコーダーです。
+/// jpegliは、libjxlプロジェクトに含まれる高品質なJPEGエンコーダーです。
 /// 標準のJPEGエンコーダーよりも優れた圧縮率と画質を提供します。
-/// Guetzliほど時間はかかりませんが、標準JPEGよりも高品質です。
+/// JPEG XLと同じ技術を活用し、高品質なJPEG画像を生成します。
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct JpegOptions {
@@ -47,11 +47,11 @@ impl Default for JpegOptions {
     }
 }
 
-/// 画像をJPEG (MozJPEG) 形式でエンコードします
+/// 画像をJPEG (jpegli) 形式でエンコードします
 ///
 /// # 引数
 /// - `img`: 変換対象の高ビット深度画像
-/// - `_icc_profile`: ICCプロファイル（現在未使用）
+/// - `icc_profile`: ICCプロファイル（オプション）
 /// - `options`: JPEGエンコードオプション
 ///
 /// # 戻り値
@@ -59,15 +59,15 @@ impl Default for JpegOptions {
 /// - 失敗した場合は `AppError` を返します
 ///
 /// # 注意
-/// - MozJPEGは標準JPEGより高品質ですが、Guetzliよりは速い
+/// - jpegliは標準JPEGより高品質でJPEG XL技術を活用
 /// - 透明度はサポートされません（RGBAはRGBに変換されます）
 /// - 推奨画質範囲は85-100です
 pub fn encode(
     img: &HighBitDepthImage,
-    _icc_profile: Option<Vec<u8>>,
+    icc_profile: Option<Vec<u8>>,
     options: &JpegOptions,
 ) -> Result<Vec<u8>, AppError> {
-    println!("Starting MozJPEG encoding...");
+    println!("Starting jpegli encoding...");
     println!(
         "Quality: {}, Progressive: {}, Optimize: {}",
         options.quality, options.progressive, options.optimize
@@ -119,7 +119,7 @@ pub fn encode(
         rgb_data.len()
     );
 
-    // MozJPEGコンプレッサーの設定
+    // jpegliコンプレッサーの設定（MozJPEG互換API）
     let mut comp = Compress::new(ColorSpace::JCS_RGB);
 
     comp.set_size(width as usize, height as usize);
@@ -130,7 +130,6 @@ pub fn encode(
     }
 
     if options.progressive {
-        comp.set_scan_optimization_mode(ScanMode::AllComponentsTogether);
         comp.set_progressive_mode();
     }
 
@@ -142,6 +141,11 @@ pub fn encode(
         .start_compress(std::io::Cursor::new(&mut jpeg_data))
         .map_err(|e| AppError::Encode(format!("Failed to start JPEG compression: {}", e)))?;
 
+    // ICCプロファイルの書き込み（開始後に実行）
+    if let Some(icc) = icc_profile {
+        comp.write_icc_profile(&icc);
+    }
+
     // 画像データを書き込み
     println!("Writing image data...");
     comp.write_scanlines(&rgb_data[..])
@@ -151,7 +155,7 @@ pub fn encode(
     comp.finish()
         .map_err(|e| AppError::Encode(format!("Failed to finish JPEG compression: {}", e)))?;
 
-    println!("MozJPEG encoding completed: {} bytes", jpeg_data.len());
+    println!("jpegli encoding completed: {} bytes", jpeg_data.len());
 
     Ok(jpeg_data)
 }

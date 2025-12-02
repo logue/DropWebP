@@ -45,7 +45,7 @@ pub fn encode(
             png::encode(&img, icc_profile, opts)
         }
         EncodeOptions::Jpeg(opts) => {
-            println!("Adapter: Converting JpegOptions for mozjpeg encoder...");
+            println!("Adapter: Converting JpegOptions for jpegli encoder...");
             jpeg::encode(&img, icc_profile, opts)
         }
     };

@@ -60,7 +60,7 @@ Optimize your images by converting them to these modern, highly efficient format
 - **JPEG XL** (`.jxl`) - **_JPEG transcode_** supported.
 - **WebP** (`.webp`) - **_Lossy & Lossless_** supported (libwebp v1.6.0)
 - **PNG** (`.png`) - Implemented with Oxipng. Zopfli compression.
-- **JPEG** (`.jpg`) - Implemented with MozJPEG.
+- **JPEG** (`.jpg`) - Implemented with jpegli.
 
 ## 📦 Installation
 

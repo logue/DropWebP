@@ -167,10 +167,10 @@ en:
         This makes it an ideal choice for preserving original data or recompressing textures for VRC.
     jpeg:
       label: JPEG
-      badge: MozJPEG Comp.
+      badge: Jpegli Comp.
       description:
         JPEG is a format primarily used for photos, emphasizing "small size, even at the expense of some image quality loss."
-        MozJPEG is a technology developed by Mozilla to make JPEG even smaller while minimizing visual degradation.
+        Jpegli is a technology developed by Google to make JPEG even smaller while minimizing visual degradation.
         It is recommended for general photos and large photos on websites.
     webp:
       label: WebP
@@ -228,10 +228,10 @@ fr:
         Il est donc idéal pour préserver les données d'origine ou recompresser les textures pour les applications VRC.
     jpeg:
       label: JPEG
-      badge: MozJPEG Comp.
+      badge: Jpegli Comp.
       description:
         JPEG est un format principalement utilisé pour les photos, privilégiant la «petite taille, même au prix d'une certaine perte de qualité d'image».
-        MozJPEG est une technologie développée par Mozilla pour réduire la taille des fichiers JPEG tout en minimisant la dégradation visuelle.
+        Jpegli est une technologie développée par Google pour réduire la taille des fichiers JPEG tout en minimisant la dégradation visuelle.
         Il est recommandé pour les photos courantes et les photos de grande taille sur les sites web.
     webp:
       label: WebP
@@ -288,10 +288,10 @@ ja:
         本プログラムで使用されているZopfliは、より高度な圧縮アルゴリズムで、変換負荷は高めなものの、品質を維持しながら同じPNGファイルでもサイズを大幅に削減できるため、オリジナルデータの保存やVRC向けのテクスチャの再圧縮に最適な選択肢です。
     jpeg:
       label: JPEG
-      badge: MozJPEG圧縮
+      badge: Jpegli圧縮
       description:
         JPEGは、主に写真に使われる形式で、「ある程度画質が落ちてもいいから、とにかく小さく」を重視した形式です。
-        MozJPEG（モズジェイペグ）は、このJPEGを「見た目の劣化を抑えつつ、もっと小さく」するためにMozillaが開発した技術です。
+        Jpegli（ジェイペグリ）は、このJPEGを「見た目の劣化を抑えつつ、もっと小さく」するためにGoogleが開発した技術です。
         一般的な写真や、Webサイト上の大きな写真の利用におすすめです。
     webp:
       label: WebP
@@ -348,10 +348,10 @@ ko:
         이 프로그램에서 사용되는 Zopfli는 더 발전된 압축 알고리즘으로, 처리 부하는 높지만 품질을 유지하면서 동일한 PNG 파일의 크기를 크게 줄일 수 있어 원본 데이터를 보존하거나 VRC용 텍스처를 재압축하는 데 이상적인 선택입니다.
     jpeg:
       label: JPEG
-      badge: MozJPEG 압축
+      badge: Jpegli 압축
       description:
         JPEG는 주로 사진에 사용되는 형식으로, '일부 이미지 품질 손실이 있더라도 가능한 한 작게'를 중시하는 형식입니다.
-        MozJPEG는 Mozilla에서 개발한 기술로, JPEG 파일 크기를 더욱 작게 만들면서 시각적 저하를 최소화합니다.
+        Jpegli는 Google에서 개발한 기술로, JPEG 파일 크기를 더욱 작게 만들면서 시각적 저하를 최소화합니다.
         일반 사진 및 웹사이트의 대형 사진에 권장됩니다.
     webp:
       label: WebP
@@ -406,9 +406,9 @@ zhHans:
         这使得它成为保留原始数据或为 VRC 重新压缩纹理的理想选择。
     jpeg:
       label: JPEG
-      badge: MozJPEG压缩
+      badge: Jpegli压缩
       description: JPEG 是一种主要用于照片的格式，强调“尺寸小，即使以牺牲一些影像品质为代价”。
-        MozJPEG是由 Mozilla 开发的技术，旨在使 JPEG 尺寸更小，同时最大限度地减少视觉效果的下降。
+        Jpegli是由 Google 开发的技术，旨在使 JPEG 尺寸更小，同时最大限度地减少视觉效果的下降。
         建议用于网站上的普通照片和大型照片。
     webp:
       label: WebP
@@ -463,9 +463,9 @@ zhHant:
         這使得它成為保留原始資料或為 VRC 重新壓縮紋理的理想選擇。
     jpeg:
       label: JPEG
-      badge: MozJPEG 壓縮
+      badge: Jpegli 壓縮
       description: JPEG 是一種主要用於照片的格式，強調「小尺寸，即使以犧牲一些影像品質為代價」。
-        MozJPEG是由 Mozilla 開發的技術，旨在使 JPEG 尺寸更小，同時最大限度地減少視覺效果的下降。
+        Jpegli是由 Google 開發的技術，旨在使 JPEG 尺寸更小，同時最大限度地減少視覺效果的下降。
         建議用於網站上的普通照片和大型照片。
     webp:
       label: WebP

@@ -1,7 +1,7 @@
 /**
- * JPEG (MozJPEG) エンコードオプション
+ * JPEG (jpegli) エンコードオプション
  *
- * MozJPEGは、Mozillaが開発した高品質なJPEGエンコーダーです。
+ * jpegliは、libjxlプロジェクトに含まれる高品質なJPEGエンコーダーです。
  * 標準のJPEGエンコーダーよりも優れた圧縮率と画質を提供します。
  */
 export interface JpegOptions {

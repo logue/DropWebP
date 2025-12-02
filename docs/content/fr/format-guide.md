@@ -42,15 +42,15 @@ Ce programme utilise Zopfli, une technologie de compression spéciale développ�
 - **Contenu web** : Utilisé pour éviter la dégradation de la qualité d’image.
 - **Conserver les données d’origine** : Images susceptibles d’être modifiées à plusieurs reprises.
 
-### JPEG (compression MozJPEG)
+### JPEG (compression jpegli)
 
-Le format JPEG (Joint Photographic Experts Group) est principalement utilisé pour les photographies, privilégiant la « petite taille, même au détriment de la qualité d’image ». MozJPEG, utilisé dans ce programme, est une technologie développée par Mozilla pour réduire davantage la taille des fichiers JPEG tout en minimisant la dégradation visuelle.
+Le format JPEG (Joint Photographic Experts Group) est principalement utilisé pour les photographies, privilégiant la « petite taille, même au détriment de la qualité d'image ». jpegli, utilisé dans ce programme, est une technologie développée par le projet libjxl (le même que JPEG XL) pour réduire davantage la taille des fichiers JPEG tout en minimisant la dégradation visuelle. C'est un encodeur JPEG de haute qualité utilisant la technologie JPEG XL.
 
 #### Caractéristiques du JPEG
 
-- **Compression avec perte** : Pour réduire la taille du fichier, les informations difficiles à voir à l’œil nu sont supprimées, ce qui entraîne une légère dégradation de la qualité de l’image (plus le taux de compression est élevé, plus la dégradation est perceptible).
-- **Taux de compression élevé** : Les images complexes contenant de nombreuses couleurs, comme les photographies, peuvent être réduites de manière extrêmement réduite.
-- **MozJPEG** : Comparé au JPEG traditionnel, il permet d’obtenir une meilleure qualité d’image pour une taille de fichier identique, et même des tailles de fichier plus petites pour une qualité d’image identique.
+- **Compression avec perte** : Pour réduire la taille du fichier, les informations difficiles à voir à l'œil nu sont supprimées, ce qui entraîne une légère dégradation de la qualité de l'image (plus le taux de compression est élevé, plus la dégradation est perceptible).
+- **Taux de compression élevé** : Les images complexes contenant de nombreuses couleurs, comme les photographies, peuvent être réduites de manière extrêmement réduite.
+- **jpegli** : Comparé au JPEG traditionnel, il permet d'obtenir une meilleure qualité d'image pour une taille de fichier identique, et même des tailles de fichier plus petites pour une qualité d'image identique. Il utilise la même technologie que JPEG XL, permettant une compression de haute qualité.
 
 #### Scénarios d’utilisation du JPEG
 
@@ -111,7 +111,7 @@ JPEG XL est un nouveau format développé pour pallier les lacunes de l'ancienne
 
 | PNG (Oxipng) | Aucune dégradation de l'image, transparence du fond. | Logos, icônes, diagrammes. | ❌️ | ✅️ | ✅️ | ❌️ | Faible | Élevée |
 
-| JPEG (MozJPEG) | Possibilité de réduire considérablement la taille des photos. | Images couramment utilisées sur le web. | ✅️ | ❌️ | ❌️ | ❌️ | Élevée | Faible |
+| JPEG (jpegli) | Possibilité de réduire considérablement la taille des photos avec compression de haute qualité. | Images couramment utilisées sur le web. | ✅️ | ❌️ | ❌️ | ❌️ | Élevée | Faible |
 
 | WebP | Compression élevée, haute qualité, prise en charge de la transparence et des animations. | Images à usage général pour les sites web. | ✅️ | ✅️ | ✅️ | ❌️ | Moyen | Moyen |
 

@@ -1,6 +1,6 @@
 [package]
 name = "drop-compress-image"
-version = "3.0.3"
+version = "3.1.0"
 authors = ["Logue"]
 edition = "2024"
 rust-version = "1.91.1"
@@ -19,7 +19,7 @@ keywords = [
   "jpeg-xl",
   "jpeg",
   "jpeg2000",
-  "mozjpeg",
+  "jpegli",
   "oxipng",
   "png",
   "tauri",
@@ -50,10 +50,10 @@ image = "0.25.9"
 imgref = "1.12.0"
 indexmap = "2.12.1"
 jpeg2k = "0.10.1"
+jpegli = "0.1.0"
 jpegxl-rs = { version = "0.11.2", features = ["vendored"] }
 kamadak-exif = "0.6.1"
 libwebp-sys = "0.14.1"
-mozjpeg = "0.10.13"
 openjpeg-sys = "1.0.12"                                     # Note: Requires system openjpeg or Homebrew
 oxipng = "9.1.5"
 png = "0.18.0"

@@ -42,16 +42,16 @@ This program uses Zopfli, a special compression technology developed by Google t
 - **Website Materials**: Used when you want to avoid image quality degradation.
 - **Preserve Original Data**: Images that may be repeatedly edited.
 
-### JPEG (MozJPEG Compression)
+### JPEG (Jpegli Compression)
 
 JPEG (Joint Photographic Experts Group) is a format primarily used for photographs, emphasizing "small size, even at the expense of some image quality."
-MozJPEG, used in this program, is a technology developed by Mozilla to further reduce JPEG size while minimizing visual degradation.
+Jpegli, used in this program, is a technology developed by Google to further reduce JPEG size while minimizing visual degradation.
 
 #### Characteristics of JPEG
 
 - **Lossy Compression**: To reduce file size, information that is difficult for the human eye to see is removed, resulting in a slight degradation in image quality (the higher the compression ratio, the more noticeable the degradation).
 - **High Compression Ratio**: Complex images with many colors, such as photographs, can be made extremely small.
-- **MozJPEG**: Compared to traditional JPEG, it can achieve higher image quality for the same file size, and even smaller file sizes for the same image quality.
+- **jpegli**: Compared to traditional JPEG, it can achieve higher image quality for the same file size, and even smaller file sizes for the same image quality. It uses the same technology as JPEG XL, enabling high-quality compression.
 
 #### JPEG Usage Scenarios
 
@@ -106,13 +106,13 @@ JPEG XL is a new format developed to overcome the shortcomings of the previous J
 
 ## Summary of Output Formats
 
-| Format         | Main Benefits                                                                         | Suitable Uses                                                                      | Lossy | Lossless | Alpha | HDR | Compression Ratio | Compression Load |
-| -------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ----- | -------- | ----- | --- | ----------------- | ---------------- |
-| PNG (Oxipng)   | No image degradation, background transparency.                                        | Logos, icons, diagrams.                                                            | ❌️    | ✅️       | ✅️    | ❌️  | Low               | High             |
-| JPEG (MozJPEG) | Photos can be made very small.                                                        | Commonly used photos on the web.                                                   | ✅️    | ❌️       | ❌️    | ❌️  | High              | Low              |
-| WebP           | High compression, high quality, supports transparency and animation.                  | General-purpose images for websites.                                               | ✅️    | ✅️       | ✅️    | ❌️  | Medium            | Medium           |
-| AVIF           | **Highest compression ratio and high image quality**, wide color gamut (HDR) support. | For websites that require both high image quality and fast display.                | ✅️    | ❌️[^1]   | ✅️    | ✅️  | High              | High             |
-| JPEG XL        | **The ultimate format** that supports everything and is compatible with JPEG.         | For reducing the size of existing JPEGs and unifying image formats for the future. | ✅️    | ✅️       | ✅️    | ✅️  | High              | Low              |
+| Format        | Main Benefits                                                                         | Suitable Uses                                                                      | Lossy | Lossless | Alpha | HDR | Compression Ratio | Compression Load |
+| ------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ----- | -------- | ----- | --- | ----------------- | ---------------- |
+| PNG (Oxipng)  | No image degradation, background transparency.                                        | Logos, icons, diagrams.                                                            | ❌️    | ✅️       | ✅️    | ❌️  | Low               | High             |
+| JPEG (jpegli) | Photos can be made very small with high-quality compression.                          | Commonly used photos on the web.                                                   | ✅️    | ❌️       | ❌️    | ❌️  | High              | Low              |
+| WebP          | High compression, high quality, supports transparency and animation.                  | General-purpose images for websites.                                               | ✅️    | ✅️       | ✅️    | ❌️  | Medium            | Medium           |
+| AVIF          | **Highest compression ratio and high image quality**, wide color gamut (HDR) support. | For websites that require both high image quality and fast display.                | ✅️    | ❌️[^1]   | ✅️    | ✅️  | High              | High             |
+| JPEG XL       | **The ultimate format** that supports everything and is compatible with JPEG.         | For reducing the size of existing JPEGs and unifying image formats for the future. | ✅️    | ✅️       | ✅️    | ✅️  | High              | Low              |
 
 [^1]:
     AVIF is lossless by definition, but this program does not implement it due to the high load and large file size.
