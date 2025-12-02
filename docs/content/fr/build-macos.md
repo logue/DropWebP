@@ -299,3 +299,77 @@ Une fois que Drop Compress Image est construit avec succès :
 4. **Distribution** : Utilisez `pnpm tauri build` pour créer des paquets distribuables
 
 Vous êtes maintenant prêt à développer et construire Drop Compress Image sur macOS !
+
+## Compilation pour Intel Mac
+
+Si vous souhaitez compiler pour Intel Mac (x86_64) à partir d'un Mac Apple Silicon (M1/M2/M3), suivez ces étapes.
+
+### Méthode 1 : Binaire universel (Recommandé)
+
+Créez un binaire unique qui fonctionne sur les Mac Intel et Apple Silicon :
+
+```bash
+cd app
+pnpm run build:tauri:mac-universal
+```
+
+**Avantages :**
+
+- Aucune installation de bibliothèque supplémentaire nécessaire
+- Un seul binaire prend en charge les deux architectures
+- Les utilisateurs n'ont pas à se soucier de l'architecture de leur Mac
+
+**Inconvénients :**
+
+- La taille du fichier est environ doublée (contient le code pour les deux architectures)
+
+### Méthode 2 : Compilation Intel uniquement
+
+Si vous souhaitez créer un binaire spécifique Intel Mac, vous aurez besoin des bibliothèques x86_64.
+
+#### Étape 1 : Installer Homebrew x86_64
+
+```bash
+arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+#### Étape 2 : Installer les bibliothèques x86_64
+
+```bash
+arch -x86_64 /usr/local/bin/brew install libavif jpeg-xl
+```
+
+Ou utilisez le script de configuration :
+
+```bash
+./scripts/setup-x86-libs.sh
+```
+
+#### Étape 3 : Compiler
+
+```bash
+cd app
+pnpm run build:tauri:mac-x64
+```
+
+### Aperçu des cibles de compilation
+
+```bash
+# Apple Silicon uniquement
+pnpm run build:tauri:mac-arm64
+
+# Intel Mac uniquement
+pnpm run build:tauri:mac-x64
+
+# Binaire universel (les deux)
+pnpm run build:tauri:mac-universal
+```
+
+### Emplacement des artefacts de compilation
+
+```text
+app/src-tauri/target/
+  ├── aarch64-apple-darwin/release/bundle/      # ARM64 uniquement
+  ├── x86_64-apple-darwin/release/bundle/       # x86_64 uniquement
+  └── universal-apple-darwin/release/bundle/    # Universel (les deux)
+```

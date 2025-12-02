@@ -281,6 +281,78 @@ security find-identity -v -p codesigning
    rustup target add x86_64-apple-darwin   # Intel
    ```
 
+### Intel Mac용 빌드
+
+Apple Silicon Mac에서 Intel Mac용 바이너리를 빌드하거나 Intel Mac에서 빌드할 수 있습니다.
+
+#### 방법 1: Universal Binary (권장)
+
+가장 간단한 방법은 ARM64와 x86_64 바이너리를 모두 포함하는 Universal Binary를 빌드하는 것입니다:
+
+```bash
+pnpm run build:tauri:mac-universal
+```
+
+이 방법은 추가 라이브러리 설치가 필요하지 않으며 모든 Mac에서 실행되는 단일 바이너리를 생성합니다.
+
+#### 방법 2: Intel 전용 빌드
+
+Intel 전용 바이너리만 필요한 경우:
+
+**Apple Silicon Mac에서 크로스 컴파일:**
+
+1. x86_64 Homebrew 및 필수 라이브러리 설치:
+
+   ```bash
+   # x86_64 Homebrew가 설치되어 있지 않은 경우
+   arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+   # x86_64 라이브러리 설치
+   arch -x86_64 /usr/local/bin/brew install libavif jpeg-xl
+   ```
+
+   또는 제공된 스크립트 사용:
+
+   ```bash
+   bash scripts/setup-x86-libs.sh
+   ```
+
+2. x86_64 타겟용 빌드:
+
+   ```bash
+   pnpm run build:tauri:mac-x64
+   ```
+
+**Intel Mac에서 빌드:**
+
+Intel Mac에서는 직접 빌드할 수 있습니다:
+
+```bash
+pnpm run build:tauri:mac-x64
+```
+
+#### 빌드 타겟 개요
+
+| 명령                        | 아키텍처                   | 플랫폼        |
+| --------------------------- | -------------------------- | ------------- |
+| `build:tauri:mac-arm64`     | ARM64                      | Apple Silicon |
+| `build:tauri:mac-x64`       | x86_64                     | Intel Mac     |
+| `build:tauri:mac-universal` | Universal (ARM64 + x86_64) | 모든 Mac      |
+
+#### 빌드 결과물 위치
+
+빌드 결과물은 타겟에 따라 다음 위치에 생성됩니다:
+
+```
+app/src-tauri/target/
+├── aarch64-apple-darwin/release/   # ARM64 빌드
+│   └── bundle/
+├── x86_64-apple-darwin/release/    # Intel 빌드
+│   └── bundle/
+└── universal-apple-darwin/release/ # Universal 빌드
+    └── bundle/
+```
+
 ### 도움 받기
 
 여기서 다루지 않은 문제가 발생하면:

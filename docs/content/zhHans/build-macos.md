@@ -281,6 +281,78 @@ security find-identity -v -p codesigning
    rustup target add x86_64-apple-darwin   # Intel
    ```
 
+### 为 Intel Mac 构建
+
+您可以在 Apple Silicon Mac 上为 Intel Mac 构建二进制文件，或直接在 Intel Mac 上构建。
+
+#### 方法 1：Universal Binary（推荐）
+
+最简单的方法是构建同时包含 ARM64 和 x86_64 二进制文件的 Universal Binary：
+
+```bash
+pnpm run build:tauri:mac-universal
+```
+
+此方法不需要安装额外的库，并生成可在所有 Mac 上运行的单个二进制文件。
+
+#### 方法 2：仅 Intel 构建
+
+如果您只需要 Intel 专用二进制文件：
+
+**在 Apple Silicon Mac 上交叉编译：**
+
+1. 安装 x86_64 Homebrew 和所需库：
+
+   ```bash
+   # 如果尚未安装 x86_64 Homebrew
+   arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+   # 安装 x86_64 库
+   arch -x86_64 /usr/local/bin/brew install libavif jpeg-xl
+   ```
+
+   或使用提供的脚本：
+
+   ```bash
+   bash scripts/setup-x86-libs.sh
+   ```
+
+2. 为 x86_64 目标构建：
+
+   ```bash
+   pnpm run build:tauri:mac-x64
+   ```
+
+**在 Intel Mac 上构建：**
+
+在 Intel Mac 上可以直接构建：
+
+```bash
+pnpm run build:tauri:mac-x64
+```
+
+#### 构建目标概览
+
+| 命令                        | 架构                       | 平台          |
+| --------------------------- | -------------------------- | ------------- |
+| `build:tauri:mac-arm64`     | ARM64                      | Apple Silicon |
+| `build:tauri:mac-x64`       | x86_64                     | Intel Mac     |
+| `build:tauri:mac-universal` | Universal (ARM64 + x86_64) | 所有 Mac      |
+
+#### 构建产物位置
+
+构建产物根据目标生成在以下位置：
+
+```
+app/src-tauri/target/
+├── aarch64-apple-darwin/release/   # ARM64 构建
+│   └── bundle/
+├── x86_64-apple-darwin/release/    # Intel 构建
+│   └── bundle/
+└── universal-apple-darwin/release/ # Universal 构建
+    └── bundle/
+```
+
 ### 获取帮助
 
 如果您遇到此处未涵盖的问题：

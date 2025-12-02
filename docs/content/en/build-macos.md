@@ -299,3 +299,77 @@ Once you have Drop Compress Image built successfully:
 4. **Distribution**: Use `pnpm build:tauri` to create distributable packages
 
 You're now ready to develop and build Drop Compress Image on macOS!
+
+## Building for Intel Mac
+
+If you want to cross-compile for Intel Mac (x86_64) from an Apple Silicon Mac (M1/M2/M3), follow these steps.
+
+### Method 1: Universal Binary (Recommended)
+
+Create a single binary that works on both Intel and Apple Silicon Macs:
+
+```bash
+cd app
+pnpm run build:tauri:mac-universal
+```
+
+**Advantages:**
+
+- No additional library installation required
+- Single binary supports both architectures
+- Users don't need to worry about their Mac's architecture
+
+**Disadvantages:**
+
+- File size is approximately doubled (contains code for both architectures)
+
+### Method 2: Intel-only Build
+
+If you want to create an Intel Mac-specific binary, you'll need x86_64 libraries.
+
+#### Step 1: Install x86_64 Homebrew
+
+```bash
+arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+#### Step 2: Install x86_64 Libraries
+
+```bash
+arch -x86_64 /usr/local/bin/brew install libavif jpeg-xl
+```
+
+Or use the setup script:
+
+```bash
+./scripts/setup-x86-libs.sh
+```
+
+#### Step 3: Build
+
+```bash
+cd app
+pnpm run build:tauri:mac-x64
+```
+
+### Build Target Overview
+
+```bash
+# Apple Silicon only
+pnpm run build:tauri:mac-arm64
+
+# Intel Mac only
+pnpm run build:tauri:mac-x64
+
+# Universal Binary (both)
+pnpm run build:tauri:mac-universal
+```
+
+### Build Artifacts Location
+
+```text
+app/src-tauri/target/
+  ├── aarch64-apple-darwin/release/bundle/      # ARM64 only
+  ├── x86_64-apple-darwin/release/bundle/       # x86_64 only
+  └── universal-apple-darwin/release/bundle/    # Universal (both)
+```

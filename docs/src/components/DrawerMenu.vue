@@ -41,6 +41,11 @@ const items: ComputedRef<DrawerMenuItem[]> = computed(() => [
     title: t('build_linux'),
     icon: 'mdi-linux',
     to: localePath('/build-linux')
+  },
+  {
+    title: t('build_linux_docker'),
+    icon: 'mdi-docker',
+    to: localePath('/build-linux-docker')
   }
 ]);
 </script>
@@ -90,6 +95,7 @@ en:
   build_windows: Windows Build Instructions
   build_macos: macOS Build Instructions
   build_linux: Linux Build Instructions
+  build_linux_docker: Linux Build Instructions (docker)
 fr:
   home: Accueil
   getting_started: Commencer
@@ -97,6 +103,7 @@ fr:
   build_windows: Windows Instructions de construction
   build_macos: macOS Instructions de construction
   build_linux: Linux Instructions de construction
+  build_linux_docker: Linux Instructions de construction (docker)
 ja:
   home: ホーム
   getting_started: はじめに
@@ -104,6 +111,7 @@ ja:
   build_windows: Windows ビルド手順
   build_macos: macOS ビルド手順
   build_linux: Linux ビルド手順
+  build_linux_docker: Linux ビルド手順（docker）
 ko:
   home: 홈
   getting_started: 시작하기
@@ -111,6 +119,7 @@ ko:
   build_windows: Windows 빌드 지침
   build_macos: macOS 빌드 지침
   build_linux: Linux 빌드 지침
+  build_linux_docker: Linux 빌드 지침 (docker)
 zhHant:
   home: 首頁
   getting_started: 入門
@@ -118,6 +127,7 @@ zhHant:
   build_windows: Windows 建置說明
   build_macos: macOS 建置說明
   build_linux: Linux 建置說明
+  build_linux_docker: Linux 建置說明 (docker)
 zhHans:
   home: 主页
   getting_started: 入门
@@ -125,4 +135,5 @@ zhHans:
   build_windows: Windows 构建说明
   build_macos: macOS 构建说明
   build_linux: Linux 构建说明
+  build_linux_docker: Linux 构建说明 (docker)
 </i18n>

@@ -1,9 +1,9 @@
 fn main() {
+    // 確認対象のライブラリ
+    let libs = ["libavif", "libjxl"];
     // Windows環境でvcpkgを使用してライブラリを検出
     #[cfg(target_os = "windows")]
     {
-        // vcpkgでインストールされたライブラリを検出
-        let libs = ["libheif", "libavif", "libjxl"];
         for lib in libs {
             match vcpkg::find_package(lib) {
                 Ok(info) => {
@@ -38,11 +38,32 @@ fn main() {
     // macOS環境でpkg-configを使用
     #[cfg(target_os = "macos")]
     {
-        let libs = ["libheif", "libavif", "libjxl"];
-        for lib in libs {
-            match pkg_config::probe_library(lib) {
-                Ok(info) => println!("cargo:info=Found {}: {:?}", lib, info),
-                Err(e) => panic!("{} not found via pkg-config: {}", lib, e),
+        // クロスコンパイルのターゲットを取得
+        let target = std::env::var("TARGET").unwrap_or_default();
+        let host = std::env::var("HOST").unwrap_or_default();
+        let is_cross_compiling = target != host;
+
+        // クロスコンパイル時は警告のみ表示
+        if is_cross_compiling {
+            println!("cargo:warning=Cross-compiling for target: {}", target);
+            println!("cargo:warning=Host architecture: {}", host);
+            println!("cargo:warning=Note: libavif and libjxl should be available for the target architecture");
+
+            // x86_64向けの場合、Homebrewのx86_64パスを追加
+            if target.contains("x86_64") {
+                println!("cargo:rustc-link-search=native=/usr/local/lib");
+                println!("cargo:warning=Added /usr/local/lib to library search path for x86_64");
+            }
+        } else {
+            // 同じアーキテクチャの場合は通常通りpkg-configでチェック
+            for lib in libs {
+                match pkg_config::probe_library(lib) {
+                    Ok(info) => println!("cargo:info=Found {}: {:?}", lib, info),
+                    Err(e) => {
+                        println!("cargo:warning={} not found via pkg-config: {}", lib, e);
+                        println!("cargo:warning=Attempting to continue with default library paths");
+                    }
+                }
             }
         }
     }

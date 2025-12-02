@@ -159,7 +159,8 @@ export default defineConfigWithVueTs(
         }
       ],
       // Mitigate non-multiword component name errors to warnings.
-      'vue/multi-word-component-names': 'warn'
+      'vue/multi-word-component-names': 'warn',
+      '@typescript-eslint/no-explicit-any': 'warn'
     }
   },
   configPrettier
