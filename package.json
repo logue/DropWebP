@@ -68,7 +68,7 @@
     "stylelint-config-recommended-vue": "^1.6.1",
     "stylelint-order": "^7.0.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.48.0"
+    "typescript-eslint": "^8.48.1"
   },
   "resolutions": {
     "esbuild": ">=0.24.2",

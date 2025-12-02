@@ -1,5 +1,5 @@
 # Linux向けTauriアプリケーションビルド用Dockerfile
-FROM rust:1.83-bookworm
+FROM rust:1.91.1-bookworm
 
 # 環境変数設定
 ENV DEBIAN_FRONTEND=noninteractive
