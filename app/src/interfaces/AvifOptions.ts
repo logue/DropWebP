@@ -1,12 +1,8 @@
-import type { BitDepth, ColorModel, AlphaColorMode } from '@/types/AvifTypes';
+import type { BitDepth, ColorModel } from '@/types/AvifTypes';
 
 // 型と定数を再エクスポート
-export { BitDepth, ColorModel, AlphaColorMode } from '@/types/AvifTypes';
-export type {
-  BitDepth as BitDepthType,
-  ColorModel as ColorModelType,
-  AlphaColorMode as AlphaColorModeType
-} from '@/types/AvifTypes';
+export { BitDepth, ColorModel } from '@/types/AvifTypes';
+export type { BitDepth as BitDepthType, ColorModel as ColorModelType } from '@/types/AvifTypes';
 
 /**
  * AVIF最適化オプション
@@ -24,6 +20,4 @@ export interface AvifOptions {
   colorModel: ColorModel;
   /** 使用するスレッド数 (undefinedの場合は自動設定) */
   threads?: number;
-  /** アルファ */
-  alphaColorMode: AlphaColorMode;
 }

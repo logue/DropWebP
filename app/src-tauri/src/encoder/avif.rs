@@ -1,7 +1,7 @@
 use super::common::{
-    apply_tone_mapping, convert_f32_to_u8, get_encoding_recommendations,
-    handle_icc_profile_embedding, log_encoding_analysis, provide_icc_recommendations,
-    EncodingAnalysis, ToneMappingType,
+    EncodingAnalysis, ToneMappingType, apply_tone_mapping, convert_f32_to_u8,
+    get_encoding_recommendations, handle_icc_profile_embedding, log_encoding_analysis,
+    provide_icc_recommendations,
 };
 use crate::{encoder::extract_pixel_data, error::AppError, options::HighBitDepthImage};
 use imgref::Img;
@@ -15,8 +15,8 @@ use serde::{Deserialize, Serialize};
 /// speed: Encoding speed (0-10). 0 is highest quality but slowest, 10 is fastest
 /// color_model: Color model (ColorModel::YCbCr, ColorModel::RGB)
 /// threads: Number of threads to use (None for automatic)
-/// alpha_color_mode: Alpha channel color mode (AlphaColorMode::Straight, AlphaColorMode::Premultiplied)
-/// Note: When BitDepth::Auto is selected, bit depth is automatically determined based on input image.
+/// Note: Alpha color mode is automatically determined based on image content.
+///     When BitDepth::Auto is selected, bit depth is automatically determined based on input image.
 ///     For example, 8-bit images will use BitDepth::Eight, 10-bit images will use BitDepth::Ten.
 ///     However, it's possible to choose BitDepth::Eight even for images with higher bit depth.
 ///     Conversely, choosing BitDepth::Eight for 10-bit+ images may result in information loss.
@@ -30,7 +30,6 @@ pub struct AvifOptions {
     pub speed: u8,
     pub color_model: ColorModel,
     pub threads: Option<usize>,
-    pub alpha_color_mode: AlphaColorMode,
 }
 
 /// Bit depth enumeration
@@ -150,6 +149,43 @@ pub fn encode(
         )));
     }
 
+    // 完全透過ピクセルのRGB値を白(1.0)に補正（真っ黒になる問題を回避）
+    let processed_pixels_f32 = if is_rgba {
+        let mut out = pixels_f32.to_vec();
+        for i in (0..out.len()).step_by(4) {
+            let a = out[i + 3];
+            if a == 0.0 {
+                out[i] = 1.0; // R
+                out[i + 1] = 1.0; // G
+                out[i + 2] = 1.0; // B
+            }
+        }
+        out
+    } else {
+        pixels_f32.to_vec()
+    };
+
+    // アルファモード自動判定（透過情報の有無と品質で決定）
+    let auto_alpha_mode = if is_rgba {
+        let mut only_zero_or_one = true;
+        for i in (3..processed_pixels_f32.len()).step_by(4) {
+            let a = processed_pixels_f32[i];
+            if a != 0.0 && a != 1.0 {
+                only_zero_or_one = false;
+                break;
+            }
+        }
+        if only_zero_or_one {
+            AlphaColorMode::UnassociatedClean
+        } else {
+            AlphaColorMode::UnassociatedDirty
+        }
+    } else {
+        AlphaColorMode::UnassociatedClean
+    };
+
+    println!("AVIF: Alpha mode auto-detected: {:?}", auto_alpha_mode);
+
     let encoded_avif: EncodedImage = {
         // ★ エンコーダーを生成（すべてのピクセルを8ビットとして処理）
         let encoder = Encoder::new()
@@ -157,7 +193,7 @@ pub fn encode(
             .with_bit_depth(options.bit_depth.to_ravif()) // 設定に従ってビット深度を決定
             .with_internal_color_model(options.color_model.to_ravif())
             .with_num_threads(options.threads)
-            .with_alpha_color_mode(options.alpha_color_mode.to_ravif())
+            .with_alpha_color_mode(auto_alpha_mode.to_ravif())
             .with_speed(options.speed)
             .with_alpha_quality(options.alpha_quality);
 
@@ -167,12 +203,17 @@ pub fn encode(
                 "AVIF: Applying tone mapping for HDR content (max luminance: {:.3})",
                 analysis.max_luminance
             );
-            apply_tone_mapping(&pixels_f32, is_rgba, ToneMappingType::Reinhard, 1.0)
+            apply_tone_mapping(
+                &processed_pixels_f32,
+                is_rgba,
+                ToneMappingType::Reinhard,
+                1.0,
+            )
         } else if analysis.has_wide_gamut {
             println!("AVIF: Processing wide gamut content");
-            pixels_f32.to_vec()
+            processed_pixels_f32.to_vec()
         } else {
-            pixels_f32.to_vec()
+            processed_pixels_f32.to_vec()
         };
 
         // Convert f32 pixels to u8 with proper clamping

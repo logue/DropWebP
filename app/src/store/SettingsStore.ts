@@ -19,8 +19,7 @@ const defaultAvifOptions: AvifOptions = {
   alphaQuality: 80.0,
   speed: 5,
   colorModel: ColorModel.YCbCr,
-  threads: undefined,
-  alphaColorMode: 'Premultiplied'
+  threads: undefined
 } as const;
 
 const defaultWebpOptions: WebpOptions = {

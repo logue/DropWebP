@@ -2,7 +2,7 @@
 import { useSettingsStore } from '@/store';
 import { useI18n } from 'vue-i18n';
 
-import { BitDepth, ColorModel, AlphaColorMode } from '@/types/AvifTypes';
+import { BitDepth, ColorModel } from '@/types/AvifTypes';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
@@ -66,19 +66,6 @@ const settingsStore = useSettingsStore();
         item-value="value"
         persistent-hint
       />
-      <v-select
-        v-model="settingsStore.avifOptions.alphaColorMode"
-        :items="[
-          { text: t('alpha_color_mode_items[0]'), value: AlphaColorMode.UnassociatedDirty },
-          { text: t('alpha_color_mode_items[1]'), value: AlphaColorMode.UnassociatedClean },
-          { text: t('alpha_color_mode_items[2]'), value: AlphaColorMode.Premultiplied }
-        ]"
-        :hint="t('alpha_color_mode_hint')"
-        :label="t('alpha_color_mode')"
-        item-title="text"
-        item-value="value"
-        persistent-hint
-      />
       <v-slider
         v-model="settingsStore.avifOptions.speed"
         :hint="t('speed_hint')"
@@ -128,12 +115,6 @@ en:
     - Auto
   quality: Quality ({min}-{max})
   alpha_quality: Alpha Channel Quality ({min}-{max})
-  alpha_color_mode: Alpha Color Mode
-  alpha_color_mode_hint: Specifies how to handle the colors of the alpha channel
-  alpha_color_mode_items:
-    - Unassociated alpha (dirty)
-    - Unassociated alpha (clean)
-    - Premultiplied alpha
   speed: Encoding Speed ({min}-{max})
   speed_hint: Higher values are faster but lower quality
   color_model: Color Model
@@ -151,12 +132,6 @@ fr:
     - Auto
   quality: Qualité ({min}-{max})
   alpha_quality: Qualité du canal alpha ({min}-{max})
-  alpha_color_mode: Mode de couleur alpha
-  alpha_color_mode_hint: Spécifie comment gérer les couleurs du canal alpha
-  alpha_color_mode_items:
-    - UnassociatedDirty (Alpha non associé (sale))
-    - UnassociatedClean (Alpha non associé (propre))
-    - Premultiplied (Alpha prémultiplié)
   speed: Vitesse d'encodage ({min}-{max})
   speed_hint: Des valeurs plus élevées sont plus rapides mais de qualité inférieure
   color_model: Modèle de couleur
@@ -174,12 +149,6 @@ ja:
     - 自動
   quality: 品質（{min}～{max}）
   alpha_quality: アルファチャンネルの品質（{min}～{max}）
-  alpha_color_mode: アルファカラーモード
-  alpha_color_mode_hint: アルファチャンネルの色の扱い方を指定します
-  alpha_color_mode_items:
-    - UnassociatedDirty (非関連（ダーティ）)
-    - UnassociatedClean (非関連（クリーン）)
-    - Premultiplied (乗算済みアルファ)
   speed: エンコード速度（{min}～{max}）
   speed_hint: 値が高いほど速度は速くなりますが、品質が悪くなります
   color_model: カラーモデル
@@ -197,12 +166,6 @@ ko:
     - 자동
   quality: 품질 ({min}-{max})
   alpha_quality: 알파 채널 품질 ({min}-{max})
-  alpha_color_mode: 알파 색상 모드
-  alpha_color_mode_hint: 알파 채널의 색상을 처리하는 방법을 지정합니다
-  alpha_color_mode_items:
-    - UnassociatedDirty (비연관 알파(더티))
-    - UnassociatedClean (비연관 알파(클린))
-    - Premultiplied (프리멀티플라이드 알파)
   speed: 인코딩 속도 ({min}-{max})
   speed_hint: 값이 높을수록 빠르지만 품질이 낮아집니다
   color_model: 색상 모델
@@ -220,12 +183,6 @@ zhHant:
     - 自動
   quality: 質量 ({min}-{max})
   alpha_quality: Alpha通道質量 ({min}-{max})
-  alpha_color_mode: Alpha顏色模式
-  alpha_color_mode_hint: 指定如何處理Alpha通道的顏色
-  alpha_color_mode_items:
-    - UnassociatedDirty (非關聯Alpha（髒）)
-    - UnassociatedClean (非關聯Alpha（乾淨）)
-    - Premultiplied (預乘Alpha)
   speed: 編碼速度 ({min}-{max})
   speed_hint: 較高的值較快但質量較低
   color_model: 顏色模式
@@ -243,12 +200,6 @@ zhHans:
     - 自动
   quality: 质量 ({min}-{max})
   alpha_quality: Alpha通道质量 ({min}-{max})
-  alpha_color_mode: Alpha颜色模式
-  alpha_color_mode_hint: 指定如何处理Alpha通道的颜色
-  alpha_color_mode_items:
-    - UnassociatedDirty (非关联Alpha（脏）)
-    - UnassociatedClean (非关联Alpha（干净）)
-    - Premultiplied (预乘Alpha)
   speed: 编码速度 ({min}-{max})
   speed_hint: 较高的值较快但质量较低
   color_model: 颜色模式
