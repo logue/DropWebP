@@ -1,6 +1,13 @@
 #!/bin/bash
 set -e
 
+# CI環境であることを明示（pnpmがTTYなしで動作するため）
+export CI=true
+
+# pkg-configがクロスコンパイルとして動作することを許可
+# Docker内でネイティブビルドしているが、Rustのターゲット指定でクロスコンパイルと誤認されるため
+export PKG_CONFIG_ALLOW_CROSS=1
+
 echo "🐧 Linux向けビルドを開始..."
 
 # プロジェクトルートで依存関係をインストール
