@@ -1,218 +1,20 @@
 <script setup lang="ts">
-import { unref } from 'vue';
-
-import avif from '@/assets/Avif-logo-rgb.svg';
-import jxl from '@/assets/JPEG_XL_logo.svg';
-import jpeg from '@/assets/Mozjpeg_logotype.svg';
-import webp from '@/assets/WebPLogo.svg';
 import logo from '@/assets/logo.png';
-import ogp from '@/assets/ogp.png';
-import png from '@/assets/zopfli-logo.png';
 
-const { locale, rt, t, tm } = useI18n();
-const localePath = useLocalePath();
+const { locale, rt, t } = useI18n();
 
-// 型安全なdescriptionの取得
-const leadDescriptions = computed(() => {
-  try {
-    const descriptions = tm('lead.description') as unknown;
-    return Array.isArray(descriptions) ? (descriptions as string[]) : [];
-  } catch {
-    return [];
-  }
+// Composables
+const { version, downloads, primaryDownload, detectPlatform } = useDownloads();
+const { features, formats, leadDescriptions, getFormatDescriptions } = useContentData();
+const { languages, setupSeoMeta } = useSeoMetadata();
+
+// OS検出
+onMounted(() => {
+  detectPlatform();
 });
 
-const getFormatDescriptions = (key: string) => {
-  try {
-    const descriptions = tm(`format.${key}.description`) as unknown;
-    return Array.isArray(descriptions) ? (descriptions as string[]) : [];
-  } catch {
-    return [];
-  }
-};
-
-const version = '3.0.2';
-const features = [
-  {
-    icon: 'mdi-image-multiple',
-    key: 'multiple_formats'
-  },
-  {
-    icon: 'mdi-lightning-bolt',
-    key: 'high_speed'
-  },
-  {
-    icon: 'mdi-drag',
-    key: 'drag_drop'
-  },
-  {
-    icon: 'mdi-earth',
-    key: 'i18n'
-  },
-  {
-    icon: 'mdi-theme-light-dark',
-    key: 'dark_mode'
-  },
-  {
-    icon: 'mdi-clipboard-outline',
-    key: 'paste'
-  }
-];
-
-const formats = [
-  { key: 'webp', logo: webp },
-  { key: 'avif', logo: avif },
-  { key: 'jxl', logo: jxl },
-  { key: 'png', logo: png },
-  { key: 'jpeg', logo: jpeg }
-];
-
-// 言語リスト定義
-const languages = [
-  { code: 'en', name: '🇺🇸 English' },
-  { code: 'ja', name: '🇯🇵 日本語' },
-  { code: 'fr', name: '🇫🇷 Français' },
-  { code: 'ko', name: '🇰🇷 한국어' },
-  { code: 'zhHans', name: '🇨🇳 简体中文' },
-  { code: 'zhHant', name: '🇹🇼 繁體中文' }
-];
-
-const urlPrefix = `https://github.com/logue/DropWebP/releases/download/${version}/drop-compress-image_${version}_`;
-
-// サイトのベースURL - 本番環境ではhttps://logue.devを使用
-const baseUrl = 'https://logue.dev';
-const sitePath = useRuntimeConfig().app.baseURL;
-
-const currentUrl = computed(() => {
-  const path = locale.value === 'en' ? '' : `/${locale.value}`;
-  return `${baseUrl}${sitePath}${path}`;
-});
-
-// OGP画像（ロゴ）- 完全なURLを構築
-const ogImage = computed(() => {
-  // ogp変数が相対パスの場合、適切にベースURLと結合
-  if (ogp.startsWith('/DropWebP/')) {
-    return `${baseUrl}${ogp}`;
-  }
-  return `${baseUrl}${sitePath}${ogp}`;
-});
-
-// hreflangタグを手動で生成（デプロイ環境での重複URL問題を回避）
-const hreflangLinks = computed(() => {
-  const links = [];
-
-  // x-default（英語）
-  links.push({
-    rel: 'alternate',
-    hreflang: 'x-default',
-    href: `${baseUrl}${sitePath}`
-  });
-
-  // 各言語
-  languages.forEach(lang => {
-    if (lang.code === 'en') {
-      links.push({
-        rel: 'alternate',
-        hreflang: 'en',
-        href: `${baseUrl}${sitePath}`
-      });
-    } else {
-      links.push({
-        rel: 'alternate',
-        hreflang: lang.code,
-        href: `${baseUrl}${sitePath}${lang.code}/`
-      });
-    }
-  });
-
-  return links;
-});
-
-useHead({
-  link: hreflangLinks
-});
-
-// SEO メタデータ
-useSeoMeta({
-  title: computed(() => `Drop Compress Image - ${t('lead.subtitle')}`),
-  ogSiteName: 'Drop Compress Image',
-  description: computed(() => t('lead.description[0]')),
-  ogTitle: 'Drop Compress Image',
-  ogDescription: computed(() => t('lead.subtitle')),
-  ogImage: ogImage,
-  ogUrl: currentUrl,
-  ogType: 'website',
-  ogLocale: computed(() => {
-    const localeMap: Record<string, string> = {
-      ja: 'ja_JP',
-      en: 'en_US',
-      fr: 'fr_FR',
-      ko: 'ko_KR',
-      zhHans: 'zh_CN',
-      zhHant: 'zh_TW'
-    };
-    return localeMap[locale.value] || 'en_US';
-  }),
-  twitterCard: 'summary_large_image',
-  twitterTitle: 'Drop Compress Image',
-  twitterDescription: computed(() => t('lead.subtitle')),
-  twitterImage: ogImage
-});
-
-// JSON-LD 構造化データ
-const jsonLdData = computed(() => {
-  const languageMap: Record<string, string> = {
-    ja: 'ja',
-    en: 'en',
-    fr: 'fr',
-    ko: 'ko',
-    zhHans: 'zh-CN',
-    zhHant: 'zh-TW'
-  };
-
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'SoftwareApplication',
-    name: 'Drop Compress Image',
-    applicationCategory: 'DesignApplication',
-    operatingSystem: 'Windows 11, macOS',
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'USD'
-    },
-    description: unref(t('lead.description[0]')),
-    url: `${unref(baseUrl)}/DropWebP`,
-    image: unref(ogImage),
-    softwareVersion: unref(version),
-    releaseNotes: `https://github.com/logue/DropWebP/releases/tag/${unref(version)}`,
-    downloadUrl: `https://github.com/logue/DropWebP/releases/download/${unref(version)}/`,
-    author: {
-      '@type': 'Person',
-      name: 'Logue',
-      url: 'https://github.com/logue'
-    },
-    featureList: [
-      unref(t('features.multiple_formats.title')),
-      unref(t('features.high_speed.title')),
-      unref(t('features.drag_drop.title')),
-      unref(t('features.i18n.title')),
-      unref(t('features.dark_mode.title')),
-      unref(t('features.paste.title'))
-    ],
-    screenshot: unref(ogImage),
-    inLanguage: languageMap[locale.value] || 'en'
-  };
-});
-
-useHead({
-  script: [
-    {
-      type: 'application/ld+json',
-      innerHTML: () => JSON.stringify(jsonLdData.value)
-    }
-  ]
-});
+// SEOメタデータの設定
+setupSeoMeta();
 </script>
 
 <template>
@@ -227,7 +29,7 @@ useHead({
           v-for="lang in languages"
           :key="lang.code"
           :hreflang="lang.code"
-          :to="localePath('/', lang.code as any)"
+          :to="lang.code === 'en' ? '/' : `/${lang.code}`"
           :variant="locale === lang.code ? 'elevated' : 'outlined'"
           :color="locale === lang.code ? 'primary' : 'default'"
           :text="lang.name"
@@ -236,7 +38,7 @@ useHead({
           size="small"
         />
       </v-chip-group>
-      <p v-for="description in leadDescriptions" :key="description">
+      <p v-for="(description, index) in leadDescriptions" :key="`lead-${index}`">
         {{ rt(description) }}
       </p>
     </v-card-text>
@@ -262,88 +64,140 @@ useHead({
     <v-card-subtitle class="text-center">
       <v-code>v.{{ version }}</v-code>
     </v-card-subtitle>
-    <!-- Download Buttons -->
-    <v-card-actions class="d-flex flex-wrap align-center justify-center gap-3">
+
+    <!-- Primary Download Button (Auto-detected) -->
+    <v-card-actions class="justify-center mb-4 d-flex flex-column">
       <v-btn
-        :href="`${urlPrefix}x64_en-US.msi`"
-        class="mr-1"
+        :href="primaryDownload.url"
+        :prepend-icon-color="primaryDownload.iconColor"
+        :prepend-icon="primaryDownload.icon"
+        class="px-8 py-4"
         download
-        prepend-icon-color="blue"
-        prepend-icon="mdi-microsoft-windows"
-        size="large"
+        height="100"
+        size="x-large"
         spaced="both"
         stacked
         variant="elevated"
       >
         <span class="text-center">
-          <div class="mb-1">{{ t('download.windows') }}</div>
-          <small class="text-medium-emphasis">({{ t('download.window_requirement') }})</small>
+          <div class="text-h6 mb-1 text-primary">{{ primaryDownload.label }}</div>
+          <small class="text-medium-emphasis">{{ primaryDownload.subtitle }}</small>
         </span>
       </v-btn>
-      <v-btn
-        :href="`${urlPrefix}aarch64.dmg`"
-        class="ml-1"
-        download
-        prepend-icon="mdi-apple"
-        prepend-icon-color="red"
-        size="large"
-        spaced="both"
-        stacked
-        variant="elevated"
-      >
-        <span class="text-center">
-          <div class="mb-1">{{ t('download.macos') }}</div>
-          <small class="text-medium-emphasis">({{ t('download.macos_arm') }})</small>
-        </span>
-      </v-btn>
-      <v-btn
-        :href="`${urlPrefix}aarch64.dmg`"
-        class="ml-1"
-        download
-        prepend-icon="mdi-apple"
-        prepend-icon-color="blue"
-        size="large"
-        spaced="both"
-        stacked
-        variant="elevated"
-      >
-        <span class="text-center">
-          <div class="mb-1">{{ t('download.macos') }}</div>
-          <small class="text-medium-emphasis">({{ t('download.macos_intel') }})</small>
-        </span>
-      </v-btn>
-      <v-btn
-        :href="`${urlPrefix}linux-x64.AppImage`"
-        class="ml-1"
-        download
-        prepend-icon="mdi-linux"
-        prepend-icon-color="black"
-        size="large"
-        spaced="both"
-        stacked
-        variant="elevated"
-      >
-        <span class="text-center">
-          <div class="mb-1">{{ t('download.linux') }}</div>
-          <small class="text-medium-emphasis">({{ t('download.linux_x64') }})</small>
-        </span>
-      </v-btn>
-      <v-btn
-        :href="`${urlPrefix}linux-arm64.AppImage`"
-        class="ml-1"
-        download
-        prepend-icon="mdi-linux"
-        prepend-icon-color="black"
-        size="large"
-        spaced="both"
-        stacked
-        variant="elevated"
-      >
-        <span class="text-center">
-          <div class="mb-1">{{ t('download.linux') }}</div>
-          <small class="text-medium-emphasis">({{ t('download.linux_arm64') }})</small>
-        </span>
-      </v-btn>
+      <br />
+      <!-- Alternative Downloads Expansion Panel -->
+      <v-expansion-panels max-width="600" elevation="2">
+        <v-expansion-panel>
+          <v-expansion-panel-title>
+            <v-icon start>mdi-package-variant</v-icon>
+            {{ t('download.other_platforms') }}
+          </v-expansion-panel-title>
+          <v-expansion-panel-text>
+            <v-row>
+              <!-- Windows -->
+              <v-col cols-sm="6">
+                <v-list density="compact">
+                  <v-list-subheader>
+                    <v-icon start color="blue">mdi-microsoft-windows</v-icon>
+                    {{ t('download.windows') }}
+                  </v-list-subheader>
+                  <v-list-item :href="downloads.windows.x64" prepend-icon="mdi-download" download>
+                    <v-list-item-title>Windows 10/11 (x64)</v-list-item-title>
+                    <v-list-item-subtitle>.msi installer</v-list-item-subtitle>
+                  </v-list-item>
+                </v-list>
+              </v-col>
+              <!-- macOS -->
+              <v-col cols-sm="6">
+                <v-list density="compact">
+                  <v-list-subheader>
+                    <v-icon start color="red">mdi-apple</v-icon>
+                    {{ t('download.macos') }}
+                  </v-list-subheader>
+                  <v-list-item
+                    :href="downloads.macos.universal"
+                    prepend-icon="mdi-download"
+                    download
+                  >
+                    <v-list-item-title>{{ t('download.macos_universal') }}</v-list-item-title>
+                    <v-list-item-subtitle>{{ t('download.recommended') }}</v-list-item-subtitle>
+                  </v-list-item>
+                  <v-list-item :href="downloads.macos.arm64" prepend-icon="mdi-download" download>
+                    <v-list-item-title>{{ t('download.macos_arm') }}</v-list-item-title>
+                    <v-list-item-subtitle>Apple Silicon (M1/M2/M3/M4/M5)</v-list-item-subtitle>
+                  </v-list-item>
+                  <v-list-item :href="downloads.macos.x64" prepend-icon="mdi-download" download>
+                    <v-list-item-title>{{ t('download.macos_intel') }}</v-list-item-title>
+                    <v-list-item-subtitle>Intel Mac</v-list-item-subtitle>
+                  </v-list-item>
+                </v-list>
+              </v-col>
+              <!-- Linux x86_64 -->
+              <v-col cols="6">
+                <v-list density="compact">
+                  <v-list-subheader>
+                    <v-icon start color="orange">mdi-linux</v-icon>
+                    {{ t('download.linux') }} - x86_64
+                  </v-list-subheader>
+                  <v-list-item
+                    :href="downloads.linux.x64.appimage"
+                    prepend-icon="mdi-download"
+                    download
+                  >
+                    <v-list-item-title>AppImage (x86_64)</v-list-item-title>
+                    <v-list-item-subtitle>
+                      {{ t('download.linux_appimage_desc') }}
+                    </v-list-item-subtitle>
+                  </v-list-item>
+                  <v-list-item :href="downloads.linux.x64.deb" prepend-icon="mdi-download" download>
+                    <v-list-item-title>.deb (x86_64)</v-list-item-title>
+                    <v-list-item-subtitle>Debian / Ubuntu</v-list-item-subtitle>
+                  </v-list-item>
+                  <v-list-item :href="downloads.linux.x64.rpm" prepend-icon="mdi-download" download>
+                    <v-list-item-title>.rpm (x86_64)</v-list-item-title>
+                    <v-list-item-subtitle>Fedora / RHEL / openSUSE</v-list-item-subtitle>
+                  </v-list-item>
+                </v-list>
+              </v-col>
+              <!-- Linux ARM64 -->
+              <v-col cols-sm="6">
+                <v-list density="compact">
+                  <v-list-subheader class="px-0">
+                    <v-icon start color="orange">mdi-linux</v-icon>
+                    {{ t('download.linux') }} - ARM64
+                  </v-list-subheader>
+                  <v-list-item
+                    :href="downloads.linux.arm64.appimage"
+                    prepend-icon="mdi-download"
+                    download
+                  >
+                    <v-list-item-title>AppImage (ARM64)</v-list-item-title>
+                    <v-list-item-subtitle>
+                      {{ t('download.linux_appimage_desc') }}
+                    </v-list-item-subtitle>
+                  </v-list-item>
+                  <v-list-item
+                    :href="downloads.linux.arm64.deb"
+                    prepend-icon="mdi-download"
+                    download
+                  >
+                    <v-list-item-title>.deb (ARM64)</v-list-item-title>
+                    <v-list-item-subtitle>Debian / Ubuntu</v-list-item-subtitle>
+                  </v-list-item>
+                  <v-list-item
+                    :href="downloads.linux.arm64.rpm"
+                    prepend-icon="mdi-download"
+                    download
+                  >
+                    <v-list-item-title>.rpm (aarch64)</v-list-item-title>
+                    <v-list-item-subtitle>Fedora / RHEL / openSUSE</v-list-item-subtitle>
+                  </v-list-item>
+                </v-list>
+              </v-col>
+            </v-row>
+          </v-expansion-panel-text>
+        </v-expansion-panel>
+      </v-expansion-panels>
     </v-card-actions>
   </v-card>
 
@@ -385,7 +239,10 @@ useHead({
               {{ t(`format.${item.key}.title`) }}
             </v-card-title>
             <v-card-text>
-              <p v-for="description in getFormatDescriptions(item.key)" :key="description">
+              <p
+                v-for="(description, index) in getFormatDescriptions(item.key)"
+                :key="`${item.key}-${index}`"
+              >
                 {{ rt(description) }}
               </p>
             </v-card-text>
@@ -394,7 +251,7 @@ useHead({
       </v-row>
     </v-card-text>
     <v-card-actions class="justify-center">
-      <NuxtLink :to="localePath('/format-guide')" custom #="{ navigate }">
+      <NuxtLink to="/format-guide" custom #="{ navigate }">
         <v-btn
           :text="t('format.more')"
           class="ma-4"
@@ -422,12 +279,17 @@ en:
     download: Download
     windows: Download for Windows
     window_requirement: Windows 11 or later
-    macos: Download for MacOS
-    macos_arm: Apple Silicon (M1 or later)
-    macos_intel: Intel-based
+    macos: Download for macOS
+    macos_universal: Universal Binary (Recommended)
+    macos_arm: Apple Silicon (M1/M2/M3)
+    macos_intel: Intel Mac
     linux: Download for Linux
-    linux_x64: x64
+    linux_x64: x86_64
     linux_arm64: ARM64
+    other_platforms: Other Platforms & Formats
+    recommended: Recommended
+    select_platform: Select your platform
+    linux_appimage_desc: Portable, distribution-independent
   features:
     title: Features
     subtitle: Key Features of Drop Compress Image
@@ -476,12 +338,10 @@ en:
         - Zopfli, used in this program, is a special compression technique created by Google to make PNGs "smaller."
         - It supports transparency and maintains high-quality images.
     jpeg:
-      title: JPEG (MozJPEG Compression)
+      title: JPEG (jpegli Compression)
       description:
-        - JPEG is a widely used image format known for its lossy compression capabilities.
-        - MozJPEG is an improved JPEG encoder developed by Mozilla that focuses on better compression and quality.
-        - It achieves smaller file sizes while maintaining visual quality, making it ideal for web images.
-        - MozJPEG incorporates advanced techniques to optimize JPEG images, resulting in faster loading times and reduced bandwidth usage.
+        - JPEG (Joint Photographic Experts Group) is an image format widely used for photographs and realistic images.
+        - JPEG, the format used in this program, is a special compression technology developed by Google to make JPEGs "smaller," achieving a compression rate that is approximately 35% better than standard JPEG compression.
 fr:
   lead:
     subtitle: Le convertisseur d'images moderne
@@ -493,13 +353,18 @@ fr:
   download:
     download: Télécharger
     windows: Télécharger pour Windows
-    window_requirement: Windows 11 ou version ultérieure
-    macos: Télécharger pour MacOS
-    macos_arm: Apple Silicon (M1 ou ultérieur)
-    macos_intel: Basé sur Intel
+    window_requirement: Windows 11 ou ultérieur
+    macos: Télécharger pour macOS
+    macos_universal: Binaire Universel (Recommandé)
+    macos_arm: Apple Silicon (M1/M2/M3)
+    macos_intel: Mac Intel
     linux: Télécharger pour Linux
-    linux_x64: x64
+    linux_x64: x86_64
     linux_arm64: ARM64
+    other_platforms: Autres Plateformes et Formats
+    recommended: Recommandé
+    select_platform: Sélectionnez votre plateforme
+    linux_appimage_desc: Portable, indépendant de la distribution
   features:
     title: Fonctionnalités
     subtitle: Fonctionnalités clés de Drop Compress Image
@@ -548,12 +413,11 @@ fr:
         - Zopfli, utilisé dans ce programme, est une technique de compression spéciale créée par Google pour rendre les PNG "plus petits".
         - Il prend en charge la transparence et maintient des images de haute qualité.
     jpeg:
-      title: JPEG (Compression MozJPEG)
+      title: JPEG (Compression jpegli)
       description:
-        - JPEG est un format d'image largement utilisé, connu pour ses capacités de compression avec perte.
-        - MozJPEG est un encodeur JPEG amélioré développé par Mozilla qui se concentre sur une meilleure compression et qualité.
-        - Il permet d'obtenir des tailles de fichiers plus petites tout en maintenant une qualité visuelle, ce qui le rend idéal pour les images web.
-        - MozJPEG intègre des techniques avancées pour optimiser les images JPEG, ce qui se traduit par des temps de chargement plus rapides et une réduction de l'utilisation de la bande passante.
+        - JPEG (Joint Photographic Experts Group) est un format d'image largement utilisé pour les photographies et les images réalistes.
+        - jpegli est un encodeur JPEG amélioré développé par Google, axé sur une meilleure compression et qualité.
+        - Il atteint une taille de fichier plus petite tout en maintenant la qualité visuelle, ce qui le rend idéal pour les images web.
 ja:
   lead:
     subtitle: モダンな画像変換ツール
@@ -566,12 +430,17 @@ ja:
     download: ダウンロード
     windows: Windows版をダウンロード
     window_requirement: Windows 11以降
-    macos: MacOS版をダウンロード
-    macos_arm: Apple Silicon (M1以降)
-    macos_intel: Intelベース
+    macos: macOS版をダウンロード
+    macos_universal: ユニバーサルバイナリ（推奨）
+    macos_arm: Apple Silicon (M1/M2/M3)
+    macos_intel: Intel Mac
     linux: Linux版をダウンロード
-    linux_x64: x64
+    linux_x64: x86_64
     linux_arm64: ARM64
+    other_platforms: その他のプラットフォームと形式
+    recommended: 推奨
+    select_platform: プラットフォームを選択
+    linux_appimage_desc: ポータブル、ディストリビューション非依存
   features:
     title: 機能
     subtitle: Drop Compress Imageの主な機能
@@ -620,10 +489,10 @@ ja:
         - 本プログラムで使用されているZopfli（ゾップフリ）とは、このPNGを「より小さく」するための、Googleが作った特別な圧縮技術です。
         - 透明度をサポートし、高品質の画像を保持します。
     jpeg:
-      title: JPEG (MozJPEG圧縮)
+      title: JPEG (jpegli圧縮)
       description:
         - JPEG（Joint Photographic Experts Group）は、写真やリアルな画像に広く使用されている画像フォーマットです。
-        - 本プログラムで使用されているMozJPEG（モズジェイペグ）とは、このJPEGを「より小さく」するための、Mozillaが開発した特別な圧縮技術です。
+        - 本プログラムで使用されているjpegli（ジェイペグエルアイ）とは、このJPEGを「より小さく」するための、Googleが開発した特別な圧縮技術で通常のJPEG圧縮と比較して約35 ％の圧縮率向上を実現しています。
 ko:
   lead:
     subtitle: 모던 이미지 변환기
@@ -636,12 +505,17 @@ ko:
     download: 다운로드
     windows: Windows용 다운로드
     window_requirement: Windows 11 이상
-    macos: MacOS용 다운로드
-    macos_arm: Apple Silicon (M1 이상)
-    macos_intel: Intel 기반
+    macos: macOS용 다운로드
+    macos_universal: 유니버설 바이너리 (권장)
+    macos_arm: Apple Silicon (M1/M2/M3)
+    macos_intel: Intel Mac
     linux: Linux용 다운로드
-    linux_x64: x64
+    linux_x64: x86_64
     linux_arm64: ARM64
+    other_platforms: 기타 플랫폼 및 형식
+    recommended: 권장
+    select_platform: 플랫폼 선택
+    linux_appimage_desc: 휴대 가능, 배포판 독립적
   features:
     title: 기능
     subtitle: Drop Compress Image의 주요 기능
@@ -690,12 +564,10 @@ ko:
         - 이 프로그램에서 사용되는 Zopfli는 PNG를 "더 작게" 만들기 위해 Google이 만든 특별한 압축 기술입니다.
         - 투명도를 지원하며 고품질 이미지를 유지합니다.
     jpeg:
-      title: JPEG (MozJPEG 압축)
+      title: JPEG (jpegli 압축)
       description:
-        - JPEG는 손실 압축 기능으로 잘 알려진 널리 사용되는 이미지 형식입니다.
-        - MozJPEG는 Mozilla에서 개발한 향상된 JPEG 인코더로, 더 나은 압축 및 품질에 중점을 둡니다.
-        - 시각적 품질을 유지하면서 더 작은 파일 크기를 달성하여 웹 이미지에 이상적입니다.
-        - MozJPEG는 JPEG 이미지를 최적화하기 위한 고급
+        - JPEG (Joint Photographic Experts Group)는 사진과 현실적인 이미지에 널리 사용되는 이미지 형식입니다.
+        - 본 프로그램에서 사용되고 있는 jpegli(제이페구엘아이)란, 이 JPEG를 「보다 작게」 하기 위한, 구글이 개발한 특별한 압축 기술로 통상의 JPEG 압축에 비해 약 35%의 압축률 향상을 실현하고 있습니다.
 zhHant:
   lead:
     subtitle: 現代圖像轉換器
@@ -762,12 +634,10 @@ zhHant:
         - 本程式中使用的 Zopfli 是 Google 創建的一種特殊壓縮技術，用於使 PNG「更小」。
         - 它支援透明度並保持高質量圖像。
     jpeg:
-      title: JPEG (MozJPEG 壓縮)
+      title: JPEG (jpegli 壓縮)
       description:
-        - JPEG 是一種廣泛使用的圖像格式，以其有損壓縮能力而聞名。
-        - MozJPEG 是 Mozilla 開發的一種改進型 JPEG 編碼器，專注於更好的壓縮和質量。
-        - 它在保持視覺質量的同時實現更小的文件大小，非常適合網絡圖像。
-        - MozJPEG 採用先進技術來優化 JPEG 圖像，從而實現更快的加載時間和減少帶寬使用。
+        - JPEG（聯合影像專家小組）是一種廣泛用於照片和逼真影像的影像格式。
+        - 本程式使用的 jpegli 是由 Google 開發的一種特殊壓縮技術，旨在減小 JPEG 檔案的大小，其壓縮率比標準 JPEG 壓縮高出約 35%。
 zhHans:
   lead:
     subtitle: 现代图像转换器
@@ -834,10 +704,8 @@ zhHans:
         - 本程序中使用的 Zopfli 是 Google 创建的一种特殊压缩技术，用于使 PNG「更小」。
         - 它支持透明度并保持高质量图像。
     jpeg:
-      title: JPEG (MozJPEG 压缩)
+      title: JPEG (jpegli 压缩)
       description:
-        - JPEG 是一种广泛使用的图像格式，以其有损压缩能力而闻名。
-        - MozJPEG 是 Mozilla 开发的一种改进型 JPEG 编码器，专注于更好的压缩和质量。
-        - 它在保持视觉质量的同时实现更小的文件大小，非常适合网络图像。
-        - MozJPEG 采用先进技术来优化 JPEG 图像，从而实现更快的加载时间和减少带宽使用。
+        - JPEG（联合图像专家组）是一种广泛用于照片和逼真图像的图像格式。
+        - 本程序使用的 jpegli 是由 Google 开发的一种特殊压缩技术，旨在减小 JPEG 文件的大小，其压缩率比标准 JPEG 压缩高出约 35%。
 </i18n>

@@ -86,46 +86,11 @@ export default defineNuxtConfig({
     transpile: ['vue-i18n']
   },
 
-  // Nitro設定（SSG用プリレンダールート）
+  // Nitro設定（SSG用プリレンダリング - 自動生成を利用）
   nitro: {
     prerender: {
-      // 各言語のmarkdownページを事前レンダリング
-      routes: [
-        '/', // デフォルトロケール（英語）
-        '/ja',
-        '/fr',
-        '/ko',
-        '/zhHans',
-        '/zhHant',
-        // format-guide
-        '/format-guide',
-        '/ja/format-guide',
-        '/fr/format-guide',
-        '/ko/format-guide',
-        '/zhHans/format-guide',
-        '/zhHant/format-guide',
-        // build-windows
-        '/build-windows',
-        '/ja/build-windows',
-        '/fr/build-windows',
-        '/ko/build-windows',
-        '/zhHans/build-windows',
-        '/zhHant/build-windows',
-        // build-macos
-        '/build-macos',
-        '/ja/build-macos',
-        '/fr/build-macos',
-        '/ko/build-macos',
-        '/zhHans/build-macos',
-        '/zhHant/build-macos',
-        // build-linux
-        '/build-linux',
-        '/ja/build-linux',
-        '/fr/build-linux',
-        '/ko/build-linux',
-        '/zhHans/build-linux',
-        '/zhHant/build-linux'
-      ]
+      crawlLinks: true,
+      routes: ['/']
     }
   }
 });
