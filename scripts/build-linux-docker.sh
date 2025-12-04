@@ -23,10 +23,16 @@ case "$TARGET" in
     x64|x86_64|amd64)
         TARGET="x86_64-unknown-linux-gnu"
         ARCH_NAME="x86_64 (AMD64)"
+        DOCKERFILE="Dockerfile.linux-x64"
+        IMAGE_NAME="dropwebp-linux-x64-builder"
+        PLATFORM="linux/amd64"
         ;;
     arm64|aarch64)
         TARGET="aarch64-unknown-linux-gnu"
         ARCH_NAME="ARM64 (AArch64)"
+        DOCKERFILE="Dockerfile.linux-arm64"
+        IMAGE_NAME="dropwebp-linux-arm64-builder"
+        PLATFORM="linux/arm64"
         ;;
     *)
         echo -e "${YELLOW}⚠️  不明なターゲット: $TARGET${NC}"
@@ -36,21 +42,24 @@ case "$TARGET" in
 esac
 
 echo -e "${GREEN}ターゲット:${NC} $ARCH_NAME ($TARGET)"
+echo -e "${GREEN}Dockerfile:${NC} $DOCKERFILE"
+echo -e "${GREEN}プラットフォーム:${NC} $PLATFORM"
 echo ""
 
 # Dockerイメージをビルド
 echo -e "${BLUE}📦 Dockerイメージをビルド中...${NC}"
 cd "$PROJECT_ROOT"
-docker build -f Dockerfile.linux-build -t dropwebp-linux-builder .
+docker build --platform "$PLATFORM" -f "$DOCKERFILE" -t "$IMAGE_NAME" .
 
 echo ""
 echo -e "${BLUE}🔨 Linux向けアプリケーションをビルド中...${NC}"
 
 # Dockerコンテナ内でビルドを実行
 docker run --rm \
+    --platform "$PLATFORM" \
     -v "$PROJECT_ROOT:/workspace" \
     -e BUILD_TARGET="$TARGET" \
-    dropwebp-linux-builder
+    "$IMAGE_NAME"
 
 echo ""
 echo -e "${GREEN}✅ ビルド完了！${NC}"

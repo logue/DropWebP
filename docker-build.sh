@@ -23,6 +23,25 @@ pnpm install
 TARGET="${BUILD_TARGET:-x86_64-unknown-linux-gnu}"
 echo "🎯 ターゲット: $TARGET"
 
+# ターゲットに応じた環境変数を設定
+if [ "$TARGET" = "x86_64-unknown-linux-gnu" ]; then
+    # x86_64はネイティブビルド（Docker内でx86_64環境）
+    export CC=gcc
+    export CXX=g++
+    export AR=ar
+    export PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig
+    echo "🔧 ネイティブx86_64ビルド"
+    echo "🔧 コンパイラ: CC=$CC, CXX=$CXX"
+elif [ "$TARGET" = "aarch64-unknown-linux-gnu" ]; then
+    # ARM64はネイティブビルド
+    export CC=gcc
+    export CXX=g++
+    export AR=ar
+    export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig
+    echo "🔧 ネイティブARM64ビルド"
+    echo "🔧 コンパイラ: CC=$CC, CXX=$CXX"
+fi
+
 # Tauriビルドを実行
 echo "🔨 Tauriアプリケーションをビルド中..."
 pnpm tauri build --target "$TARGET"

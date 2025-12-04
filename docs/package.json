@@ -9,13 +9,13 @@
     "preview": "nuxt preview",
     "clean": "rimraf .nuxt .output public/_nuxt",
     "deploy": "nuxt generate && gh-pages -d .output/public -b main",
-    "lint": "eslint . --fix --cache --cache-location ./node_modules/.vite/vite-plugin-eslint && prettier src/**/*.{ts,vue,json} -w -u",
+    "lint": "eslint . --fix --cache --cache-location ./node_modules/.vite/vite-plugin-eslint && prettier src/**/*.{ts,vue} -w -u",
     "lint:style": "stylelint \"./src/**/*.{css,sass,scss,htm,html,vue}\" --fix --cache-location ./node_modules/.vite/vite-plugin-stylelint && prettier \"./src/**/*.{css,sass,scss,htm,html,vue}\" -w -u",
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
-    "@nuxt/content": "^3.8.2",
+    "@nuxt/content": "^3.9.0",
     "@nuxt/eslint": "^1.11.0",
     "@nuxtjs/i18n": "^10.2.1",
     "@nuxtjs/sitemap": "^7.4.7",
@@ -28,7 +28,7 @@
     "vite-plugin-vuetify": "^2.1.2",
     "vue": "^3.5.25",
     "vue-router": "^4.6.3",
-    "vuetify": "^3.11.1",
+    "vuetify": "^3.11.2",
     "vuetify-nuxt-module": "^0.18.8",
     "zod": "^4.1.13"
   },

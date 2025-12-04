@@ -285,6 +285,7 @@ useHead({
         class="ml-1"
         download
         prepend-icon="mdi-apple"
+        prepend-icon-color="red"
         size="large"
         spaced="both"
         stacked
@@ -292,7 +293,55 @@ useHead({
       >
         <span class="text-center">
           <div class="mb-1">{{ t('download.macos') }}</div>
-          <small class="text-medium-emphasis">({{ t('download.macos_requirement') }})</small>
+          <small class="text-medium-emphasis">({{ t('download.macos_arm') }})</small>
+        </span>
+      </v-btn>
+      <v-btn
+        :href="`${urlPrefix}aarch64.dmg`"
+        class="ml-1"
+        download
+        prepend-icon="mdi-apple"
+        prepend-icon-color="blue"
+        size="large"
+        spaced="both"
+        stacked
+        variant="elevated"
+      >
+        <span class="text-center">
+          <div class="mb-1">{{ t('download.macos') }}</div>
+          <small class="text-medium-emphasis">({{ t('download.macos_intel') }})</small>
+        </span>
+      </v-btn>
+      <v-btn
+        :href="`${urlPrefix}linux-x64.AppImage`"
+        class="ml-1"
+        download
+        prepend-icon="mdi-linux"
+        prepend-icon-color="black"
+        size="large"
+        spaced="both"
+        stacked
+        variant="elevated"
+      >
+        <span class="text-center">
+          <div class="mb-1">{{ t('download.linux') }}</div>
+          <small class="text-medium-emphasis">({{ t('download.linux_x64') }})</small>
+        </span>
+      </v-btn>
+      <v-btn
+        :href="`${urlPrefix}linux-arm64.AppImage`"
+        class="ml-1"
+        download
+        prepend-icon="mdi-linux"
+        prepend-icon-color="black"
+        size="large"
+        spaced="both"
+        stacked
+        variant="elevated"
+      >
+        <span class="text-center">
+          <div class="mb-1">{{ t('download.linux') }}</div>
+          <small class="text-medium-emphasis">({{ t('download.linux_arm64') }})</small>
         </span>
       </v-btn>
     </v-card-actions>
@@ -374,7 +423,11 @@ en:
     windows: Download for Windows
     window_requirement: Windows 11 or later
     macos: Download for MacOS
-    macos_requirement: M1 or later
+    macos_arm: Apple Silicon (M1 or later)
+    macos_intel: Intel-based
+    linux: Download for Linux
+    linux_x64: x64
+    linux_arm64: ARM64
   features:
     title: Features
     subtitle: Key Features of Drop Compress Image
@@ -442,7 +495,11 @@ fr:
     windows: Télécharger pour Windows
     window_requirement: Windows 11 ou version ultérieure
     macos: Télécharger pour MacOS
-    macos_requirement: M1 ou version ultérieure
+    macos_arm: Apple Silicon (M1 ou ultérieur)
+    macos_intel: Basé sur Intel
+    linux: Télécharger pour Linux
+    linux_x64: x64
+    linux_arm64: ARM64
   features:
     title: Fonctionnalités
     subtitle: Fonctionnalités clés de Drop Compress Image
@@ -510,7 +567,11 @@ ja:
     windows: Windows版をダウンロード
     window_requirement: Windows 11以降
     macos: MacOS版をダウンロード
-    macos_requirement: M1以降
+    macos_arm: Apple Silicon (M1以降)
+    macos_intel: Intelベース
+    linux: Linux版をダウンロード
+    linux_x64: x64
+    linux_arm64: ARM64
   features:
     title: 機能
     subtitle: Drop Compress Imageの主な機能
@@ -576,7 +637,11 @@ ko:
     windows: Windows용 다운로드
     window_requirement: Windows 11 이상
     macos: MacOS용 다운로드
-    macos_requirement: M1 이상
+    macos_arm: Apple Silicon (M1 이상)
+    macos_intel: Intel 기반
+    linux: Linux용 다운로드
+    linux_x64: x64
+    linux_arm64: ARM64
   features:
     title: 기능
     subtitle: Drop Compress Image의 주요 기능
@@ -644,7 +709,11 @@ zhHant:
     windows: 下載 Windows 版
     window_requirement: Windows 11 或更新版本
     macos: 下載 MacOS 版
-    macos_requirement: M1 或更新版本
+    macos_arm: Apple Silicon (M1 或更新版本)
+    macos_intel: Intel 處理器
+    linux: 下載 Linux 版
+    linux_x64: x64
+    linux_arm64: ARM64
   features:
     title: 功能
     subtitle: Drop Compress Image 的主要功能
@@ -712,7 +781,11 @@ zhHans:
     windows: 下载安装 Windows 版
     window_requirement: Windows 11 或更新版本
     macos: 下载安装 MacOS 版
-    macos_requirement: M1 或更新版本
+    macos_arm: Apple Silicon (M1 或更新版本)
+    macos_intel: 基于 Intel
+    linux: 下载安装 Linux 版
+    linux_x64: x64
+    linux_arm64: ARM64
   features:
     title: 功能
     subtitle: Drop Compress Image 的主要功能

@@ -27,7 +27,9 @@ export default withNuxt(
     'nuxt.config.ts',
     // 生成されたJavaScriptファイルを除外
     'src/**/*.js',
-    'src/**/*.vue.js'
+    'src/**/*.vue.js',
+    // JSONファイルを除外
+    'src/**/*.json'
   ]),
   {
     files: ['/**/*.ts', '/**/*.tsx'],
