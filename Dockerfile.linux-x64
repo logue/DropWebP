@@ -15,6 +15,10 @@ RUN apt-get update && apt-get install -y \
     libayatana-appindicator3-dev \
     librsvg2-dev \
     patchelf \
+    xdg-utils \
+    # AppImage用
+    fuse \
+    libfuse2 \
     # ビルドツール
     build-essential \
     curl \

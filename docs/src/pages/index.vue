@@ -86,7 +86,7 @@ setupSeoMeta();
       </v-btn>
       <br />
       <!-- Alternative Downloads Expansion Panel -->
-      <v-expansion-panels max-width="600" elevation="2">
+      <v-expansion-panels elevation="2">
         <v-expansion-panel>
           <v-expansion-panel-title>
             <v-icon start>mdi-package-variant</v-icon>
@@ -95,20 +95,23 @@ setupSeoMeta();
           <v-expansion-panel-text>
             <v-row>
               <!-- Windows -->
-              <v-col cols-sm="6">
+              <v-col cols="12" md="6">
                 <v-list density="compact">
                   <v-list-subheader>
                     <v-icon start color="blue">mdi-microsoft-windows</v-icon>
                     {{ t('download.windows') }}
                   </v-list-subheader>
-                  <v-list-item :href="downloads.windows.x64" prepend-icon="mdi-download" download>
-                    <v-list-item-title>Windows 10/11 (x64)</v-list-item-title>
-                    <v-list-item-subtitle>.msi installer</v-list-item-subtitle>
-                  </v-list-item>
+                  <v-list-item
+                    :href="downloads.windows.x64"
+                    download
+                    prepend-icon="mdi-download"
+                    subtitle=".msi installer"
+                    title="Windows 10/11 (x64)"
+                  />
                 </v-list>
               </v-col>
               <!-- macOS -->
-              <v-col cols-sm="6">
+              <v-col cols="12" md="6">
                 <v-list density="compact">
                   <v-list-subheader>
                     <v-icon start color="red">mdi-apple</v-icon>
@@ -116,82 +119,85 @@ setupSeoMeta();
                   </v-list-subheader>
                   <v-list-item
                     :href="downloads.macos.universal"
-                    prepend-icon="mdi-download"
+                    :subtitle="t('download.recommended')"
+                    :title="t('download.macos_universal')"
                     download
-                  >
-                    <v-list-item-title>{{ t('download.macos_universal') }}</v-list-item-title>
-                    <v-list-item-subtitle>{{ t('download.recommended') }}</v-list-item-subtitle>
-                  </v-list-item>
-                  <v-list-item :href="downloads.macos.arm64" prepend-icon="mdi-download" download>
-                    <v-list-item-title>{{ t('download.macos_arm') }}</v-list-item-title>
-                    <v-list-item-subtitle>Apple Silicon (M1/M2/M3/M4/M5)</v-list-item-subtitle>
-                  </v-list-item>
-                  <v-list-item :href="downloads.macos.x64" prepend-icon="mdi-download" download>
-                    <v-list-item-title>{{ t('download.macos_intel') }}</v-list-item-title>
-                    <v-list-item-subtitle>Intel Mac</v-list-item-subtitle>
-                  </v-list-item>
+                    prepend-icon="mdi-download"
+                  />
+                  <v-list-item
+                    :href="downloads.macos.arm64"
+                    :subtitle="t('download.macos_arm_desc')"
+                    :title="t('download.macos_arm')"
+                    download
+                    prepend-icon="mdi-download"
+                  />
+                  <v-list-item
+                    :href="downloads.macos.x64"
+                    :subtitle="t('download.macos_intel_desc')"
+                    :title="t('download.macos_intel')"
+                    download
+                    prepend-icon="mdi-download"
+                  />
                 </v-list>
               </v-col>
               <!-- Linux x86_64 -->
-              <v-col cols="6">
+              <v-col cols="12" md="6">
                 <v-list density="compact">
                   <v-list-subheader>
                     <v-icon start color="orange">mdi-linux</v-icon>
                     {{ t('download.linux') }} - x86_64
                   </v-list-subheader>
-                  <v-list-item
+                  <!--v-list-item
                     :href="downloads.linux.x64.appimage"
+                    :subtitle="t('download.linux_appimage_desc')"
+                    download
+                    prepend-icon="mdi-download"
+                    title="AppImage (x86_64)"
+                  /-->
+                  <v-list-item
+                    :href="downloads.linux.x64.deb"
+                    download
+                    prepend-icon="mdi-download"
+                    subtitle="Debian / Ubuntu"
+                    title=".deb (x86_64)"
+                  />
+                  <v-list-item
+                    :href="downloads.linux.x64.rpm"
                     prepend-icon="mdi-download"
                     download
-                  >
-                    <v-list-item-title>AppImage (x86_64)</v-list-item-title>
-                    <v-list-item-subtitle>
-                      {{ t('download.linux_appimage_desc') }}
-                    </v-list-item-subtitle>
-                  </v-list-item>
-                  <v-list-item :href="downloads.linux.x64.deb" prepend-icon="mdi-download" download>
-                    <v-list-item-title>.deb (x86_64)</v-list-item-title>
-                    <v-list-item-subtitle>Debian / Ubuntu</v-list-item-subtitle>
-                  </v-list-item>
-                  <v-list-item :href="downloads.linux.x64.rpm" prepend-icon="mdi-download" download>
-                    <v-list-item-title>.rpm (x86_64)</v-list-item-title>
-                    <v-list-item-subtitle>Fedora / RHEL / openSUSE</v-list-item-subtitle>
-                  </v-list-item>
+                    title=".rpm (x86_64)"
+                    subtitle="Fedora / RHEL / openSUSE"
+                  />
                 </v-list>
               </v-col>
               <!-- Linux ARM64 -->
-              <v-col cols-sm="6">
+              <v-col cols="12" md="6">
                 <v-list density="compact">
                   <v-list-subheader class="px-0">
                     <v-icon start color="orange">mdi-linux</v-icon>
                     {{ t('download.linux') }} - ARM64
                   </v-list-subheader>
-                  <v-list-item
+                  <!--v-list-item
                     :href="downloads.linux.arm64.appimage"
-                    prepend-icon="mdi-download"
+                    :subtitle="t('download.linux_appimage_desc')"
                     download
-                  >
-                    <v-list-item-title>AppImage (ARM64)</v-list-item-title>
-                    <v-list-item-subtitle>
-                      {{ t('download.linux_appimage_desc') }}
-                    </v-list-item-subtitle>
-                  </v-list-item>
+                    prepend-icon="mdi-download"
+                    title="AppImage (ARM64)"
+                  /-->
                   <v-list-item
                     :href="downloads.linux.arm64.deb"
                     prepend-icon="mdi-download"
                     download
-                  >
-                    <v-list-item-title>.deb (ARM64)</v-list-item-title>
-                    <v-list-item-subtitle>Debian / Ubuntu</v-list-item-subtitle>
-                  </v-list-item>
+                    title=".deb (ARM64)"
+                    subtitle="Debian / Ubuntu"
+                  />
                   <v-list-item
                     :href="downloads.linux.arm64.rpm"
                     prepend-icon="mdi-download"
                     download
-                  >
-                    <v-list-item-title>.rpm (aarch64)</v-list-item-title>
-                    <v-list-item-subtitle>Fedora / RHEL / openSUSE</v-list-item-subtitle>
-                  </v-list-item>
+                    title=".rpm (ARM64)"
+                    subtitle="Fedora / RHEL / openSUSE"
+                  />
                 </v-list>
               </v-col>
             </v-row>

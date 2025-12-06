@@ -7,6 +7,14 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+# .envファイルを読み込む
+if [ -f "$PROJECT_ROOT/.env" ]; then
+    echo "📄 .envファイルを読み込んでいます..."
+    set -a
+    source "$PROJECT_ROOT/.env"
+    set +a
+fi
+
 # 色付き出力
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -44,21 +52,93 @@ esac
 echo -e "${GREEN}ターゲット:${NC} $ARCH_NAME ($TARGET)"
 echo -e "${GREEN}Dockerfile:${NC} $DOCKERFILE"
 echo -e "${GREEN}プラットフォーム:${NC} $PLATFORM"
+
+# AppImageを含めるかどうか（デフォルト: 除外）
+INCLUDE_APPIMAGE="${INCLUDE_APPIMAGE:-false}"
+if [ "$INCLUDE_APPIMAGE" = "true" ]; then
+    echo -e "${GREEN}AppImage:${NC} 有効（FUSEが必要）"
+    BUNDLE_TARGETS=""
+else
+    echo -e "${YELLOW}AppImage:${NC} 無効（Docker環境では.deb, .rpmのみ）"
+    BUNDLE_TARGETS="deb,rpm"
+fi
+
+echo ""
+
+# CPUコア数とメモリの設定
+DOCKER_BUILD_ARGS=""
+DOCKER_RUN_ARGS=""
+
+if [ -n "$BUILD_CPUS" ]; then
+    echo -e "${GREEN}CPUコア数:${NC} $BUILD_CPUS"
+    DOCKER_BUILD_ARGS="$DOCKER_BUILD_ARGS --cpus=$BUILD_CPUS"
+    DOCKER_RUN_ARGS="$DOCKER_RUN_ARGS --cpus=$BUILD_CPUS"
+fi
+
+if [ -n "$BUILD_MEMORY" ]; then
+    echo -e "${GREEN}メモリ制限:${NC} $BUILD_MEMORY"
+    DOCKER_BUILD_ARGS="$DOCKER_BUILD_ARGS --memory=$BUILD_MEMORY"
+    DOCKER_RUN_ARGS="$DOCKER_RUN_ARGS --memory=$BUILD_MEMORY"
+fi
+
+# Cargo並列度の設定
+CARGO_BUILD_JOBS="${CARGO_BUILD_JOBS:-${BUILD_CPUS}}"
+if [ -n "$CARGO_BUILD_JOBS" ]; then
+    echo -e "${GREEN}Cargo並列度:${NC} $CARGO_BUILD_JOBS"
+    DOCKER_RUN_ARGS="$DOCKER_RUN_ARGS -e CARGO_BUILD_JOBS=$CARGO_BUILD_JOBS"
+fi
+
+# Make並列度の設定
+if [ -n "$BUILD_CPUS" ]; then
+    MAKEFLAGS="${MAKEFLAGS:--j$BUILD_CPUS}"
+    echo -e "${GREEN}Make並列度:${NC} $MAKEFLAGS"
+    DOCKER_RUN_ARGS="$DOCKER_RUN_ARGS -e MAKEFLAGS='$MAKEFLAGS'"
+fi
+
 echo ""
 
 # Dockerイメージをビルド
 echo -e "${BLUE}📦 Dockerイメージをビルド中...${NC}"
 cd "$PROJECT_ROOT"
-docker build --platform "$PLATFORM" -f "$DOCKERFILE" -t "$IMAGE_NAME" .
+docker build --platform "$PLATFORM" $DOCKER_BUILD_ARGS -f "$DOCKERFILE" -t "$IMAGE_NAME" .
 
 echo ""
 echo -e "${BLUE}🔨 Linux向けアプリケーションをビルド中...${NC}"
 
+# キャッシュ用のDockerボリューム名
+CARGO_CACHE_VOLUME="dropwebp-cargo-cache-${PLATFORM//\//-}"
+PNPM_CACHE_VOLUME="dropwebp-pnpm-cache-${PLATFORM//\//-}"
+TARGET_CACHE_VOLUME="dropwebp-target-cache-${PLATFORM//\//-}"
+
+# ボリュームが存在しない場合は作成
+docker volume create "$CARGO_CACHE_VOLUME" >/dev/null 2>&1 || true
+docker volume create "$PNPM_CACHE_VOLUME" >/dev/null 2>&1 || true
+docker volume create "$TARGET_CACHE_VOLUME" >/dev/null 2>&1 || true
+
+echo -e "${GREEN}キャッシュボリューム:${NC}"
+echo "  - Cargo: $CARGO_CACHE_VOLUME"
+echo "  - pnpm: $PNPM_CACHE_VOLUME"
+echo "  - Target: $TARGET_CACHE_VOLUME"
+echo ""
+
 # Dockerコンテナ内でビルドを実行
+# --privileged: AppImageビルドに必要
+# --security-opt apparmor=unconfined: AppArmorを無効化
+# --security-opt seccomp=unconfined: seccompを無効化
 docker run --rm \
     --platform "$PLATFORM" \
+    --privileged \
+    --security-opt apparmor=unconfined \
+    --security-opt seccomp=unconfined \
     -v "$PROJECT_ROOT:/workspace" \
+    -v "$CARGO_CACHE_VOLUME:/root/.cargo/registry" \
+    -v "$PNPM_CACHE_VOLUME:/pnpm/store" \
+    -v "$TARGET_CACHE_VOLUME:/workspace/app/src-tauri/target" \
     -e BUILD_TARGET="$TARGET" \
+    -e TAURI_BUNDLER_TARGETS="$BUNDLE_TARGETS" \
+    -e APPIMAGE_EXTRACT_AND_RUN=1 \
+    -e VERBOSE=1 \
+    $DOCKER_RUN_ARGS \
     "$IMAGE_NAME"
 
 echo ""
