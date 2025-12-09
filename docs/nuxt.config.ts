@@ -1,4 +1,21 @@
+import { readFileSync } from 'node:fs';
 import { fileURLToPath, URL } from 'node:url';
+
+// Load version from .env file
+const loadVersionFromEnv = (): string => {
+  try {
+    const envPath = fileURLToPath(new URL('../.env', import.meta.url));
+    const envContent = readFileSync(envPath, 'utf-8');
+    const versionRegex = /^VERSION=(.+)$/m;
+    const versionMatch = versionRegex.exec(envContent);
+    return versionMatch ? versionMatch[1].trim() : '0.0.0';
+  } catch {
+    console.warn('Failed to load version from .env, using default version');
+    return '0.0.0';
+  }
+};
+
+const version = loadVersionFromEnv();
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -13,6 +30,13 @@ export default defineNuxtConfig({
   // SSRスタイル設定（CSS最適化）
   features: {
     inlineStyles: false // CSS外部化
+  },
+
+  // Runtime config to expose version
+  runtimeConfig: {
+    public: {
+      appVersion: version
+    }
   },
 
   // サイト設定

@@ -3,7 +3,8 @@
  */
 export const useDownloads = () => {
   const { t } = useI18n();
-  const version = '3.1.0';
+  const config = useRuntimeConfig();
+  const version = config.public.appVersion as string;
   const urlPrefix = `https://github.com/logue/DropWebP/releases/download/${version}/drop-compress-image_${version}_`;
 
   // OS検出

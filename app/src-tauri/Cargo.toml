@@ -1,6 +1,6 @@
 [package]
 name = "drop-compress-image"
-version = "3.1.0"
+version = "3.2.0"
 authors = ["Logue"]
 edition = "2024"
 rust-version = "1.91.1"
@@ -37,7 +37,7 @@ name = "drop_compress_image_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-cc = "1.2.47"
+cc = "1.2.49"
 pkg-config = "0.3.32"
 tauri-build = { version = "2.5.3", features = [] }
 vcpkg = "0.2.15"
@@ -51,11 +51,11 @@ imgref = "1.12.0"
 indexmap = "2.12.1"
 jpeg2k = "0.10.1"
 jpegli = "0.1.0"
-jpegxl-rs = { version = "0.11.2", features = ["vendored"] }
+jpegxl-rs = { version = "0.11.2+libjxl-0.11.1" }
 kamadak-exif = "0.6.1"
 libwebp-sys = "0.14.1"
-openjpeg-sys = "1.0.12"                                     # Note: Requires system openjpeg or Homebrew
-oxipng = "9.1.5"
+openjpeg-sys = "1.0.12"                               # Note: Requires system openjpeg or Homebrew
+oxipng = "10.0.0"
 png = "0.18.0"
 ravif = "0.12.0"
 rgb = "0.8.52"
@@ -71,7 +71,7 @@ tauri-plugin-os = "2.3.2"
 thiserror = "2.0.17"
 
 [dev-dependencies]
-glib = "0.21.4"
+glib = "0.21.5"
 
 [profile.release]
 lto = "thin"       # Thin LTO (互換性重視)

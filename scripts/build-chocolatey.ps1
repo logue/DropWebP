@@ -2,15 +2,38 @@
 # Chocolatey パッケージ生成スクリプト
 
 param(
-    [string]$Version = "3.0.2"
+    [string]$Version = ""
 )
 
 $ErrorActionPreference = "Stop"
 
+# ルートディレクトリを取得
+$rootDir = Split-Path -Parent $PSScriptRoot
+
+# .envファイルを読み込む
+$envFile = Join-Path $rootDir ".env"
+if (Test-Path $envFile) {
+    Write-Host "📄 .envファイルを読み込んでいます..." -ForegroundColor Cyan
+    Get-Content $envFile | ForEach-Object {
+        if ($_ -match '^\s*([^#][^=]+)\s*=\s*(.+)\s*$') {
+            $key = $matches[1].Trim()
+            $value = $matches[2].Trim()
+            Set-Variable -Name $key -Value $value -Scope Script
+        }
+    }
+}
+
+# コマンドライン引数でバージョンを上書き可能
+if ([string]::IsNullOrEmpty($Version)) {
+    if (Get-Variable -Name "VERSION" -ErrorAction SilentlyContinue) {
+        $Version = $script:VERSION
+    } else {
+        $Version = "3.0.2"
+    }
+}
+
 Write-Host "=== Chocolatey Package Generation ===" -ForegroundColor Cyan
 Write-Host "Version: $Version" -ForegroundColor Green
-
-$rootDir = Split-Path -Parent $PSScriptRoot
 $chocoDir = Join-Path $rootDir ".choco"
 $bundleDir = Join-Path $rootDir "app\src-tauri\target\release\bundle\msi"
 

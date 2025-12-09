@@ -4,7 +4,20 @@
 
 set -e
 
+# プロジェクトルートディレクトリを取得
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# .envファイルを読み込む
+if [ -f "$ROOT_DIR/.env" ]; then
+    echo "📄 .envファイルを読み込んでいます..."
+    set -a
+    source "$ROOT_DIR/.env"
+    set +a
+fi
+
 echo "🔨 Building DropWebP for macOS with universal compatibility..."
+echo "Version: ${VERSION:-unknown}"
 
 # Clean previous builds
 echo "🧹 Cleaning previous builds..."

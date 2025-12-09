@@ -3,12 +3,23 @@
 
 set -e
 
-VERSION="${1:-3.0.2}"
+# プロジェクトルートディレクトリを取得
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# .envファイルを読み込む
+if [ -f "$ROOT_DIR/.env" ]; then
+    echo "📄 .envファイルを読み込んでいます..."
+    set -a
+    source "$ROOT_DIR/.env"
+    set +a
+fi
+
+# コマンドライン引数でバージョンを上書き可能
+VERSION="${1:-${VERSION:-3.0.2}}"
 
 echo "=== Homebrew Formula Generation ==="
 echo "Version: $VERSION"
-
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 HOMEBREW_DIR="$ROOT_DIR/.homebrew"
 BUNDLE_DIR="$ROOT_DIR/app/src-tauri/target/release/bundle"
 
