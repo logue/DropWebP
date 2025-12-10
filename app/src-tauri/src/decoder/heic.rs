@@ -253,6 +253,7 @@ pub fn decode_heic<P: AsRef<Path>>(path: P) -> Result<DynamicImage, AppError> {
         Ok(DynamicImage::ImageRgba16(img_buffer))
     }
 }
+
 #[cfg(target_os = "linux")]
 pub fn decode_heic<P: AsRef<Path>>(path: P) -> Result<DynamicImage, AppError> {
     use std::io::Write;

@@ -53,11 +53,13 @@ jpeg2k = "0.10.1"
 jpegli = "0.1.0"
 jpegxl-rs = { version = "0.11.2+libjxl-0.11.1" }
 kamadak-exif = "0.6.1"
+libavif-sys = { version = "0.17.0", default-features = false, features = [
+  "codec-rav1e",
+] }
 libwebp-sys = "0.14.1"
-openjpeg-sys = "1.0.12"                               # Note: Requires system openjpeg or Homebrew
+openjpeg-sys = "1.0.12" # Note: Requires system openjpeg or Homebrew
 oxipng = "10.0.0"
 png = "0.18.0"
-ravif = "0.12.0"
 rgb = "0.8.52"
 serde = "1.0.228"
 serde_json = "1.0.145"

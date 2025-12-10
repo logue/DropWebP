@@ -11,9 +11,9 @@ pub enum AppError {
     #[error("Image processing error: {0}")]
     Image(#[from] image::ImageError), // image::ImageErrorから自動
 
-    // ravif::Errorを保持するためのバリアントを追加
+    // libavif::Errorを保持するためのバリアントを追加
     #[error("AVIF encoding error: {0}")]
-    Ravif(#[from] ravif::Error), //
+    Avif(String), // libavif::Errorは複雑なのでStringに変換
 
     #[error("JPEG XL encoding error: {0}")]
     Jxr(#[from] jpegxl_rs::EncodeError),
