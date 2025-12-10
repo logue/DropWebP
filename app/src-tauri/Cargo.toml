@@ -61,13 +61,14 @@ ravif = "0.12.0"
 rgb = "0.8.52"
 serde = "1.0.228"
 serde_json = "1.0.145"
-tauri = { version = "2.9.4", features = [] }
+tauri = { version = "2.9.5", features = [] }
 tauri-plugin-dialog = "2.4.2"
 tauri-plugin-fs = "2.4.4"
 tauri-plugin-log = "2.7.1"
 tauri-plugin-notification = "2.3.3"
 tauri-plugin-opener = "2.5.2"
 tauri-plugin-os = "2.3.2"
+tempfile = "3.23.0"
 thiserror = "2.0.17"
 
 [dev-dependencies]
@@ -82,11 +83,17 @@ opt-level = 3      # 速度最適化（互換性重視）
 
 # Windows 固有の最適化
 [target.'cfg(windows)'.dependencies]
-windows = { version = "0.62.2", features = ["Win32_Foundation"] }
+windows = { version = "0.62.2", features = [
+  "Win32_Foundation",
+  "Win32_Graphics_Imaging",
+  "Win32_System_Com",
+] }
 
 # macOS 固有の最適化
 [target.'cfg(target_os = "macos")'.dependencies]
 cocoa = "0.26.1"
+core-foundation = "0.10.0"
+core-graphics = "0.25.0"
 objc = "0.2.7"
 
 # Apple Silicon (ARM64) 向けの設定

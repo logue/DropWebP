@@ -47,10 +47,30 @@ pub async fn convert(
         // 入力データのサイズを保存
         let input_size = data.len();
 
+        // HEICフォーマットチェック - ファイルパスが必要なため特別処理
+        let is_heic = data.len() >= 12 &&
+                      &data[4..8] == b"ftyp" &&
+                      (&data[8..12] == b"heic" || &data[8..12] == b"heix" ||
+                       &data[8..12] == b"hevc" || &data[8..12] == b"heim");
+
         // 画像デコード
-        let decoded_data = crate::decoder::decode(&data)
-            .log_error(Some("Image decoding"))
-            .map_err(|e| format!("Failed to decode image: {}", e))?;
+        let decoded_data = if is_heic {
+            // HEICの場合は一時ファイルに保存してdecode_from_pathを使用
+            use std::io::Write;
+            let mut temp_file = tempfile::NamedTempFile::new()
+                .map_err(|e| format!("Failed to create temp file: {}", e))?;
+            temp_file.write_all(&data)
+                .map_err(|e| format!("Failed to write temp file: {}", e))?;
+
+            send_log_with_handle(&app_clone, LogLevel::Info, "Decoding HEIC image using OS-native decoder...");
+            crate::decoder::decode_from_path(temp_file.path())
+                .log_error(Some("HEIC decoding"))
+                .map_err(|e| format!("Failed to decode HEIC image: {}", e))?
+        } else {
+            crate::decoder::decode(&data)
+                .log_error(Some("Image decoding"))
+                .map_err(|e| format!("Failed to decode image: {}", e))?
+        };
 
         let (img, icc_profile) = decoded_data;
 
@@ -176,19 +196,47 @@ pub async fn convert_with_progress(
 
         let input_size = data.len();
 
+        // HEICフォーマットチェック
+        let is_heic = data.len() >= 12 &&
+                      &data[4..8] == b"ftyp" &&
+                      (&data[8..12] == b"heic" || &data[8..12] == b"heix" ||
+                       &data[8..12] == b"hevc" || &data[8..12] == b"heim");
+
         // 画像デコード
         progress_callback.on_progress(0.0, "Decoding image");
-        let decoded_data = crate::decoder::decode(&data)
-            .log_error(Some("Image decoding"))
-            .map_err(|e| {
-                progress_callback.on_error(&format!("Failed to decode image: {}", e));
-                format!("Failed to decode image: {}", e)
-            })?;
+        let decoded_data = if is_heic {
+            use std::io::Write;
+            let mut temp_file = tempfile::NamedTempFile::new()
+                .map_err(|e| {
+                    progress_callback.on_error(&format!("Failed to create temp file: {}", e));
+                    format!("Failed to create temp file: {}", e)
+                })?;
+            temp_file.write_all(&data)
+                .map_err(|e| {
+                    progress_callback.on_error(&format!("Failed to write temp file: {}", e));
+                    format!("Failed to write temp file: {}", e)
+                })?;
+
+            progress_callback.on_progress(5.0, "Decoding HEIC using OS-native decoder");
+            crate::decoder::decode_from_path(temp_file.path())
+                .log_error(Some("HEIC decoding"))
+                .map_err(|e| {
+                    progress_callback.on_error(&format!("Failed to decode HEIC: {}", e));
+                    format!("Failed to decode HEIC: {}", e)
+                })?
+        } else {
+            crate::decoder::decode(&data)
+                .log_error(Some("Image decoding"))
+                .map_err(|e| {
+                    progress_callback.on_error(&format!("Failed to decode image: {}", e));
+                    format!("Failed to decode image: {}", e)
+                })?
+        };
 
         let (img, icc_profile) = decoded_data;
 
         // 推計サイズの算出
-        progress_callback.on_progress(5.0, "Estimating output size");
+        progress_callback.on_progress(10.0, "Estimating output size");
         let estimated_size = crate::encoder::estimate_size(&img, &options);
 
         send_log_with_handle(

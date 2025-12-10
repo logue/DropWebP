@@ -1,4 +1,5 @@
 mod common;
+mod heic;
 mod jpeg2k;
 mod jxl;
 
@@ -6,6 +7,48 @@ use crate::error::AppError;
 use crate::options::HighBitDepthImage;
 use image::{self, DynamicImage, GenericImageView, ImageFormat};
 use std::io::Cursor;
+use std::path::Path;
+
+/// ファイルパスから画像をデコードし、HighBitDepthImageとして返す
+/// HEIC形式の場合はOS標準APIを使用
+pub fn decode_from_path<P: AsRef<Path>>(
+    path: P,
+) -> Result<(HighBitDepthImage, Option<Vec<u8>>), AppError> {
+    // ファイルを読み込む
+    let data = std::fs::read(path.as_ref()).map_err(|e| AppError::IoError(e))?;
+
+    // フォーマットを検出
+    let format = detect_format(&data)
+        .ok_or_else(|| AppError::Decode("Unsupported or unknown image format".to_string()))?;
+
+    // HEICの場合はOS標準APIを使用（HDR対応16-bit）
+    if matches!(format, DetectedFormat::Heic) {
+        println!("Decoder: Using OS-native HEIC decoder (HDR-capable)...");
+        let img = heic::decode_heic(path)?;
+
+        // HEICは16-bit RGBA (Rgba16)でデコードされる
+        let high_bit_img = match img {
+            DynamicImage::ImageRgba16(_) => {
+                println!("HEIC: 16-bit HDR image detected, converting to f32 for processing");
+                HighBitDepthImage::Rgba(img.to_rgba32f())
+            }
+            DynamicImage::ImageRgba8(rgba) => {
+                // フォールバック: 8-bit RGBA
+                println!("HEIC: 8-bit image, converting to f32");
+                HighBitDepthImage::Rgba(image::DynamicImage::ImageRgba8(rgba).to_rgba32f())
+            }
+            _ => {
+                println!("HEIC: Converting other format to f32");
+                HighBitDepthImage::Rgba(img.to_rgba32f())
+            }
+        };
+
+        return Ok((high_bit_img, None));
+    }
+
+    // その他の形式は従来のdecode関数を使用
+    decode(&data)
+}
 
 /// バイトデータから画像をデコードし、HighBitDepthImageとして返す
 /// サポートする形式: JPEG 2000, JPEG XL, そして imageクレートが対応する形式
@@ -17,7 +60,10 @@ use std::io::Cursor;
 /// # 注意
 /// - JPEG 2000形式のデコードには `jpeg2k` クレートを使用しています。
 ///   ただし、このクレートはすべてのJPEG 2000ファイルに対応しているわけではないため、特定のファイルでエラーが発生する可能性があります。
-/// - HEIC/HEIF形式はサポートしていません。macOSのプレビュー.appでJPEGに変換してください。
+/// - HEIC/HEIF形式はOS標準APIを使用してデコードします：
+///   - Windows: Windows Imaging Component (WIC)
+///   - macOS: ImageIO framework
+///   - Linux: heif-convert コマンド (要 libheif-tools パッケージ)
 pub fn decode(image_bytes: &[u8]) -> Result<(HighBitDepthImage, Option<Vec<u8>>), AppError> {
     // まず、バイトデータから画像形式を判別する
     let format = detect_format(image_bytes)
@@ -26,8 +72,10 @@ pub fn decode(image_bytes: &[u8]) -> Result<(HighBitDepthImage, Option<Vec<u8>>)
     // 判別した形式に応じて、適切なデコーダーを呼び出す
     match format {
         DetectedFormat::Heic => {
-            // HEICはサポート外 - ユーザーにPreview.appでの変換を案内
-            Err(AppError::HeicNotSupported)
+            // HEICはファイルパスが必要なため、decode_from_pathを使用する必要がある
+            Err(AppError::Decode(
+                "HEIC format requires file path. Use decode_from_path() instead.".to_string(),
+            ))
         }
         DetectedFormat::Jpeg2000 => {
             println!("Decoder: Using Jpeg2k decoder...");

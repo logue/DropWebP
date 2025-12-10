@@ -21,14 +21,32 @@ pub enum AppError {
     #[error("Filesystem error: {0}")]
     Io(#[from] std::io::Error), // std::io::Errorから自動変換
 
-    #[error("Unsupported format")]
-    UnsupportedFormat,
+    #[error("Unsupported format: {0}")]
+    UnsupportedFormat(String),
 
-    #[error("HEIC/HEIF format is not supported. Please convert to JPEG using macOS Preview app (File > Export > JPEG) and try again.")]
-    HeicNotSupported,
+    #[error("System dependency not found: {0}")]
+    DependencyNotFound(String),
+
+    #[error("Command execution failed: {0}")]
+    CommandFailed(String),
+
+    #[error("Path conversion error")]
+    PathConversion,
+
+    #[error("Image conversion error")]
+    ImageConversion,
+
+    #[error("Image decoding error")]
+    ImageDecoding,
 
     #[error("Image processing Error: {0}")] // TODO: image::ImageErrorと混同
     ImageProcessing(String),
+
+    #[error("IO error: {0}")]
+    IoError(#[source] std::io::Error),
+
+    #[error("Image error: {0}")]
+    ImageError(#[source] image::ImageError),
 }
 
 /// Tauriコマンドは String を返す必要があるため、変換を実装
