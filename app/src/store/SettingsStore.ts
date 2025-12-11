@@ -17,7 +17,7 @@ const defaultAvifOptions: AvifOptions = {
   quality: 80.0,
   bitDepth: BitDepth.Auto,
   alphaQuality: 80.0,
-  speed: 5,
+  speed: 6,
   colorModel: ColorModel.YCbCr,
   threads: undefined
 } as const;

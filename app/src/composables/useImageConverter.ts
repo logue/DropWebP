@@ -31,6 +31,8 @@ export function useImageConverter() {
     'tiff',
     'webp',
     // 追加対応の拡張子
+    'heic',
+    'heif',
     // JPEG 2000
     'jp2',
     'j2c',

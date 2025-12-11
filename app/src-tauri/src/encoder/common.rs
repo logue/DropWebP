@@ -234,21 +234,23 @@ fn extract_pixel_data_for_analysis(img: &HighBitDepthImage) -> (&[f32], bool) {
 
 /// Analyze ICC profile for wide gamut characteristics
 fn analyze_icc_for_wide_gamut(profile: &[u8]) -> bool {
-    // Check profile size - wide gamut profiles tend to be larger
-    if profile.len() < 400 {
-        return false;
-    }
-
     // Look for wide gamut indicators in the profile
     let profile_str = String::from_utf8_lossy(profile);
 
-    profile_str.contains("Display P3")
+    // Check for wide gamut markers (including synthetic markers from HEIC decoder)
+    if profile_str.contains("Display P3")
         || profile_str.contains("DCI-P3")
         || profile_str.contains("Rec2020")
         || profile_str.contains("BT.2020")
         || profile_str.contains("ProPhoto")
         || profile_str.contains("Adobe RGB")
-        || profile.len() > 1000 // Large profiles often indicate complex tone curves or wide gamuts
+    {
+        return true;
+    }
+
+    // Full ICC profiles tend to be larger (400+ bytes)
+    // Large profiles often indicate complex tone curves or wide gamuts
+    profile.len() >= 400 || profile.len() > 1000
 }
 
 /// Calculate optimal quality settings based on content analysis

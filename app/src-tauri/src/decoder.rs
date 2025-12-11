@@ -5,6 +5,7 @@ mod jxl;
 
 use crate::error::AppError;
 use crate::options::HighBitDepthImage;
+use exif;
 use image::{self, DynamicImage, GenericImageView, ImageFormat};
 use std::io::Cursor;
 use std::path::Path;
@@ -14,6 +15,8 @@ use std::path::Path;
 pub fn decode_from_path<P: AsRef<Path>>(
     path: P,
 ) -> Result<(HighBitDepthImage, Option<Vec<u8>>), AppError> {
+    let decode_start = std::time::Instant::now();
+
     // ファイルを読み込む
     let data = std::fs::read(path.as_ref()).map_err(|e| AppError::IoError(e))?;
 
@@ -24,16 +27,111 @@ pub fn decode_from_path<P: AsRef<Path>>(
     // HEICの場合はOS標準APIを使用（HDR対応16-bit）
     if matches!(format, DetectedFormat::Heic) {
         println!("Decoder: Using OS-native HEIC decoder (HDR-capable)...");
-        let img = heic::decode_heic(path)?;
+        let path_ref = path.as_ref();
+        let mut img = heic::decode_heic(path_ref)?;
+
+        // EXIF Orientation を処理して画像を回転
+        if let Ok(exif_data) = std::fs::read(path_ref) {
+            if let Ok(exif_reader) =
+                exif::Reader::new().read_from_container(&mut std::io::Cursor::new(&exif_data))
+            {
+                if let Some(orientation_field) =
+                    exif_reader.get_field(exif::Tag::Orientation, exif::In::PRIMARY)
+                {
+                    if let Some(orientation_value) = orientation_field.value.get_uint(0) {
+                        println!("HEIC: EXIF Orientation detected: {}", orientation_value);
+                        img = match orientation_value {
+                            1 => img,                     // Normal
+                            2 => img.fliph(),             // Flip horizontal
+                            3 => img.rotate180(),         // Rotate 180
+                            4 => img.flipv(),             // Flip vertical
+                            5 => img.rotate90().fliph(),  // Rotate 90 CW + flip horizontal
+                            6 => img.rotate90(),          // Rotate 90 CW
+                            7 => img.rotate270().fliph(), // Rotate 270 CW + flip horizontal
+                            8 => img.rotate270(),         // Rotate 270 CW
+                            _ => img,
+                        };
+                    }
+                }
+            }
+        }
 
         // HEICは16-bit RGBA (Rgba16)でデコードされる
+        // iPhone HEIC は Display P3 の SDR (0-1 範囲) を 16-bit で表現
         let high_bit_img = match img {
-            DynamicImage::ImageRgba16(_) => {
-                println!("HEIC: 16-bit HDR image detected, converting to f32 for processing");
-                HighBitDepthImage::Rgba(img.to_rgba32f())
+            DynamicImage::ImageRgba16(rgba16) => {
+                println!("HEIC: 16-bit image detected, converting Display P3 to sRGB");
+                let (width, height) = rgba16.dimensions();
+
+                // macOS ImageIO は BGR 順序で出力する
+                // Display P3 → sRGB/BT.709 色域変換を適用
+                let pixels_f32: Vec<f32> = rgba16
+                    .pixels()
+                    .flat_map(|p| {
+                        // BGR として読み取る（macOS ImageIO の出力形式）
+                        let b = p.0[0] as f32 / 65535.0;
+                        let g = p.0[1] as f32 / 65535.0;
+                        let r = p.0[2] as f32 / 65535.0;
+                        let a = p.0[3] as f32 / 65535.0;
+
+                        // sRGB ガンマを解除（線形化）
+                        let r_lin = if r <= 0.04045 {
+                            r / 12.92
+                        } else {
+                            ((r + 0.055) / 1.055).powf(2.4)
+                        };
+                        let g_lin = if g <= 0.04045 {
+                            g / 12.92
+                        } else {
+                            ((g + 0.055) / 1.055).powf(2.4)
+                        };
+                        let b_lin = if b <= 0.04045 {
+                            b / 12.92
+                        } else {
+                            ((b + 0.055) / 1.055).powf(2.4)
+                        };
+
+                        // Display P3 → sRGB/BT.709 変換行列（線形空間）
+                        let r_out = r_lin * 1.2249 + g_lin * -0.2247 + b_lin * -0.0002;
+                        let g_out = r_lin * -0.0420 + g_lin * 1.0419 + b_lin * 0.0001;
+                        let b_out = r_lin * -0.0197 + g_lin * -0.0786 + b_lin * 1.0983;
+
+                        // クリッピング（色域外の色を範囲内に）
+                        let r_clip = r_out.max(0.0).min(1.0);
+                        let g_clip = g_out.max(0.0).min(1.0);
+                        let b_clip = b_out.max(0.0).min(1.0);
+
+                        // sRGB ガンマを適用
+                        let r_srgb = if r_clip <= 0.0031308 {
+                            r_clip * 12.92
+                        } else {
+                            1.055 * r_clip.powf(1.0 / 2.4) - 0.055
+                        };
+                        let g_srgb = if g_clip <= 0.0031308 {
+                            g_clip * 12.92
+                        } else {
+                            1.055 * g_clip.powf(1.0 / 2.4) - 0.055
+                        };
+                        let b_srgb = if b_clip <= 0.0031308 {
+                            b_clip * 12.92
+                        } else {
+                            1.055 * b_clip.powf(1.0 / 2.4) - 0.055
+                        };
+
+                        [r_srgb, g_srgb, b_srgb, a]
+                    })
+                    .collect();
+
+                let buffer =
+                    image::ImageBuffer::<image::Rgba<f32>, _>::from_raw(width, height, pixels_f32)
+                        .ok_or_else(|| {
+                            AppError::Decode("Failed to create RGBA f32 HDR buffer".to_string())
+                        })?;
+
+                HighBitDepthImage::Rgba(buffer)
             }
             DynamicImage::ImageRgba8(rgba) => {
-                // フォールバック: 8-bit RGBA
+                // フォールバック: 8-bit RGBA (SDR)
                 println!("HEIC: 8-bit image, converting to f32");
                 HighBitDepthImage::Rgba(image::DynamicImage::ImageRgba8(rgba).to_rgba32f())
             }
@@ -43,11 +141,23 @@ pub fn decode_from_path<P: AsRef<Path>>(
             }
         };
 
-        return Ok((high_bit_img, None));
+        // HEIC は通常 Display P3 色域を使用
+        // 合成 ICC プロファイルマーカーを返して広色域として認識させる
+        let synthetic_icc = b"Display P3".to_vec();
+        println!(
+            "Decoder: HEIC decoded in {:.2}s",
+            decode_start.elapsed().as_secs_f64()
+        );
+        return Ok((high_bit_img, Some(synthetic_icc)));
     }
 
     // その他の形式は従来のdecode関数を使用
-    decode(&data)
+    let result = decode(&data);
+    println!(
+        "Decoder: Image decoded in {:.2}s",
+        decode_start.elapsed().as_secs_f64()
+    );
+    result
 }
 
 /// バイトデータから画像をデコードし、HighBitDepthImageとして返す

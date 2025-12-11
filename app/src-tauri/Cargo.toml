@@ -54,7 +54,7 @@ jpegli = "0.1.0"
 jpegxl-rs = { version = "0.11.2+libjxl-0.11.1" }
 kamadak-exif = "0.6.1"
 libavif-sys = { version = "0.17.0", default-features = false, features = [
-  "codec-rav1e",
+  "codec-aom",
 ] }
 libwebp-sys = "0.14.1"
 openjpeg-sys = "1.0.12" # Note: Requires system openjpeg or Homebrew

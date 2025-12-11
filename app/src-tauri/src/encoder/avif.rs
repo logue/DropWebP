@@ -68,7 +68,17 @@ pub fn encode(
     icc_profile: Option<Vec<u8>>,
     options: &AvifOptions,
 ) -> Result<Vec<u8>, AppError> {
+    let encode_start = std::time::Instant::now();
     println!("AVIF: Starting AVIF encoding process with libavif-sys...");
+
+    // Debug ICC profile
+    if let Some(ref profile) = icc_profile {
+        println!(
+            "AVIF: ICC profile received: {} bytes, content: {:?}",
+            profile.len(),
+            String::from_utf8_lossy(profile)
+        );
+    }
 
     // Perform content analysis for optimal encoding
     let analysis = EncodingAnalysis::analyze(pixel_data, icc_profile.as_deref());
@@ -91,19 +101,35 @@ pub fn encode(
     );
 
     // Determine bit depth based on content and settings
+    // Auto mode intelligently selects bit depth for optimal quality/speed balance
     let target_depth = match options.bit_depth {
         BitDepth::Auto => {
             if analysis.has_hdr_content {
-                println!("AVIF: Auto-selecting 10-bit for HDR content");
+                println!("AVIF: Auto → 10-bit (HDR content detected)");
                 10
+            } else if analysis.has_wide_gamut && options.quality >= 90.0 {
+                println!("AVIF: Auto → 10-bit (Wide gamut + Quality ≥90, encoding will be slow)");
+                10
+            } else if analysis.has_wide_gamut {
+                println!("AVIF: Auto → 8-bit (Wide gamut + Quality <90, faster encoding)");
+                8
             } else {
-                println!("AVIF: Auto-selecting 8-bit for SDR content");
+                println!("AVIF: Auto → 8-bit (Standard SDR content)");
                 8
             }
         }
-        BitDepth::Eight => 8,
-        BitDepth::Ten => 10,
-        BitDepth::Twelve => 12,
+        BitDepth::Eight => {
+            println!("AVIF: Manual → 8-bit (user selected)");
+            8
+        }
+        BitDepth::Ten => {
+            println!("AVIF: Manual → 10-bit (user selected, slower encoding)");
+            10
+        }
+        BitDepth::Twelve => {
+            println!("AVIF: Manual → 12-bit (user selected, very slow encoding)");
+            12
+        }
     };
 
     println!(
@@ -148,16 +174,30 @@ pub fn encode(
         (*encoder).maxQuantizerAlpha = alpha_quantizer;
 
         // Create image
-        let image = libavif_sys::avifImageCreate(
-            width,
-            height,
-            target_depth,
-            if has_alpha {
-                libavif_sys::AVIF_PIXEL_FORMAT_YUV444
+        // YUV420 is much faster and provides good quality for most content
+        // YUV444 only for extreme quality requirements (can be 3-5x slower)
+        let yuv_format = if analysis.has_wide_gamut && options.quality >= 90.0 {
+            // Only use YUV444 for wide gamut + very high quality (quality >= 90)
+            println!("AVIF: Using YUV444 for wide gamut + high quality (slow encoding)");
+            libavif_sys::AVIF_PIXEL_FORMAT_YUV444
+        } else {
+            // YUV420 for all other cases (including alpha channel)
+            // Alpha channel is encoded separately at full resolution
+            libavif_sys::AVIF_PIXEL_FORMAT_YUV420
+        };
+
+        println!(
+            "AVIF: Using YUV format: {}",
+            if yuv_format == libavif_sys::AVIF_PIXEL_FORMAT_YUV444 {
+                "YUV444"
+            } else if yuv_format == libavif_sys::AVIF_PIXEL_FORMAT_YUV422 {
+                "YUV422"
             } else {
-                libavif_sys::AVIF_PIXEL_FORMAT_YUV444
-            },
+                "YUV420"
+            }
         );
+
+        let image = libavif_sys::avifImageCreate(width, height, target_depth, yuv_format);
 
         if image.is_null() {
             libavif_sys::avifEncoderDestroy(encoder);
@@ -241,6 +281,8 @@ pub fn encode(
         }
 
         // Create RGB image
+        // Note: avifRGBImage は RGB 入力を表現し、avifImage の色空間設定が
+        // RGB→YUV 変換のターゲットになる
         let mut rgb_image = libavif_sys::avifRGBImage {
             width: width as u32,
             height: height as u32,
@@ -256,6 +298,13 @@ pub fn encode(
             pixels: rgb_pixels.as_ptr() as *mut u8,
             rowBytes: row_bytes as u32,
         };
+
+        println!(
+            "AVIF: RGB→YUV conversion with target colorPrimaries={}, transferCharacteristics={}, matrixCoefficients={}",
+            (*image).colorPrimaries,
+            (*image).transferCharacteristics,
+            (*image).matrixCoefficients
+        );
 
         // Convert RGB to YUV
         println!("AVIF: Converting RGB to YUV...");
@@ -370,9 +419,11 @@ pub fn encode(
             return Err(AppError::Avif("Encoded data is empty".to_string()));
         }
 
+        let total_time = encode_start.elapsed();
         println!(
-            "AVIF: Encoding completed successfully ({} bytes)",
-            encoded_data.len()
+            "AVIF: Encoding completed successfully ({} bytes, total time: {:.2}s)",
+            encoded_data.len(),
+            total_time.as_secs_f64()
         );
 
         // Provide format-specific ICC recommendations
