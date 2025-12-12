@@ -1,442 +1,181 @@
-use super::progress::ProgressCallback;
 use crate::error::AppError;
 use crate::options::HighBitDepthImage;
-use indexmap::IndexSet;
-use oxipng::optimize_from_memory;
+use oxipng::Options;
 use serde::{Deserialize, Serialize};
 use std::io::Cursor;
-use std::sync::Arc;
 
-/// PNGフィルター戦略
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub enum PngFilter {
-    /// フィルターなし
-    None,
-    /// Subフィルター
-    Sub,
-    /// Upフィルター
-    Up,
-    /// Averageフィルター
-    Average,
-    /// Paethフィルター
-    Paeth,
-    /// 最小合計（すべてのフィルターを試して最小を選択）
-    MinSum,
-    /// エントロピー（最小エントロピーのフィルターを選択）
-    Entropy,
-    /// Bigrams（2グラム頻度分析）
-    Bigrams,
-    /// BigEnt（BigramsとEntropyの組み合わせ）
-    BigEnt,
-    /// Brute（すべての組み合わせを試行、最も遅いが最良の圧縮）
-    Brute,
-}
-
-impl Default for PngFilter {
-    fn default() -> Self {
-        Self::MinSum // バランスの良いデフォルト
-    }
-}
-
-impl From<PngFilter> for oxipng::RowFilter {
-    fn from(filter: PngFilter) -> Self {
-        match filter {
-            PngFilter::None => oxipng::RowFilter::None,
-            PngFilter::Sub => oxipng::RowFilter::Sub,
-            PngFilter::Up => oxipng::RowFilter::Up,
-            PngFilter::Average => oxipng::RowFilter::Average,
-            PngFilter::Paeth => oxipng::RowFilter::Paeth,
-            PngFilter::MinSum => oxipng::RowFilter::MinSum,
-            PngFilter::Entropy => oxipng::RowFilter::Entropy,
-            PngFilter::Bigrams => oxipng::RowFilter::Bigrams,
-            PngFilter::BigEnt => oxipng::RowFilter::BigEnt,
-            PngFilter::Brute => oxipng::RowFilter::Brute,
-        }
-    }
-}
-
-/// PNGインターレース設定
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub enum PngInterlace {
-    /// インターレースなし（最小ファイルサイズ）
-    None,
-    /// Adam7インターレース（プログレッシブ読み込み）
-    Adam7,
-}
-
-impl Default for PngInterlace {
-    fn default() -> Self {
-        Self::None
-    }
-}
-
-impl From<PngInterlace> for oxipng::Interlacing {
-    fn from(interlace: PngInterlace) -> Self {
-        match interlace {
-            PngInterlace::None => oxipng::Interlacing::None,
-            PngInterlace::Adam7 => oxipng::Interlacing::Adam7,
-        }
-    }
-}
-
-/// PNG最適化オプション（OxiPNG専用）
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
 pub struct PngOptions {
-    /// Zopfliの反復回数（15-255、高いほど高圧縮だが遅い）
-    pub zopfli_iterations: u32,
-    /// ICCプロファイルを含めるか
-    pub embed_icc_profile: bool,
-    /// ビット深度削減を有効にする
-    pub bit_depth_reduction: bool,
-    /// カラータイプ削減を有効にする（RGBA→RGB、RGB→Grayscaleなど）
-    pub color_type_reduction: bool,
-    /// パレット削減を有効にする
-    pub palette_reduction: bool,
-    /// インターレース設定
-    pub interlace: PngInterlace,
-    /// フィルター戦略
-    pub filter: PngFilter,
+    pub optimization_level: u8, // 0-6
+    #[serde(default)]
+    pub use_zopfli: bool, // Zopfli 圧縮を使用（遅いが高圧縮）
+    #[serde(default)]
+    pub strip_metadata: bool, // メタデータを削除
+    #[serde(default)]
+    pub bit_depth_reduction: bool, // ビット深度削減を試行
+    #[serde(default)]
+    pub color_type_reduction: bool, // カラータイプ削減を試行
+    #[serde(default)]
+    pub palette_reduction: bool, // パレット削減を試行
+    #[serde(default)]
+    pub grayscale_reduction: bool, // グレースケール変換を試行
+    #[serde(default)]
+    pub interlace: Option<bool>, // インターレース (None=変更なし, Some(true)=有効, Some(false)=無効)
+    #[serde(default)]
+    pub optimize_alpha: bool, // 透明ピクセルの最適化
+    #[serde(default)]
+    pub fast_evaluation: bool, // 高速評価モード (デフォルトtrue)
+    #[serde(default)]
+    pub scale_16: bool, // 16ビットを強制的に8ビットにスケール
 }
 
-impl Default for PngOptions {
-    fn default() -> Self {
-        Self {
-            zopfli_iterations: 15, // Zopfliのデフォルト
-            embed_icc_profile: true,
-            bit_depth_reduction: true,
-            color_type_reduction: true,
-            palette_reduction: true,
-            interlace: PngInterlace::None,
-            filter: PngFilter::MinSum,
-        }
-    }
-}
-
-/// PNG画像をZopfliで圧縮します
+/// PNG エンコーダー (oxipng 10.0)
+///
+/// oxipng はロスレス圧縮のみをサポートします。
+/// optimization_level: 0(最速/最小圧縮) ～ 6(最遅/最大圧縮)
 pub fn encode(
-    img: &HighBitDepthImage,
-    icc_profile: Option<Vec<u8>>,
+    pixel_data: &HighBitDepthImage,
+    _icc_profile: Option<Vec<u8>>,
     options: &PngOptions,
 ) -> Result<Vec<u8>, AppError> {
-    let (width, height, color_type, bit_depth, data) = prepare_image_data(img)?;
-    encode_with_zopfli(
-        width,
-        height,
-        color_type,
-        bit_depth,
-        &data,
-        icc_profile,
-        options,
-    )
-}
+    let encode_start = std::time::Instant::now();
+    println!("PNG: Starting PNG optimization with oxipng 10.0...");
 
-/// Zopfli（OxiPNG）を使った高圧縮PNGエンコード
-fn encode_with_zopfli(
-    width: u32,
-    height: u32,
-    color_type: png::ColorType,
-    bit_depth: png::BitDepth,
-    data: &[u8],
-    icc_profile: Option<Vec<u8>>,
-    options: &PngOptions,
-) -> Result<Vec<u8>, AppError> {
-    // まず標準的なPNGを生成
-    let mut temp_buffer = Vec::new();
-    let cursor = Cursor::new(&mut temp_buffer);
-
-    let mut encoder = png::Encoder::new(cursor, width, height);
-    encoder.set_color(color_type);
-    encoder.set_depth(bit_depth);
-    encoder.set_compression(png::Compression::Fast); // 一時的に高速圧縮
-
-    let mut writer = encoder
-        .write_header()
-        .map_err(|e| AppError::Encode(format!("PNG header write error: {}", e)))?;
-
-    // ICCプロファイル埋め込み
-    if options.embed_icc_profile {
-        if let Some(profile) = icc_profile {
-            writer
-                .write_chunk(png::chunk::iCCP, &create_iccp_chunk(&profile)?)
-                .map_err(|e| AppError::Encode(format!("ICC profile embedding error: {}", e)))?;
-        }
-    }
-
-    writer
-        .write_image_data(data)
-        .map_err(|e| AppError::Encode(format!("PNG image data write error: {}", e)))?;
-
-    writer
-        .finish()
-        .map_err(|e| AppError::Encode(format!("PNG encoding finish error: {}", e)))?;
-
-    // OxiPNGで最適化
-    let oxipng_options = oxipng::Options {
-        deflate: oxipng::Deflaters::Zopfli {
-            iterations: std::num::NonZeroU8::new(options.zopfli_iterations.min(255) as u8).unwrap(),
-        },
-        optimize_alpha: true,
-        strip: oxipng::StripChunks::Safe,
-        bit_depth_reduction: options.bit_depth_reduction,
-        color_type_reduction: options.color_type_reduction,
-        palette_reduction: options.palette_reduction,
-        interlace: Some(options.interlace.into()),
-        filter: IndexSet::from([options.filter.into()]),
-        ..Default::default()
-    };
+    let opt_level = options.optimization_level.min(6);
 
     println!(
-        "PNG: Applying OxiPNG optimization with Zopfli ({} iterations)...",
-        options.zopfli_iterations
+        "PNG: Optimization level {} (Zopfli: {})",
+        opt_level, options.use_zopfli
     );
 
-    let optimized = optimize_from_memory(&temp_buffer, &oxipng_options)
-        .map_err(|e| AppError::Encode(format!("OxiPNG optimization error: {}", e)))?;
-
-    let original_size = temp_buffer.len();
-    let optimized_size = optimized.len();
-    let reduction = ((original_size - optimized_size) as f64 / original_size as f64) * 100.0;
-
-    println!("PNG: OxiPNG optimization completed");
-    println!("     Original: {} bytes", original_size);
-    println!("     Optimized: {} bytes", optimized_size);
-    println!("     Reduction: {:.1}%", reduction);
-
-    Ok(optimized)
-}
-
-/// 画像データをPNGエンコード用に準備
-fn prepare_image_data(
-    img: &HighBitDepthImage,
-) -> Result<(u32, u32, png::ColorType, png::BitDepth, Vec<u8>), AppError> {
-    match img {
-        HighBitDepthImage::Rgb(buffer) => {
-            let (width, height) = buffer.dimensions();
-            let pixels = buffer.as_raw();
-
-            // f32からu8に変換
-            let data: Vec<u8> = pixels
-                .iter()
-                .map(|&pixel| (pixel.clamp(0.0, 1.0) * 255.0) as u8)
-                .collect();
-
-            Ok((
-                width,
-                height,
-                png::ColorType::Rgb,
-                png::BitDepth::Eight,
-                data,
-            ))
-        }
-        HighBitDepthImage::Rgba(buffer) => {
-            let (width, height) = buffer.dimensions();
-            let pixels = buffer.as_raw();
-
-            // f32からu8に変換
-            let data: Vec<u8> = pixels
-                .iter()
-                .map(|&pixel| (pixel.clamp(0.0, 1.0) * 255.0) as u8)
-                .collect();
-
-            Ok((
-                width,
-                height,
-                png::ColorType::Rgba,
-                png::BitDepth::Eight,
-                data,
-            ))
-        }
-        HighBitDepthImage::Argb(buffer) => {
-            let (width, height) = buffer.dimensions();
-            let argb_pixels = buffer.as_raw();
-
-            // ARGBからRGBAに変換してu8に変換
-            let mut rgba_data = Vec::with_capacity(argb_pixels.len());
-            for chunk in argb_pixels.chunks_exact(4) {
-                let a = (chunk[0].clamp(0.0, 1.0) * 255.0) as u8; // Alpha
-                let r = (chunk[1].clamp(0.0, 1.0) * 255.0) as u8; // Red
-                let g = (chunk[2].clamp(0.0, 1.0) * 255.0) as u8; // Green
-                let b = (chunk[3].clamp(0.0, 1.0) * 255.0) as u8; // Blue
-
-                rgba_data.extend_from_slice(&[r, g, b, a]);
+    // image crate で PNG にエンコード
+    let mut png_buffer = Vec::new();
+    {
+        let mut cursor = Cursor::new(&mut png_buffer);
+        match pixel_data {
+            HighBitDepthImage::Rgb(img) => {
+                // RGB32F → RGB8
+                let rgb8 = image::DynamicImage::ImageRgb32F(img.clone()).to_rgb8();
+                rgb8.write_to(&mut cursor, image::ImageFormat::Png)
+                    .map_err(|e| AppError::Encode(format!("Failed to encode PNG: {}", e)))?;
             }
-
-            Ok((
-                width,
-                height,
-                png::ColorType::Rgba,
-                png::BitDepth::Eight,
-                rgba_data,
-            ))
-        }
-    }
-}
-
-/// ICCプロファイルのiCCPチャンクを作成
-fn create_iccp_chunk(profile: &[u8]) -> Result<Vec<u8>, AppError> {
-    use flate2::{Compression, write::DeflateEncoder};
-    use std::io::Write;
-
-    println!(
-        "PNG: Creating iCCP chunk with profile size: {} bytes",
-        profile.len()
-    );
-
-    // プロファイル名（固定）
-    let profile_name = b"Embedded Profile\0";
-
-    // 圧縮方式（0 = deflate）
-    let compression_method = [0u8];
-
-    // プロファイルをDeflateで圧縮
-    let mut encoder = DeflateEncoder::new(Vec::new(), Compression::best());
-    encoder
-        .write_all(profile)
-        .map_err(|e| AppError::Encode(format!("ICC profile compression write error: {}", e)))?;
-
-    let compressed_profile = encoder
-        .finish()
-        .map_err(|e| AppError::Encode(format!("ICC profile compression finish error: {}", e)))?;
-
-    let mut chunk_data = Vec::new();
-    chunk_data.extend_from_slice(profile_name);
-    chunk_data.extend_from_slice(&compression_method);
-    chunk_data.extend_from_slice(&compressed_profile);
-
-    println!(
-        "PNG: iCCP chunk created, compressed profile size: {} bytes",
-        compressed_profile.len()
-    );
-
-    Ok(chunk_data)
-}
-
-/// PNGファイルサイズを推定
-pub fn estimate_size(img: &HighBitDepthImage, options: &PngOptions) -> usize {
-    let (width, height, color_type, _, _) = match prepare_image_data(img) {
-        Ok(data) => data,
-        Err(_) => return 0,
-    };
-
-    // 基本的なサイズ推定
-    let channels = match color_type {
-        png::ColorType::Rgb => 3,
-        png::ColorType::Rgba => 4,
-        _ => 3,
-    };
-
-    let uncompressed_size = (width * height * channels) as usize;
-
-    // 圧縮率の推定（Zopfliのiteration数により調整）
-    let compression_ratio = if options.zopfli_iterations >= 50 {
-        0.3 // 70%圧縮（高iteration）
-    } else if options.zopfli_iterations >= 20 {
-        0.4 // 60%圧縮（中iteration）
-    } else {
-        0.5 // 50%圧縮（低iteration）
-    };
-
-    (uncompressed_size as f64 * compression_ratio) as usize
-}
-
-/// Encode image to PNG format with progress callback support
-///
-/// # Arguments
-/// - `img`: Source image to encode (HighBitDepthImage)
-/// - `icc_profile`: ICC profile for color management
-/// - `options`: PNG encoding options (PngOptions)
-/// - `progress_callback`: Progress callback implementation
-///
-/// # Returns
-/// - Success: PNG format byte data as Vec<u8>
-/// - Failure: AppError
-///
-/// # Notes
-/// - Progress reporting is approximate as PNG encoding is multi-stage
-/// - Zopfli optimization stage provides the most granular progress updates
-pub fn encode_with_progress(
-    img: &HighBitDepthImage,
-    icc_profile: Option<Vec<u8>>,
-    options: &PngOptions,
-    progress_callback: Arc<dyn ProgressCallback>,
-) -> Result<Vec<u8>, AppError> {
-    progress_callback.on_progress(0.0, "Starting PNG encoding");
-    progress_callback.on_progress(10.0, "Preparing image data");
-
-    let (width, height, color_type, bit_depth, data) = prepare_image_data(img)?;
-
-    progress_callback.on_progress(20.0, "Writing PNG header and data");
-
-    // まず標準的なPNGを生成
-    let mut temp_buffer = Vec::new();
-    let cursor = Cursor::new(&mut temp_buffer);
-
-    let mut encoder = png::Encoder::new(cursor, width, height);
-    encoder.set_color(color_type);
-    encoder.set_depth(bit_depth);
-    encoder.set_compression(png::Compression::Fast);
-
-    let mut writer = encoder
-        .write_header()
-        .map_err(|e| AppError::Encode(format!("PNG header write error: {}", e)))?;
-
-    // ICCプロファイル埋め込み
-    if options.embed_icc_profile {
-        if let Some(profile) = icc_profile {
-            progress_callback.on_progress(30.0, "Embedding ICC profile");
-            writer
-                .write_chunk(png::chunk::iCCP, &create_iccp_chunk(&profile)?)
-                .map_err(|e| AppError::Encode(format!("ICC profile embedding error: {}", e)))?;
+            HighBitDepthImage::Rgba(img) => {
+                // RGBA32F → RGBA8
+                let rgba8 = image::DynamicImage::ImageRgba32F(img.clone()).to_rgba8();
+                rgba8
+                    .write_to(&mut cursor, image::ImageFormat::Png)
+                    .map_err(|e| AppError::Encode(format!("Failed to encode PNG: {}", e)))?;
+            }
+            HighBitDepthImage::Argb(img) => {
+                // ARGB32F → RGBA8 (channel swap)
+                let rgba8 = image::DynamicImage::ImageRgba32F(img.clone()).to_rgba8();
+                rgba8
+                    .write_to(&mut cursor, image::ImageFormat::Png)
+                    .map_err(|e| AppError::Encode(format!("Failed to encode PNG: {}", e)))?;
+            }
         }
     }
 
-    progress_callback.on_progress(40.0, "Writing image data");
+    println!("PNG: Initial PNG size: {} bytes", png_buffer.len());
 
-    writer
-        .write_image_data(&data)
-        .map_err(|e| AppError::Encode(format!("PNG image data write error: {}", e)))?;
+    // oxipng 10.0: オプションを設定
+    let mut opts = Options::from_preset(opt_level);
 
-    writer
-        .finish()
-        .map_err(|e| AppError::Encode(format!("PNG encoding finish error: {}", e)))?;
+    // 詳細オプションを適用
+    if options.use_zopfli {
+        use std::num::NonZero;
+        let zopfli_opts = oxipng::ZopfliOptions {
+            iteration_count: NonZero::new(15).unwrap(),
+            iterations_without_improvement: NonZero::new(u64::MAX).unwrap(),
+            maximum_block_splits: 15,
+        };
+        opts.deflater = oxipng::Deflater::Zopfli(zopfli_opts);
+        println!("PNG: Using Zopfli compression (15 iterations)");
+    }
 
-    progress_callback.on_progress(60.0, "Optimizing with OxiPNG");
+    if options.strip_metadata {
+        opts.strip = oxipng::StripChunks::Safe;
+        println!("PNG: Stripping metadata");
+    }
 
-    // OxiPNGで最適化
-    let oxipng_options = oxipng::Options {
-        deflate: oxipng::Deflaters::Zopfli {
-            iterations: std::num::NonZeroU8::new(options.zopfli_iterations.min(255) as u8).unwrap(),
-        },
-        filter: {
-            let mut filters = IndexSet::new();
-            filters.insert(options.filter.into());
-            filters
-        },
-        interlace: Some(options.interlace.into()),
-        bit_depth_reduction: options.bit_depth_reduction,
-        color_type_reduction: options.color_type_reduction,
-        palette_reduction: options.palette_reduction,
-        ..Default::default()
+    // インターレース設定
+    if let Some(interlace) = options.interlace {
+        opts.interlace = Some(interlace);
+        println!("PNG: Interlace: {}", interlace);
+    }
+
+    // 透明度最適化
+    opts.optimize_alpha = options.optimize_alpha;
+    if options.optimize_alpha {
+        println!("PNG: Alpha optimization enabled");
+    }
+
+    // 高速評価モード
+    opts.fast_evaluation = options.fast_evaluation;
+
+    // 16ビット強制スケール
+    opts.scale_16 = options.scale_16;
+    if options.scale_16 {
+        println!("PNG: 16-bit to 8-bit scaling enabled");
+    }
+
+    // リダクション設定
+    opts.bit_depth_reduction = options.bit_depth_reduction;
+    opts.color_type_reduction = options.color_type_reduction;
+    opts.palette_reduction = options.palette_reduction;
+    opts.grayscale_reduction = options.grayscale_reduction;
+
+    if options.bit_depth_reduction
+        || options.color_type_reduction
+        || options.palette_reduction
+        || options.grayscale_reduction
+    {
+        println!(
+            "PNG: Enabled reductions - bit_depth: {}, color_type: {}, palette: {}, grayscale: {}",
+            options.bit_depth_reduction,
+            options.color_type_reduction,
+            options.palette_reduction,
+            options.grayscale_reduction
+        );
+    }
+
+    match oxipng::optimize_from_memory(&png_buffer, &opts) {
+        Ok(optimized) => {
+            println!(
+                "PNG: Optimization completed in {:.2}s, final size: {} bytes (saved {} bytes)",
+                encode_start.elapsed().as_secs_f64(),
+                optimized.len(),
+                png_buffer.len().saturating_sub(optimized.len())
+            );
+            Ok(optimized)
+        }
+        Err(e) => Err(AppError::Encode(format!(
+            "oxipng optimization failed: {}",
+            e
+        ))),
+    }
+}
+
+/// PNG形式のファイルサイズを推定します
+///
+/// PNGはロスレス圧縮のため、正確なサイズ推定は困難です。
+/// ここでは非圧縮サイズの60%を目安として返します。
+pub fn estimate_size(pixel_data: &HighBitDepthImage, _options: &PngOptions) -> usize {
+    let (width, height) = match pixel_data {
+        HighBitDepthImage::Rgb(img) => (img.width(), img.height()),
+        HighBitDepthImage::Rgba(img) => (img.width(), img.height()),
+        HighBitDepthImage::Argb(img) => (img.width(), img.height()),
     };
 
-    progress_callback.on_progress(80.0, "Applying Zopfli compression");
+    let bytes_per_pixel = match pixel_data {
+        HighBitDepthImage::Rgb(_) => 3,
+        HighBitDepthImage::Rgba(_) | HighBitDepthImage::Argb(_) => 4,
+    };
 
-    let optimized = optimize_from_memory(&temp_buffer, &oxipng_options).map_err(|e| {
-        progress_callback.on_error(&e.to_string());
-        AppError::Encode(format!("OxiPNG optimization error: {}", e))
-    })?;
+    // 非圧縮サイズ
+    let raw_size = (width * height * bytes_per_pixel) as usize;
 
-    progress_callback.on_progress(95.0, "Finalizing");
-
-    println!(
-        "PNG: Encoding complete - Original: {} bytes, Optimized: {} bytes",
-        temp_buffer.len(),
-        optimized.len()
-    );
-
-    progress_callback.on_complete();
-    Ok(optimized)
+    // PNGの圧縮率を60%と仮定（最適化により変動）
+    // Zopfli使用時はもう少し小さくなる可能性がありますが、保守的に見積もり
+    (raw_size as f64 * 0.6) as usize
 }

@@ -1,6 +1,6 @@
 # Linux ARM64向けTauriアプリケーションビルド用Dockerfile
 # ARM64ネイティブビルド
-FROM --platform=linux/arm64 rust:1.91.1-bookworm
+FROM --platform=linux/arm64 rust:1.92.0-bookworm
 
 # 環境変数設定
 ENV DEBIAN_FRONTEND=noninteractive

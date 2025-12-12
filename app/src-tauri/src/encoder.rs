@@ -40,12 +40,9 @@ pub fn encode(
             println!("Adapter: Converting JxlOptions for jpegxl_rs encoder...");
             jxl::encode(&img, icc_profile, opts)
         }
-        EncodeOptions::Png(_opts) => {
-            // println!("Adapter: Converting PngOptions for zopfli encoder...");
-            // png::encode(&img, icc_profile, opts)
-            Err(AppError::Encode(
-                "PNG encoding temporarily disabled due to oxipng 10.0 API changes".to_string(),
-            ))
+        EncodeOptions::Png(opts) => {
+            println!("Adapter: Converting PngOptions for oxipng encoder...");
+            png::encode(&img, icc_profile, opts)
         }
         EncodeOptions::Jpeg(opts) => {
             println!("Adapter: Converting JpegOptions for jpegli encoder...");
@@ -68,7 +65,7 @@ pub fn estimate_size(img: &HighBitDepthImage, options: &EncodeOptions) -> usize 
         EncodeOptions::Avif(opts) => avif::estimate_size(img, opts),
         EncodeOptions::Webp(opts) => webp::estimate_size(img, opts),
         EncodeOptions::Jxl(opts) => jxl::estimate_size(img, opts),
-        EncodeOptions::Png(_opts) => 0, // png::estimate_size(img, opts), // Temporarily disabled
+        EncodeOptions::Png(opts) => png::estimate_size(img, opts),
         EncodeOptions::Jpeg(opts) => jpeg::estimate_size(img, opts),
     }
 }

@@ -7,7 +7,7 @@ import { BitDepth, ColorModel, type AvifOptions } from '@/interfaces/AvifOptions
 import { OutputFormat, type CommonOptions } from '@/interfaces/CommonOptions';
 import { type JpegOptions } from '@/interfaces/JpegOptions';
 import { ColorEncoding, EncoderSpeed, type JxlOptions } from '@/interfaces/JxlOptions';
-import { PngFilter, PngInterlace, type PngOptions } from '@/interfaces/PngOptions';
+import { type PngOptions } from '@/interfaces/PngOptions';
 import { WebPImageHint, type WebpOptions } from '@/interfaces/WebpOptions';
 import { FolderType } from '@/types/FolderType';
 import { WebPPreset } from '@/types/WebpTypes';
@@ -47,13 +47,17 @@ const defaultJxlOptions: JxlOptions = {
 };
 
 const defaultPngOptions: PngOptions = {
-  zopfliIterations: 15,
-  embedIccProfile: true,
-  bitDepthReduction: true,
-  colorTypeReduction: true,
-  paletteReduction: true,
-  interlace: PngInterlace.None,
-  filter: PngFilter.MinSum
+  optimizationLevel: 2,
+  useZopfli: true,
+  stripMetadata: false,
+  bitDepthReduction: false,
+  colorTypeReduction: false,
+  paletteReduction: false,
+  grayscaleReduction: false,
+  interlace: null,
+  optimizeAlpha: false,
+  fastEvaluation: true,
+  scale16: false
 } as const;
 
 const defaultJpegOptions: JpegOptions = { quality: 95, progressive: true, optimize: true };
