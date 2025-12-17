@@ -21,7 +21,7 @@ const settingsStore = useSettingsStore();
       <v-slider
         v-model="settingsStore.jxlOptions.quality"
         :disabled="settingsStore.jxlOptions.lossless"
-        :hint="t('quality_hint', { min: 0.5, max: 3.0 })"
+        :hint="t('quality_hint', { min: 3.0, max: 5.0 })"
         :label="t('quality', { min: 0.1, max: 15.0 })"
         color="primary"
         max="15.0"

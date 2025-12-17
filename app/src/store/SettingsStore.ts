@@ -36,9 +36,9 @@ const defaultWebpOptions: WebpOptions = {
 } as const;
 
 const defaultJxlOptions: JxlOptions = {
-  lossless: true,
+  lossless: false, // ロスレスはファイルサイズが大きくなるため、デフォルトはロッシー圧縮
   speed: EncoderSpeed.Squirrel,
-  quality: 1,
+  quality: 3, // デフォルトを3に上げて高品質を確保（推奨範囲: 0.5-3.0）
   useContainer: false,
   usesOriginalProfile: false,
   decodingSpeed: 0,

@@ -1,12 +1,12 @@
 use super::common::{
-    get_encoding_recommendations, log_encoding_analysis, provide_icc_recommendations,
-    EncodingAnalysis,
+    EncodingAnalysis, get_encoding_recommendations, log_encoding_analysis,
+    provide_icc_recommendations,
 };
 use crate::{
-    encoder::{extract_pixel_data, HighBitDepthImage},
+    encoder::{HighBitDepthImage, extract_pixel_data},
     error::AppError,
 };
-use jpegxl_rs::encode::{encoder_builder, EncoderFrame, EncoderResult, EncoderSpeed::*};
+use jpegxl_rs::encode::{EncoderFrame, EncoderResult, EncoderSpeed::*, encoder_builder};
 use serde::{Deserialize, Serialize};
 
 /// JPEG XL encoding options
@@ -226,6 +226,14 @@ pub fn encode(
         );
         // Use linear color encoding for HDR images
         builder = builder.color_encoding(jpegxl_rs::encode::ColorEncoding::LinearSrgb);
+
+        // HDR画像でロスレスの場合は警告を表示
+        if options.lossless {
+            println!(
+                "JXL: WARNING - Lossless mode with HDR content will result in very large files!"
+            );
+            println!("JXL: Consider using lossy mode with quality 3-5 for better compression");
+        }
     } else if is_wide_gamut_sdr {
         println!(
             "JXL: Wide gamut SDR content detected (ICC profile: {} bytes) - using sRGB with ICC management",
@@ -257,9 +265,35 @@ pub fn encode(
         builder = builder.lossless(true);
         // ロスレス時はuses_original_profileを強制的に有効化
         builder = builder.uses_original_profile(true);
+
+        // ファイルサイズの推定警告
+        if is_hdr {
+            let estimated_size_mb = (width * height * 12) / (1024 * 1024); // HDRの場合、約12バイト/ピクセルと推定
+            println!(
+                "JXL: WARNING - Lossless HDR encoding may result in ~{}MB file size",
+                estimated_size_mb
+            );
+        } else if estimated_original_bit_depth > 8 {
+            let estimated_size_mb = (width * height * 8) / (1024 * 1024); // 高ビット深度の場合、約8バイト/ピクセルと推定
+            println!(
+                "JXL: INFO - Lossless high bit-depth encoding may result in ~{}MB file size",
+                estimated_size_mb
+            );
+        }
     } else {
         // ロッシー圧縮時の品質設定
-        let safe_quality = options.quality.clamp(0.1, 15.0);
+        let mut effective_quality = options.quality;
+
+        // HDR画像の場合、品質設定を自動調整
+        if is_hdr && effective_quality < 3.0 {
+            println!(
+                "JXL: HDR content detected - adjusting quality from {:.1} to 3.0 for better preservation",
+                effective_quality
+            );
+            effective_quality = 3.0;
+        }
+
+        let safe_quality = effective_quality.clamp(0.1, 15.0);
         if safe_quality != options.quality {
             println!(
                 "JXL: Adjusted quality value {:.3} -> {:.3}",
@@ -267,8 +301,9 @@ pub fn encode(
             );
         }
         println!(
-            "JXL: Using lossy compression with quality: {:.3}",
-            safe_quality
+            "JXL: Using lossy compression with quality: {:.3}{}",
+            safe_quality,
+            if is_hdr { " (HDR-optimized)" } else { "" }
         );
         builder = builder.quality(safe_quality);
     }
@@ -473,7 +508,7 @@ pub fn encode(
                     rgb.push(chunk[0]); // R
                     rgb.push(chunk[1]); // G
                     rgb.push(chunk[2]); // B
-                                        // Discard alpha channel
+                    // Discard alpha channel
                 }
                 rgb
             } else {
