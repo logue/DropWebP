@@ -28,7 +28,7 @@
     "pinia": "^3.0.4",
     "ufo": "^1.6.1",
     "vite-plugin-vuetify": "^2.1.2",
-    "vue": "^3.5.25",
+    "vue": "^3.5.26",
     "vue-router": "^4.6.4",
     "vuetify": "^3.11.4",
     "vuetify-nuxt-module": "^0.19.1",
@@ -36,11 +36,11 @@
   },
   "devDependencies": {
     "@types/node": "^25.0.3",
-    "@typescript-eslint/eslint-plugin": "^8.50.0",
+    "@typescript-eslint/eslint-plugin": "^8.50.1",
     "@vue/eslint-config-prettier": "^10.2.0",
     "eslint": "^9.39.2",
     "eslint-plugin-vuejs-accessibility": "^2.4.1",
     "rimraf": "^6.1.2",
-    "sass-embedded": "^1.97.0"
+    "sass-embedded": "^1.97.1"
   }
 }

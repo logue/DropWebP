@@ -47,6 +47,17 @@ pub enum AppError {
 
     #[error("Image error: {0}")]
     ImageError(#[source] image::ImageError),
+
+    #[cfg(target_os = "windows")]
+    #[error("Windows API error: {0}")]
+    WindowsError(String),
+}
+
+#[cfg(target_os = "windows")]
+impl From<windows::core::Error> for AppError {
+    fn from(error: windows::core::Error) -> Self {
+        AppError::WindowsError(error.to_string())
+    }
 }
 
 /// Tauriコマンドは String を返す必要があるため、変換を実装

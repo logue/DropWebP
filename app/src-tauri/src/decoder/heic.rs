@@ -7,13 +7,19 @@ use image::{DynamicImage, ImageBuffer, Rgba};
 use std::path::Path;
 
 #[cfg(target_os = "windows")]
+#[cfg(target_os = "windows")]
 pub fn decode_heic<P: AsRef<Path>>(path: P) -> Result<DynamicImage, AppError> {
     use std::ptr;
-    use windows::{Win32::Graphics::Imaging::*, Win32::System::Com::*, core::*};
+    use windows::{
+        core::*, Win32::Foundation::GENERIC_ACCESS_RIGHTS, Win32::Graphics::Imaging::*,
+        Win32::System::Com::*,
+    };
 
     unsafe {
         // COMの初期化
-        CoInitializeEx(None, COINIT_MULTITHREADED)?;
+        CoInitializeEx(None, COINIT_MULTITHREADED)
+            .ok()
+            .map_err(|e| AppError::WindowsError(e.to_string()))?;
 
         // WICファクトリーの作成
         let factory: IWICImagingFactory =
@@ -25,8 +31,8 @@ pub fn decode_heic<P: AsRef<Path>>(path: P) -> Result<DynamicImage, AppError> {
 
         let decoder = factory.CreateDecoderFromFilename(
             PCWSTR(wide_path.as_ptr()),
-            ptr::null(),
-            GENERIC_READ.0,
+            None,
+            GENERIC_ACCESS_RIGHTS(0x80000000), // GENERIC_READ
             WICDecodeMetadataCacheOnDemand,
         )?;
 
@@ -113,7 +119,8 @@ pub fn decode_heic<P: AsRef<Path>>(path: P) -> Result<DynamicImage, AppError> {
             .ok_or(AppError::PathConversion)?;
 
         // CGImageSourceを作成
-        let image_source_ref = CGImageSourceCreateWithURL(cf_url.as_concrete_TypeRef(), ptr::null());
+        let image_source_ref =
+            CGImageSourceCreateWithURL(cf_url.as_concrete_TypeRef(), ptr::null());
 
         if image_source_ref.is_null() {
             return Err(AppError::ImageDecoding);
@@ -153,10 +160,22 @@ pub fn decode_heic<P: AsRef<Path>>(path: P) -> Result<DynamicImage, AppError> {
                             let offset = (y * bytes_per_row + x * 8) as usize;
                             if offset + 7 < data_slice.len() {
                                 // macOSはBGRA16なのでRGBA16に変換（ビッグエンディアン）
-                                let b = u16::from_be_bytes([data_slice[offset], data_slice[offset + 1]]);
-                                let g = u16::from_be_bytes([data_slice[offset + 2], data_slice[offset + 3]]);
-                                let r = u16::from_be_bytes([data_slice[offset + 4], data_slice[offset + 5]]);
-                                let a = u16::from_be_bytes([data_slice[offset + 6], data_slice[offset + 7]]);
+                                let b = u16::from_be_bytes([
+                                    data_slice[offset],
+                                    data_slice[offset + 1],
+                                ]);
+                                let g = u16::from_be_bytes([
+                                    data_slice[offset + 2],
+                                    data_slice[offset + 3],
+                                ]);
+                                let r = u16::from_be_bytes([
+                                    data_slice[offset + 4],
+                                    data_slice[offset + 5],
+                                ]);
+                                let a = u16::from_be_bytes([
+                                    data_slice[offset + 6],
+                                    data_slice[offset + 7],
+                                ]);
                                 rgba16_buffer.push(r);
                                 rgba16_buffer.push(g);
                                 rgba16_buffer.push(b);
@@ -171,9 +190,18 @@ pub fn decode_heic<P: AsRef<Path>>(path: P) -> Result<DynamicImage, AppError> {
                         for x in 0..width {
                             let offset = (y * bytes_per_row + x * 6) as usize;
                             if offset + 5 < data_slice.len() {
-                                let r = u16::from_be_bytes([data_slice[offset], data_slice[offset + 1]]);
-                                let g = u16::from_be_bytes([data_slice[offset + 2], data_slice[offset + 3]]);
-                                let b = u16::from_be_bytes([data_slice[offset + 4], data_slice[offset + 5]]);
+                                let r = u16::from_be_bytes([
+                                    data_slice[offset],
+                                    data_slice[offset + 1],
+                                ]);
+                                let g = u16::from_be_bytes([
+                                    data_slice[offset + 2],
+                                    data_slice[offset + 3],
+                                ]);
+                                let b = u16::from_be_bytes([
+                                    data_slice[offset + 4],
+                                    data_slice[offset + 5],
+                                ]);
                                 rgba16_buffer.push(r);
                                 rgba16_buffer.push(g);
                                 rgba16_buffer.push(b);
@@ -246,9 +274,12 @@ pub fn decode_heic<P: AsRef<Path>>(path: P) -> Result<DynamicImage, AppError> {
         CFRelease(image_source_ref);
 
         // image::DynamicImageに変換（16-bit）
-        let img_buffer =
-            ImageBuffer::<Rgba<u16>, Vec<u16>>::from_raw(width as u32, height as u32, rgba16_buffer)
-                .ok_or(AppError::ImageConversion)?;
+        let img_buffer = ImageBuffer::<Rgba<u16>, Vec<u16>>::from_raw(
+            width as u32,
+            height as u32,
+            rgba16_buffer,
+        )
+        .ok_or(AppError::ImageConversion)?;
 
         Ok(DynamicImage::ImageRgba16(img_buffer))
     }
