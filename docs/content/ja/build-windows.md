@@ -2,6 +2,67 @@
 
 このガイドでは、WindowsでDrop Compress Imageをビルドするための開発環境のセットアップ手順を説明します。
 
+## ビルド方法の選択
+
+Windowsでのビルドには2つの方法があります：
+
+1. **Docker環境でのビルド（推奨）**: クリーンな環境で依存関係の競合を回避
+2. **ネイティブ環境でのビルド**: より高速だが環境構築が複雑
+
+---
+
+## 方法1: Docker環境でのビルド（推奨）
+
+### 前提条件
+
+- Windows 10/11 Pro、Enterprise、Education（Hyper-V対応）
+- Docker Desktop for Windows
+
+### 手順
+
+1. **Docker Desktop のインストール**
+
+   [Docker Desktop](https://www.docker.com/products/docker-desktop)をダウンロードしてインストールします。
+
+2. **Windowsコンテナモードへの切り替え**
+
+   Docker Desktopのタスクトレイアイコンを右クリックし、「Switch to Windows containers...」を選択します。
+
+3. **プロジェクトのクローン**
+
+   ```powershell
+   git clone https://github.com/logue/DropWebP.git
+   cd DropWebP
+   ```
+
+4. **Dockerイメージのビルド**（初回のみ、30-60分程度かかります）
+
+   ```powershell
+   docker build -f Dockerfile.windows-x64 -t dropwebp-windows-builder .
+   ```
+
+5. **アプリケーションのビルド**
+
+   ```powershell
+   docker run --rm -v ${PWD}:C:\workspace dropwebp-windows-builder
+   ```
+
+6. **ビルド成果物の確認**
+
+   ビルドが成功すると、`app/src-tauri/target/release/bundle/`ディレクトリに実行ファイルとインストーラーが生成されます。
+
+### Docker環境の利点
+
+- ✅ ホスト環境を汚さない
+- ✅ 依存関係の競合を回避
+- ✅ 再現可能なビルド
+- ✅ クリーンな環境でのビルド
+- ✅ CI/CD環境との一貫性
+
+---
+
+## 方法2: ネイティブ環境でのビルド
+
 ## 1. Chocolateyのインストール
 
 1. 管理者権限でPowerShellを開き、以下のコマンドでChocolateyパッケージマネージャーをインストールします：

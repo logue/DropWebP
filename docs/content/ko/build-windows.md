@@ -2,6 +2,67 @@
 
 Windows에서 Drop Compress Image의 개발 환경을 설정하는 가이드입니다.
 
+## 빌드 방법 선택
+
+Windows에서 빌드하는 두 가지 방법이 있습니다:
+
+1. **Docker 환경 빌드 (권장)**: 깨끗한 환경으로 의존성 충돌 방지
+2. **네이티브 환경 빌드**: 더 빠르지만 설정이 복잡함
+
+---
+
+## 방법 1: Docker 환경 빌드 (권장)
+
+### 사전 요구사항
+
+- Windows 10/11 Pro, Enterprise 또는 Education (Hyper-V 지원 필요)
+- Docker Desktop for Windows
+
+### 단계
+
+1. **Docker Desktop 설치**
+
+   [Docker Desktop](https://www.docker.com/products/docker-desktop)을 다운로드하여 설치합니다.
+
+2. **Windows 컨테이너 모드로 전환**
+
+   Docker Desktop 트레이 아이콘을 우클릭하고 "Switch to Windows containers..."를 선택합니다.
+
+3. **프로젝트 클론**
+
+   ```powershell
+   git clone https://github.com/logue/DropWebP.git
+   cd DropWebP
+   ```
+
+4. **Docker 이미지 빌드** (처음에만, 30-60분 소요)
+
+   ```powershell
+   docker build -f Dockerfile.windows-x64 -t dropwebp-windows-builder .
+   ```
+
+5. **애플리케이션 빌드**
+
+   ```powershell
+   docker run --rm -v ${PWD}:C:\workspace dropwebp-windows-builder
+   ```
+
+6. **빌드 결과물 확인**
+
+   빌드 성공 시 실행 파일과 설치 프로그램이 `app/src-tauri/target/release/bundle/` 디렉토리에 생성됩니다.
+
+### Docker 환경의 장점
+
+- ✅ 호스트 환경을 깨끗하게 유지
+- ✅ 의존성 충돌 방지
+- ✅ 재현 가능한 빌드
+- ✅ 깨끗한 빌드 환경
+- ✅ CI/CD 파이프라인과의 일관성
+
+---
+
+## 방법 2: 네이티브 환경 빌드
+
 ## 1. Chocolatey 설치
 
 관리자 권한으로 PowerShell을 열고 다음 명령어를 실행하여 Chocolatey를 설치합니다.

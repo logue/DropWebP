@@ -2,6 +2,67 @@
 
 在Windows上为Drop Compress Image设置开发环境的指南。
 
+## 选择构建方法
+
+Windows上有两种构建方式：
+
+1. **Docker环境构建（推荐）**：干净的环境避免依赖冲突
+2. **原生环境构建**：更快但设置更复杂
+
+---
+
+## 方法1：Docker环境构建（推荐）
+
+### 先决条件
+
+- Windows 10/11 Pro、Enterprise或Education（支持Hyper-V）
+- Docker Desktop for Windows
+
+### 步骤
+
+1. **安装Docker Desktop**
+
+   下载并安装[Docker Desktop](https://www.docker.com/products/docker-desktop)。
+
+2. **切换到Windows容器模式**
+
+   右键点击Docker Desktop托盘图标，选择"Switch to Windows containers..."。
+
+3. **克隆项目**
+
+   ```powershell
+   git clone https://github.com/logue/DropWebP.git
+   cd DropWebP
+   ```
+
+4. **构建Docker镜像**（仅首次，需要30-60分钟）
+
+   ```powershell
+   docker build -f Dockerfile.windows-x64 -t dropwebp-windows-builder .
+   ```
+
+5. **构建应用程序**
+
+   ```powershell
+   docker run --rm -v ${PWD}:C:\workspace dropwebp-windows-builder
+   ```
+
+6. **检查构建产物**
+
+   构建成功后，可执行文件和安装程序将生成在`app/src-tauri/target/release/bundle/`目录中。
+
+### Docker环境的优势
+
+- ✅ 保持主机环境干净
+- ✅ 避免依赖冲突
+- ✅ 可重现的构建
+- ✅ 干净的构建环境
+- ✅ 与CI/CD管道保持一致
+
+---
+
+## 方法2：原生环境构建
+
 ## 1. 安装Chocolatey
 
 以管理员身份打开PowerShell并运行以下命令以安装Chocolatey。

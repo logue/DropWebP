@@ -2,6 +2,67 @@
 
 Guide pour la configuration de l'environnement de développement de Drop Compress Image sur Windows.
 
+## Choisissez votre méthode de construction
+
+Il existe deux façons de construire sur Windows :
+
+1. **Environnement Docker (Recommandé)** : Environnement propre évitant les conflits de dépendances
+2. **Environnement natif** : Plus rapide mais configuration plus complexe
+
+---
+
+## Méthode 1 : Construction avec Docker (Recommandé)
+
+### Prérequis
+
+- Windows 10/11 Pro, Enterprise ou Education (avec support Hyper-V)
+- Docker Desktop pour Windows
+
+### Étapes
+
+1. **Installer Docker Desktop**
+
+   Téléchargez et installez [Docker Desktop](https://www.docker.com/products/docker-desktop).
+
+2. **Basculer en mode conteneur Windows**
+
+   Faites un clic droit sur l'icône Docker Desktop dans la barre des tâches et sélectionnez « Switch to Windows containers... ».
+
+3. **Cloner le projet**
+
+   ```powershell
+   git clone https://github.com/logue/DropWebP.git
+   cd DropWebP
+   ```
+
+4. **Construire l'image Docker** (première fois seulement, prend 30-60 minutes)
+
+   ```powershell
+   docker build -f Dockerfile.windows-x64 -t dropwebp-windows-builder .
+   ```
+
+5. **Construire l'application**
+
+   ```powershell
+   docker run --rm -v ${PWD}:C:\workspace dropwebp-windows-builder
+   ```
+
+6. **Vérifier les artefacts de construction**
+
+   Une fois la construction réussie, les exécutables et installateurs seront générés dans le répertoire `app/src-tauri/target/release/bundle/`.
+
+### Avantages de l'environnement Docker
+
+- ✅ Garde l'environnement hôte propre
+- ✅ Évite les conflits de dépendances
+- ✅ Constructions reproductibles
+- ✅ Environnement de construction propre
+- ✅ Cohérence avec les pipelines CI/CD
+
+---
+
+## Méthode 2 : Construction en environnement natif
+
 ## 1. Installer Chocolatey
 
 Ouvrez PowerShell en tant qu'administrateur et exécutez la commande suivante pour installer Chocolatey.
