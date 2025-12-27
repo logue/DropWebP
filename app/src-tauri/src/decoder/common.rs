@@ -51,6 +51,14 @@ impl IccProfileInfo {
     pub fn requires_high_precision(&self) -> bool {
         self.has_high_precision || self.suggests_wide_gamut
     }
+
+    /// Check if this is a BT.2020 (Rec. 2020) color profile
+    pub fn is_bt2020(&self) -> bool {
+        self.profile_description.contains("Rec2020")
+            || self.profile_description.contains("BT.2020")
+            || self.profile_description.contains("BT2020")
+            || self.profile_description.contains("ITU-R BT.2020")
+    }
 }
 
 /// Bit depth analysis result for decoder optimization

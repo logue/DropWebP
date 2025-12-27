@@ -1,7 +1,11 @@
+mod avif;
 mod common;
 mod heic;
 mod jpeg2k;
 mod jxl;
+
+// Re-export IccProfileInfo for use in other modules
+pub use common::IccProfileInfo;
 
 use crate::error::AppError;
 use crate::options::HighBitDepthImage;
@@ -181,6 +185,10 @@ pub fn decode(image_bytes: &[u8]) -> Result<(HighBitDepthImage, Option<Vec<u8>>)
 
     // 判別した形式に応じて、適切なデコーダーを呼び出す
     match format {
+        DetectedFormat::Avif => {
+            println!("Decoder: Using AVIF decoder...");
+            avif::decode(image_bytes)
+        }
         DetectedFormat::Heic => {
             // HEICはファイルパスが必要なため、decode_from_pathを使用する必要がある
             Err(AppError::Decode(
@@ -312,6 +320,7 @@ pub fn decode(image_bytes: &[u8]) -> Result<(HighBitDepthImage, Option<Vec<u8>>)
 
 // 独自の形式を定義するためのenum
 enum DetectedFormat {
+    Avif,
     Heic,
     Jpeg2000,
     Jxl,
@@ -328,12 +337,9 @@ fn detect_format(bytes: &[u8]) -> Option<DetectedFormat> {
         if ftyp == b"heic" || ftyp == b"heix" || ftyp == b"hevc" || ftyp == b"heim" {
             return Some(DetectedFormat::Heic);
         }
-        // AVIFの判別もここに追加できる
+        // AVIFの判別
         if ftyp == b"avif" || ftyp == b"avis" {
-            // AVIFの場合はimageクレートが扱えるのでStandardに流す
-            if let Ok(format) = image::guess_format(bytes) {
-                return Some(DetectedFormat::Standard(format));
-            }
+            return Some(DetectedFormat::Avif);
         }
     }
 

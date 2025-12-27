@@ -219,7 +219,19 @@ pub fn encode(
     let is_likely_8bit_source = estimated_original_bit_depth <= 8 && analysis.max_luminance <= 1.0;
     let is_wide_gamut_sdr = has_wide_gamut_profile && !is_hdr && !is_likely_8bit_source;
 
-    if is_hdr {
+    // Check if this is a BT.2020 profile (wide color gamut for HDR)
+    let is_bt2020_profile = icc_profile.as_ref().map_or(false, |profile| {
+        let info = super::common::IccProfileInfo::analyze(profile);
+        info.is_bt2020()
+    });
+
+    if is_bt2020_profile {
+        println!("JXL: BT.2020 wide gamut profile detected - using ICC profile-driven encoding");
+        println!("JXL: HDR color information will be preserved through ICC profile");
+        // For BT.2020, do NOT set color_encoding - let ICC profile drive the color space
+        // This preserves the wide gamut and HDR information
+        builder = builder.uses_original_profile(true);
+    } else if is_hdr {
         println!(
             "JXL: HDR content detected (max luminance: {:.3}) - using linear color encoding",
             analysis.max_luminance
@@ -227,12 +239,31 @@ pub fn encode(
         // Use linear color encoding for HDR images
         builder = builder.color_encoding(jpegxl_rs::encode::ColorEncoding::LinearSrgb);
 
+        // Note: jpegxl-rs 0.11.2 does not support intensity_target in builder API
+        // HDR intensity information is preserved through LinearSrgb color encoding
+        // with pixel values scaled appropriately (1.0 = 100 nits, max ~100 = 10000 nits)
+        println!(
+            "JXL: HDR dynamic range preserved via LinearSrgb encoding (pixel range 0-{:.1})",
+            analysis.max_luminance
+        );
+
         // HDR画像でロスレスの場合は警告を表示
         if options.lossless {
             println!(
                 "JXL: WARNING - Lossless mode with HDR content will result in very large files!"
             );
             println!("JXL: Consider using lossy mode with quality 3-5 for better compression");
+        }
+    } else if is_bt2020_profile {
+        // BT.2020 profile is already handled above, no additional color encoding needed
+        println!(
+            "JXL: BT.2020 HDR content - preserving full dynamic range via ICC profile (0-{:.1} relative)",
+            analysis.max_luminance
+        );
+        if options.lossless {
+            println!(
+                "JXL: WARNING - Lossless mode with BT.2020 HDR will result in very large files!"
+            );
         }
     } else if is_wide_gamut_sdr {
         println!(
@@ -267,10 +298,15 @@ pub fn encode(
         builder = builder.uses_original_profile(true);
 
         // ファイルサイズの推定警告
-        if is_hdr {
-            let estimated_size_mb = (width * height * 12) / (1024 * 1024); // HDRの場合、約12バイト/ピクセルと推定
+        if is_hdr || is_bt2020_profile {
+            let estimated_size_mb = (width * height * 12) / (1024 * 1024); // HDR/BT.2020の場合、約12バイト/ピクセルと推定
             println!(
-                "JXL: WARNING - Lossless HDR encoding may result in ~{}MB file size",
+                "JXL: WARNING - Lossless {} encoding may result in ~{}MB file size",
+                if is_bt2020_profile {
+                    "BT.2020 HDR"
+                } else {
+                    "HDR"
+                },
                 estimated_size_mb
             );
         } else if estimated_original_bit_depth > 8 {
@@ -284,13 +320,24 @@ pub fn encode(
         // ロッシー圧縮時の品質設定
         let mut effective_quality = options.quality;
 
-        // HDR画像の場合、品質設定を自動調整
-        if is_hdr && effective_quality < 3.0 {
+        // HDR画像の場合、品質設定を自動調整（より高い品質が必要）
+        if (is_hdr || is_bt2020_profile) && effective_quality < 5.0 {
+            let recommended_quality = 5.0;
             println!(
-                "JXL: HDR content detected - adjusting quality from {:.1} to 3.0 for better preservation",
+                "JXL: WARNING - {} content detected with low quality ({:.1})",
+                if is_bt2020_profile {
+                    "BT.2020 HDR"
+                } else {
+                    "HDR"
+                },
                 effective_quality
             );
-            effective_quality = 3.0;
+            println!(
+                "JXL: Adjusting quality from {:.1} to {:.1} to preserve HDR highlights",
+                effective_quality, recommended_quality
+            );
+            println!("JXL: Note: Quality below 5.0 may cause clipping in bright HDR areas");
+            effective_quality = recommended_quality;
         }
 
         let safe_quality = effective_quality.clamp(0.1, 15.0);
@@ -303,7 +350,11 @@ pub fn encode(
         println!(
             "JXL: Using lossy compression with quality: {:.3}{}",
             safe_quality,
-            if is_hdr { " (HDR-optimized)" } else { "" }
+            if is_hdr || is_bt2020_profile {
+                " (HDR-optimized)"
+            } else {
+                ""
+            }
         );
         builder = builder.quality(safe_quality);
     }

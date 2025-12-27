@@ -1,5 +1,8 @@
 use crate::options::HighBitDepthImage;
 
+// Re-export IccProfileInfo from decoder for use in encoders
+pub use crate::decoder::IccProfileInfo;
+
 /// Encoding quality analysis and optimization
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
@@ -60,7 +63,8 @@ impl EncodingAnalysis {
         let has_wide_gamut =
             icc_profile.map_or(false, |profile| analyze_icc_for_wide_gamut(profile));
 
-        // HDR detection
+        // HDR detection - based on pixel values and dynamic range
+        // Note: Synthetic HDR markers (HDR_PQ/HDR_HLG) are no longer used
         let has_hdr_content = max_luminance > 1.0 || dynamic_range > 100.0;
 
         let is_hdr_or_wide_gamut = has_hdr_content || has_wide_gamut;

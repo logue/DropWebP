@@ -53,6 +53,7 @@ jpeg2k = "0.10.1"
 jpegli = "0.1.0"
 jpegxl-rs = { version = "0.11.2+libjxl-0.11.1" }
 kamadak-exif = "0.6.1"
+lcms2 = "6.1.0"
 libavif-sys = { version = "0.17.0", default-features = false, features = [
   "codec-aom",
 ] }
