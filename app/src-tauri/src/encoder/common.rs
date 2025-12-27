@@ -59,6 +59,11 @@ impl EncodingAnalysis {
             max_luminance
         };
 
+        println!(
+            "Content analysis: max_luminance={:.6}, min_luminance={:.6}, dynamic_range={:.3}",
+            max_luminance, min_luminance, dynamic_range
+        );
+
         // ICC profile analysis
         let has_wide_gamut =
             icc_profile.map_or(false, |profile| analyze_icc_for_wide_gamut(profile));
@@ -66,6 +71,13 @@ impl EncodingAnalysis {
         // HDR detection - based on pixel values and dynamic range
         // Note: Synthetic HDR markers (HDR_PQ/HDR_HLG) are no longer used
         let has_hdr_content = max_luminance > 1.0 || dynamic_range > 100.0;
+
+        println!(
+            "HDR detection: max_luminance > 1.0? {} || dynamic_range > 100.0? {} => has_hdr_content={}",
+            max_luminance > 1.0,
+            dynamic_range > 100.0,
+            has_hdr_content
+        );
 
         let is_hdr_or_wide_gamut = has_hdr_content || has_wide_gamut;
 
