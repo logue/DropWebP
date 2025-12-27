@@ -1,4 +1,4 @@
-use super::common::{log_icc_profile_details, IccProfileInfo};
+use super::common::{IccProfileInfo, log_icc_profile_details};
 use crate::error::AppError;
 use crate::options::HighBitDepthImage;
 
@@ -32,39 +32,60 @@ pub fn decode(data: &[u8]) -> Result<(HighBitDepthImage, Option<Vec<u8>>), AppEr
     let height = metadata.height;
 
     println!("JXL: Image properties - {}x{}", width, height);
+    println!("JXL: Pixel format: {:?}", std::mem::discriminant(&pixels));
 
     if let Some(ref info) = profile_info {
         println!(
-            "JXL: Profile analysis - Wide gamut: {}, High precision: {}",
-            info.suggests_wide_gamut, info.has_high_precision
+            "JXL: Profile analysis - Wide gamut: {}, High precision: {}, BT.2020: {}",
+            info.suggests_wide_gamut,
+            info.has_high_precision,
+            info.is_bt2020()
         );
     }
 
     // ピクセルデータをf32形式で取得し、HighBitDepthImageに変換
     let image_buffer = match pixels {
-        Pixels::Float(buffer_f32) => {
+        Pixels::Float(ref buffer_f32) => {
             // チャンネル数を計算してRGBまたはRGBAを判定
             let channels = buffer_f32.len() / (width as usize * height as usize);
+
+            // HDR 範囲チェック（デバッグ用）
+            let max_value = buffer_f32.iter().fold(0.0f32, |max, &v| max.max(v));
+            let min_value = buffer_f32.iter().fold(f32::MAX, |min, &v| min.min(v));
+            println!(
+                "JXL: Decoded pixel value range: [{:.3}, {:.3}]",
+                min_value, max_value
+            );
+            if max_value > 1.0 {
+                println!(
+                    "JXL: HDR content detected in decoded data (max: {:.3})",
+                    max_value
+                );
+            }
 
             match channels {
                 3 => {
                     // RGB
-                    let buffer =
-                        ImageBuffer::<Rgb<f32>, Vec<f32>>::from_raw(width, height, buffer_f32)
-                            .ok_or_else(|| {
-                                AppError::Decode("Failed to create f32 RGB ImageBuffer".to_string())
-                            })?;
+                    let buffer = ImageBuffer::<Rgb<f32>, Vec<f32>>::from_raw(
+                        width,
+                        height,
+                        buffer_f32.clone(),
+                    )
+                    .ok_or_else(|| {
+                        AppError::Decode("Failed to create f32 RGB ImageBuffer".to_string())
+                    })?;
                     HighBitDepthImage::Rgb(buffer)
                 }
                 4 => {
                     // RGBA
-                    let buffer =
-                        ImageBuffer::<Rgba<f32>, Vec<f32>>::from_raw(width, height, buffer_f32)
-                            .ok_or_else(|| {
-                                AppError::Decode(
-                                    "Failed to create f32 RGBA ImageBuffer".to_string(),
-                                )
-                            })?;
+                    let buffer = ImageBuffer::<Rgba<f32>, Vec<f32>>::from_raw(
+                        width,
+                        height,
+                        buffer_f32.clone(),
+                    )
+                    .ok_or_else(|| {
+                        AppError::Decode("Failed to create f32 RGBA ImageBuffer".to_string())
+                    })?;
                     HighBitDepthImage::Rgba(buffer)
                 }
                 _ => {

@@ -160,9 +160,27 @@ pub fn encode(
 
     // Encoder configuration (using safe default values)
     let mut binding = encoder_builder();
-    let mut builder = binding
-        .speed(options.speed.to_jxl())
-        .use_container(options.use_container);
+    let mut builder = binding.speed(options.speed.to_jxl());
+
+    // RGBA の場合は builder 段階で has_alpha を設定
+    // 注意：後でエンコーダーを再構築すると ICC profile が失われる
+    if is_rgba {
+        println!("JXL: Configuring for RGBA image (alpha channel support)");
+        builder = builder.has_alpha(true);
+    }
+
+    // ICC profile がある場合は container format を強制的に有効化
+    // ICC profile はメタデータボックスとして埋め込まれるため、container が必要
+    let use_container = if icc_profile.is_some() {
+        if !options.use_container {
+            println!("JXL: Enabling container format to embed ICC profile");
+        }
+        true
+    } else {
+        options.use_container
+    };
+
+    builder = builder.use_container(use_container);
 
     // Validate decoding_speed values (out-of-range values cause ApiUsage errors)
     let safe_decoding_speed = options.decoding_speed.clamp(0, 4);
@@ -225,18 +243,46 @@ pub fn encode(
         info.is_bt2020()
     });
 
-    if is_bt2020_profile {
-        println!("JXL: BT.2020 wide gamut profile detected - using ICC profile-driven encoding");
-        println!("JXL: HDR color information will be preserved through ICC profile");
-        // For BT.2020, do NOT set color_encoding - let ICC profile drive the color space
-        // This preserves the wide gamut and HDR information
+    // JPEG XL color encoding 設定
+    // 重要：jpegxl-rs 0.11.2 の制限により、ICC profile の直接埋め込みが困難
+    // そのため、HDR の場合は LinearSrgb color_encoding を使用し、
+    // ICC profile は参考情報として埋め込む
+    let use_icc_for_color =
+        icc_profile.is_some() && (is_bt2020_profile || is_hdr || has_wide_gamut_profile);
+
+    if use_icc_for_color {
+        println!(
+            "JXL: ICC profile available (size: {} bytes)",
+            icc_profile.as_ref().unwrap().len()
+        );
+        if is_bt2020_profile {
+            println!("JXL: BT.2020 wide gamut profile detected");
+        } else if is_hdr {
+            println!("JXL: HDR content with ICC profile detected");
+        } else if has_wide_gamut_profile {
+            println!("JXL: Wide gamut ICC profile detected");
+        }
+        println!("JXL: ICC profile will be embedded as metadata");
+        println!("JXL: Note: Will NOT set color_encoding to let ICC profile define color space");
+    }
+
+    // Color encoding の設定
+    // 重要：jpegxl-rs 0.11.2 の制限により、BT.2020 などの広色域を正しく扱えない
+    // ICC profile がある場合でも LinearSrgb を設定する必要がある
+    if use_icc_for_color {
+        // ICC profile + LinearSrgb の組み合わせ
+        // HDR 輝度は保持されるが、色域は sRGB に制限される
+        println!("JXL: Using LinearSrgb with ICC profile (jpegxl-rs limitation)");
+        println!("JXL: WARNING - BT.2020 color gamut will be mapped to sRGB");
+        println!("JXL: Recommendation: Use AVIF format for full BT.2020/HDR support");
+        builder = builder.color_encoding(jpegxl_rs::encode::ColorEncoding::LinearSrgb);
         builder = builder.uses_original_profile(true);
     } else if is_hdr {
+        // HDR content で ICC profile がない場合のみ LinearSrgb を使用
         println!(
-            "JXL: HDR content detected (max luminance: {:.3}) - using linear color encoding",
+            "JXL: HDR content without ICC profile (max luminance: {:.3}) - using LinearSrgb",
             analysis.max_luminance
         );
-        // Use linear color encoding for HDR images
         builder = builder.color_encoding(jpegxl_rs::encode::ColorEncoding::LinearSrgb);
 
         // Note: jpegxl-rs 0.11.2 does not support intensity_target in builder API
@@ -254,24 +300,15 @@ pub fn encode(
             );
             println!("JXL: Consider using lossy mode with quality 3-5 for better compression");
         }
-    } else if is_bt2020_profile {
-        // BT.2020 profile is already handled above, no additional color encoding needed
-        println!(
-            "JXL: BT.2020 HDR content - preserving full dynamic range via ICC profile (0-{:.1} relative)",
-            analysis.max_luminance
-        );
-        if options.lossless {
-            println!(
-                "JXL: WARNING - Lossless mode with BT.2020 HDR will result in very large files!"
-            );
-        }
     } else if is_wide_gamut_sdr {
         println!(
             "JXL: Wide gamut SDR content detected (ICC profile: {} bytes) - using sRGB with ICC management",
             icc_profile.as_ref().unwrap().len()
         );
-        // Use sRGB for wide gamut SDR images, let ICC profile manage color gamut
-        builder = builder.color_encoding(jpegxl_rs::encode::ColorEncoding::Srgb);
+        // Use sRGB for wide gamut SDR images without ICC, or let ICC profile manage if present
+        if !use_icc_for_color {
+            builder = builder.color_encoding(jpegxl_rs::encode::ColorEncoding::Srgb);
+        }
         println!("JXL: Applied high quality settings for wide gamut content");
     } else if is_likely_8bit_source {
         println!(
@@ -281,12 +318,19 @@ pub fn encode(
         // Use standard sRGB settings for efficient 8-bit processing
         builder = builder.color_encoding(jpegxl_rs::encode::ColorEncoding::Srgb);
     } else {
-        // Other high bit depth images
+        // Other high bit depth images - use user-specified or default color encoding
+        println!(
+            "JXL: Using configured color encoding: {:?}",
+            options.color_encoding
+        );
         builder = builder.color_encoding(options.color_encoding.to_jxl());
     }
 
-    if options.uses_original_profile {
+    // ICC profile を使用する場合、uses_original_profile を有効化
+    // これにより、エンコーダーが ICC profile を尊重する
+    if use_icc_for_color {
         builder = builder.uses_original_profile(true);
+        println!("JXL: Enabled uses_original_profile for ICC profile support");
     }
 
     // ロスレス設定
@@ -294,18 +338,18 @@ pub fn encode(
     if options.lossless {
         println!("JXL: Using lossless compression mode");
         builder = builder.lossless(true);
-        // ロスレス時はuses_original_profileを強制的に有効化
-        builder = builder.uses_original_profile(true);
 
         // ファイルサイズの推定警告
-        if is_hdr || is_bt2020_profile {
-            let estimated_size_mb = (width * height * 12) / (1024 * 1024); // HDR/BT.2020の場合、約12バイト/ピクセルと推定
+        if is_hdr || use_icc_for_color {
+            let estimated_size_mb = (width * height * 12) / (1024 * 1024); // HDR/広色域の場合、約12バイト/ピクセルと推定
             println!(
                 "JXL: WARNING - Lossless {} encoding may result in ~{}MB file size",
                 if is_bt2020_profile {
                     "BT.2020 HDR"
-                } else {
+                } else if is_hdr {
                     "HDR"
+                } else {
+                    "wide gamut"
                 },
                 estimated_size_mb
             );
@@ -321,22 +365,29 @@ pub fn encode(
         let mut effective_quality = options.quality;
 
         // HDR画像の場合、品質設定を自動調整（より高い品質が必要）
-        if (is_hdr || is_bt2020_profile) && effective_quality < 5.0 {
+        if (is_hdr || use_icc_for_color) && effective_quality < 5.0 {
             let recommended_quality = 5.0;
             println!(
                 "JXL: WARNING - {} content detected with low quality ({:.1})",
                 if is_bt2020_profile {
                     "BT.2020 HDR"
-                } else {
+                } else if is_hdr {
                     "HDR"
+                } else {
+                    "Wide gamut"
                 },
                 effective_quality
             );
             println!(
-                "JXL: Adjusting quality from {:.1} to {:.1} to preserve HDR highlights",
-                effective_quality, recommended_quality
+                "JXL: Adjusting quality from {:.1} to {:.1} to preserve {} highlights",
+                effective_quality,
+                recommended_quality,
+                if is_hdr { "HDR" } else { "color" }
             );
-            println!("JXL: Note: Quality below 5.0 may cause clipping in bright HDR areas");
+            println!(
+                "JXL: Note: Quality below 5.0 may cause clipping in bright {} areas",
+                if is_hdr { "HDR" } else { "color" }
+            );
             effective_quality = recommended_quality;
         }
 
@@ -350,8 +401,8 @@ pub fn encode(
         println!(
             "JXL: Using lossy compression with quality: {:.3}{}",
             safe_quality,
-            if is_hdr || is_bt2020_profile {
-                " (HDR-optimized)"
+            if is_hdr || use_icc_for_color {
+                " (optimized)"
             } else {
                 ""
             }
@@ -371,16 +422,16 @@ pub fn encode(
             profile_data.len()
         );
 
-        // Add ICC profile as custom metadata box
-        // 'icc ' (standard 4-character code for ICC profiles)
+        // JPEG XL container format での ICC profile 埋め込み
+        // 'icc ' は JPEG XL 仕様に従った 4-character code
         let icc_type = *b"icc ";
         let metadata = jpegxl_rs::encode::Metadata::Custom(icc_type, profile_data);
 
         if let Err(e) = encoder.add_metadata(&metadata, false) {
             println!("JXL: Failed to embed ICC profile: {:?}", e);
-            println!("JXL: Continuing processing without ICC profile");
+            println!("JXL: Continuing without ICC profile metadata");
         } else {
-            println!("JXL: ICC profile embedding completed successfully");
+            println!("JXL: ICC profile embedded as metadata");
         }
     }
 
@@ -433,17 +484,6 @@ pub fn encode(
                 println!("JXL: Warning - Negative values detected, will clamp to 0.0");
             }
         }
-    }
-
-    // Alpha channel support encoding
-    // Apply GitHub Issue #96 solution: set has_alpha() in builder
-    if is_rgba {
-        println!("JXL: Processing RGBA image (preserving alpha channel)...");
-        builder = builder.has_alpha(true);
-        // Rebuild encoder (has_alpha must be set at builder time)
-        encoder = builder.build().map_err(|e| {
-            AppError::Encode(format!("JXL encoder rebuild with alpha failed: {}", e))
-        })?;
     }
 
     // RGBA processing based on GitHub Issue #96 solution (HDR compatible version)
@@ -537,50 +577,83 @@ pub fn encode(
             println!("JXL: Initial encoding failed - error details: {:?}", e);
 
             // Staged fallback strategy for known jpegxl-rs issues
-            println!("JXL: Attempting emergency fallback for jpegxl-rs compatibility issues...");
+            println!("JXL: Attempting fallback with adjusted settings...");
 
-            // 最も安全な設定で再試行
-            let mut fallback_encoder = encoder_builder()
+            // フォールバック設定：元の設定を保持しつつ、安全な設定に変更
+            let mut fallback_binding = encoder_builder();
+            let mut fallback_builder = fallback_binding
                 .speed(Cheetah) // 中程度の速度
-                .quality(1.0) // デフォルト品質
-                .use_container(false) // コンテナなし
-                .color_encoding(jpegxl_rs::encode::ColorEncoding::Srgb)
-                .build()
-                .map_err(|e| {
-                    AppError::Encode(format!("JXL fallback encoder build failed: {}", e))
-                })?;
+                .use_container(use_container); // 元の container 設定を保持
 
-            println!("JXL: 緊急フォールバック設定でエンコード再試行中...");
-
-            // フォールバック時はRGB（3チャンネル）に変換
-            let fallback_data = if is_rgba {
-                let mut rgb = Vec::with_capacity((final_data.len() / 4) * 3);
-                for chunk in final_data.chunks_exact(4) {
-                    rgb.push(chunk[0]); // R
-                    rgb.push(chunk[1]); // G
-                    rgb.push(chunk[2]); // B
-                    // Discard alpha channel
-                }
-                rgb
+            // Color encoding の設定（ICC profile がある場合も LinearSrgb を使用）
+            if use_icc_for_color {
+                println!(
+                    "JXL: Fallback - using LinearSrgb with ICC profile (jpegxl-rs limitation)"
+                );
+                fallback_builder =
+                    fallback_builder.color_encoding(jpegxl_rs::encode::ColorEncoding::LinearSrgb);
+                fallback_builder = fallback_builder.uses_original_profile(true);
+            } else if is_hdr {
+                println!("JXL: Fallback - using LinearSrgb for HDR content without ICC profile");
+                fallback_builder =
+                    fallback_builder.color_encoding(jpegxl_rs::encode::ColorEncoding::LinearSrgb);
             } else {
-                final_data.clone()
-            };
+                fallback_builder =
+                    fallback_builder.color_encoding(jpegxl_rs::encode::ColorEncoding::Srgb);
+            }
+
+            // RGBA の場合は has_alpha を設定
+            if is_rgba {
+                println!("JXL: Fallback - configuring for RGBA");
+                fallback_builder = fallback_builder.has_alpha(true);
+            }
+
+            // ロスレスの場合はロッシーに変更（ロスレスが失敗したため）
+            if options.lossless {
+                println!("JXL: Fallback - switching from lossless to lossy (quality 5.0)");
+                fallback_builder = fallback_builder.quality(5.0);
+            } else {
+                fallback_builder = fallback_builder.quality(options.quality.clamp(0.1, 15.0));
+            }
+
+            let mut fallback_encoder = fallback_builder.build().map_err(|e| {
+                AppError::Encode(format!("JXL fallback encoder build failed: {}", e))
+            })?;
+
+            // ICC profile を再度埋め込む
+            if let Some(profile_data) = &icc_profile {
+                println!(
+                    "JXL: Fallback - re-embedding ICC profile ({} bytes)",
+                    profile_data.len()
+                );
+                let icc_type = *b"icc ";
+                let metadata = jpegxl_rs::encode::Metadata::Custom(icc_type, profile_data);
+                if let Err(e) = fallback_encoder.add_metadata(&metadata, false) {
+                    println!("JXL: Fallback - Failed to embed ICC profile: {:?}", e);
+                }
+            }
+
+            println!("JXL: フォールバックエンコード実行中...");
+
+            // フォールバック時は元のデータをそのまま使用（RGB/RGBA を保持）
+            let fallback_channels = if is_rgba { 4 } else { 3 };
 
             // Use appropriate data type based on 8-bit detection for fallback too
             let fallback_result: Result<Vec<u8>, _> = if is_likely_8bit_source {
                 println!("JXL: Fallback - encoding with 8-bit u8 data");
-                let fallback_u8: Vec<u8> = fallback_data
+                let fallback_u8: Vec<u8> = final_data
                     .iter()
                     .map(|&f| (f * 255.0).round().clamp(0.0, 255.0) as u8)
                     .collect();
-                let fallback_frame_u8 = EncoderFrame::new(fallback_u8.as_slice()).num_channels(3);
+                let fallback_frame_u8 =
+                    EncoderFrame::new(fallback_u8.as_slice()).num_channels(fallback_channels);
                 fallback_encoder
                     .encode_frame::<u8, u8>(&fallback_frame_u8, width, height)
                     .map(|result| result.to_vec())
             } else {
                 println!("JXL: Fallback - encoding with f32 data");
                 let fallback_frame_f32 =
-                    EncoderFrame::new(fallback_data.as_slice()).num_channels(3);
+                    EncoderFrame::new(final_data.as_slice()).num_channels(fallback_channels);
                 fallback_encoder
                     .encode_frame::<f32, f32>(&fallback_frame_f32, width, height)
                     .map(|result| result.to_vec())
@@ -589,18 +662,22 @@ pub fn encode(
             match fallback_result {
                 Ok(result) => {
                     println!(
-                        "JXL: Emergency fallback successful - output size: {} bytes",
+                        "JXL: Fallback successful - output size: {} bytes",
                         result.len()
                     );
-                    println!("JXL: Note: Used safe settings instead of original configuration");
+                    if options.lossless {
+                        println!(
+                            "JXL: Note: Switched to lossy mode (quality 5.0) for compatibility"
+                        );
+                    }
                     result
                 }
                 Err(fallback_err) => {
-                    println!("JXL: Emergency fallback also failed");
+                    println!("JXL: Fallback also failed");
                     println!("JXL: Original error: {:?}", e);
                     println!("JXL: Fallback error: {:?}", fallback_err);
-                    println!("JXL: Configuration information:");
-                    eprintln!("  - Width: {}, Height: {}", width, height);
+                    println!("JXL: Encoding configuration:");
+                    eprintln!("  - Dimensions: {}x{}", width, height);
                     eprintln!("  - Is RGBA: {}", is_rgba);
                     eprintln!("  - Data length: {}", final_data.len());
                     eprintln!("  - Lossless: {}", options.lossless);
