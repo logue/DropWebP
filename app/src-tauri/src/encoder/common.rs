@@ -15,6 +15,7 @@ pub struct EncodingAnalysis {
     pub recommended_bit_depth: RecommendedBitDepth,
     pub tone_mapping_required: bool,
     pub alpha_channel_present: bool,
+    pub transfer_function: Option<crate::decoder::TransferFunction>,
 }
 
 #[derive(Debug, Clone)]
@@ -36,6 +37,8 @@ pub enum ToneMappingType {
 impl EncodingAnalysis {
     /// Analyze image content and ICC profile to determine optimal encoding settings
     pub fn analyze(pixel_data: &HighBitDepthImage, icc_profile: Option<&[u8]>) -> Self {
+        use crate::decoder::TransferFunction;
+
         let (pixels_f32, has_alpha) = extract_pixel_data_for_analysis(pixel_data);
 
         // Calculate luminance statistics
@@ -65,19 +68,32 @@ impl EncodingAnalysis {
         );
 
         // ICC profile analysis
-        let has_wide_gamut =
-            icc_profile.map_or(false, |profile| analyze_icc_for_wide_gamut(profile));
+        let (has_wide_gamut, transfer_function) = icc_profile
+            .map(|profile| analyze_icc_for_wide_gamut(profile))
+            .unwrap_or((false, None));
 
-        // HDR detection - based on pixel values and dynamic range
-        // Note: Synthetic HDR markers (HDR_PQ/HDR_HLG) are no longer used
-        let has_hdr_content = max_luminance > 1.0 || dynamic_range > 100.0;
+        // HDR detection - consider both pixel values AND transfer function from ICC profile
+        // If ICC profile indicates PQ or HLG transfer, treat as HDR regardless of pixel values
+        // This handles the case where pixel data is already in PQ/HLG encoding (0-1 range)
+        let has_hdr_content = matches!(
+            transfer_function,
+            Some(TransferFunction::Pq) | Some(TransferFunction::Hlg)
+        ) || max_luminance > 1.0
+            || dynamic_range > 100.0;
 
-        println!(
-            "HDR detection: max_luminance > 1.0? {} || dynamic_range > 100.0? {} => has_hdr_content={}",
-            max_luminance > 1.0,
-            dynamic_range > 100.0,
-            has_hdr_content
-        );
+        if let Some(ref tf) = transfer_function {
+            println!(
+                "HDR detection: transfer_function={:?} => has_hdr_content={}",
+                tf, has_hdr_content
+            );
+        } else {
+            println!(
+                "HDR detection: max_luminance > 1.0? {} || dynamic_range > 100.0? {} => has_hdr_content={}",
+                max_luminance > 1.0,
+                dynamic_range > 100.0,
+                has_hdr_content
+            );
+        }
 
         let is_hdr_or_wide_gamut = has_hdr_content || has_wide_gamut;
 
@@ -101,6 +117,7 @@ impl EncodingAnalysis {
             recommended_bit_depth,
             tone_mapping_required,
             alpha_channel_present: has_alpha,
+            transfer_function,
         }
     }
 }
@@ -248,25 +265,30 @@ fn extract_pixel_data_for_analysis(img: &HighBitDepthImage) -> (&[f32], bool) {
     }
 }
 
-/// Analyze ICC profile for wide gamut characteristics
-fn analyze_icc_for_wide_gamut(profile: &[u8]) -> bool {
-    // Look for wide gamut indicators in the profile
-    let profile_str = String::from_utf8_lossy(profile);
+/// Analyze ICC profile for wide gamut characteristics and transfer function
+fn analyze_icc_for_wide_gamut(profile: &[u8]) -> (bool, Option<crate::decoder::TransferFunction>) {
+    use crate::decoder::{IccProfileInfo, TransferFunction};
 
-    // Check for wide gamut markers (including synthetic markers from HEIC decoder)
-    if profile_str.contains("Display P3")
-        || profile_str.contains("DCI-P3")
-        || profile_str.contains("Rec2020")
-        || profile_str.contains("BT.2020")
-        || profile_str.contains("ProPhoto")
-        || profile_str.contains("Adobe RGB")
-    {
-        return true;
-    }
+    // Use proper ICC profile analysis from decoder module
+    let info = IccProfileInfo::analyze(profile);
 
-    // Full ICC profiles tend to be larger (400+ bytes)
-    // Large profiles often indicate complex tone curves or wide gamuts
-    profile.len() >= 400 || profile.len() > 1000
+    println!(
+        "ICC Profile Analysis: {} bytes, color_space: {}, description: {}, transfer: {:?}, wide_gamut: {}",
+        info.size,
+        info.color_space,
+        info.profile_description,
+        info.transfer_function,
+        info.suggests_wide_gamut
+    );
+
+    let has_wide_gamut = info.suggests_wide_gamut;
+    let transfer_fn = if info.transfer_function != TransferFunction::Unknown {
+        Some(info.transfer_function)
+    } else {
+        None
+    };
+
+    (has_wide_gamut, transfer_fn)
 }
 
 /// Calculate optimal quality settings based on content analysis

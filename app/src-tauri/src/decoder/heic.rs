@@ -1,18 +1,17 @@
 /// HEIC/HEIF デコーダー（OS標準API使用、HDR対応）
 /// - Windows: Windows Imaging Component (WIC) - 64bppRGBA
-/// - macOS: ImageIO framework - 16-bit per channel
+/// - macOS: ImageIO framework - 16-bit per channel + ICC profile
 /// - Linux: heif-convert コマンド - 16-bit PNG
 use crate::error::AppError;
 use image::{DynamicImage, ImageBuffer, Rgba};
 use std::path::Path;
 
 #[cfg(target_os = "windows")]
-#[cfg(target_os = "windows")]
-pub fn decode_heic<P: AsRef<Path>>(path: P) -> Result<DynamicImage, AppError> {
+pub fn decode_heic<P: AsRef<Path>>(path: P) -> Result<(DynamicImage, Option<Vec<u8>>), AppError> {
     use std::ptr;
     use windows::{
-        core::*, Win32::Foundation::GENERIC_ACCESS_RIGHTS, Win32::Graphics::Imaging::*,
-        Win32::System::Com::*,
+        Win32::Foundation::GENERIC_ACCESS_RIGHTS, Win32::Graphics::Imaging::*,
+        Win32::System::Com::*, core::*,
     };
 
     unsafe {
@@ -76,12 +75,13 @@ pub fn decode_heic<P: AsRef<Path>>(path: P) -> Result<DynamicImage, AppError> {
         let img_buffer = ImageBuffer::<Rgba<u16>, Vec<u16>>::from_raw(width, height, rgba16_buffer)
             .ok_or(AppError::ImageConversion)?;
 
-        Ok(DynamicImage::ImageRgba16(img_buffer))
+        // TODO: Windows版もWICからICCプロファイルを抽出する必要がある
+        Ok((DynamicImage::ImageRgba16(img_buffer), None))
     }
 }
 
 #[cfg(target_os = "macos")]
-pub fn decode_heic<P: AsRef<Path>>(path: P) -> Result<DynamicImage, AppError> {
+pub fn decode_heic<P: AsRef<Path>>(path: P) -> Result<(DynamicImage, Option<Vec<u8>>), AppError> {
     use core_foundation::base::TCFType;
     use core_foundation::data::CFData;
     use std::os::raw::c_void;
@@ -91,6 +91,8 @@ pub fn decode_heic<P: AsRef<Path>>(path: P) -> Result<DynamicImage, AppError> {
     type CGImageSourceRef = *const c_void;
     type CGImageRef = *const c_void;
     type CGDataProviderRef = *const c_void;
+    type CGColorSpaceRef = *const c_void;
+    type CFDictionaryRef = *const c_void;
 
     unsafe extern "C" {
         fn CGImageSourceCreateWithURL(
@@ -102,12 +104,20 @@ pub fn decode_heic<P: AsRef<Path>>(path: P) -> Result<DynamicImage, AppError> {
             index: usize,
             options: core_foundation::dictionary::CFDictionaryRef,
         ) -> CGImageRef;
+        fn CGImageSourceCopyPropertiesAtIndex(
+            isrc: CGImageSourceRef,
+            index: usize,
+            options: core_foundation::dictionary::CFDictionaryRef,
+        ) -> CFDictionaryRef;
         fn CGImageGetWidth(image: CGImageRef) -> usize;
         fn CGImageGetHeight(image: CGImageRef) -> usize;
         fn CGImageGetBitsPerComponent(image: CGImageRef) -> usize;
         fn CGImageGetBitsPerPixel(image: CGImageRef) -> usize;
         fn CGImageGetBytesPerRow(image: CGImageRef) -> usize;
         fn CGImageGetDataProvider(image: CGImageRef) -> CGDataProviderRef;
+        fn CGImageGetColorSpace(image: CGImageRef) -> CGColorSpaceRef;
+        fn CGColorSpaceCopyICCData(space: CGColorSpaceRef) -> core_foundation::data::CFDataRef;
+        fn CGColorSpaceCopyName(space: CGColorSpaceRef) -> core_foundation::string::CFStringRef;
         fn CGDataProviderCopyData(provider: CGDataProviderRef) -> core_foundation::data::CFDataRef;
         fn CFRelease(cf: *const c_void);
     }
@@ -124,6 +134,69 @@ pub fn decode_heic<P: AsRef<Path>>(path: P) -> Result<DynamicImage, AppError> {
 
         if image_source_ref.is_null() {
             return Err(AppError::ImageDecoding);
+        }
+
+        // 画像メタデータを取得してHDR Gain Mapをチェック
+        // ファイルの生データから直接HDR Gain Map関連の文字列を検索
+        let mut has_gain_map = false;
+
+        if let Ok(file_data) = std::fs::read(path.as_ref()) {
+            // Convert to string for searching (lossy is OK for metadata detection)
+            let file_str = String::from_utf8_lossy(&file_data);
+
+            // Check for Apple HDR Gain Map indicators
+            // These strings appear in HEIC files with Gain Map HDR
+            if file_str.contains("HDRGainMap")
+                || file_str.contains("hdrgainmap")
+                || file_str.contains("urn:com:apple:photo:2020:aux:hdrgainmap")
+                || file_str.contains("Apple_Gain_Map")
+                || file_str.contains("GainMapHeadroom")
+                || file_str.contains("GainMapVersion")
+            {
+                has_gain_map = true;
+                println!("HEIC: Apple HDR Gain Map detected in file metadata");
+
+                // Check if libheif-convert is available (optional external tool)
+                // Cross-platform: Use .exe extension on Windows
+                #[cfg(target_os = "windows")]
+                let heif_convert_cmd = "heif-convert.exe";
+                #[cfg(not(target_os = "windows"))]
+                let heif_convert_cmd = "heif-convert";
+
+                let heif_available = std::process::Command::new(heif_convert_cmd)
+                    .arg("--version")
+                    .output()
+                    .map(|output| output.status.success())
+                    .unwrap_or(false);
+
+                if heif_available {
+                    println!("HEIC: libheif-convert found - Gain Map HDR can be processed");
+                    println!(
+                        "HEIC: NOTE: For best results, consider using libheif-convert directly"
+                    );
+                    println!("HEIC: Example: {} input.heic output.png", heif_convert_cmd);
+                } else {
+                    println!("HEIC: WARNING - Gain Map HDR detected but not fully supported");
+                    println!("HEIC: The base SDR image (8-bit Display P3) will be decoded");
+                    println!("HEIC: HDR tone mapping from Gain Map is NOT applied");
+                    println!("HEIC: ");
+                    println!("HEIC: To enable HDR support, install libheif (optional):");
+                    #[cfg(target_os = "macos")]
+                    println!("HEIC:   macOS: brew install libheif");
+                    #[cfg(target_os = "linux")]
+                    println!("HEIC:   Linux: sudo apt install libheif-examples");
+                    #[cfg(target_os = "windows")]
+                    {
+                        println!(
+                            "HEIC:   Windows: Download from https://github.com/strukturag/libheif/releases"
+                        );
+                        println!("HEIC:   Or use Chocolatey: choco install libheif");
+                    }
+                    println!("HEIC: ");
+                    println!("HEIC: Alternative: Convert with ffmpeg or macOS Preview first");
+                    println!("HEIC:   ffmpeg -i input.heic -pix_fmt rgb48le output.png");
+                }
+            }
         }
 
         // 最初の画像を取得
@@ -146,21 +219,100 @@ pub fn decode_heic<P: AsRef<Path>>(path: P) -> Result<DynamicImage, AppError> {
         let data = CFData::wrap_under_create_rule(cf_data_ref);
         let data_slice = data.bytes();
 
+        // カラースペース情報とICCプロファイルを取得
+        let color_space_ref = CGImageGetColorSpace(cg_image_ref);
+        let mut icc_profile: Option<Vec<u8>> = None;
+        let mut color_space_name = String::new();
+
+        if !color_space_ref.is_null() {
+            // カラースペース名を取得
+            let cs_name_ref = CGColorSpaceCopyName(color_space_ref);
+            if !cs_name_ref.is_null() {
+                let cs_name =
+                    core_foundation::string::CFString::wrap_under_create_rule(cs_name_ref);
+                color_space_name = cs_name.to_string();
+                println!("HEIC: Color space: {}", color_space_name);
+            }
+
+            // ICCプロファイルを取得
+            let icc_data_ref = CGColorSpaceCopyICCData(color_space_ref);
+            if !icc_data_ref.is_null() {
+                let icc_data = CFData::wrap_under_create_rule(icc_data_ref);
+                let icc_bytes = icc_data.bytes();
+                if !icc_bytes.is_empty() {
+                    let mut profile = icc_bytes.to_vec();
+
+                    // カラースペース名にPQ/HLG/HDR情報が含まれている場合、
+                    // ICCプロファイルの末尾にメタデータとして追加
+                    // これにより、encoder側でHDR検出が可能になる
+                    if color_space_name.contains("PQ")
+                        || color_space_name.contains("HLG")
+                        || color_space_name.contains("HDR")
+                        || color_space_name.contains("BT2020")
+                        || color_space_name.contains("Rec2020")
+                        || has_gain_map
+                    {
+                        // カラースペース名をUTF-8バイト列として追加
+                        profile.extend_from_slice(b"\n[ColorSpace]");
+                        if has_gain_map && !color_space_name.contains("HDR") {
+                            // Gain Map HDRの場合は明示的にマーク
+                            profile.extend_from_slice(
+                                format!("{} (Apple Gain Map HDR)", color_space_name).as_bytes(),
+                            );
+                        } else {
+                            profile.extend_from_slice(color_space_name.as_bytes());
+                        }
+                        println!("HEIC: Added color space metadata to ICC profile");
+                    }
+
+                    icc_profile = Some(profile);
+                    println!(
+                        "HEIC: Extracted ICC profile ({} bytes)",
+                        icc_profile.as_ref().unwrap().len()
+                    );
+                } else {
+                    println!("HEIC: ICC profile is empty");
+                }
+            } else {
+                println!("HEIC: No ICC profile available in color space");
+
+                // ICCプロファイルがない場合でも、カラースペース名からHDR情報を生成
+                if color_space_name.contains("PQ")
+                    || color_space_name.contains("HLG")
+                    || color_space_name.contains("HDR")
+                    || has_gain_map
+                {
+                    let mut synthetic_profile = Vec::new();
+                    synthetic_profile.extend_from_slice(b"[ColorSpace]");
+                    if has_gain_map {
+                        synthetic_profile.extend_from_slice(
+                            format!("{} (Apple Gain Map HDR)", color_space_name).as_bytes(),
+                        );
+                    } else {
+                        synthetic_profile.extend_from_slice(color_space_name.as_bytes());
+                    }
+                    icc_profile = Some(synthetic_profile);
+                    println!("HEIC: Created synthetic HDR profile from color space name");
+                }
+            }
+        }
+
         // 16-bit/chの場合はRGBA16、8-bit/chの場合は8→16変換
         let is_16bit = bits_per_component == 16;
+        println!("HEIC: Bit depth: {}-bit per component", bits_per_component);
         let mut rgba16_buffer = Vec::with_capacity((width * height * 4) as usize);
 
         if is_16bit {
             // 16-bit/ch の場合（HDR対応）
             match bits_per_pixel {
                 64 => {
-                    // RGBA16 または BGRA16
+                    // RGBA16（ビッグエンディアン）
                     for y in 0..height {
                         for x in 0..width {
                             let offset = (y * bytes_per_row + x * 8) as usize;
                             if offset + 7 < data_slice.len() {
-                                // macOSはBGRA16なのでRGBA16に変換（ビッグエンディアン）
-                                let b = u16::from_be_bytes([
+                                // macOS CGImageはRGBA16順序（ビッグエンディアン）
+                                let r = u16::from_be_bytes([
                                     data_slice[offset],
                                     data_slice[offset + 1],
                                 ]);
@@ -168,7 +320,7 @@ pub fn decode_heic<P: AsRef<Path>>(path: P) -> Result<DynamicImage, AppError> {
                                     data_slice[offset + 2],
                                     data_slice[offset + 3],
                                 ]);
-                                let r = u16::from_be_bytes([
+                                let b = u16::from_be_bytes([
                                     data_slice[offset + 4],
                                     data_slice[offset + 5],
                                 ]);
@@ -223,15 +375,15 @@ pub fn decode_heic<P: AsRef<Path>>(path: P) -> Result<DynamicImage, AppError> {
             // 8-bit/ch の場合 → 16-bitに変換（0-255 → 0-65535）
             match bits_per_pixel {
                 32 => {
-                    // RGBA8 または BGRA8
+                    // RGBA8（macOS CGImageは通常RGBA順序）
                     for y in 0..height {
                         for x in 0..width {
                             let offset = (y * bytes_per_row + x * 4) as usize;
                             if offset + 3 < data_slice.len() {
-                                // macOSはBGRA8なのでRGBA16に変換（8bit→16bit拡張）
-                                let r = (data_slice[offset + 2] as u16) * 257;
+                                // RGBA8からRGBA16に変換（8bit→16bit拡張）
+                                let r = (data_slice[offset] as u16) * 257;
                                 let g = (data_slice[offset + 1] as u16) * 257;
-                                let b = (data_slice[offset] as u16) * 257;
+                                let b = (data_slice[offset + 2] as u16) * 257;
                                 let a = (data_slice[offset + 3] as u16) * 257;
                                 rgba16_buffer.push(r);
                                 rgba16_buffer.push(g);
@@ -281,7 +433,7 @@ pub fn decode_heic<P: AsRef<Path>>(path: P) -> Result<DynamicImage, AppError> {
         )
         .ok_or(AppError::ImageConversion)?;
 
-        Ok(DynamicImage::ImageRgba16(img_buffer))
+        Ok((DynamicImage::ImageRgba16(img_buffer), icc_profile))
     }
 }
 
@@ -327,7 +479,8 @@ pub fn decode_heic<P: AsRef<Path>>(path: P) -> Result<DynamicImage, AppError> {
     // 一時ファイルを削除
     std::fs::remove_file(&temp_path).map_err(|e| AppError::IoError(e))?;
 
-    Ok(img)
+    // TODO: Linux版もheif-convertからICCプロファイルを抽出する必要がある
+    Ok((img, None))
 }
 
 #[cfg(test)]

@@ -7,6 +7,17 @@ pub struct IccProfileInfo {
     pub color_space: String,
     pub profile_description: String,
     pub has_high_precision: bool,
+    pub transfer_function: TransferFunction,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum TransferFunction {
+    Unknown,
+    Srgb,
+    Gamma(f32),
+    Pq,  // ST.2084 PQ (HDR)
+    Hlg, // HLG (HDR)
+    Linear,
 }
 
 impl IccProfileInfo {
@@ -15,18 +26,21 @@ impl IccProfileInfo {
         let size = profile.len();
 
         // Extract profile details if the profile is large enough
-        let (color_space, profile_description, has_high_precision) = if size >= 128 {
-            let color_space = extract_color_space(profile);
-            let description = extract_profile_description(profile);
-            let high_precision = detect_high_precision_profile(profile, &color_space);
-            (color_space, description, high_precision)
-        } else {
-            (
-                "Unknown".to_string(),
-                "Invalid or truncated profile".to_string(),
-                false,
-            )
-        };
+        let (color_space, profile_description, has_high_precision, transfer_function) =
+            if size >= 128 {
+                let color_space = extract_color_space(profile);
+                let description = extract_profile_description(profile);
+                let high_precision = detect_high_precision_profile(profile, &color_space);
+                let transfer_fn = detect_transfer_function(profile, &description);
+                (color_space, description, high_precision, transfer_fn)
+            } else {
+                (
+                    "Unknown".to_string(),
+                    "Invalid or truncated profile".to_string(),
+                    false,
+                    TransferFunction::Unknown,
+                )
+            };
 
         // Display P3, Rec2020, and other wide gamut profiles typically range 400-2000 bytes
         // Small profiles (< 400 bytes) are usually sRGB or basic profiles
@@ -44,12 +58,21 @@ impl IccProfileInfo {
             color_space,
             profile_description,
             has_high_precision,
+            transfer_function,
         }
     }
 
     /// Check if this profile suggests high bit depth processing
     pub fn requires_high_precision(&self) -> bool {
-        self.has_high_precision || self.suggests_wide_gamut
+        self.has_high_precision || self.suggests_wide_gamut || self.is_hdr()
+    }
+
+    /// Check if this is an HDR profile (PQ or HLG transfer function)
+    pub fn is_hdr(&self) -> bool {
+        matches!(
+            self.transfer_function,
+            TransferFunction::Pq | TransferFunction::Hlg
+        )
     }
 
     /// Check if this is a BT.2020 (Rec. 2020) color profile
@@ -192,12 +215,21 @@ fn extract_color_space(profile: &[u8]) -> String {
 
 /// Extract profile description from ICC profile tags
 fn extract_profile_description(profile: &[u8]) -> String {
-    // This is a simplified implementation
-    // A full implementation would parse the tag table and locate the 'desc' tag
-
-    // Look for common profile description patterns in the profile data
+    // First check for color space metadata appended by HEIC decoder
     let profile_str = String::from_utf8_lossy(profile);
 
+    // Check for [ColorSpace] metadata tag from macOS HEIC decoder
+    if let Some(idx) = profile_str.find("[ColorSpace]") {
+        let color_space_name = &profile_str[idx + 12..]; // Skip "[ColorSpace]"
+        // Extract the color space name (up to end or newline)
+        let name = color_space_name.lines().next().unwrap_or("").trim();
+        if !name.is_empty() {
+            println!("ICC Profile: Found color space metadata: {}", name);
+            return name.to_string();
+        }
+    }
+
+    // Look for common profile description patterns in the profile data
     if profile_str.contains("Display P3") {
         "Display P3".to_string()
     } else if profile_str.contains("DCI-P3") {
@@ -232,4 +264,62 @@ fn detect_high_precision_profile(profile: &[u8], color_space: &str) -> bool {
                 || profile.len() > 1000
             // Large profiles often indicate complex tone curves
         )
+}
+
+/// Detect transfer function from ICC profile
+/// PQ (ST.2084) and HLG are HDR transfer functions
+fn detect_transfer_function(profile: &[u8], description: &str) -> TransferFunction {
+    let profile_str = String::from_utf8_lossy(profile);
+
+    // Priority 1: Check description from [ColorSpace] metadata
+    // Apple Gain Map HDR uses a different approach, but we treat it as PQ for compatibility
+    if description.contains("Gain Map HDR") || description.contains("GainMap") {
+        println!("ICC Profile: Detected Apple Gain Map HDR (treating as PQ for compatibility)");
+        return TransferFunction::Pq;
+    }
+
+    if description.contains("PQ")
+        || description.contains("ST.2084")
+        || description.contains("SMPTE2084")
+        || description.contains("ST2084")
+        || description.contains("BT.2100")
+    {
+        println!("ICC Profile: Detected PQ transfer from color space metadata");
+        return TransferFunction::Pq;
+    }
+
+    if description.contains("HLG") || description.contains("Hybrid Log") {
+        println!("ICC Profile: Detected HLG transfer from color space metadata");
+        return TransferFunction::Hlg;
+    }
+
+    // Priority 2: Check ICC profile content
+    if profile_str.contains("PQ")
+        || profile_str.contains("ST.2084")
+        || profile_str.contains("SMPTE2084")
+        || profile_str.contains("ST2084")
+    {
+        return TransferFunction::Pq;
+    }
+
+    if profile_str.contains("HLG") || profile_str.contains("Hybrid Log") {
+        return TransferFunction::Hlg;
+    }
+
+    // Check for sRGB
+    if profile_str.contains("sRGB") || description.contains("sRGB") {
+        return TransferFunction::Srgb;
+    }
+
+    // Check for linear
+    if profile_str.contains("linear") || profile_str.contains("Linear") {
+        return TransferFunction::Linear;
+    }
+
+    // Check for Display P3 (typically uses sRGB transfer function)
+    if description.contains("Display P3") {
+        return TransferFunction::Srgb;
+    }
+
+    TransferFunction::Unknown
 }

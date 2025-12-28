@@ -210,6 +210,7 @@ Special case: JPEG → JPEG XL uses `jxl::transcode()` to skip decode/encode.
 
 - **Windows**: Uses native APIs in `target.'cfg(windows)'.dependencies` for Windows-specific optimizations.
 - **Linux**: Built via Docker with Debian Bookworm + WebKit2GTK. See `DOCKER_BUILD.md`.
+- **macOS Cross-compilation**: Uses `vendored` features for jpegxl-rs to enable x86_64 builds from Apple Silicon. See `INTEL_MAC_BUILD.md`.
 
 ## Key Files
 
@@ -219,6 +220,7 @@ Special case: JPEG → JPEG XL uses `jxl::transcode()` to skip decode/encode.
 - [app/src/composables/useImageConversionController.ts](app/src/composables/useImageConversionController.ts) - Frontend orchestration
 - [app/src-tauri/Cargo.toml](app/src-tauri/Cargo.toml) - Rust dependencies and build config
 - [MACOS_COMPATIBILITY.md](MACOS_COMPATIBILITY.md) - Apple Silicon compatibility notes
+- [INTEL_MAC_BUILD.md](INTEL_MAC_BUILD.md) - Intel Mac cross-compilation from Apple Silicon
 - [DEPENDENCY_ANALYSIS.md](DEPENDENCY_ANALYSIS.md) - Static vs dynamic linking decisions
 
 ## Common Tasks
@@ -226,12 +228,16 @@ Special case: JPEG → JPEG XL uses `jxl::transcode()` to skip decode/encode.
 - **Add new image format**: Create encoder in `app/src-tauri/src/encoder/newformat.rs`, add to `EncodeOptions` enum in `options.rs`, implement in `encoder.rs` encode function, add TypeScript interface in `app/src/interfaces/`
 - **Add progress support**: Implement `ProgressCallback` in encoder, check `webp.rs` or `png.rs` for reference pattern
 - **Update UI strings**: Edit `app/src/locales/*.yml` for all languages (en, fr, ja, ko, zhHans, zhHant)
-- **Fix build issues**: Check `MACOS_COMPATIBILITY.md` for M1/M2/M3 compatibility, `DOCKER_BUILD.md` for Linux builds
+- **Fix build issues**:
+  - Check `MACOS_COMPATIBILITY.md` for M1/M2/M3 compatibility
+  - Check `INTEL_MAC_BUILD.md` for Intel Mac cross-compilation (requires YASM and jpegxl-rs vendored feature)
+  - Check `DOCKER_BUILD.md` for Linux builds
 - **Platform-specific code**: Use `#[cfg(target_os = "macos")]` or `cfg(windows)` in Rust, feature flags in Cargo.toml
 
 ## Important Notes
 
 - **pnpm workspace**: Always use `pnpm --filter app <command>` or `pnpm --filter docs <command>` for package-specific operations
-- **Rust edition**: Stick to edition 2021 (not 2024) for stability
+- **Rust edition**: Stick to edition 2024 (was 2021) for modern Rust features
 - **Version management**: Version is in root `.env` file, synced to `Cargo.toml`, `package.json`, and `tauri.conf.json`
+- **Cross-compilation**: jpegxl-rs uses `vendored` feature to enable cross-compilation without system library dependencies. This allows building x86_64 Mac binaries from Apple Silicon without installing x86_64 Homebrew.
 - **No HEIC/HEIF support**: HEIC/HEIF format removed due to libheif-rs licensing constraints (LGPL-3.0). Modern iPhones capture in JPEG XL format (fully supported). For legacy HEIC files, users should convert via macOS Preview app (File → Export → JPEG) first. See `HEIC_REMOVAL_SUMMARY.md`.
