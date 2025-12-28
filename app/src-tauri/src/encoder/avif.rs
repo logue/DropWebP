@@ -303,7 +303,7 @@ pub fn encode(
         // Create RGB image
         // Note: avifRGBImage は RGB 入力を表現し、avifImage の色空間設定が
         // RGB→YUV 変換のターゲットになる
-        let mut rgb_image = libavif_sys::avifRGBImage {
+        let rgb_image = libavif_sys::avifRGBImage {
             width: width as u32,
             height: height as u32,
             depth: rgb_depth as u32,

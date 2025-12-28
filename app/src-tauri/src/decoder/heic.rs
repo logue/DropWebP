@@ -3,8 +3,14 @@
 /// - macOS: ImageIO framework - 16-bit per channel + ICC profile
 /// - Linux: heif-convert コマンド - 16-bit PNG
 use crate::error::AppError;
-use image::{DynamicImage, ImageBuffer, Rgba};
+use image::DynamicImage;
 use std::path::Path;
+
+#[cfg(target_os = "macos")]
+use image::{ImageBuffer, Rgba};
+
+#[cfg(target_os = "windows")]
+use image::{ImageBuffer, Rgba};
 
 #[cfg(target_os = "windows")]
 pub fn decode_heic<P: AsRef<Path>>(path: P) -> Result<(DynamicImage, Option<Vec<u8>>), AppError> {
@@ -438,8 +444,7 @@ pub fn decode_heic<P: AsRef<Path>>(path: P) -> Result<(DynamicImage, Option<Vec<
 }
 
 #[cfg(target_os = "linux")]
-pub fn decode_heic<P: AsRef<Path>>(path: P) -> Result<DynamicImage, AppError> {
-    use std::io::Write;
+pub fn decode_heic<P: AsRef<Path>>(path: P) -> Result<(DynamicImage, Option<Vec<u8>>), AppError> {
     use std::process::Command;
     use tempfile::NamedTempFile;
 

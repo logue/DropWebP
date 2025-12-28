@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useSettingsStore } from '@/store';
+import { OutputFormat } from '@/types/SettingsTypes';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -123,6 +124,33 @@ const onPasteFromContextMenu = async () => {
             </template>
           </v-tooltip>
         </v-radio-group>
+
+        <!-- WebP/JXL選択時のロスレススイッチ -->
+        <v-expand-transition>
+          <div v-if="settingsStore.commonOptions.format === OutputFormat.WebP">
+            <v-switch
+              v-model="settingsStore.webpOptions.lossless"
+              :label="t('lossless_compression')"
+              :hint="t('lossless_hint_webp')"
+              color="primary"
+              persistent-hint
+              density="comfortable"
+            />
+          </div>
+        </v-expand-transition>
+
+        <v-expand-transition>
+          <div v-if="settingsStore.commonOptions.format === OutputFormat.JXL">
+            <v-switch
+              v-model="settingsStore.jxlOptions.lossless"
+              :label="t('lossless_compression')"
+              :hint="t('lossless_hint_jxl')"
+              color="primary"
+              persistent-hint
+              density="comfortable"
+            />
+          </div>
+        </v-expand-transition>
       </v-card-actions>
     </v-card>
   </v-container>
@@ -156,6 +184,9 @@ en:
   select_files_title: Select image files to compress
   select_directory_title: Select a directory containing images to batch compress
   convert_to: 'Convert to:'
+  lossless_compression: Lossless compression
+  lossless_hint_webp: Larger file size but no quality loss. Disable for smaller files with minimal visual degradation.
+  lossless_hint_jxl: Not recommended for HDR images (causes extreme file size increase). Use lossy mode for practical sizes.
   image: Image
   formats:
     png:
@@ -217,6 +248,9 @@ fr:
   select_files_title: Sélectionnez les fichiers image à compresser
   select_directory_title: Sélectionnez un répertoire contenant des images à compresser en lot
   convert_to: 'Convertir en :'
+  lossless_compression: Compression sans perte
+  lossless_hint_webp: Taille de fichier plus grande mais aucune perte de qualité. Désactivez pour des fichiers plus petits avec une dégradation visuelle minimale.
+  lossless_hint_jxl: Non recommandé pour les images HDR (augmentation extrême de la taille du fichier). Utilisez le mode avec perte pour des tailles pratiques.
   image: Image
   formats:
     png:
@@ -278,6 +312,9 @@ ja:
   select_files_title: 圧縮したい画像ファイルを選択
   select_directory_title: 一括圧縮したい画像の入ったディレクトリを選択
   convert_to: 変換先の形式：
+  lossless_compression: ロスレス圧縮
+  lossless_hint_webp: ファイルサイズは大きくなりますが、画質は劣化しません。無効にすると、視覚的な劣化を最小限に抑えながらファイルサイズが小さくなります。
+  lossless_hint_jxl: HDR画像には非推奨（ファイルサイズが極端に大きくなります）。実用的なサイズにするにはロッシーモードを使用してください。
   image: 画像
   formats:
     png:
@@ -338,6 +375,9 @@ ko:
   select_files_title: 압축할 이미지 파일 선택
   select_directory_title: 일괄 압축할 이미지가 들어 있는 디렉터리 선택
   convert_to: '변환 형식:'
+  lossless_compression: 무손실 압축
+  lossless_hint_webp: 파일 크기가 커지지만 화질 손실이 없습니다. 비활성화하면 시각적 저하를 최소화하면서 파일 크기가 작아집니다.
+  lossless_hint_jxl: HDR 이미지에는 권장하지 않습니다(파일 크기가 극도로 증가함). 실용적인 크기를 위해 손실 모드를 사용하세요.
   image: 이미지
   formats:
     png:
@@ -396,6 +436,9 @@ zhHans:
   select_files_title: 选择要压缩的图片文件
   select_directory_title: 选择包含图片以进行批量压缩的目录
   convert_to: '转换为：'
+  lossless_compression: 无损压缩
+  lossless_hint_webp: 文件大小会增加，但不会损失画质。禁用后文件大小会减小，视觉上几乎无损失。
+  lossless_hint_jxl: 不建议用于HDR图像(文件大小会极度增加)。请使用有损模式以获得实用的文件大小。
   image: 图片
   formats:
     png:
@@ -453,6 +496,9 @@ zhHant:
   select_files_title: 選擇要壓縮的圖片文件
   select_directory_title: 選擇包含圖片以進行批量壓縮的目錄
   convert_to: '轉換為：'
+  lossless_compression: 無損壓縮
+  lossless_hint_webp: 檔案大小會增加，但不會損失畫質。停用後檔案大小會減小，視覺上幾乎無損失。
+  lossless_hint_jxl: 不建議用於HDR影像(檔案大小會極度增加)。請使用有損模式以獲得實用的檔案大小。
   image: 圖片
   formats:
     png:
