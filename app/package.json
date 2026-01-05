@@ -44,8 +44,8 @@
     "pinia-plugin-persistedstate": "^4.7.1",
     "unified-network": "^0.6.4",
     "vue": "^3.5.26",
-    "vue-i18n": "^11.2.7",
-    "vuetify": "^3.11.5"
+    "vue-i18n": "^11.2.8",
+    "vuetify": "^3.11.6"
   },
   "devDependencies": {
     "@intlify/unplugin-vue-i18n": "^11.0.3",

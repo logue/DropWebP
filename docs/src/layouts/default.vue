@@ -36,7 +36,7 @@ const isDark: ComputedRef<string> = computed(() => (configStore.theme ? 'dark' :
     </v-main>
 
     <v-footer app elevation="3" color="primary">
-      <span class="mr-5">2025 &copy; Logue</span>
+      <span class="mr-5">2025-2026 &copy; Logue</span>
     </v-footer>
   </v-app>
   <teleport to="head">

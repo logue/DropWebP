@@ -1,6 +1,5 @@
 use crate::error::AppError;
 use crate::options::HighBitDepthImage;
-use jpegli::{ColorSpace, Compress};
 use serde::{Deserialize, Serialize};
 
 /// デフォルトの画質
@@ -119,45 +118,81 @@ pub fn encode(
         rgb_data.len()
     );
 
-    // jpegliコンプレッサーの設定（MozJPEG互換API）
-    let mut comp = Compress::new(ColorSpace::JCS_RGB);
+    // jpegli-rsエンコーダーの設定
+    let mode = if options.progressive {
+        jpegli_rs::JpegMode::Progressive
+    } else {
+        jpegli_rs::JpegMode::Baseline
+    };
 
-    comp.set_size(width as usize, height as usize);
-    comp.set_quality(options.quality as f32);
+    let config = jpegli_rs::EncoderConfig {
+        width,
+        height,
+        pixel_format: jpegli_rs::PixelFormat::Rgb,
+        quality: jpegli_rs::Quality::from_distance(95.0 / options.quality as f32),
+        mode,
+        optimize_huffman: options.optimize,
+        ..Default::default()
+    };
 
-    if options.optimize {
-        comp.set_optimize_coding(true);
-    }
+    let encoder = jpegli_rs::Encoder::from_config(config);
 
-    if options.progressive {
-        comp.set_progressive_mode();
-    }
+    // エンコード実行
+    println!("Encoding image data...");
+    let mut jpeg_data = encoder
+        .encode(&rgb_data)
+        .map_err(|e| AppError::Encode(format!("Failed to encode JPEG: {:?}", e)))?;
 
-    // 圧縮データを格納するVec
-    let mut jpeg_data = Vec::new();
-
-    // 圧縮を開始（メモリライターを渡す）
-    let mut comp = comp
-        .start_compress(std::io::Cursor::new(&mut jpeg_data))
-        .map_err(|e| AppError::Encode(format!("Failed to start JPEG compression: {}", e)))?;
-
-    // ICCプロファイルの書き込み（開始後に実行）
+    // ICCプロファイルの追加（エンコード後にAPP2マーカーとして追加）
     if let Some(icc) = icc_profile {
-        comp.write_icc_profile(&icc);
+        jpeg_data = add_icc_profile(jpeg_data, &icc)?;
     }
-
-    // 画像データを書き込み
-    println!("Writing image data...");
-    comp.write_scanlines(&rgb_data[..])
-        .map_err(|e| AppError::Encode(format!("Failed to write scanlines: {}", e)))?;
-
-    // 圧縮を完了
-    comp.finish()
-        .map_err(|e| AppError::Encode(format!("Failed to finish JPEG compression: {}", e)))?;
 
     println!("jpegli encoding completed: {} bytes", jpeg_data.len());
 
     Ok(jpeg_data)
+}
+
+/// エンコード済みJPEGデータにICCプロファイルを追加
+///
+/// JPEG形式では、ICCプロファイルはAPP2マーカー内に埋め込まれます
+fn add_icc_profile(jpeg_data: Vec<u8>, icc: &[u8]) -> Result<Vec<u8>, AppError> {
+    // JPEGマーカー: SOI(0xFFD8)の直後にAPP2マーカーを挿入
+    if jpeg_data.len() < 2 || jpeg_data[0] != 0xFF || jpeg_data[1] != 0xD8 {
+        return Err(AppError::Encode(
+            "Invalid JPEG: missing SOI marker".to_string(),
+        ));
+    }
+
+    // APP2マーカー (0xFFE2) + "ICC_PROFILE\0" + シーケンス番号
+    const MAX_CHUNK_SIZE: usize = 65533 - 14; // 65535 - marker(2) - length(2) - "ICC_PROFILE\0"(12) - seq(2)
+    let chunk_count = (icc.len() + MAX_CHUNK_SIZE - 1) / MAX_CHUNK_SIZE;
+
+    let mut result = Vec::with_capacity(jpeg_data.len() + icc.len() + chunk_count * 18);
+
+    // SOIマーカーをコピー
+    result.extend_from_slice(&jpeg_data[0..2]);
+
+    // ICCプロファイルをチャンク化してAPP2マーカーとして追加
+    for (i, chunk) in icc.chunks(MAX_CHUNK_SIZE).enumerate() {
+        result.push(0xFF); // マーカー開始
+        result.push(0xE2); // APP2
+
+        let seg_len = 2 + 12 + 2 + chunk.len(); // length(2) + "ICC_PROFILE\0"(12) + seq(2) + data
+        result.push((seg_len >> 8) as u8);
+        result.push(seg_len as u8);
+
+        result.extend_from_slice(b"ICC_PROFILE\0"); // 識別子
+        result.push((i + 1) as u8); // 現在のチャンク番号 (1-based)
+        result.push(chunk_count as u8); // 総チャンク数
+
+        result.extend_from_slice(chunk);
+    }
+
+    // 残りのJPEGデータをコピー
+    result.extend_from_slice(&jpeg_data[2..]);
+
+    Ok(result)
 }
 
 /// JPEGファイルサイズを推定

@@ -1,38 +1,28 @@
 fn main() {
-    // 確認対象のライブラリ
-    let libs = ["libavif", "libjxl"];
-    // Windows環境でvcpkgを使用してライブラリを検出
+    // Windows環境でvendored featureを使用する場合、CMakeジェネレータを設定
     #[cfg(target_os = "windows")]
     {
-        for lib in libs {
-            match vcpkg::find_package(lib) {
-                Ok(info) => {
-                    println!("cargo:info=Found {}: {:?}", lib, info);
+        // jpegxl-rsのvendoredビルドのために、MSVCツールチェーンを強制
+        // ClangCLではなくMSVCを使用するように設定
+        // SAFETY: ビルドスクリプト内での環境変数設定は安全
+        // 他のスレッドとの競合はビルドプロセスの性質上発生しない
+        unsafe {
+            std::env::set_var("CMAKE_GENERATOR", "Visual Studio 17 2022");
+            std::env::remove_var("CMAKE_GENERATOR_TOOLSET"); // ClangCL指定を削除
 
-                    // libjxlの場合、jpegxl-sys用に追加の環境変数を設定
-                    if lib == "libjxl" {
-                        // jpegxl-sysがvcpkgのライブラリを見つけられるように
-                        // リンクパスとインクルードパスを設定
-                        for path in &info.link_paths {
-                            println!("cargo:rustc-link-search=native={}", path.display());
-                        }
-                        for path in &info.include_paths {
-                            println!("cargo:include={}", path.display());
-                        }
-                        println!("cargo:rustc-link-lib=static=jxl");
-                        println!("cargo:rustc-link-lib=static=jxl_cms");
-                        println!("cargo:rustc-link-lib=static=jxl_threads");
-                    }
-                }
-                Err(e) => {
-                    println!("cargo:warning={} not found via vcpkg: {}", lib, e);
-                    println!(
-                        "cargo:warning=Please install {} using: vcpkg install {}",
-                        lib, lib
-                    );
-                }
-            }
+            // jpegxl-src内部でClangCLを使わないようにする
+            std::env::set_var("JPEGXL_NO_CLANGCL", "1");
+
+            // libaom-sysでアセンブラなしでビルド（NASMなしでもビルド可能）
+            // libaom-sys専用の環境変数でCMakeに直接オプションを渡す
+            std::env::set_var("AOM_CMAKE_ARGS", "-DAOM_TARGET_CPU=generic");
         }
+
+        println!("cargo:warning=Using vendored libraries for Windows build");
+        println!("cargo:warning=CMake generator: Visual Studio 17 2022 (MSVC)");
+        println!(
+            "cargo:warning=Building libaom without assembler optimizations (generic CPU target)"
+        );
     }
 
     // macOS環境でpkg-configを使用

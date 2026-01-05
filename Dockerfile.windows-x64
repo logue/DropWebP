@@ -1,6 +1,6 @@
+# escape=`
 # Windows x86_64向けTauriアプリケーションビルド用Dockerfile
 # MSVC環境でのビルド（Windows実機のDocker Desktop上で実行）
-# escape=`
 
 FROM mcr.microsoft.com/windows/servercore:ltsc2022
 
@@ -17,10 +17,9 @@ RUN choco install -y `
     visualstudio2022buildtools `
     visualstudio2022-workload-vctools `
     git `
-    nasm `
     cmake `
     && choco install -y nodejs --version=24.12.0 `
-    && refreshenv
+    && choco install -y nasm --version=2.16.03
 
 # pnpmをインストール
 RUN powershell -Command `
@@ -33,10 +32,10 @@ RUN powershell -NoProfile -ExecutionPolicy Bypass -Command `
     .\rustup-init.exe -y --default-toolchain 1.92.0 --default-host x86_64-pc-windows-msvc; `
     Remove-Item rustup-init.exe"
 
-# 環境変数を設定
-RUN setx /M PATH "%PATH%;C:\Users\ContainerAdministrator\.cargo\bin;%PNPM_HOME%"
+# 環境変数を設定（setxでマシンレベルのPATHに追加）
+RUN setx /M PATH "%PATH%;C:\Program Files\NASM;C:\Users\ContainerAdministrator\.cargo\bin;%PNPM_HOME%"
 
-# Tauri CLIをインストール
+# Tauri CLIをインストール（新しいPATHを読み込んでから実行）
 RUN powershell -Command `
     "$env:PATH = [System.Environment]::GetEnvironmentVariable('PATH','Machine'); `
     cargo install tauri-cli --version ^2.0"
@@ -44,8 +43,14 @@ RUN powershell -Command `
 # 作業ディレクトリ設定
 WORKDIR C:\workspace
 
-# ビルドスクリプト
-COPY docker-build.ps1 C:\docker-build.ps1
+# ビルドスクリプト（CMDバッチスクリプト）
+COPY docker-build.cmd C:\docker-build.cmd
+
+# ラッパースクリプトを作成（vcvars64.bat実行後にビルドスクリプトを起動）
+# setlocalを使わずに環境変数を維持
+RUN powershell -Command `
+    "$wrapper = '@echo off', 'call \"C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat\"', 'if errorlevel 1 exit /b 1', 'call C:\docker-build.cmd', 'exit /b %ERRORLEVEL%'; `
+    $wrapper | Out-File -FilePath C:\build.cmd -Encoding ASCII"
 
 # デフォルトコマンド
-CMD ["powershell", "-File", "C:\\docker-build.ps1"]
+CMD ["C:\\build.cmd"]

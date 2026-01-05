@@ -87,6 +87,29 @@ Download the latest release from the [Releases page](https://github.com/logue/Dr
 - **macOS**: `.dmg` disk image (Apple Silicon)
 - **Linux**: `.deb` or `.AppImage`
 
+## 🛠️ Building from Source
+
+### Quick Start
+
+#### Windows
+
+```powershell
+# Use the provided build script (no ClangCL required)
+.\build-windows.ps1
+```
+
+**Build Issues?** See [WINDOWS_BUILD_FIX.md](WINDOWS_BUILD_FIX.md) for troubleshooting.
+
+#### macOS / Linux
+
+```bash
+cd app
+pnpm install
+pnpm run build:tauri
+```
+
+For detailed build instructions, see the documentation in `docs/content/{lang}/build-*.md`.
+
 ## 🌐 Localization
 
 The user interface is available in the following languages:
@@ -99,4 +122,4 @@ The user interface is available in the following languages:
 
 ## License
 
-©2023, 2025 by Logue. Licensed under the [MIT License](LICENSE).
+©2023, 2025-2026 by Logue. Licensed under the [MIT License](LICENSE).
