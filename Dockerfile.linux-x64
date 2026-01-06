@@ -28,6 +28,13 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     pkg-config \
     nasm \
+    # jpegxl-rs vendored build dependencies
+    libbrotli-dev \
+    libgif-dev \
+    libjpeg-dev \
+    libopenexr-dev \
+    libpng-dev \
+    libwebp-dev \
     # Node.js用
     ca-certificates \
     gnupg \
