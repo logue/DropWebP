@@ -63,6 +63,6 @@
     "vite-plugin-checker": "^0.12.0",
     "vite-plugin-vue-devtools": "^8.0.5",
     "vite-plugin-vuetify": "^2.1.2",
-    "vue-tsc": "^3.2.1"
+    "vue-tsc": "^3.2.2"
   }
 }

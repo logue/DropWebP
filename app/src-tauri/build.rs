@@ -1,4 +1,7 @@
 fn main() {
+    // 確認対象のライブラリ
+    let libs = ["libavif", "libjxl"];
+
     // Windows環境でvendored featureを使用する場合、CMakeジェネレータを設定
     #[cfg(target_os = "windows")]
     {

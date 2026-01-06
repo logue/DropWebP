@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@types/node": "^25.0.3",
-    "@typescript-eslint/eslint-plugin": "^8.51.0",
+    "@typescript-eslint/eslint-plugin": "^8.52.0",
     "@vue/eslint-config-prettier": "^10.2.0",
     "eslint": "^9.39.2",
     "eslint-plugin-vuejs-accessibility": "^2.4.1",

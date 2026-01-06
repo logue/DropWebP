@@ -144,6 +144,18 @@ docker run --rm \
 echo ""
 echo -e "${GREEN}✅ ビルド完了！${NC}"
 echo ""
+echo -e "${BLUE}📋 成果物をホストにコピー中...${NC}"
+
+# ホスト側のディレクトリを作成
+mkdir -p "$PROJECT_ROOT/app/src-tauri/target/$TARGET/release"
+
+# Dockerボリュームからホストに成果物をコピー
+docker run --rm \
+    -v "$TARGET_CACHE_VOLUME:/data" \
+    -v "$PROJECT_ROOT/app/src-tauri/target:/output" \
+    alpine sh -c "cp -r /data/$TARGET/release/bundle /output/$TARGET/release/ 2>/dev/null || echo 'Bundle not found in volume'"
+
+echo ""
 echo -e "${GREEN}📦 成果物の場所:${NC}"
 echo "   $PROJECT_ROOT/app/src-tauri/target/$TARGET/release/bundle/"
 echo ""
@@ -152,6 +164,11 @@ echo ""
 if [ -d "$PROJECT_ROOT/app/src-tauri/target/$TARGET/release/bundle/deb" ]; then
     echo -e "${GREEN}📊 .deb パッケージ:${NC}"
     du -h "$PROJECT_ROOT/app/src-tauri/target/$TARGET/release/bundle/deb/"*.deb 2>/dev/null || true
+fi
+
+if [ -d "$PROJECT_ROOT/app/src-tauri/target/$TARGET/release/bundle/rpm" ]; then
+    echo -e "${GREEN}📊 .rpm パッケージ:${NC}"
+    du -h "$PROJECT_ROOT/app/src-tauri/target/$TARGET/release/bundle/rpm/"*.rpm 2>/dev/null || true
 fi
 
 if [ -d "$PROJECT_ROOT/app/src-tauri/target/$TARGET/release/bundle/appimage" ]; then
