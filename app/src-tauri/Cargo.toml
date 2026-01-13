@@ -1,6 +1,6 @@
 [package]
 name = "drop-compress-image"
-version = "3.2.0"
+version = "3.2.1"
 authors = ["Logue"]
 edition = "2024"
 rust-version = "1.92.0"
@@ -45,17 +45,17 @@ vcpkg = "0.2.15"
 [dependencies]
 bytemuck = "1.24.0"
 chrono = { version = "0.4.42", features = ["serde"] }
-flate2 = "1.1.5"
+flate2 = "1.1.8"
 image = "0.25.9"
 imgref = "1.12.0"
-indexmap = "2.12.1"
+indexmap = "2.13.0"
 jpeg2k = "0.10.1"
 jpegli_rs = { version = "0.3.0", package = "jpegli-rs" }
 jpegxl-rs = { version = "0.11.2+libjxl-0.11.1", features = ["vendored"] }
 kamadak-exif = "0.6.1"
-lcms2 = "6.1.0"
+lcms2 = "6.1.1"
 libavif-sys = { version = "0.17.0", default-features = false, features = [
-  "codec-rav1e", # Use pure Rust rav1e encoder instead of libaom (avoids CMake issues on Windows Docker)
+  "codec-aom", # Use libaom encoder (much faster than rav1e, 5-10x speed improvement)
 ] }
 libwebp-sys = "0.14.1"
 openjpeg-sys = "1.0.12" # Note: Requires system openjpeg or Homebrew
@@ -63,13 +63,13 @@ oxipng = "10.0.0"
 png = "0.18.0"
 rgb = "0.8.52"
 serde = "1.0.228"
-serde_json = "1.0.147"
+serde_json = "1.0.149"
 tauri = { version = "2.9.5", features = [] }
-tauri-plugin-dialog = "2.4.2"
-tauri-plugin-fs = "2.4.4"
-tauri-plugin-log = "2.7.1"
+tauri-plugin-dialog = "2.5.0"
+tauri-plugin-fs = "2.4.5"
+tauri-plugin-log = "2.8.0"
 tauri-plugin-notification = "2.3.3"
-tauri-plugin-opener = "2.5.2"
+tauri-plugin-opener = "2.5.3"
 tauri-plugin-os = "2.3.2"
 tempfile = "3.24.0"
 thiserror = "2.0.17"
@@ -100,8 +100,8 @@ core-graphics = "0.25.0"
 objc = "0.2.7"
 
 # Apple Silicon (ARM64) 向けの設定
-[target.aarch64-apple-darwin]
-rustflags = ["-C", "target-cpu=apple-a14"] # Apple Silicon互換性向上
+# [target.aarch64-apple-darwin]
+# rustflags = ["-C", "target-cpu=apple-a14"] # Apple Silicon互換性向上
 
 # Linux 固有の最適化
 [target.'cfg(unix)'.dependencies]
