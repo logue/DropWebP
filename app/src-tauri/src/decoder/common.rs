@@ -221,7 +221,7 @@ fn extract_profile_description(profile: &[u8]) -> String {
     // Check for [ColorSpace] metadata tag from macOS HEIC decoder
     if let Some(idx) = profile_str.find("[ColorSpace]") {
         let color_space_name = &profile_str[idx + 12..]; // Skip "[ColorSpace]"
-        // Extract the color space name (up to end or newline)
+                                                         // Extract the color space name (up to end or newline)
         let name = color_space_name.lines().next().unwrap_or("").trim();
         if !name.is_empty() {
             println!("ICC Profile: Found color space metadata: {}", name);
@@ -271,8 +271,26 @@ fn detect_high_precision_profile(profile: &[u8], color_space: &str) -> bool {
 fn detect_transfer_function(profile: &[u8], description: &str) -> TransferFunction {
     let profile_str = String::from_utf8_lossy(profile);
 
-    // Priority 1: Check description from [ColorSpace] metadata
-    // Apple Gain Map HDR uses a different approach, but we treat it as PQ for compatibility
+    // Priority 1: Check for Display P3 FIRST (before PQ check)
+    // Display P3 profiles often contain the text "Display" which can match "PQ" patterns
+    // Display P3 uses sRGB transfer function, NOT PQ
+    if description.contains("Display P3")
+        || description.contains("Display")
+        || profile_str.contains("Display P3")
+    {
+        // Double-check it's not actually an HDR Display P3 variant
+        if !description.contains("2100")
+            && !description.contains("ST.2084")
+            && !description.contains("SMPTE2084")
+            && !profile_str.contains("kCGColorSpaceITUR_2100")
+        {
+            println!("ICC Profile: Detected Display P3 (sRGB transfer function)");
+            return TransferFunction::Srgb;
+        }
+    }
+
+    // Priority 2: Check for HDR transfer functions from [ColorSpace] metadata
+    // Apple Gain Map HDR is a different approach, but we treat it as indicating HDR content
     if description.contains("Gain Map HDR") || description.contains("GainMap") {
         println!("ICC Profile: Detected Apple Gain Map HDR (treating as PQ for compatibility)");
         return TransferFunction::Pq;
@@ -283,6 +301,8 @@ fn detect_transfer_function(profile: &[u8], description: &str) -> TransferFuncti
         || description.contains("SMPTE2084")
         || description.contains("ST2084")
         || description.contains("BT.2100")
+        || description.contains("ITU")
+            && (description.contains("2100") || description.contains("PQ"))
     {
         println!("ICC Profile: Detected PQ transfer from color space metadata");
         return TransferFunction::Pq;
@@ -293,11 +313,11 @@ fn detect_transfer_function(profile: &[u8], description: &str) -> TransferFuncti
         return TransferFunction::Hlg;
     }
 
-    // Priority 2: Check ICC profile content
-    if profile_str.contains("PQ")
-        || profile_str.contains("ST.2084")
+    // Priority 3: Check ICC profile content
+    if profile_str.contains("ST.2084")
         || profile_str.contains("SMPTE2084")
         || profile_str.contains("ST2084")
+        || profile_str.contains("kCGColorSpaceITUR_2100_PQ")
     {
         return TransferFunction::Pq;
     }
@@ -314,11 +334,6 @@ fn detect_transfer_function(profile: &[u8], description: &str) -> TransferFuncti
     // Check for linear
     if profile_str.contains("linear") || profile_str.contains("Linear") {
         return TransferFunction::Linear;
-    }
-
-    // Check for Display P3 (typically uses sRGB transfer function)
-    if description.contains("Display P3") {
-        return TransferFunction::Srgb;
     }
 
     TransferFunction::Unknown

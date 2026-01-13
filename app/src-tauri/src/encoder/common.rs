@@ -73,17 +73,36 @@ impl EncodingAnalysis {
             .unwrap_or((false, None));
 
         // HDR detection - consider both pixel values AND transfer function from ICC profile
-        // If ICC profile indicates PQ or HLG transfer, treat as HDR regardless of pixel values
-        // This handles the case where pixel data is already in PQ/HLG encoding (0-1 range)
+        // IMPORTANT: macOS CGImage converts PQ→Linear automatically during decoding
+        // However, we cannot recover the original PQ data, so we treat it as already encoded
+        // This preserves color accuracy even if true HDR range is lost
+
+        // For HEIC files with PQ color space, always treat as PQ-encoded (even if normalized)
+        // This prevents double encoding and preserves relative colors
+        let icc_claims_pq = matches!(transfer_function, Some(TransferFunction::Pq));
+
+        let actual_transfer = if icc_claims_pq {
+            println!(
+                "AVIF: ICC profile indicates PQ (max_luminance={:.3})",
+                max_luminance
+            );
+            println!("AVIF: Treating data as PQ-encoded to preserve color accuracy");
+            transfer_function // Keep as Pq
+        } else {
+            transfer_function
+        };
+
         let has_hdr_content = matches!(
-            transfer_function,
-            Some(TransferFunction::Pq) | Some(TransferFunction::Hlg)
+            actual_transfer,
+            Some(TransferFunction::Pq)
+                | Some(TransferFunction::Hlg)
+                | Some(TransferFunction::Linear)
         ) || max_luminance > 1.0
             || dynamic_range > 100.0;
 
-        if let Some(ref tf) = transfer_function {
+        if let Some(ref tf) = actual_transfer {
             println!(
-                "HDR detection: transfer_function={:?} => has_hdr_content={}",
+                "HDR detection: actual_transfer_function={:?} => has_hdr_content={}",
                 tf, has_hdr_content
             );
         } else {
@@ -117,7 +136,7 @@ impl EncodingAnalysis {
             recommended_bit_depth,
             tone_mapping_required,
             alpha_channel_present: has_alpha,
-            transfer_function,
+            transfer_function: actual_transfer, // Use corrected transfer function
         }
     }
 }

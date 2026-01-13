@@ -73,11 +73,9 @@ pub fn encode(
 
     // Debug ICC profile
     if let Some(ref profile) = icc_profile {
-        println!(
-            "AVIF: ICC profile received: {} bytes, content: {:?}",
-            profile.len(),
-            String::from_utf8_lossy(profile)
-        );
+        println!("AVIF: ICC profile received: {} bytes", profile.len());
+        // Note: Binary content output commented out to reduce log noise
+        // println!("Content: {:?}", String::from_utf8_lossy(profile));
     }
 
     // Perform content analysis for optimal encoding
@@ -221,23 +219,25 @@ pub fn encode(
             return Err(AppError::Avif("Failed to create AVIF image".to_string()));
         }
 
-        // Set color properties (but NOT transferCharacteristics yet for HDR)
+        // Set color properties before RGB→YUV conversion
+        // CRITICAL: These settings tell libavif what the INPUT RGB data looks like
+        // libavif will use this information to perform correct RGB→YUV conversion
         if is_hdr {
-            // HDR: Set color space, but defer transferCharacteristics until after RGB→YUV
-            // This prevents libavif from applying PQ again (we already applied it)
+            // HDR: Input RGB is PQ-encoded (we applied PQ in convert_to_rgb16)
+            // Tell libavif that RGB input is in PQ space so it converts correctly
             (*image).colorPrimaries = libavif_sys::AVIF_COLOR_PRIMARIES_BT2020 as u16;
             (*image).transferCharacteristics =
-                libavif_sys::AVIF_TRANSFER_CHARACTERISTICS_UNSPECIFIED as u16; // Temporarily unspecified
+                libavif_sys::AVIF_TRANSFER_CHARACTERISTICS_SMPTE2084 as u16; // PQ
             (*image).matrixCoefficients = libavif_sys::AVIF_MATRIX_COEFFICIENTS_BT2020_NCL as u16;
-            println!(
-                "AVIF: Using BT.2020 color primaries (PQ will be set after RGB→YUV conversion)"
-            );
+            println!("AVIF: HDR mode - BT.2020/PQ(ST.2084) for RGB→YUV conversion");
         } else {
-            // SDR: Use BT.709/sRGB
+            // SDR: Input RGB is in sRGB gamma space (non-linear)
+            // Tell libavif that RGB input is sRGB so it performs correct RGB→YUV conversion
             (*image).colorPrimaries = libavif_sys::AVIF_COLOR_PRIMARIES_BT709 as u16;
             (*image).transferCharacteristics =
                 libavif_sys::AVIF_TRANSFER_CHARACTERISTICS_SRGB as u16;
             (*image).matrixCoefficients = libavif_sys::AVIF_MATRIX_COEFFICIENTS_BT709 as u16;
+            println!("AVIF: SDR mode - BT.709/sRGB for RGB→YUV conversion");
         }
 
         (*image).yuvRange = libavif_sys::AVIF_RANGE_FULL;
@@ -261,6 +261,7 @@ pub fn encode(
                 target_depth,
                 is_hdr,
                 analysis.max_luminance,
+                analysis.transfer_function.as_ref(),
             )
         };
 
@@ -368,14 +369,7 @@ pub fn encode(
             )));
         }
         println!("AVIF: RGB to YUV conversion successful");
-
-        // For HDR: Now set the PQ transfer characteristics after RGB→YUV conversion
-        // This ensures the metadata is correct without libavif applying the transfer function
-        if is_hdr {
-            (*image).transferCharacteristics =
-                libavif_sys::AVIF_TRANSFER_CHARACTERISTICS_SMPTE2084 as u16; // PQ
-            println!("AVIF: Set PQ (ST.2084) transfer characteristics after RGB→YUV conversion");
-        }
+        // Note: transferCharacteristics is already set correctly from before RGB→YUV conversion
 
         // Add ICC profile (but skip for HDR to avoid conflicts with cICP metadata)
         // HDR content should rely on nclx (cICP) color information, not ICC profiles
@@ -587,6 +581,7 @@ fn convert_to_rgb16(
     target_depth: u32,
     is_hdr: bool,
     _max_luminance: f32,
+    transfer_function: Option<&crate::decoder::TransferFunction>,
 ) -> Result<(Vec<u8>, libavif_sys::avifRGBFormat, i32), AppError> {
     let channels = if has_alpha { 4 } else { 3 };
     let pixel_count = (width * height) as usize;
@@ -605,50 +600,127 @@ fn convert_to_rgb16(
     let mut rgb_u16 = Vec::with_capacity(expected_len);
 
     if is_hdr {
-        // HDR: Apply PQ (ST.2084) encoding to linear values
-        // libavif does NOT apply transfer function during RGB→YUV conversion,
-        // so we must apply PQ encoding ourselves before passing to libavif
-        println!(
-            "AVIF: Applying PQ (ST.2084) encoding to linear HDR values ({}-bit)",
-            target_depth
-        );
+        use crate::decoder::TransferFunction;
 
-        // Sample some pixels for debugging
-        let sample_pixels = [(width / 2, height / 2), (width * 3 / 4, height / 2)];
+        // Check if data is already PQ-encoded (from HEIC/HDR sources)
+        // If transfer_function is Pq, the input data is already in PQ space (0-1)
+        // and we should NOT apply PQ encoding again
+        let data_is_pq_encoded = matches!(transfer_function, Some(TransferFunction::Pq));
 
-        for i in 0..pixel_count {
-            let base = i * channels;
-            let r = pixels_f32[base];
-            let g = pixels_f32[base + 1];
-            let b = pixels_f32[base + 2];
+        if data_is_pq_encoded {
+            // HEIC HDR: macOS has converted PQ→Linear and normalized to 0-1 range
+            // We need to apply PQ encoding to this normalized linear data
+            // Note: Original absolute luminance is lost, but relative colors are preserved
+            println!(
+                "AVIF: HEIC HDR detected - applying PQ encoding to normalized linear data ({}-bit)",
+                target_depth
+            );
 
-            // Apply PQ (ST.2084) EOTF inverse to convert linear (0-100) to PQ (0-1)
-            let r_pq = apply_pq_eotf_inverse(r);
-            let g_pq = apply_pq_eotf_inverse(g);
-            let b_pq = apply_pq_eotf_inverse(b);
+            // Sample some pixels for debugging
+            let sample_pixels = [(width / 2, height / 2), (width * 3 / 4, height / 2)];
 
-            let r_u16 = (r_pq * max_value) as u16;
-            let g_u16 = (g_pq * max_value) as u16;
-            let b_u16 = (b_pq * max_value) as u16;
+            for i in 0..pixel_count {
+                let base = i * channels;
+                let r = pixels_f32[base];
+                let g = pixels_f32[base + 1];
+                let b = pixels_f32[base + 2];
 
-            // Debug output for sample pixels
-            let x = (i as u32) % width;
-            let y = (i as u32) / width;
-            if sample_pixels.contains(&(x, y)) {
-                println!(
-                    "AVIF: Sample pixel [{}, {}]: linear=({:.3}, {:.3}, {:.3}) -> PQ=({:.6}, {:.6}, {:.6}) -> u16=({}, {}, {})",
-                    x, y, r, g, b, r_pq, g_pq, b_pq, r_u16, g_u16, b_u16
-                );
+                // Apply PQ encoding to normalized linear values
+                // This preserves relative luminance even though absolute nits are unknown
+                let r_pq = apply_pq_to_normalized_linear(r);
+                let g_pq = apply_pq_to_normalized_linear(g);
+                let b_pq = apply_pq_to_normalized_linear(b);
+
+                let r_u16 = (r_pq * max_value) as u16;
+                let g_u16 = (g_pq * max_value) as u16;
+                let b_u16 = (b_pq * max_value) as u16;
+
+                // Debug output for sample pixels
+                let x = (i as u32) % width;
+                let y = (i as u32) / width;
+                if sample_pixels.contains(&(x, y)) {
+                    println!(
+                        "AVIF: Sample pixel [{}, {}]: linear=({:.3}, {:.3}, {:.3}) -> PQ=({:.6}, {:.6}, {:.6}) -> u16=({}, {}, {})",
+                        x, y, r, g, b, r_pq, g_pq, b_pq, r_u16, g_u16, b_u16
+                    );
+                }
+
+                rgb_u16.push(r_u16);
+                rgb_u16.push(g_u16);
+                rgb_u16.push(b_u16);
+
+                if has_alpha {
+                    let a = pixels_f32[base + 3];
+                    let a_u16 = (a.clamp(0.0, 1.0) * max_value) as u16;
+                    rgb_u16.push(a_u16);
+                }
             }
+        } else {
+            // Data is in NORMALIZED LINEAR space (0-1 range from macOS CGImage)
+            // macOS has already converted PQ to Linear and normalized to 0-1 range
+            // Apply sRGB gamma curve first, then PQ encoding
+            println!(
+                "AVIF: Converting normalized linear to sRGB gamma, then applying PQ encoding ({}-bit)",
+                target_depth
+            );
 
-            rgb_u16.push(r_u16);
-            rgb_u16.push(g_u16);
-            rgb_u16.push(b_u16);
+            // Sample some pixels for debugging
+            let sample_pixels = [(width / 2, height / 2), (width * 3 / 4, height / 2)];
 
-            if has_alpha {
-                let a = pixels_f32[base + 3];
-                let a_u16 = (a.clamp(0.0, 1.0) * max_value) as u16;
-                rgb_u16.push(a_u16);
+            for i in 0..pixel_count {
+                let base = i * channels;
+                let r = pixels_f32[base];
+                let g = pixels_f32[base + 1];
+                let b = pixels_f32[base + 2];
+
+                // Step 1: Apply sRGB gamma to normalized linear values
+                // This converts display-referred linear to gamma-corrected values
+                let r_gamma = linear_to_srgb(r);
+                let g_gamma = linear_to_srgb(g);
+                let b_gamma = linear_to_srgb(b);
+
+                // Step 2: Apply PQ curve to gamma-corrected values
+                // Treat gamma-corrected values as if they are linear light for PQ encoding
+                let r_pq = apply_pq_to_normalized_linear(r_gamma);
+                let g_pq = apply_pq_to_normalized_linear(g_gamma);
+                let b_pq = apply_pq_to_normalized_linear(b_gamma);
+
+                let r_u16 = (r_pq * max_value) as u16;
+                let g_u16 = (g_pq * max_value) as u16;
+                let b_u16 = (b_pq * max_value) as u16;
+
+                // Debug output for sample pixels
+                let x = (i as u32) % width;
+                let y = (i as u32) / width;
+                if sample_pixels.contains(&(x, y)) {
+                    println!(
+                        "AVIF: Sample pixel [{}, {}]: linear=({:.3}, {:.3}, {:.3}) -> gamma=({:.3}, {:.3}, {:.3}) -> PQ=({:.6}, {:.6}, {:.6}) -> u16=({}, {}, {})",
+                        x,
+                        y,
+                        r,
+                        g,
+                        b,
+                        r_gamma,
+                        g_gamma,
+                        b_gamma,
+                        r_pq,
+                        g_pq,
+                        b_pq,
+                        r_u16,
+                        g_u16,
+                        b_u16
+                    );
+                }
+
+                rgb_u16.push(r_u16);
+                rgb_u16.push(g_u16);
+                rgb_u16.push(b_u16);
+
+                if has_alpha {
+                    let a = pixels_f32[base + 3];
+                    let a_u16 = (a.clamp(0.0, 1.0) * max_value) as u16;
+                    rgb_u16.push(a_u16);
+                }
             }
         }
     } else {
@@ -694,6 +766,31 @@ fn convert_to_rgb16(
 }
 
 /// Apply PQ (ST.2084) inverse EOTF for HDR encoding
+/// Apply PQ curve to normalized linear values (from macOS CGImage)
+/// Input: Normalized linear (0.0-1.0), Output: PQ signal (0.0-1.0)
+fn apply_pq_to_normalized_linear(linear: f32) -> f32 {
+    if linear <= 0.0 {
+        return 0.0;
+    }
+
+    // macOS provides normalized linear values (0-1)
+    // Clamp to valid range
+    let y = linear.clamp(0.0, 1.0);
+
+    // PQ constants (SMPTE ST 2084)
+    let m1 = 2610.0 / 16384.0; // 0.1593017578125
+    let m2 = 2523.0 / 4096.0 * 128.0; // 78.84375
+    let c1 = 3424.0 / 4096.0; // 0.8359375
+    let c2 = 2413.0 / 4096.0 * 32.0; // 18.8515625
+    let c3 = 2392.0 / 4096.0 * 32.0; // 18.6875
+
+    // Apply PQ EOTF inverse
+    let y_m1 = y.powf(m1);
+    let pq = ((c1 + c2 * y_m1) / (1.0 + c3 * y_m1)).powf(m2);
+
+    pq.clamp(0.0, 1.0)
+}
+
 /// Input: Linear light (0.0-100.0 normalized, where 100.0 = 10000 nits), Output: PQ signal (0.0-1.0)
 fn apply_pq_eotf_inverse(linear: f32) -> f32 {
     if linear <= 0.0 {
