@@ -1,5 +1,6 @@
 use crate::error::AppError;
 use crate::options::HighBitDepthImage;
+use jpegli_rs::encoder::{EncoderConfig, PixelLayout, Unstoppable};
 use serde::{Deserialize, Serialize};
 
 /// デフォルトの画質
@@ -118,30 +119,24 @@ pub fn encode(
         rgb_data.len()
     );
 
-    // jpegli-rsエンコーダーの設定
-    let mode = if options.progressive {
-        jpegli_rs::JpegMode::Progressive
-    } else {
-        jpegli_rs::JpegMode::Baseline
-    };
+    // jpegli-rs新API
+    let config = EncoderConfig::new()
+        .quality(options.quality)
+        .progressive(options.progressive)
+        .optimize_huffman(options.optimize);
 
-    let config = jpegli_rs::EncoderConfig {
-        width,
-        height,
-        pixel_format: jpegli_rs::PixelFormat::Rgb,
-        quality: jpegli_rs::Quality::from_distance(95.0 / options.quality as f32),
-        mode,
-        optimize_huffman: options.optimize,
-        ..Default::default()
-    };
-
-    let encoder = jpegli_rs::Encoder::from_config(config);
-
-    // エンコード実行
     println!("Encoding image data...");
+    let mut encoder = config
+        .encode_from_bytes(width, height, PixelLayout::Rgb8Srgb)
+        .map_err(|e| AppError::Encode(format!("Failed to create JPEG encoder: {:?}", e)))?;
+
+    encoder
+        .push_packed(&rgb_data, Unstoppable)
+        .map_err(|e| AppError::Encode(format!("Failed to push image data: {:?}", e)))?;
+
     let mut jpeg_data = encoder
-        .encode(&rgb_data)
-        .map_err(|e| AppError::Encode(format!("Failed to encode JPEG: {:?}", e)))?;
+        .finish()
+        .map_err(|e| AppError::Encode(format!("Failed to finish encoding: {:?}", e)))?;
 
     // ICCプロファイルの追加（エンコード後にAPP2マーカーとして追加）
     if let Some(icc) = icc_profile {

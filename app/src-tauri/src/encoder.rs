@@ -37,7 +37,7 @@ pub fn encode(
             webp::encode(&img, icc_profile, opts)
         }
         EncodeOptions::Jxl(opts) => {
-            println!("Adapter: Converting JxlOptions for jpegxl_rs encoder...");
+            println!("Adapter: Converting JxlOptions for jxl-sys encoder...");
             jxl::encode(&img, icc_profile, opts)
         }
         EncodeOptions::Png(opts) => {
@@ -61,10 +61,17 @@ pub fn encode(
 /// # 戻り値
 /// - 推定されるファイルサイズをバイト単位で返します。
 pub fn estimate_size(img: &HighBitDepthImage, options: &EncodeOptions) -> usize {
+    let (width, height, channels) = match img {
+        HighBitDepthImage::Rgb(buf) => (buf.width(), buf.height(), 3),
+        HighBitDepthImage::Rgba(buf) | HighBitDepthImage::Argb(buf) => {
+            (buf.width(), buf.height(), 4)
+        }
+    };
+
     match options {
         EncodeOptions::Avif(opts) => avif::estimate_size(img, opts),
         EncodeOptions::Webp(opts) => webp::estimate_size(img, opts),
-        EncodeOptions::Jxl(opts) => jxl::estimate_size(img, opts),
+        EncodeOptions::Jxl(opts) => jxl::estimate_size(width, height, channels, opts.quality),
         EncodeOptions::Png(opts) => png::estimate_size(img, opts),
         EncodeOptions::Jpeg(opts) => jpeg::estimate_size(img, opts),
     }

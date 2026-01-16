@@ -16,7 +16,7 @@ pub enum AppError {
     Avif(String), // libavif::Errorは複雑なのでStringに変換
 
     #[error("JPEG XL encoding error: {0}")]
-    Jxr(#[from] jpegxl_rs::EncodeError),
+    Jxr(String), // jxl-sysのエラーをStringに変換
 
     #[error("Filesystem error: {0}")]
     Io(#[from] std::io::Error), // std::io::Errorから自動変換

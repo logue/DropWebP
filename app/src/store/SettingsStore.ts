@@ -38,11 +38,11 @@ const defaultWebpOptions: WebpOptions = {
 const defaultJxlOptions: JxlOptions = {
   lossless: false, // ロスレスはファイルサイズが大きくなるため、デフォルトはロッシー圧縮
   speed: EncoderSpeed.Squirrel,
-  quality: 3, // デフォルトを3に上げて高品質を確保（推奨範囲: 0.5-3.0）
+  quality: 1.0, // Visually Lossless品質（推奨範囲: 0.5-3.0、値が小さいほど高品質）
   useContainer: false,
   usesOriginalProfile: false,
   decodingSpeed: 0,
-  initBufferSize: 512,
+  initBufferSize: 1024 * 1024, // 1MBから開始（バッファ拡張を最小化）
   colorEncoding: ColorEncoding.Srgb
 };
 

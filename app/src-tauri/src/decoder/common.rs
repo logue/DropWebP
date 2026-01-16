@@ -25,13 +25,27 @@ impl IccProfileInfo {
     pub fn analyze(profile: &[u8]) -> Self {
         let size = profile.len();
 
+        // Check for custom BT2020-PQ marker at the end of profile
+        let has_bt2020_marker = if size > 10 {
+            let marker_pos = size.saturating_sub(10);
+            &profile[marker_pos..] == b"BT2020-PQ\0"
+        } else {
+            false
+        };
+
         // Extract profile details if the profile is large enough
         let (color_space, profile_description, has_high_precision, transfer_function) =
             if size >= 128 {
                 let color_space = extract_color_space(profile);
                 let description = extract_profile_description(profile);
                 let high_precision = detect_high_precision_profile(profile, &color_space);
-                let transfer_fn = detect_transfer_function(profile, &description);
+                let mut transfer_fn = detect_transfer_function(profile, &description);
+
+                // Override with PQ if we have the marker
+                if has_bt2020_marker {
+                    transfer_fn = TransferFunction::Pq;
+                }
+
                 (color_space, description, high_precision, transfer_fn)
             } else {
                 (
@@ -44,13 +58,17 @@ impl IccProfileInfo {
 
         // Display P3, Rec2020, and other wide gamut profiles typically range 400-2000 bytes
         // Small profiles (< 400 bytes) are usually sRGB or basic profiles
-        let suggests_wide_gamut = size > 400
-            && (color_space.contains("RGB")
-                || profile_description.contains("Display P3")
-                || profile_description.contains("DCI-P3")
-                || profile_description.contains("Rec2020")
-                || profile_description.contains("ProPhoto")
-                || profile_description.contains("Adobe RGB"));
+        let suggests_wide_gamut = has_bt2020_marker
+            || (size > 400
+                && (color_space.contains("RGB")
+                    || profile_description.contains("Display P3")
+                    || profile_description.contains("DCI-P3")
+                    || profile_description.contains("Rec2020")
+                    || profile_description.contains("BT.2020")
+                    || profile_description.contains("BT2020")
+                    || profile_description.contains("ITU-R BT.2100")
+                    || profile_description.contains("ProPhoto")
+                    || profile_description.contains("Adobe RGB")));
 
         Self {
             size,
@@ -77,10 +95,20 @@ impl IccProfileInfo {
 
     /// Check if this is a BT.2020 (Rec. 2020) color profile
     pub fn is_bt2020(&self) -> bool {
+        // Check transfer function first (most reliable for generated profiles)
+        if matches!(
+            self.transfer_function,
+            TransferFunction::Pq | TransferFunction::Hlg
+        ) {
+            return true;
+        }
+
+        // Check profile description
         self.profile_description.contains("Rec2020")
             || self.profile_description.contains("BT.2020")
             || self.profile_description.contains("BT2020")
             || self.profile_description.contains("ITU-R BT.2020")
+            || self.profile_description.contains("ITU-R BT.2100")
     }
 }
 

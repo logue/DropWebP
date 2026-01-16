@@ -37,7 +37,7 @@ pub async fn convert(
                 );
 
                 // トランスコードを実行し、成功したら`return`で即座に関数を抜ける
-                return crate::encoder::jxl::transcode(&data, jxl_opts)
+                return crate::encoder::jxl::transcode(&data)
                     .log_error(Some("JPEG to JPEG XL transcode"))
                     .map_err(|e| format!("Failed to transcode JPEG to JPEG XL: {}", e));
             }
@@ -188,7 +188,7 @@ pub async fn convert_with_progress(
                     "JPEG detected for JPEG XL target. Using transcode path (no progress)...",
                 );
 
-                return crate::encoder::jxl::transcode(&data, jxl_opts)
+                return crate::encoder::jxl::transcode(&data)
                     .log_error(Some("JPEG to JPEG XL transcode"))
                     .map_err(|e| format!("Failed to transcode JPEG to JPEG XL: {}", e));
             }

@@ -37,7 +37,7 @@ name = "drop_compress_image_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-cc = "1.2.49"
+cc = "1.2.52"
 pkg-config = "0.3.32"
 tauri-build = { version = "2.5.3", features = [] }
 vcpkg = "0.2.15"
@@ -50,8 +50,8 @@ image = "0.25.9"
 imgref = "1.12.0"
 indexmap = "2.13.0"
 jpeg2k = "0.10.1"
-jpegli_rs = { version = "0.3.0", package = "jpegli-rs" }
-jpegxl-rs = { version = "0.11.2+libjxl-0.11.1", features = ["vendored"] }
+jpegli_rs = { version = "0.6.0", package = "jpegli-rs" }
+jxl-sys = "0.1.5" # MIT/Apache-2.0 FFI bindings to libjxl (BSD-3-Clause)
 kamadak-exif = "0.6.1"
 lcms2 = "6.1.1"
 libavif-sys = { version = "0.17.0", default-features = false, features = [

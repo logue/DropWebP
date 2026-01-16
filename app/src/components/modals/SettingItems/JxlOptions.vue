@@ -21,13 +21,14 @@ const settingsStore = useSettingsStore();
       <v-slider
         v-model="settingsStore.jxlOptions.quality"
         :disabled="settingsStore.jxlOptions.lossless"
-        :hint="t('quality_hint', { min: 3.0, max: 5.0 })"
+        :hint="t('quality_hint', { min: 0.5, max: 3.0 })"
         :label="t('quality', { min: 0.1, max: 15.0 })"
         color="primary"
         max="15.0"
         min="0.1"
         persistent-hint
         step="0.1"
+        thumb-label
         type="number"
       >
         <template #append>
@@ -143,8 +144,8 @@ en:
     - 8, Kitten (Best quality, very slow)
     - 9, Tortoise (Best quality, very slow)
     - 10, Glacier (Best quality, very slow, for archival use)
-  quality: Quality ({min}-{max})
-  quality_hint: Higher values mean higher quality. Default is 1, recommended values are ({min}-{max}).
+  quality: Quality / Distance ({min}-{max})
+  quality_hint: Distance parameter. LOWER values mean HIGHER quality. 0.0=lossless, 1.0=visually lossless (recommended), 3.0=high quality. Recommended range is ({min}-{max}).
   use_container: Use JPEG XL container format
   use_container_hint: Using the JPEG XL container format allows saving metadata such as JPEG reconstruction. However, even if there is no additional metadata, a few bytes are added to the encoded file for the container header.
   uses_original_profile: Use original color profile
@@ -178,8 +179,8 @@ fr:
     - 8, Kitten (Meilleure qualité, très lent)
     - 9, Tortoise (Meilleure qualité, très lent)
     - 10, Glacier (Meilleure qualité, très lent, pour usage archivistique)
-  quality: Qualité ({min}-{max})
-  quality_hint: Des valeurs plus élevées signifient une meilleure qualité. La valeur par défaut est 1, les valeurs recommandées sont ({min}-{max}).
+  quality: Qualité / Distance ({min}-{max})
+  quality_hint: Paramètre de distance. Des valeurs PLUS BASSES signifient une qualité PLUS ÉLEVÉE. 0.0=sans perte, 1.0=visuellement sans perte (recommandé), 3.0=haute qualité. La plage recommandée est ({min}-{max}).
   use_container: Utiliser le format de conteneur JPEG XL
   use_container_hint: L'utilisation du format de conteneur JPEG XL permet de sauvegarder des métadonnées telles que la reconstruction JPEG. Cependant, même s'il n'y a pas de métadonnées supplémentaires, quelques octets sont ajoutés au fichier encodé pour l'en-tête du conteneur.
   uses_original_profile: Utiliser le profil de couleur original
@@ -213,8 +214,8 @@ ja:
     - 8, Kitten（最高品質、非常に遅い）
     - 9, Tortoise（最高品質、非常に遅い）
     - 10, Glacier（最高品質、非常に遅い、アーカイブ用）
-  quality: 品質（{min}～{max}）
-  quality_hint: 値が高いほど高品質です。デフォルトは1で、推奨値は{min}～{max}です。
+  quality: 品質 / 距離（{min}～{max}）
+  quality_hint: 距離パラメータです。値が低いほど品質が高くなります。0.0=ロスレス、1.0=視覚的にロスレス（推奨）、3.0=高品質。推奨範囲は{min}～{max}です。
   use_container: JPEG XLコンテナ形式を使用
   use_container_hint: JPEG XLコンテナ形式を使用すると、JPEG再構成などのメタデータを保存できます。ただし、追加のメタデータがない場合でも、コンテナヘッダー用にエンコードされたファイルに数バイトが追加されます。
   uses_original_profile: 元のカラープロファイルを使用
@@ -248,8 +249,8 @@ ko:
     - 8, Kitten (최고 품질, 매우 느림)
     - 9, Tortoise (최고 품질, 매우 느림)
     - 10, Glacier (최고 품질, 매우 느림, 보관용)
-  quality: 품질 ({min}-{max})
-  quality_hint: 값이 높을수록 품질이 높아집니다. 기본값은 1이며 권장 값은 ({min}-{max})입니다.
+  quality: 품질 / 거리 ({min}-{max})
+  quality_hint: 거리 매개변수입니다. 값이 낮을수록 품질이 높아집니다. 0.0=무손실, 1.0=시각적 무손실(권장), 3.0=고품질. 권장 범위는 ({min}-{max})입니다.
   use_container: JPEG XL 컨테이너 형식 사용
   use_container_hint: JPEG XL 컨테이너 형식을 사용하면 JPEG 재구성 등의 메타데이터를 저장할 수 있습니다. 그러나 추가 메타데이터가 없더라도 컨테이너 헤더를 위해 인코딩된 파일에 몇 바이트가 추가됩니다.
   uses_original_profile: 원본 색상 프로필 사용
@@ -283,8 +284,8 @@ zhHants:
     - 8, Kitten（最佳質量，非常慢）
     - 9, Tortoise（最佳質量，非常慢）
     - 10, Glacier（最佳質量，非常慢，用於存檔）
-  quality: 質量 ({min}-{max})
-  quality_hint: 值越高，質量越高。默認值為 1，建議值為 ({min}-{max})。
+  quality: 質量 / 距離 ({min}-{max})
+  quality_hint: 距離參數。值越低，質量越高。0.0=無損，1.0=視覺上無損（建議），3.0=高質量。建議範圍為 ({min}-{max})。
   use_container: 使用 JPEG XL 容器格式
   use_container_hint: 使用 JPEG XL 容器格式可以保存 JPEG 重建等元數據。但是，即使沒有其他元數據，編碼文件也會為容器標頭添加幾個字節。
   uses_original_profile: 使用原始色彩配置文件
@@ -318,8 +319,8 @@ zhHans:
     - 8, Kitten（最佳质量，非常慢）
     - 9, Tortoise（最佳质量，非常慢）
     - 10, Glacier（最佳质量，非常慢，用于存档）
-  quality: 质量 ({min}-{max})
-  quality_hint: 值越高，质量越高。默认值为 1，建议值为 ({min}-{max})。
+  quality: 质量 / 距离 ({min}-{max})
+  quality_hint: 距离参数。值越低，质量越高。0.0=无损，1.0=视觉上无损（建议），3.0=高质量。建议范围为 ({min}-{max})。
   use_container: 使用 JPEG XL 容器格式
   use_container_hint: 使用 JPEG XL 容器格式可以保存 JPEG 重建等元数据。但是，即使没有其他元数据，编码文件也会为容器头添加几个字节。
   uses_original_profile: 使用原始色彩配置文件
