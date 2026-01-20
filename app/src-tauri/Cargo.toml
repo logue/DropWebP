@@ -37,42 +37,43 @@ name = "drop_compress_image_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-cc = "1.2.52"
+cc = "1.2.53"
 pkg-config = "0.3.32"
 tauri-build = { version = "2.5.3", features = [] }
 vcpkg = "0.2.15"
 
 [dependencies]
 bytemuck = "1.24.0"
-chrono = { version = "0.4.42", features = ["serde"] }
+chrono = { version = "0.4.43", features = ["serde"] }
 flate2 = "1.1.8"
 image = "0.25.9"
 imgref = "1.12.0"
 indexmap = "2.13.0"
 jpeg2k = "0.10.1"
-jpegli_rs = { version = "0.6.0", package = "jpegli-rs" }
-jxl-sys = "0.1.5" # MIT/Apache-2.0 FFI bindings to libjxl (BSD-3-Clause)
+jpegli_rs = { version = "0.6.0", package = "jpegli-rs" } # Note: Uses libjpeg-turbo via vcpkg
+# Note: jxl-sys requires LLVM/Clang for bindgen on Windows
+# Install from: https://github.com/llvm/llvm-project/releases (e.g., LLVM-19.1.6-win64.exe)
+# Or install via winget: winget install LLVM.LLVM
+jxl-sys = "0.1.5"                                              # MIT/Apache-2.0 FFI bindings to libjxl (BSD-3-Clause)
 kamadak-exif = "0.6.1"
-lcms2 = "6.1.1"
-libavif-sys = { version = "0.17.0", default-features = false, features = [
-  "codec-aom", # Use libaom encoder (much faster than rav1e, 5-10x speed improvement)
-] }
-libwebp-sys = "0.14.1"
-openjpeg-sys = "1.0.12" # Note: Requires system openjpeg or Homebrew
+lcms2 = "6.1.1"                                                # Little CMS color management, linked via vcpkg
+libavif-sys = { version = "0.17.0", default-features = false } # Note: Uses system libavif (with aom) via vcpkg, no internal build
+libwebp-sys = "0.14.1"                                         # WebP codec, linked via vcpkg
+openjpeg-sys = "1.0.12"                                        # JPEG 2000 decoder, linked via vcpkg
 oxipng = "10.0.0"
 png = "0.18.0"
 rgb = "0.8.52"
 serde = "1.0.228"
 serde_json = "1.0.149"
 tauri = { version = "2.9.5", features = [] }
-tauri-plugin-dialog = "2.5.0"
+tauri-plugin-dialog = "2.6.0"
 tauri-plugin-fs = "2.4.5"
 tauri-plugin-log = "2.8.0"
 tauri-plugin-notification = "2.3.3"
 tauri-plugin-opener = "2.5.3"
 tauri-plugin-os = "2.3.2"
 tempfile = "3.24.0"
-thiserror = "2.0.17"
+thiserror = "2.0.18"
 
 [dev-dependencies]
 glib = "0.21.5"

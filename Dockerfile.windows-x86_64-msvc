@@ -1,0 +1,38 @@
+# ベースイメージ（Rust最新版）
+FROM rust:latest
+
+# 1. 必要なツールチェーンのインストール
+# clang, lld: MSVC互換のクロスリンクに必須
+# nsisser: TauriのWindowsインストーラー作成に必要（Linux版NSIS）
+RUN apt-get update && apt-get install -y \
+    clang \
+    lld \
+    llvm \
+    nsis \
+    libssl-dev \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+# 2. cargo-xwin のインストール
+# これが Windows SDK や CRT を自動でダウンロード・管理します
+RUN cargo install cargo-xwin
+
+# 3. Windows (MSVC) ターゲットの追加
+RUN rustup target add x86_64-pc-windows-msvc
+
+# 4. 作業ディレクトリの設定
+WORKDIR /workspace
+
+# 5. ビルド用環境変数の設定
+# C言語系ライブラリ(jpeg-xl等)をコンパイルする際に、
+# Linuxのgccではなくclang-cl（MSVC互換ドライバ）を使うように強制します。
+ENV CC_x86_64_pc_windows_msvc="clang-cl" \
+    CXX_x86_64_pc_windows_msvc="clang-cl" \
+    AR_x86_64_pc_windows_msvc="llvm-lib" \
+    # CMakeを使うクレート対策（システムによって名称が異なるため念のため）
+    CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_LINKER="lld-link"
+
+# 6. 【重要】cargo-xwin用設定
+# xwinがダウンロードしたSDKキャッシュを永続化したい場合はボリュームマウントを推奨
+# ここではビルドコマンド例をCMDとして記述
+CMD ["cargo", "xwin", "build", "--target", "x86_64-pc-windows-msvc", "--release"]
