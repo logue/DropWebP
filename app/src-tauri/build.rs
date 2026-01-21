@@ -107,15 +107,22 @@ fn main() {
                 println!("cargo:include={}", include_path.display());
             }
             // libaom-sysに内部ビルドをスキップさせる
+            // libaom-sys 0.17.xが認識する正式な環境変数を設定
             unsafe {
-                if !lib.link_paths.is_empty() {
-                    env::set_var("AOM_LIB_DIR", lib.link_paths[0].to_str().unwrap());
+                if !lib.link_paths.is_empty() && !lib.include_paths.is_empty() {
+                    let lib_dir = lib.link_paths[0].to_str().unwrap();
+                    let inc_dir = lib.include_paths[0].to_str().unwrap();
+                    let pkgconfig_dir = format!("{}/pkgconfig", lib_dir);
+
+                    // libaom-sysのbuild.rsが参照する環境変数（必須）
+                    env::set_var("LIB_AOM_STATIC_LIB_PATH", lib_dir);
+                    env::set_var("LIB_AOM_INCLUDE_PATH", inc_dir);
+                    env::set_var("LIB_AOM_PKG_CONFIG_PATH", &pkgconfig_dir);
+
+                    println!("cargo:info=Set LIB_AOM_STATIC_LIB_PATH={}", lib_dir);
+                    println!("cargo:info=Set LIB_AOM_INCLUDE_PATH={}", inc_dir);
+                    println!("cargo:info=Set LIB_AOM_PKG_CONFIG_PATH={}", pkgconfig_dir);
                 }
-                if !lib.include_paths.is_empty() {
-                    env::set_var("AOM_INCLUDE_DIR", lib.include_paths[0].to_str().unwrap());
-                }
-                env::set_var("AOM_STATIC", "1");
-                env::set_var("LIBAOM_NO_LOCAL_BUILD", "1");
             }
         }
         Err(e) => {
@@ -214,7 +221,7 @@ fn main() {
     // Windows環境での設定
     #[cfg(target_os = "windows")]
     {
-        if let Ok(vcpkg_root) = env::var("VCPKG_ROOT") {
+        if let Ok(_vcpkg_root) = env::var("VCPKG_ROOT") {
             let target = env::var("TARGET").unwrap_or_default();
             let profile = env::var("PROFILE").unwrap_or_else(|_| "debug".to_string());
 
@@ -245,8 +252,12 @@ fn main() {
 
             unsafe {
                 // libavif-sysとlibaom-sysに内部ビルドをスキップさせる
+                // Windows特有の環境変数も設定
                 env::set_var("LIBAVIF_NO_LOCAL_BUILD", "1");
                 env::set_var("LIBAOM_NO_LOCAL_BUILD", "1");
+                env::set_var("LIBAOM_NO_FETCH", "1");
+                env::set_var("LIBAOM_NO_BUILD", "1");
+                env::set_var("LIBAOM_SYS_STATIC", "1");
             }
         } else {
             println!(
