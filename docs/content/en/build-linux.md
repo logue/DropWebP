@@ -127,16 +127,80 @@ npm install -g pnpm
 pnpm --version
 ```
 
-## Step 6: Install Additional Dependencies
+## Step 6: Set Up vcpkg and Install Dependencies
 
-Install additional tools that may be required:
+This project uses vcpkg to manage C/C++ image processing libraries (libaom, libavif, libjxl, etc.).
+
+### Install vcpkg Prerequisites
 
 ```bash
-# Install CMake (for some native dependencies)
-sudo apt install -y cmake
+# Install tools required for vcpkg
+sudo apt install -y curl zip unzip tar cmake pkg-config
+```
 
-# Install pkg-config (for linking libraries)
-sudo apt install -y pkg-config
+### Install vcpkg
+
+```bash
+# Clone vcpkg
+git clone https://github.com/Microsoft/vcpkg.git ~/vcpkg
+
+# Bootstrap vcpkg
+cd ~/vcpkg
+./bootstrap-vcpkg.sh
+
+# Set environment variables (add to ~/.bashrc)
+echo 'export VCPKG_ROOT="$HOME/vcpkg"' >> ~/.bashrc
+echo 'export PATH="$VCPKG_ROOT:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+### Install Dependencies
+
+Use the automated installation script (recommended):
+
+```bash
+cd ~/path/to/DropWebP/app/src-tauri
+./setup-vcpkg.sh
+```
+
+Or install manually:
+
+```bash
+cd ~/vcpkg
+
+# For x64 Linux
+./vcpkg install aom:x64-linux
+./vcpkg install libavif[aom]:x64-linux
+./vcpkg install libjxl:x64-linux
+./vcpkg install libwebp:x64-linux
+./vcpkg install openjpeg:x64-linux
+./vcpkg install libjpeg-turbo:x64-linux
+./vcpkg install lcms:x64-linux
+
+# For ARM64 Linux
+./vcpkg install aom:arm64-linux
+./vcpkg install libavif[aom]:arm64-linux
+./vcpkg install libjxl:arm64-linux
+./vcpkg install libwebp:arm64-linux
+./vcpkg install openjpeg:arm64-linux
+./vcpkg install libjpeg-turbo:arm64-linux
+./vcpkg install lcms:arm64-linux
+```
+
+Installed libraries:
+
+- **libaom**: AV1 encoder (for AVIF format, **required**)
+- **libavif**: AVIF image format
+- **libjxl**: JPEG XL image format
+- **libwebp**: WebP image format
+- **openjpeg**: JPEG 2000 image format
+- **libjpeg-turbo**: JPEG image processing (for jpegli)
+- **lcms**: Little CMS color management
+
+### Verify Installation
+
+```bash
+./vcpkg list | grep -E "aom|avif|jxl|webp|openjpeg|jpeg|lcms"
 ```
 
 ## Step 7: Clone and Build Drop Compress Image

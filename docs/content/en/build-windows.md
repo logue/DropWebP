@@ -182,13 +182,13 @@ There are two ways to build on Windows:
 
 > **Warning:** While it's possible to install Rust via Chocolatey, it installs with the MinGW toolchain, which may lead to compatibility issues with libraries.
 
-## 8. Set Up vcpkg (Official Instructions)
+## 8. Set Up vcpkg
 
 1. Clone the vcpkg repository:
 
    ```powershell
-   git clone https://github.com/Microsoft/vcpkg.git
-   cd vcpkg
+   git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
+   cd C:\vcpkg
    ```
 
 2. Run the bootstrap script:
@@ -197,31 +197,69 @@ There are two ways to build on Windows:
    .\bootstrap-vcpkg.bat
    ```
 
-3. Integrate vcpkg with Visual Studio (this step sets environment variables like VCPKG_ROOT):
+3. Set environment variables (recommended to add to system environment variables):
 
    ```powershell
-   .\vcpkg integrate install
+   $env:VCPKG_ROOT = "C:\vcpkg"
+   [System.Environment]::SetEnvironmentVariable('VCPKG_ROOT', 'C:\vcpkg', 'User')
    ```
 
-> **Warning:** You can also set VCPKG_ROOT environment variable to the vcpkg installation directory (e.g., C:\vcpkg) and add vcpkg to your PATH if needed.
+> **Important:** The VCPKG_ROOT environment variable is required for the build system to locate vcpkg libraries.
 
-## 9. Install Required Libraries
+## 9. Install Dependencies
 
-1. Install required libraries for image processing:
+### Create Release Triplet
 
-   ```powershell
-   .\vcpkg install libavif libjxl --triplet x64-windows-static-md
-   ```
+vcpkg's default triplet includes debug symbols which cause link errors with Rust release builds. Create a custom triplet:
 
-   > **Note:** JPEG XL (`libjxl`) is statically linked via the `vendored` feature, so vcpkg may not be required in the future.
+```powershell
+@"
+set(VCPKG_TARGET_ARCHITECTURE x64)
+set(VCPKG_CRT_LINKAGE static)
+set(VCPKG_LIBRARY_LINKAGE static)
+set(VCPKG_BUILD_TYPE release)
+"@ | Out-File -Encoding utf8 C:\vcpkg\triplets\x64-windows-static-release.cmake
+```
 
-2. After installation, you can verify that the libraries are installed correctly:
+### Install Dependencies
 
-   ```powershell
-   .\vcpkg list
-   ```
+Use the automated installation script (recommended):
 
-> **Notice:** The x64-windows-static-md triplet ensures compatibility with Rust's default MSVC runtime.
+```powershell
+cd DropWebP\app\src-tauri
+.\setup-vcpkg.ps1
+```
+
+Or install manually:
+
+```powershell
+cd C:\vcpkg
+
+# Install with x64-windows-static-release triplet (release-only)
+.\vcpkg install aom:x64-windows-static-release
+.\vcpkg install libavif[aom]:x64-windows-static-release
+.\vcpkg install libjxl:x64-windows-static-release
+.\vcpkg install libwebp:x64-windows-static-release
+.\vcpkg install openjpeg:x64-windows-static-release
+.\vcpkg install libjpeg-turbo:x64-windows-static-release
+.\vcpkg install lcms:x64-windows-static-release
+```
+
+Installed libraries:
+
+- **libaom**: AV1 encoder (for AVIF format)
+- **libavif**: AVIF image format
+- **libjxl**: JPEG XL image format
+- **libwebp**: WebP image format
+- **openjpeg**: JPEG 2000 image format
+- **libjpeg-turbo**: JPEG image processing (for jpegli)
+- **lcms**: Little CMS color management
+
+Verify installation:
+
+```powershell
+.\vcpkg list | Select-String "aom|avif|jxl|webp|openjpeg|jpeg|lcms"
+```
 
 ## 10. Build the Application
 
@@ -245,3 +283,69 @@ There are two ways to build on Windows:
    ```
 
 The application should now build successfully on Windows. If you encounter any issues, ensure all dependencies are properly installed and environment variables are set correctly.
+
+---
+
+## Cross-Building for Arm64 Windows
+
+You can cross-build for Arm64 Windows (Windows on ARM) from an x64 Windows machine.
+
+### Prerequisites
+
+- x64 Windows build environment set up as described above
+- vcpkg dependencies for Arm64 target
+
+### 1. Add Rust Toolchain
+
+```powershell
+rustup target add aarch64-pc-windows-msvc
+```
+
+### 2. Install vcpkg Dependencies for Arm64
+
+Create release triplet for Arm64 (if not already done):
+
+```powershell
+@"
+set(VCPKG_TARGET_ARCHITECTURE arm64)
+set(VCPKG_CRT_LINKAGE static)
+set(VCPKG_LIBRARY_LINKAGE static)
+set(VCPKG_BUILD_TYPE release)
+"@ | Out-File -Encoding utf8 C:\vcpkg\triplets\arm64-windows-static-release.cmake
+```
+
+Install dependencies:
+
+```powershell
+cd C:\vcpkg
+
+.\vcpkg install aom:arm64-windows-static-release
+.\vcpkg install libavif[aom]:arm64-windows-static-release
+.\vcpkg install libjxl:arm64-windows-static-release
+.\vcpkg install libwebp:arm64-windows-static-release
+.\vcpkg install openjpeg:arm64-windows-static-release
+.\vcpkg install libjpeg-turbo:arm64-windows-static-release
+.\vcpkg install lcms:arm64-windows-static-release
+```
+
+### 3. Build for Arm64
+
+```powershell
+cd path\to\DropWebP\app
+pnpm run build:tauri:windows-arm64
+```
+
+Or build manually:
+
+```powershell
+cd app\src-tauri
+cargo build --release --target aarch64-pc-windows-msvc
+cd ..
+pnpm tauri build --target aarch64-pc-windows-msvc
+```
+
+### Notes
+
+- Arm64 binaries will only run on Arm64 Windows devices (e.g., Surface Pro X)
+- Cross-built binaries cannot be executed on x64 machines
+- Build artifacts are generated in `app/src-tauri/target/aarch64-pc-windows-msvc/release/`

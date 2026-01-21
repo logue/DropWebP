@@ -94,9 +94,25 @@ Download the latest release from the [Releases page](https://github.com/logue/Dr
 #### Windows
 
 ```powershell
-# Use the provided build script (no ClangCL required)
-.\build-windows.ps1
+# Install vcpkg and dependencies first
+git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
+cd C:\vcpkg
+.\bootstrap-vcpkg.bat
+
+# Set environment variable
+$env:VCPKG_ROOT = "C:\vcpkg"
+
+# Install dependencies (see docs/content/en/build-windows.md for details)
+cd path\to\DropWebP\app\src-tauri
+.\setup-vcpkg.ps1
+
+# Build the application
+cd ..
+pnpm install
+pnpm run build:tauri
 ```
+
+For detailed Windows build instructions including vcpkg setup, see [Windows Build Guide](./docs/content/en/build-windows.md).
 
 **Build Issues?** See [WINDOWS_BUILD_FIX.md](WINDOWS_BUILD_FIX.md) for troubleshooting.
 

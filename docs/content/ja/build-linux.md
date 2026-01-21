@@ -127,16 +127,80 @@ npm install -g pnpm
 pnpm --version
 ```
 
-## ステップ 6: 追加の依存関係のインストール
+## ステップ 6: vcpkgのセットアップと依存関係のインストール
 
-必要となる可能性のある追加ツールをインストールします：
+このプロジェクトではvcpkgを使用してC/C++画像処理ライブラリ（libaom、libavif、libjxl等）を管理します。
+
+### vcpkg前提パッケージのインストール
 
 ```bash
-# CMakeのインストール（一部のネイティブ依存関係用）
-sudo apt install -y cmake
+# vcpkgに必要なツールをインストール
+sudo apt install -y curl zip unzip tar cmake pkg-config
+```
 
-# pkg-configのインストール（ライブラリのリンク用）
-sudo apt install -y pkg-config
+### vcpkgのインストール
+
+```bash
+# vcpkgをクローン
+git clone https://github.com/Microsoft/vcpkg.git ~/vcpkg
+
+# vcpkgをブートストラップ
+cd ~/vcpkg
+./bootstrap-vcpkg.sh
+
+# 環境変数を設定（~/.bashrc に追加）
+echo 'export VCPKG_ROOT="$HOME/vcpkg"' >> ~/.bashrc
+echo 'export PATH="$VCPKG_ROOT:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+### 依存関係のインストール
+
+自動インストールスクリプトを使用（推奨）:
+
+```bash
+cd ~/path/to/DropWebP/app/src-tauri
+./setup-vcpkg.sh
+```
+
+または手動でインストール：
+
+```bash
+cd ~/vcpkg
+
+# x64 Linux の場合
+./vcpkg install aom:x64-linux
+./vcpkg install libavif[aom]:x64-linux
+./vcpkg install libjxl:x64-linux
+./vcpkg install libwebp:x64-linux
+./vcpkg install openjpeg:x64-linux
+./vcpkg install libjpeg-turbo:x64-linux
+./vcpkg install lcms:x64-linux
+
+# ARM64 Linux の場合
+./vcpkg install aom:arm64-linux
+./vcpkg install libavif[aom]:arm64-linux
+./vcpkg install libjxl:arm64-linux
+./vcpkg install libwebp:arm64-linux
+./vcpkg install openjpeg:arm64-linux
+./vcpkg install libjpeg-turbo:arm64-linux
+./vcpkg install lcms:arm64-linux
+```
+
+インストールされるライブラリ：
+
+- **libaom**: AV1エンコーダー（AVIF形式用、**必須**）
+- **libavif**: AVIF画像フォーマット
+- **libjxl**: JPEG XL画像フォーマット
+- **libwebp**: WebP画像フォーマット
+- **openjpeg**: JPEG 2000画像フォーマット
+- **libjpeg-turbo**: JPEG画像処理（jpegli用）
+- **lcms**: Little CMS カラーマネジメント
+
+### インストール確認
+
+```bash
+./vcpkg list | grep -E "aom|avif|jxl|webp|openjpeg|jpeg|lcms"
 ```
 
 ## ステップ 7: Drop Compress Imageのクローンとビルド

@@ -127,16 +127,80 @@ npm install -g pnpm
 pnpm --version
 ```
 
-## 단계 6: 추가 종속성 설치
+## 단계 6: vcpkg 설정 및 종속성 설치
 
-필요할 수 있는 추가 도구를 설치합니다:
+이 프로젝트는 vcpkg를 사용하여 C/C++ 이미지 처리 라이브러리(libaom, libavif, libjxl 등)를 관리합니다.
+
+### vcpkg 선행 조건 설치
 
 ```bash
-# CMake 설치 (일부 네이티브 종속성용)
-sudo apt install -y cmake
+# vcpkg에 필요한 도구 설치
+sudo apt install -y curl zip unzip tar cmake pkg-config
+```
 
-# pkg-config 설치 (라이브러리 링킹용)
-sudo apt install -y pkg-config
+### vcpkg 설치
+
+```bash
+# vcpkg 복제
+git clone https://github.com/Microsoft/vcpkg.git ~/vcpkg
+
+# vcpkg 부트스트랩
+cd ~/vcpkg
+./bootstrap-vcpkg.sh
+
+# 환경 변수 설정(~/.bashrc에 추가)
+echo 'export VCPKG_ROOT="$HOME/vcpkg"' >> ~/.bashrc
+echo 'export PATH="$VCPKG_ROOT:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+### 종속성 설치
+
+자동 설치 스크립트 사용(권장):
+
+```bash
+cd ~/path/to/DropWebP/app/src-tauri
+./setup-vcpkg.sh
+```
+
+또는 수동으로 설치:
+
+```bash
+cd ~/vcpkg
+
+# x64 Linux의 경우
+./vcpkg install aom:x64-linux
+./vcpkg install libavif[aom]:x64-linux
+./vcpkg install libjxl:x64-linux
+./vcpkg install libwebp:x64-linux
+./vcpkg install openjpeg:x64-linux
+./vcpkg install libjpeg-turbo:x64-linux
+./vcpkg install lcms:x64-linux
+
+# ARM64 Linux의 경우
+./vcpkg install aom:arm64-linux
+./vcpkg install libavif[aom]:arm64-linux
+./vcpkg install libjxl:arm64-linux
+./vcpkg install libwebp:arm64-linux
+./vcpkg install openjpeg:arm64-linux
+./vcpkg install libjpeg-turbo:arm64-linux
+./vcpkg install lcms:arm64-linux
+```
+
+설치된 라이브러리:
+
+- **libaom**: AV1 인코더(AVIF 형식용, **필수**)
+- **libavif**: AVIF 이미지 형식
+- **libjxl**: JPEG XL 이미지 형식
+- **libwebp**: WebP 이미지 형식
+- **openjpeg**: JPEG 2000 이미지 형식
+- **libjpeg-turbo**: JPEG 이미지 처리(jpegli용)
+- **lcms**: Little CMS 색상 관리
+
+### 설치 확인
+
+```bash
+./vcpkg list | grep -E "aom|avif|jxl|webp|openjpeg|jpeg|lcms"
 ```
 
 ## 단계 7: Drop Compress Image 복제 및 빌드

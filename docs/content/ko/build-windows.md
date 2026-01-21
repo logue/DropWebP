@@ -182,56 +182,170 @@ rustc --version
 
 > **경고:** Chocolatey를 통해 Rust를 설치할 수도 있지만 MinGW 툴체인으로 설치되어 라이브러리와의 호환성 문제가 발생할 수 있습니다.
 
-## 8. vcpkg 설정 (공식 지침)
+## 8. vcpkg 설정
 
-원하는 디렉토리에서 다음 명령어를 실행하여 vcpkg를 클론합니다.
+1. vcpkg 리포지토리를 클론합니다:
 
-```powershell
-git clone https://github.com/microsoft/vcpkg.git
-```
+   ```powershell
+   git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
+   cd C:\vcpkg
+   ```
 
-vcpkg 디렉토리로 이동하여 설정 명령어를 실행합니다.
+2. 부트스트랩 스크립트를 실행합니다:
 
-```powershell
-cd vcpkg
-.\bootstrap-vcpkg.bat
-```
+   ```powershell
+   .\bootstrap-vcpkg.bat
+   ```
 
-vcpkg.exe의 경로(예: `C:\path\to\vcpkg`)를 환경 변수 `PATH`에 추가합니다. 방법: 시스템 환경 변수의 "Path"에 vcpkg 디렉토리를 추가하세요.
+3. 환경 변수를 설정합니다(시스템 환경 변수에 추가하는 것이 권장됨):
 
-또한 환경 변수 `VCPKG_DEFAULT_TRIPLET`을 추가하고 값을 `x64-windows-static-md`로 설정합니다. 이렇게 하면 64비트 Windows용 정적 라이브러리가 기본적으로 설치됩니다.
+   ```powershell
+   $env:VCPKG_ROOT = "C:\vcpkg"
+   [System.Environment]::SetEnvironmentVariable('VCPKG_ROOT', 'C:\vcpkg', 'User')
+   ```
 
-설치 후 아래 명령어로 경로가 설정되었는지와 버전을 확인합니다.
+> **중요:** VCPKG_ROOT 환경 변수는 빌드 시스템이 vcpkg 라이브러리를 찾는 데 필요합니다.
 
-```powershell
-vcpkg version
-```
+## 9. 종속성 설치
 
-> **경고:** vcpkg 경로에 영숫자가 아닌 문자가 포함되어 있으면 제대로 작동하지 않을 수 있습니다. 드라이브 루트와 같은 위치에 클론하는 것이 좋습니다.
+### 릴리스 트리플릿 생성
 
-## 9. 필요한 라이브러리 설치
-
-다음 명령어를 실행하여 이미지 변환에 필요한 라이브러리를 설치합니다.
-
-```powershell
-vcpkg install libavif libjxl libwebp libjpeg-turbo libpng
-```
-
-> **참고:** JPEG XL (`libjxl`)은 `vendored` 기능을 통해 정적으로 링크되므로 향후 vcpkg가 필요하지 않을 수 있습니다. 설치하는 데 시간이 걸릴 수 있으며 일부 라이브러리는 빌드에 실패할 수 있습니다. 이 경우 vcpkg 문서를 참조하세요.
-
-## 10. 종속성 설치 및 빌드
-
-프로젝트 디렉토리에서 종속성을 설치합니다.
+vcpkg의 기본 트리플릿에는 디버그 심볼이 포함되어 있어 Rust 릴리스 빌드에서 링크 오류가 발생합니다. 사용자 지정 트리플릿을 생성합니다:
 
 ```powershell
-pnpm install
+@"
+set(VCPKG_TARGET_ARCHITECTURE x64)
+set(VCPKG_CRT_LINKAGE static)
+set(VCPKG_LIBRARY_LINKAGE static)
+set(VCPKG_BUILD_TYPE release)
+"@ | Out-File -Encoding utf8 C:\vcpkg\triplets\x64-windows-static-release.cmake
 ```
 
-개발 모드에서 애플리케이션을 시작합니다.
+### 종속성 설치
+
+자동 설치 스크립트 사용(권장):
 
 ```powershell
-cd app
-pnpm tauri dev
+cd DropWebP\app\src-tauri
+.\setup-vcpkg.ps1
 ```
 
-> **완료:** 첫 번째 시작 시 Rust 종속성 컴파일에 시간이 걸릴 수 있습니다. 애플리케이션 창이 나타나면 개발 환경 설정이 완료된 것입니다.
+또는 수동으로 설치:
+
+```powershell
+cd C:\vcpkg
+
+# x64-windows-static-release 트리플릿으로 설치(릴리스 전용)
+.\vcpkg install aom:x64-windows-static-release
+.\vcpkg install libavif[aom]:x64-windows-static-release
+.\vcpkg install libjxl:x64-windows-static-release
+.\vcpkg install libwebp:x64-windows-static-release
+.\vcpkg install openjpeg:x64-windows-static-release
+.\vcpkg install libjpeg-turbo:x64-windows-static-release
+.\vcpkg install lcms:x64-windows-static-release
+```
+
+설치된 라이브러리:
+
+- **libaom**: AV1 인코더(AVIF 형식용)
+- **libavif**: AVIF 이미지 형식
+- **libjxl**: JPEG XL 이미지 형식
+- **libwebp**: WebP 이미지 형식
+- **openjpeg**: JPEG 2000 이미지 형식
+- **libjpeg-turbo**: JPEG 이미지 처리(jpegli용)
+- **lcms**: Little CMS 색상 관리
+
+설치 확인:
+
+```powershell
+.\vcpkg list | Select-String "aom|avif|jxl|webp|openjpeg|jpeg|lcms"
+```
+
+## 10. 애플리케이션 빌드
+
+1. app 디렉토리로 이동하고 종속성을 설치합니다:
+
+   ```powershell
+   cd app
+   pnpm install
+   ```
+
+2. 개발 모드로 애플리케이션을 빌드하고 실행합니다:
+
+   ```powershell
+   pnpm run dev:tauri
+   ```
+
+3. 프로덕션 빌드의 경우:
+
+   ```powershell
+   pnpm run build:tauri
+   ```
+
+이제 애플리케이션이 Windows에서 성공적으로 빌드되어야 합니다. 문제가 발생하면 모든 종속성이 올바르게 설치되었고 환경 변수가 올바르게 설정되었는지 확인하세요.
+
+---
+
+## Arm64 Windows 크로스 빌드
+
+x64 Windows 머신에서 Arm64 Windows(Windows on ARM)용으로 크로스 빌드할 수 있습니다.
+
+### 사전 요구사항
+
+- 위에서 설명한 대로 설정된 x64 빌드 환경
+- Arm64 대상용 vcpkg 종속성
+
+### 1. Rust 툴체인 추가
+
+```powershell
+rustup target add aarch64-pc-windows-msvc
+```
+
+### 2. Arm64용 vcpkg 종속성 설치
+
+Arm64용 릴리스 트리플릿 생성(아직 완료하지 않은 경우):
+
+```powershell
+@"
+set(VCPKG_TARGET_ARCHITECTURE arm64)
+set(VCPKG_CRT_LINKAGE static)
+set(VCPKG_LIBRARY_LINKAGE static)
+set(VCPKG_BUILD_TYPE release)
+"@ | Out-File -Encoding utf8 C:\vcpkg\triplets\arm64-windows-static-release.cmake
+```
+
+종속성 설치:
+
+```powershell
+cd C:\vcpkg
+
+.\vcpkg install aom:arm64-windows-static-release
+.\vcpkg install libavif[aom]:arm64-windows-static-release
+.\vcpkg install libjxl:arm64-windows-static-release
+.\vcpkg install libwebp:arm64-windows-static-release
+.\vcpkg install openjpeg:arm64-windows-static-release
+.\vcpkg install libjpeg-turbo:arm64-windows-static-release
+.\vcpkg install lcms:arm64-windows-static-release
+```
+
+### 3. Arm64용 빌드
+
+```powershell
+cd path\to\DropWebP\app
+pnpm run build:tauri:windows-arm64
+```
+
+또는 수동으로 빌드:
+
+```powershell
+cd app\src-tauri
+cargo build --release --target aarch64-pc-windows-msvc
+cd ..
+pnpm tauri build --target aarch64-pc-windows-msvc
+```
+
+### 참고 사항
+
+- Arm64 바이너리는 Arm64 Windows 장치(Surface Pro X 등)에서만 실행됩니다
+- 크로스 빌드된 바이너리는 x64 머신에서 실행할 수 없습니다
+- 빌드 결과물은 `app/src-tauri/target/aarch64-pc-windows-msvc/release/`에 생성됩니다

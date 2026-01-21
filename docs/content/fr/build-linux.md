@@ -127,16 +127,80 @@ npm install -g pnpm
 pnpm --version
 ```
 
-## Étape 6 : Installer les Dépendances Supplémentaires
+## Étape 6 : Configurer vcpkg et Installer les Dépendances
 
-Installez des outils supplémentaires qui peuvent être requis :
+Ce projet utilise vcpkg pour gérer les bibliothèques de traitement d'images C/C++ (libaom, libavif, libjxl, etc.).
+
+### Installer les Prérequis de vcpkg
 
 ```bash
-# Installer CMake (pour certaines dépendances natives)
-sudo apt install -y cmake
+# Installer les outils requis pour vcpkg
+sudo apt install -y curl zip unzip tar cmake pkg-config
+```
 
-# Installer pkg-config (pour lier les bibliothèques)
-sudo apt install -y pkg-config
+### Installer vcpkg
+
+```bash
+# Cloner vcpkg
+git clone https://github.com/Microsoft/vcpkg.git ~/vcpkg
+
+# Bootstrap vcpkg
+cd ~/vcpkg
+./bootstrap-vcpkg.sh
+
+# Définir les variables d'environnement (ajouter à ~/.bashrc)
+echo 'export VCPKG_ROOT="$HOME/vcpkg"' >> ~/.bashrc
+echo 'export PATH="$VCPKG_ROOT:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+### Installer les Dépendances
+
+Utilisez le script d'installation automatique (recommandé) :
+
+```bash
+cd ~/path/to/DropWebP/app/src-tauri
+./setup-vcpkg.sh
+```
+
+Ou installez manuellement :
+
+```bash
+cd ~/vcpkg
+
+# Pour Linux x64
+./vcpkg install aom:x64-linux
+./vcpkg install libavif[aom]:x64-linux
+./vcpkg install libjxl:x64-linux
+./vcpkg install libwebp:x64-linux
+./vcpkg install openjpeg:x64-linux
+./vcpkg install libjpeg-turbo:x64-linux
+./vcpkg install lcms:x64-linux
+
+# Pour Linux ARM64
+./vcpkg install aom:arm64-linux
+./vcpkg install libavif[aom]:arm64-linux
+./vcpkg install libjxl:arm64-linux
+./vcpkg install libwebp:arm64-linux
+./vcpkg install openjpeg:arm64-linux
+./vcpkg install libjpeg-turbo:arm64-linux
+./vcpkg install lcms:arm64-linux
+```
+
+Bibliothèques installées :
+
+- **libaom** : Encodeur AV1 (pour le format AVIF, **requis**)
+- **libavif** : Format d'image AVIF
+- **libjxl** : Format d'image JPEG XL
+- **libwebp** : Format d'image WebP
+- **openjpeg** : Format d'image JPEG 2000
+- **libjpeg-turbo** : Traitement d'images JPEG (pour jpegli)
+- **lcms** : Gestion des couleurs Little CMS
+
+### Vérifier l'Installation
+
+```bash
+./vcpkg list | grep -E "aom|avif|jxl|webp|openjpeg|jpeg|lcms"
 ```
 
 ## Étape 7 : Cloner et Construire Drop Compress Image

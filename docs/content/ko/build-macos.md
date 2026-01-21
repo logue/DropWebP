@@ -125,28 +125,73 @@ brew install pnpm
 pnpm --version
 ```
 
-## 단계 6: 추가 종속성 설치
+## 단계 6: vcpkg 설정 및 종속성 설치
 
-빌드에 필요한 추가 도구와 이미지 처리 라이브러리를 설치합니다:
+이 프로젝트는 vcpkg를 사용하여 C/C++ 이미지 처리 라이브러리(libaom, libavif, libjxl 등)를 관리합니다.
+
+### vcpkg 설치
 
 ```bash
-# CMake 설치 (일부 네이티브 종속성에 필요)
-brew install cmake
+# vcpkg 복제
+git clone https://github.com/Microsoft/vcpkg.git ~/Developer/vcpkg
 
-# pkg-config 설치 (라이브러리 링킹에 필요)
-brew install pkg-config
+# vcpkg 부트스트랩
+cd ~/Developer/vcpkg
+./bootstrap-vcpkg.sh
 
-# 이미지 포맷 처리 라이브러리 설치
-brew install libavif  # AVIF 형식 지원
-brew install libheif  # HEIF/HEIC 형식 지원
-brew install jpeg-xl  # JPEG XL 형식 지원
+# 환경 변수 설정(~/.zshrc에 추가)
+echo 'export VCPKG_ROOT="$HOME/Developer/vcpkg"' >> ~/.zshrc
+echo 'export PATH="$VCPKG_ROOT:$PATH"' >> ~/.zshrc
+source ~/.zshrc
 ```
 
-### 종속성 라이브러리 설치 확인
+### 종속성 설치
+
+자동 설치 스크립트 사용(권장):
 
 ```bash
-# 설치된 라이브러리의 버전 확인
-brew list --versions libavif libheif jpeg-xl
+cd ~/path/to/DropWebP/app/src-tauri
+./setup-vcpkg.sh
+```
+
+또는 수동으로 설치:
+
+```bash
+cd ~/Developer/vcpkg
+
+# Apple Silicon (M1/M2/M3)의 경우
+./vcpkg install aom:arm64-osx
+./vcpkg install libavif[aom]:arm64-osx
+./vcpkg install libjxl:arm64-osx
+./vcpkg install libwebp:arm64-osx
+./vcpkg install openjpeg:arm64-osx
+./vcpkg install libjpeg-turbo:arm64-osx
+./vcpkg install lcms:arm64-osx
+
+# Intel Mac의 경우
+./vcpkg install aom:x64-osx
+./vcpkg install libavif[aom]:x64-osx
+./vcpkg install libjxl:x64-osx
+./vcpkg install libwebp:x64-osx
+./vcpkg install openjpeg:x64-osx
+./vcpkg install libjpeg-turbo:x64-osx
+./vcpkg install lcms:x64-osx
+```
+
+설치된 라이브러리:
+
+- **libaom**: AV1 인코더(AVIF 형식용, **필수**)
+- **libavif**: AVIF 이미지 형식
+- **libjxl**: JPEG XL 이미지 형식
+- **libwebp**: WebP 이미지 형식
+- **openjpeg**: JPEG 2000 이미지 형식
+- **libjpeg-turbo**: JPEG 이미지 처리(jpegli용)
+- **lcms**: Little CMS 색상 관리
+
+### 설치 확인
+
+```bash
+./vcpkg list | grep -E "aom|avif|jxl|webp|openjpeg|jpeg|lcms"
 ```
 
 ## 단계 7: Drop Compress Image 복제 및 빌드

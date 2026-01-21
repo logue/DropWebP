@@ -182,56 +182,170 @@ rustc --version
 
 > **警告：** 虽然可以通过Chocolatey安装Rust，但它会使用MinGW工具链进行安装，这可能会导致与库的兼容性问题。
 
-## 8. 设置vcpkg（官方说明）
+## 8. 设置vcpkg
 
-在所需目录中运行以下命令以克隆vcpkg。
+1. 克隆vcpkg仓库：
 
-```powershell
-git clone https://github.com/microsoft/vcpkg.git
-```
+   ```powershell
+   git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
+   cd C:\vcpkg
+   ```
 
-导航到vcpkg目录并运行设置命令。
+2. 运行引导脚本：
 
-```powershell
-cd vcpkg
-.\bootstrap-vcpkg.bat
-```
+   ```powershell
+   .\bootstrap-vcpkg.bat
+   ```
 
-将vcpkg.exe的路径（例如`C:\path\to\vcpkg`）添加到环境变量`PATH`中。方法：将vcpkg目录添加到系统环境变量中的"Path"。
+3. 设置环境变量（建议添加到系统环境变量）：
 
-此外，添加环境变量`VCPKG_DEFAULT_TRIPLET`并将其设置为`x64-windows-static-md`。这确保默认安装适用于64位Windows的静态库。
+   ```powershell
+   $env:VCPKG_ROOT = "C:\vcpkg"
+   [System.Environment]::SetEnvironmentVariable('VCPKG_ROOT', 'C:\vcpkg', 'User')
+   ```
 
-安装后，验证路径是否设置，并使用以下命令检查版本。
+> **重要：** VCPKG_ROOT环境变量是构建系统定位vcpkg库所必需的。
 
-```powershell
-vcpkg version
-```
+## 9. 安装依赖项
 
-> **警告：** 如果vcpkg的路径包含非字母数字字符，可能无法正常工作。建议将其克隆到驱动器根目录等位置。
+### 创建发布三元组
 
-## 9. 安装所需库
-
-运行以下命令以安装图像转换所需的库。
-
-```powershell
-vcpkg install libavif libjxl libwebp libjpeg-turbo libpng
-```
-
-> **注意：** JPEG XL (`libjxl`) 通过 `vendored` 功能静态链接，因此将来可能不需要 vcpkg。安装可能需要一些时间，并且某些库可能会构建失败。在这种情况下，请参阅vcpkg文档。
-
-## 10. 安装依赖项并构建
-
-在项目目录中安装依赖项。
+vcpkg的默认三元组包含调试符号，会导致Rust发布构建出现链接错误。创建自定义三元组：
 
 ```powershell
-pnpm install
+@"
+set(VCPKG_TARGET_ARCHITECTURE x64)
+set(VCPKG_CRT_LINKAGE static)
+set(VCPKG_LIBRARY_LINKAGE static)
+set(VCPKG_BUILD_TYPE release)
+"@ | Out-File -Encoding utf8 C:\vcpkg\triplets\x64-windows-static-release.cmake
 ```
 
-以开发模式启动应用程序。
+### 安装依赖项
+
+使用自动安装脚本（推荐）：
 
 ```powershell
-cd app
-pnpm tauri dev
+cd DropWebP\app\src-tauri
+.\setup-vcpkg.ps1
 ```
 
-> **完成：** 第一次启动可能需要一些时间来编译Rust依赖项。一旦应用程序窗口出现，开发环境设置就完成了。
+或手动安装：
+
+```powershell
+cd C:\vcpkg
+
+# 使用x64-windows-static-release三元组安装（仅发布版）
+.\vcpkg install aom:x64-windows-static-release
+.\vcpkg install libavif[aom]:x64-windows-static-release
+.\vcpkg install libjxl:x64-windows-static-release
+.\vcpkg install libwebp:x64-windows-static-release
+.\vcpkg install openjpeg:x64-windows-static-release
+.\vcpkg install libjpeg-turbo:x64-windows-static-release
+.\vcpkg install lcms:x64-windows-static-release
+```
+
+已安装的库：
+
+- **libaom**：AV1编码器（用于AVIF格式）
+- **libavif**：AVIF图像格式
+- **libjxl**：JPEG XL图像格式
+- **libwebp**：WebP图像格式
+- **openjpeg**：JPEG 2000图像格式
+- **libjpeg-turbo**：JPEG图像处理（用于jpegli）
+- **lcms**：Little CMS色彩管理
+
+验证安装：
+
+```powershell
+.\vcpkg list | Select-String "aom|avif|jxl|webp|openjpeg|jpeg|lcms"
+```
+
+## 10. 构建应用程序
+
+1. 导航到 app 目录并安装依赖项：
+
+   ```powershell
+   cd app
+   pnpm install
+   ```
+
+2. 在开发模式下构建并运行应用程序：
+
+   ```powershell
+   pnpm run dev:tauri
+   ```
+
+3. 对于生产构建：
+
+   ```powershell
+   pnpm run build:tauri
+   ```
+
+现在应用程序应该可以在 Windows 上成功构建。如果遇到任何问题，请确保所有依赖项都已正确安装，并且环境变量已正确设置。
+
+---
+
+## Arm64 Windows 交叉编译
+
+您可以从 x64 Windows 机器交叉编译 Arm64 Windows（Windows on ARM）。
+
+### 前提条件
+
+- 如上所述设置好的 x64 构建环境
+- Arm64 目标的 vcpkg 依赖项
+
+### 1. 添加 Rust 工具链
+
+```powershell
+rustup target add aarch64-pc-windows-msvc
+```
+
+### 2. 为 Arm64 安装 vcpkg 依赖项
+
+创建 Arm64 的发布三元组（如果尚未完成）：
+
+```powershell
+@"
+set(VCPKG_TARGET_ARCHITECTURE arm64)
+set(VCPKG_CRT_LINKAGE static)
+set(VCPKG_LIBRARY_LINKAGE static)
+set(VCPKG_BUILD_TYPE release)
+"@ | Out-File -Encoding utf8 C:\vcpkg\triplets\arm64-windows-static-release.cmake
+```
+
+安装依赖项：
+
+```powershell
+cd C:\vcpkg
+
+.\vcpkg install aom:arm64-windows-static-release
+.\vcpkg install libavif[aom]:arm64-windows-static-release
+.\vcpkg install libjxl:arm64-windows-static-release
+.\vcpkg install libwebp:arm64-windows-static-release
+.\vcpkg install openjpeg:arm64-windows-static-release
+.\vcpkg install libjpeg-turbo:arm64-windows-static-release
+.\vcpkg install lcms:arm64-windows-static-release
+```
+
+### 3. 为 Arm64 构建
+
+```powershell
+cd path\to\DropWebP\app
+pnpm run build:tauri:windows-arm64
+```
+
+或手动构建：
+
+```powershell
+cd app\src-tauri
+cargo build --release --target aarch64-pc-windows-msvc
+cd ..
+pnpm tauri build --target aarch64-pc-windows-msvc
+```
+
+### 注意事项
+
+- Arm64 二进制文件仅在 Arm64 Windows 设备（例如 Surface Pro X）上运行
+- 交叉编译的二进制文件无法在 x64 机器上执行
+- 构建产物在 `app/src-tauri/target/aarch64-pc-windows-msvc/release/` 中生成

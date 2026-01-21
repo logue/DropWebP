@@ -125,28 +125,73 @@ npm install -g pnpm
 pnpm --version
 ```
 
-## Step 6: Install Additional Dependencies
+## Step 6: Set Up vcpkg and Install Dependencies
 
-Install additional tools and image processing libraries required for building:
+This project uses vcpkg to manage C/C++ image processing libraries (libaom, libavif, libjxl, etc.).
+
+### Install vcpkg
 
 ```bash
-# Install CMake (needed for some native dependencies)
-brew install cmake
+# Clone vcpkg
+git clone https://github.com/Microsoft/vcpkg.git ~/Developer/vcpkg
 
-# Install pkg-config (needed for linking libraries)
-brew install pkg-config
+# Bootstrap vcpkg
+cd ~/Developer/vcpkg
+./bootstrap-vcpkg.sh
 
-# Install image format processing libraries
-brew install libavif  # AVIF format support
-brew install libheif  # HEIF/HEIC format support
-brew install jpeg-xl  # JPEG XL format support
+# Set environment variables (add to ~/.zshrc)
+echo 'export VCPKG_ROOT="$HOME/Developer/vcpkg"' >> ~/.zshrc
+echo 'export PATH="$VCPKG_ROOT:$PATH"' >> ~/.zshrc
+source ~/.zshrc
 ```
 
-### Verify Dependency Libraries Installation
+### Install Dependencies
+
+Use the automated installation script (recommended):
 
 ```bash
-# Check the versions of installed libraries
-brew list --versions libavif libheif jpeg-xl
+cd ~/path/to/DropWebP/app/src-tauri
+./setup-vcpkg.sh
+```
+
+Or install manually:
+
+```bash
+cd ~/Developer/vcpkg
+
+# For Apple Silicon (M1/M2/M3)
+./vcpkg install aom:arm64-osx
+./vcpkg install libavif[aom]:arm64-osx
+./vcpkg install libjxl:arm64-osx
+./vcpkg install libwebp:arm64-osx
+./vcpkg install openjpeg:arm64-osx
+./vcpkg install libjpeg-turbo:arm64-osx
+./vcpkg install lcms:arm64-osx
+
+# For Intel Mac
+./vcpkg install aom:x64-osx
+./vcpkg install libavif[aom]:x64-osx
+./vcpkg install libjxl:x64-osx
+./vcpkg install libwebp:x64-osx
+./vcpkg install openjpeg:x64-osx
+./vcpkg install libjpeg-turbo:x64-osx
+./vcpkg install lcms:x64-osx
+```
+
+Installed libraries:
+
+- **libaom**: AV1 encoder (for AVIF format, **required**)
+- **libavif**: AVIF image format
+- **libjxl**: JPEG XL image format
+- **libwebp**: WebP image format
+- **openjpeg**: JPEG 2000 image format
+- **libjpeg-turbo**: JPEG image processing (for jpegli)
+- **lcms**: Little CMS color management
+
+### Verify Installation
+
+```bash
+./vcpkg list | grep -E "aom|avif|jxl|webp|openjpeg|jpeg|lcms"
 ```
 
 ## Step 7: Clone and Build Drop Compress Image

@@ -182,13 +182,13 @@ Windowsでのビルドには2つの方法があります：
 
 > **警告:** ChocolateyでもRustをインストールできますが、MinGWツールチェーンでインストールされるため、ライブラリとの互換性問題が発生する可能性があります。
 
-## 8. vcpkgのセットアップ（公式手順）
+## 8. vcpkgのセットアップ
 
 1. vcpkgリポジトリをクローンします：
 
    ```powershell
-   git clone https://github.com/Microsoft/vcpkg.git
-   cd vcpkg
+   git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
+   cd C:\vcpkg
    ```
 
 2. ブートストラップスクリプトを実行します：
@@ -197,31 +197,69 @@ Windowsでのビルドには2つの方法があります：
    .\bootstrap-vcpkg.bat
    ```
 
-3. vcpkgをVisual Studioに統合します（この手順でVCPKG_ROOTなどの環境変数が設定されます）：
+3. 環境変数を設定します（システム環境変数に追加することを推奨）：
 
    ```powershell
-   .\vcpkg integrate install
+   $env:VCPKG_ROOT = "C:\vcpkg"
+   [System.Environment]::SetEnvironmentVariable('VCPKG_ROOT', 'C:\vcpkg', 'User')
    ```
 
-> **警告:** 必要に応じて、VCPKG_ROOT環境変数をvcpkgのインストールディレクトリ（例：C:\vcpkg）に設定し、vcpkgをPATHに追加することもできます。
+> **重要:** VCPKG_ROOT環境変数はビルドシステムがvcpkgライブラリを見つけるために必須です。
 
-## 9. 必要なライブラリのインストール
+## 9. 依存ライブラリのインストール
 
-1. 画像処理に必要なライブラリをインストールします：
+### リリース用トリプレットの作成
 
-   ```powershell
-   .\vcpkg install libavif libjxl --triplet x64-windows-static-md
-   ```
+vcpkgのデフォルトトリプレットはデバッグシンボルを含むため、Rustのリリースビルドでリンクエラーが発生します。カスタムトリプレットを作成します：
 
-   > **注意:** JPEG XL (`libjxl`) は `vendored` 機能により静的リンクされるため、将来的には vcpkg 不要になる可能性があります。
+```powershell
+@"
+set(VCPKG_TARGET_ARCHITECTURE x64)
+set(VCPKG_CRT_LINKAGE static)
+set(VCPKG_LIBRARY_LINKAGE static)
+set(VCPKG_BUILD_TYPE release)
+"@ | Out-File -Encoding utf8 C:\vcpkg\triplets\x64-windows-static-release.cmake
+```
 
-2. インストール後、ライブラリが正しくインストールされたことを確認できます：
+### 依存ライブラリのインストール
 
-   ```powershell
-   .\vcpkg list
-   ```
+自動インストールスクリプトを使用（推奨）:
 
-> **注意:** x64-windows-static-mdトリプレットは、RustのデフォルトMSVCランタイムとの互換性を保証します。
+```powershell
+cd DropWebP\app\src-tauri
+.\setup-vcpkg.ps1
+```
+
+または手動でインストール：
+
+```powershell
+cd C:\vcpkg
+
+# x64-windows-static-release tripletでインストール（リリース専用）
+.\vcpkg install aom:x64-windows-static-release
+.\vcpkg install libavif[aom]:x64-windows-static-release
+.\vcpkg install libjxl:x64-windows-static-release
+.\vcpkg install libwebp:x64-windows-static-release
+.\vcpkg install openjpeg:x64-windows-static-release
+.\vcpkg install libjpeg-turbo:x64-windows-static-release
+.\vcpkg install lcms:x64-windows-static-release
+```
+
+インストールされるライブラリ:
+
+- **libaom**: AV1エンコーダー（AVIF形式用）
+- **libavif**: AVIF画像フォーマット
+- **libjxl**: JPEG XL画像フォーマット
+- **libwebp**: WebP画像フォーマット
+- **openjpeg**: JPEG 2000画像フォーマット
+- **libjpeg-turbo**: JPEG画像処理（jpegli用）
+- **lcms**: Little CMS カラーマネジメント
+
+インストール確認:
+
+```powershell
+.\vcpkg list | Select-String "aom|avif|jxl|webp|openjpeg|jpeg|lcms"
+```
 
 ## 10. アプリケーションのビルド
 
@@ -245,3 +283,69 @@ Windowsでのビルドには2つの方法があります：
    ```
 
 これで、Windowsでアプリケーションのビルドが成功するはずです。問題が発生した場合は、すべての依存関係が正しくインストールされ、環境変数が正しく設定されていることを確認してください。
+
+---
+
+## Arm64 Windows向けクロスビルド
+
+Arm64 Windows（Windows on ARM）向けにx64 Windowsマシンからクロスビルドできます。
+
+### 前提条件
+
+- 上記のx64ビルド環境がセットアップ済み
+- Arm64ターゲットのvcpkg依存関係
+
+### 1. Rustツールチェインの追加
+
+```powershell
+rustup target add aarch64-pc-windows-msvc
+```
+
+### 2. Arm64用vcpkg依存関係のインストール
+
+リリース用トリプレットの作成（まだの場合）:
+
+```powershell
+@"
+set(VCPKG_TARGET_ARCHITECTURE arm64)
+set(VCPKG_CRT_LINKAGE static)
+set(VCPKG_LIBRARY_LINKAGE static)
+set(VCPKG_BUILD_TYPE release)
+"@ | Out-File -Encoding utf8 C:\vcpkg\triplets\arm64-windows-static-release.cmake
+```
+
+依存関係をインストール:
+
+```powershell
+cd C:\vcpkg
+
+.\vcpkg install aom:arm64-windows-static-release
+.\vcpkg install libavif[aom]:arm64-windows-static-release
+.\vcpkg install libjxl:arm64-windows-static-release
+.\vcpkg install libwebp:arm64-windows-static-release
+.\vcpkg install openjpeg:arm64-windows-static-release
+.\vcpkg install libjpeg-turbo:arm64-windows-static-release
+.\vcpkg install lcms:arm64-windows-static-release
+```
+
+### 3. Arm64向けビルド
+
+```powershell
+cd path\to\DropWebP\app
+pnpm run build:tauri:windows-arm64
+```
+
+または手動でビルド:
+
+```powershell
+cd app\src-tauri
+cargo build --release --target aarch64-pc-windows-msvc
+cd ..
+pnpm tauri build --target aarch64-pc-windows-msvc
+```
+
+### 注意事項
+
+- Arm64バイナリはArm64 Windowsデバイス（Surface Pro X等）でのみ動作します
+- クロスビルドしたバイナリはx64マシンでは実行できません
+- ビルド成果物は`app/src-tauri/target/aarch64-pc-windows-msvc/release/`に生成されます

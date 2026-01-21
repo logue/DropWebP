@@ -127,16 +127,80 @@ npm install -g pnpm
 pnpm --version
 ```
 
-## 步驟 6：安裝附加相依性
+## 步驟 6：設置 vcpkg 並安裝相依性
 
-安裝可能需要的附加工具：
+此項目使用 vcpkg 管理 C/C++ 圖像處理程式庫（libaom、libavif、libjxl 等）。
+
+### 安裝 vcpkg 先決條件
 
 ```bash
-# 安裝 CMake（一些原生相依性需要）
-sudo apt install -y cmake
+# 安裝 vcpkg 所需的工具
+sudo apt install -y curl zip unzip tar cmake pkg-config
+```
 
-# 安裝 pkg-config（連結程式庫需要）
-sudo apt install -y pkg-config
+### 安裝 vcpkg
+
+```bash
+# 複製 vcpkg
+git clone https://github.com/Microsoft/vcpkg.git ~/vcpkg
+
+# 引導 vcpkg
+cd ~/vcpkg
+./bootstrap-vcpkg.sh
+
+# 設置環境變數（新增到 ~/.bashrc）
+echo 'export VCPKG_ROOT="$HOME/vcpkg"' >> ~/.bashrc
+echo 'export PATH="$VCPKG_ROOT:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+### 安裝相依性
+
+使用自動安裝腳本（推薦）：
+
+```bash
+cd ~/path/to/DropWebP/app/src-tauri
+./setup-vcpkg.sh
+```
+
+或手動安裝：
+
+```bash
+cd ~/vcpkg
+
+# x64 Linux 的情況
+./vcpkg install aom:x64-linux
+./vcpkg install libavif[aom]:x64-linux
+./vcpkg install libjxl:x64-linux
+./vcpkg install libwebp:x64-linux
+./vcpkg install openjpeg:x64-linux
+./vcpkg install libjpeg-turbo:x64-linux
+./vcpkg install lcms:x64-linux
+
+# ARM64 Linux 的情況
+./vcpkg install aom:arm64-linux
+./vcpkg install libavif[aom]:arm64-linux
+./vcpkg install libjxl:arm64-linux
+./vcpkg install libwebp:arm64-linux
+./vcpkg install openjpeg:arm64-linux
+./vcpkg install libjpeg-turbo:arm64-linux
+./vcpkg install lcms:arm64-linux
+```
+
+安裝的程式庫：
+
+- **libaom**：AV1 編碼器（用於 AVIF 格式，**必需**）
+- **libavif**：AVIF 圖像格式
+- **libjxl**：JPEG XL 圖像格式
+- **libwebp**：WebP 圖像格式
+- **openjpeg**：JPEG 2000 圖像格式
+- **libjpeg-turbo**：JPEG 圖像處理（用於 jpegli）
+- **lcms**：Little CMS 色彩管理
+
+### 驗證安裝
+
+```bash
+./vcpkg list | grep -E "aom|avif|jxl|webp|openjpeg|jpeg|lcms"
 ```
 
 ## 步驟 7：複製和建構 Drop Compress Image

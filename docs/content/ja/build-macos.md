@@ -125,28 +125,73 @@ brew install pnpm
 pnpm --version
 ```
 
-## ステップ 6: 追加の依存関係のインストール
+## ステップ 6: vcpkgのセットアップと依存関係のインストール
 
-ビルドに必要な追加ツールと画像処理ライブラリをインストールします：
+このプロジェクトではvcpkgを使用してC/C++画像処理ライブラリ（libaom、libavif、libjxl等）を管理します。
+
+### vcpkgのインストール
 
 ```bash
-# CMakeのインストール（一部のネイティブ依存関係に必要）
-brew install cmake
+# vcpkgをクローン
+git clone https://github.com/Microsoft/vcpkg.git ~/Developer/vcpkg
 
-# pkg-configのインストール（ライブラリのリンクに必要）
-brew install pkg-config
+# vcpkgをブートストラップ
+cd ~/Developer/vcpkg
+./bootstrap-vcpkg.sh
 
-# 画像フォーマット処理ライブラリのインストール
-brew install libavif  # AVIF形式のサポート
-brew install libheif  # HEIF/HEIC形式のサポート
-brew install jpeg-xl  # JPEG XL形式のサポート
+# 環境変数を設定（~/.zshrc に追加）
+echo 'export VCPKG_ROOT="$HOME/Developer/vcpkg"' >> ~/.zshrc
+echo 'export PATH="$VCPKG_ROOT:$PATH"' >> ~/.zshrc
+source ~/.zshrc
 ```
 
-### 依存ライブラリのインストール確認
+### 依存関係のインストール
+
+自動インストールスクリプトを使用（推奨）:
 
 ```bash
-# インストールされたライブラリのバージョンを確認
-brew list --versions libavif libheif jpeg-xl
+cd ~/path/to/DropWebP/app/src-tauri
+./setup-vcpkg.sh
+```
+
+または手動でインストール：
+
+```bash
+cd ~/Developer/vcpkg
+
+# Apple Silicon (M1/M2/M3) の場合
+./vcpkg install aom:arm64-osx
+./vcpkg install libavif[aom]:arm64-osx
+./vcpkg install libjxl:arm64-osx
+./vcpkg install libwebp:arm64-osx
+./vcpkg install openjpeg:arm64-osx
+./vcpkg install libjpeg-turbo:arm64-osx
+./vcpkg install lcms:arm64-osx
+
+# Intel Mac の場合
+./vcpkg install aom:x64-osx
+./vcpkg install libavif[aom]:x64-osx
+./vcpkg install libjxl:x64-osx
+./vcpkg install libwebp:x64-osx
+./vcpkg install openjpeg:x64-osx
+./vcpkg install libjpeg-turbo:x64-osx
+./vcpkg install lcms:x64-osx
+```
+
+インストールされるライブラリ：
+
+- **libaom**: AV1エンコーダー（AVIF形式用、**必須**）
+- **libavif**: AVIF画像フォーマット
+- **libjxl**: JPEG XL画像フォーマット
+- **libwebp**: WebP画像フォーマット
+- **openjpeg**: JPEG 2000画像フォーマット
+- **libjpeg-turbo**: JPEG画像処理（jpegli用）
+- **lcms**: Little CMS カラーマネジメント
+
+### インストール確認
+
+```bash
+./vcpkg list | grep -E "aom|avif|jxl|webp|openjpeg|jpeg|lcms"
 ```
 
 ## ステップ 7: Drop Compress Imageのクローンとビルド

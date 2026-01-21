@@ -125,28 +125,73 @@ brew install pnpm
 pnpm --version
 ```
 
-## Étape 6 : Installer les Dépendances Supplémentaires
+## Étape 6 : Configurer vcpkg et Installer les Dépendances
 
-Installez des outils supplémentaires et des bibliothèques de traitement d'images requis pour la construction :
+Ce projet utilise vcpkg pour gérer les bibliothèques de traitement d'images C/C++ (libaom, libavif, libjxl, etc.).
+
+### Installer vcpkg
 
 ```bash
-# Installer CMake (nécessaire pour certaines dépendances natives)
-brew install cmake
+# Cloner vcpkg
+git clone https://github.com/Microsoft/vcpkg.git ~/Developer/vcpkg
 
-# Installer pkg-config (nécessaire pour lier les bibliothèques)
-brew install pkg-config
+# Bootstrap vcpkg
+cd ~/Developer/vcpkg
+./bootstrap-vcpkg.sh
 
-# Installer les bibliothèques de traitement de format d'image
-brew install libavif  # Support du format AVIF
-brew install libheif  # Support du format HEIF/HEIC
-brew install jpeg-xl  # Support du format JPEG XL
+# Définir les variables d'environnement (ajouter à ~/.zshrc)
+echo 'export VCPKG_ROOT="$HOME/Developer/vcpkg"' >> ~/.zshrc
+echo 'export PATH="$VCPKG_ROOT:$PATH"' >> ~/.zshrc
+source ~/.zshrc
 ```
 
-### Vérifier l'Installation des Bibliothèques de Dépendance
+### Installer les Dépendances
+
+Utilisez le script d'installation automatique (recommandé) :
 
 ```bash
-# Vérifier les versions des bibliothèques installées
-brew list --versions libavif libheif jpeg-xl
+cd ~/path/to/DropWebP/app/src-tauri
+./setup-vcpkg.sh
+```
+
+Ou installez manuellement :
+
+```bash
+cd ~/Developer/vcpkg
+
+# Pour Apple Silicon (M1/M2/M3)
+./vcpkg install aom:arm64-osx
+./vcpkg install libavif[aom]:arm64-osx
+./vcpkg install libjxl:arm64-osx
+./vcpkg install libwebp:arm64-osx
+./vcpkg install openjpeg:arm64-osx
+./vcpkg install libjpeg-turbo:arm64-osx
+./vcpkg install lcms:arm64-osx
+
+# Pour Mac Intel
+./vcpkg install aom:x64-osx
+./vcpkg install libavif[aom]:x64-osx
+./vcpkg install libjxl:x64-osx
+./vcpkg install libwebp:x64-osx
+./vcpkg install openjpeg:x64-osx
+./vcpkg install libjpeg-turbo:x64-osx
+./vcpkg install lcms:x64-osx
+```
+
+Bibliothèques installées :
+
+- **libaom** : Encodeur AV1 (pour le format AVIF, **requis**)
+- **libavif** : Format d'image AVIF
+- **libjxl** : Format d'image JPEG XL
+- **libwebp** : Format d'image WebP
+- **openjpeg** : Format d'image JPEG 2000
+- **libjpeg-turbo** : Traitement d'images JPEG (pour jpegli)
+- **lcms** : Gestion des couleurs Little CMS
+
+### Vérifier l'Installation
+
+```bash
+./vcpkg list | grep -E "aom|avif|jxl|webp|openjpeg|jpeg|lcms"
 ```
 
 ## Étape 7 : Cloner et Construire Drop Compress Image

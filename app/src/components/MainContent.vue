@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useSettingsStore } from '@/store';
-import { OutputFormat } from '@/types/SettingsTypes';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -10,6 +9,7 @@ import ProgressDialog from './modals/ProgressDialog.vue';
 import { useFormatConfig } from '@/composables/useFormatConfig';
 import { useImageConversionController } from '@/composables/useImageConversionController';
 import { useLogger } from '@/composables/useLogger';
+import { OutputFormat } from '@/types/SettingsTypes';
 
 const settingsStore = useSettingsStore();
 const { t } = useI18n();

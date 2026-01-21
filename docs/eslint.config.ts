@@ -2,7 +2,6 @@ import configPrettier from '@vue/eslint-config-prettier';
 import withNuxt from './.nuxt/eslint.config.mjs';
 
 import { globalIgnores } from 'eslint/config';
-import pluginVue from 'eslint-plugin-vue';
 import pluginVueA11y from 'eslint-plugin-vuejs-accessibility';
 
 /**
@@ -40,7 +39,6 @@ export default withNuxt(
       }
     }
   },
-  pluginVue.configs['flat/recommended'],
   ...pluginVueA11y.configs['flat/recommended'],
   {
     settings: {

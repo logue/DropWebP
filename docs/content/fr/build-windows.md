@@ -182,56 +182,170 @@ rustc --version
 
 > **Avertissement :** Bien qu'il soit possible d'installer Rust via Chocolatey, il s'installe avec la chaîne d'outils MinGW, ce qui peut entraîner des problèmes de compatibilité avec les bibliothèques.
 
-## 8. Configurer vcpkg (Instructions officielles)
+## 8. Configurer vcpkg
 
-Exécutez la commande suivante dans le répertoire de votre choix pour cloner vcpkg.
+1. Clonez le référentiel vcpkg :
 
-```powershell
-git clone https://github.com/microsoft/vcpkg.git
-```
+   ```powershell
+   git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
+   cd C:\vcpkg
+   ```
 
-Naviguez vers le répertoire vcpkg et exécutez la commande de configuration.
+2. Exécutez le script de bootstrap :
 
-```powershell
-cd vcpkg
-.\bootstrap-vcpkg.bat
-```
+   ```powershell
+   .\bootstrap-vcpkg.bat
+   ```
 
-Ajoutez le chemin vers vcpkg.exe (par exemple `C:\path\to\vcpkg`) à votre variable d'environnement `PATH`. Comment faire : Ajoutez le répertoire contenant vcpkg.exe à la variable d'environnement Path.
+3. Définissez les variables d'environnement (recommandé d'ajouter aux variables d'environnement système) :
 
-De plus, ajoutez une variable d'environnement `VCPKG_DEFAULT_TRIPLET` et définissez-la sur `x64-windows-static-md`. Cela garantit que les bibliothèques statiques pour Windows 64 bits sont installées par défaut.
+   ```powershell
+   $env:VCPKG_ROOT = "C:\vcpkg"
+   [System.Environment]::SetEnvironmentVariable('VCPKG_ROOT', 'C:\vcpkg', 'User')
+   ```
 
-Après l'installation, vérifiez que le chemin est défini et vérifiez la version avec la commande ci-dessous.
+> **Important :** La variable d'environnement VCPKG_ROOT est requise pour que le système de construction localise les bibliothèques vcpkg.
 
-```powershell
-vcpkg version
-```
+## 9. Installer les dépendances
 
-> **Avertissement :** vcpkg peut ne pas fonctionner correctement si son chemin contient des caractères non alphanumériques. Il est recommandé de le cloner à un emplacement comme la racine d'un lecteur.
+### Créer un triplet de version
 
-## 9. Installer les bibliothèques requises
-
-Exécutez la commande suivante pour installer les bibliothèques requises pour la conversion d'images.
-
-```powershell
-vcpkg install libavif libjxl libwebp libjpeg-turbo libpng
-```
-
-> **Remarque :** JPEG XL (`libjxl`) est lié statiquement via la fonctionnalité `vendored`, donc vcpkg pourrait ne plus être nécessaire à l'avenir. L'installation peut prendre un certain temps, et certaines bibliothèques peuvent échouer à se construire. Dans ce cas, veuillez vous référer à la documentation de vcpkg.
-
-## 10. Installer les dépendances et construire
-
-Installez les dépendances dans le répertoire du projet.
+Le triplet par défaut de vcpkg inclut des symboles de débogage qui causent des erreurs de liaison avec les builds de release Rust. Créez un triplet personnalisé :
 
 ```powershell
-pnpm install
+@"
+set(VCPKG_TARGET_ARCHITECTURE x64)
+set(VCPKG_CRT_LINKAGE static)
+set(VCPKG_LIBRARY_LINKAGE static)
+set(VCPKG_BUILD_TYPE release)
+"@ | Out-File -Encoding utf8 C:\vcpkg\triplets\x64-windows-static-release.cmake
 ```
 
-Démarrez l'application en mode développement.
+### Installer les dépendances
+
+Utilisez le script d'installation automatique (recommandé) :
 
 ```powershell
-cd app
-pnpm tauri dev
+cd DropWebP\app\src-tauri
+.\setup-vcpkg.ps1
 ```
 
-> **Terminé :** Le premier démarrage peut prendre un certain temps pour compiler les dépendances Rust. Une fois que la fenêtre de l'application apparaît, la configuration de l'environnement de développement est terminée.
+Ou installez manuellement :
+
+```powershell
+cd C:\vcpkg
+
+# Installer avec le triplet x64-windows-static-release (release uniquement)
+.\vcpkg install aom:x64-windows-static-release
+.\vcpkg install libavif[aom]:x64-windows-static-release
+.\vcpkg install libjxl:x64-windows-static-release
+.\vcpkg install libwebp:x64-windows-static-release
+.\vcpkg install openjpeg:x64-windows-static-release
+.\vcpkg install libjpeg-turbo:x64-windows-static-release
+.\vcpkg install lcms:x64-windows-static-release
+```
+
+Bibliothèques installées :
+
+- **libaom** : Encodeur AV1 (pour le format AVIF)
+- **libavif** : Format d'image AVIF
+- **libjxl** : Format d'image JPEG XL
+- **libwebp** : Format d'image WebP
+- **openjpeg** : Format d'image JPEG 2000
+- **libjpeg-turbo** : Traitement d'images JPEG (pour jpegli)
+- **lcms** : Gestion des couleurs Little CMS
+
+Vérifier l'installation :
+
+```powershell
+.\vcpkg list | Select-String "aom|avif|jxl|webp|openjpeg|jpeg|lcms"
+```
+
+## 10. Construire l'Application
+
+1. Naviguez vers le répertoire app et installez les dépendances :
+
+   ```powershell
+   cd app
+   pnpm install
+   ```
+
+2. Construisez et exécutez l'application en mode développement :
+
+   ```powershell
+   pnpm run dev:tauri
+   ```
+
+3. Pour une construction de production :
+
+   ```powershell
+   pnpm run build:tauri
+   ```
+
+L'application devrait maintenant se construire avec succès sur Windows. Si vous rencontrez des problèmes, assurez-vous que toutes les dépendances sont correctement installées et que les variables d'environnement sont correctement définies.
+
+---
+
+## Construction Croisée pour Windows Arm64
+
+Vous pouvez construire en mode croisé pour Windows Arm64 (Windows on ARM) depuis une machine Windows x64.
+
+### Prérequis
+
+- Environnement de construction Windows x64 configuré comme décrit ci-dessus
+- Dépendances vcpkg pour la cible Arm64
+
+### 1. Ajouter la Chaîne d'Outils Rust
+
+```powershell
+rustup target add aarch64-pc-windows-msvc
+```
+
+### 2. Installer les Dépendances vcpkg pour Arm64
+
+Créer un triplet de version pour Arm64 (si ce n'est pas déjà fait) :
+
+```powershell
+@"
+set(VCPKG_TARGET_ARCHITECTURE arm64)
+set(VCPKG_CRT_LINKAGE static)
+set(VCPKG_LIBRARY_LINKAGE static)
+set(VCPKG_BUILD_TYPE release)
+"@ | Out-File -Encoding utf8 C:\vcpkg\triplets\arm64-windows-static-release.cmake
+```
+
+Installer les dépendances :
+
+```powershell
+cd C:\vcpkg
+
+.\vcpkg install aom:arm64-windows-static-release
+.\vcpkg install libavif[aom]:arm64-windows-static-release
+.\vcpkg install libjxl:arm64-windows-static-release
+.\vcpkg install libwebp:arm64-windows-static-release
+.\vcpkg install openjpeg:arm64-windows-static-release
+.\vcpkg install libjpeg-turbo:arm64-windows-static-release
+.\vcpkg install lcms:arm64-windows-static-release
+```
+
+### 3. Construire pour Arm64
+
+```powershell
+cd path\to\DropWebP\app
+pnpm run build:tauri:windows-arm64
+```
+
+Ou construire manuellement :
+
+```powershell
+cd app\src-tauri
+cargo build --release --target aarch64-pc-windows-msvc
+cd ..
+pnpm tauri build --target aarch64-pc-windows-msvc
+```
+
+### Remarques
+
+- Les binaires Arm64 ne fonctionneront que sur les appareils Windows Arm64 (par exemple, Surface Pro X)
+- Les binaires construits en mode croisé ne peuvent pas être exécutés sur des machines x64
+- Les artefacts de construction sont générés dans `app/src-tauri/target/aarch64-pc-windows-msvc/release/`

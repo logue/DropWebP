@@ -6,12 +6,11 @@
 
 **vcpkgのデフォルト`x64-windows-static`トリプレットはデバッグシンボルを含むため、Rustのリリースビルドでリンクエラーが発生します。**
 
-このプロジェクトでは**`x64-windows-static-release`トリプレット**と**`x64-windows-static`トリプレット**の両方を使用します:
+このプロジェクトでは**`x64-windows-static-release`トリプレット**を使用します:
 
-- **リリースビルド** (`cargo build --release`): `x64-windows-static-release` (デバッグシンボルなし)
-- **デバッグビルド** (`cargo build` / `pnpm run dev:tauri`): `x64-windows-static` (デバッグシンボルあり)
+- **リリースビルド** (`cargo build --release` / `pnpm run build:tauri`): `x64-windows-static-release` (デバッグシンボルなし)
 
-build.rsが自動的に`PROFILE`環境変数を検出して適切なトリプレットを選択します。
+`.cargo/config.toml`で環境変数が設定されており、`LIB_AOM_STATIC_LIB_PATH`などの環境変数を通じてvcpkgのライブラリパスを指定します。
 
 ## 前提条件
 
@@ -78,39 +77,44 @@ cd C:\vcpkg
 
 # 環境変数を設定（システム環境変数に追加することを推奨）
 $env:VCPKG_ROOT = "C:\vcpkg"
+[System.Environment]::SetEnvironmentVariable('VCPKG_ROOT', 'C:\vcpkg', 'User')
 ```
 
 ### 2. 依存関係のインストール
 
-自動インストールスクリプトを使用（リリーストリプレット）:
+自動インストールスクリプトを使用（推奨）:
 
 ```powershell
-cd app\src-tauri
+cd path\to\DropWebP\app\src-tauri
 .\setup-vcpkg.ps1
 ```
 
 または手動でインストール：
 
 ```powershell
+cd C:\vcpkg
+
 # x64-windows-static-release tripletでインストール（リリース専用静的リンク）
-vcpkg install aom:x64-windows-static-release
-vcpkg install libavif[aom]:x64-windows-static-release
-vcpkg install libjxl:x64-windows-static-release
-vcpkg install libwebp:x64-windows-static-release
-vcpkg install openjpeg:x64-windows-static-release
-vcpkg install libjpeg-turbo:x64-windows-static-release
-vcpkg install lcms:x64-windows-static-release
+.\vcpkg install aom:x64-windows-static-release
+.\vcpkg install libavif[aom]:x64-windows-static-release
+.\vcpkg install libjxl:x64-windows-static-release
+.\vcpkg install libwebp:x64-windows-static-release
+.\vcpkg install openjpeg:x64-windows-static-release
+.\vcpkg install libjpeg-turbo:x64-windows-static-release
+.\vcpkg install lcms:x64-windows-static-release
 ```
 
 インストールされるライブラリ：
 
-- **libaom**: AV1エンコーダー（AVIF形式用）
+- **libaom**: AV1エンコーダー（AVIF形式用） - **必須**
 - **libavif**: AVIF画像フォーマット
 - **libjxl**: JPEG XL画像フォーマット
 - **libwebp**: WebP画像フォーマット
 - **openjpeg**: JPEG 2000画像フォーマット
 - **libjpeg-turbo**: JPEG画像処理（jpegli用）
 - **lcms**: Little CMS カラーマネジメント
+
+> **重要**: `libaom`はAVIFエンコーディングに必須の依存ライブラリです。vcpkg経由でインストールすることで、libaom-sysの内部ビルド（nasmエラーが発生しやすい）を回避できます。
 
 ### 3. ビルド
 

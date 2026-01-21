@@ -125,28 +125,73 @@ brew install pnpm
 pnpm --version
 ```
 
-## 步骤 6：安装附加依赖项
+## 步骤 6：设置 vcpkg 并安装依赖项
 
-安装构建所需的附加工具和图像处理库：
+此项目使用 vcpkg 管理 C/C++ 图像处理库（libaom、libavif、libjxl 等）。
+
+### 安装 vcpkg
 
 ```bash
-# 安装 CMake（一些原生依赖项需要）
-brew install cmake
+# 克隆 vcpkg
+git clone https://github.com/Microsoft/vcpkg.git ~/Developer/vcpkg
 
-# 安装 pkg-config（链接库需要）
-brew install pkg-config
+# 引导 vcpkg
+cd ~/Developer/vcpkg
+./bootstrap-vcpkg.sh
 
-# 安装图像格式处理库
-brew install libavif  # AVIF 格式支持
-brew install libheif  # HEIF/HEIC 格式支持
-brew install jpeg-xl  # JPEG XL 格式支持
+# 设置环境变量（添加到 ~/.zshrc）
+echo 'export VCPKG_ROOT="$HOME/Developer/vcpkg"' >> ~/.zshrc
+echo 'export PATH="$VCPKG_ROOT:$PATH"' >> ~/.zshrc
+source ~/.zshrc
 ```
 
-### 验证依赖库安装
+### 安装依赖项
+
+使用自动安装脚本（推荐）：
 
 ```bash
-# 检查已安装库的版本
-brew list --versions libavif libheif jpeg-xl
+cd ~/path/to/DropWebP/app/src-tauri
+./setup-vcpkg.sh
+```
+
+或手动安装：
+
+```bash
+cd ~/Developer/vcpkg
+
+# Apple Silicon (M1/M2/M3) 的情况
+./vcpkg install aom:arm64-osx
+./vcpkg install libavif[aom]:arm64-osx
+./vcpkg install libjxl:arm64-osx
+./vcpkg install libwebp:arm64-osx
+./vcpkg install openjpeg:arm64-osx
+./vcpkg install libjpeg-turbo:arm64-osx
+./vcpkg install lcms:arm64-osx
+
+# Intel Mac 的情况
+./vcpkg install aom:x64-osx
+./vcpkg install libavif[aom]:x64-osx
+./vcpkg install libjxl:x64-osx
+./vcpkg install libwebp:x64-osx
+./vcpkg install openjpeg:x64-osx
+./vcpkg install libjpeg-turbo:x64-osx
+./vcpkg install lcms:x64-osx
+```
+
+安装的库：
+
+- **libaom**：AV1 编码器（用于 AVIF 格式，**必需**）
+- **libavif**：AVIF 图像格式
+- **libjxl**：JPEG XL 图像格式
+- **libwebp**：WebP 图像格式
+- **openjpeg**：JPEG 2000 图像格式
+- **libjpeg-turbo**：JPEG 图像处理（用于 jpegli）
+- **lcms**：Little CMS 色彩管理
+
+### 验证安装
+
+```bash
+./vcpkg list | grep -E "aom|avif|jxl|webp|openjpeg|jpeg|lcms"
 ```
 
 ## 步骤 7：克隆和构建 Drop Compress Image
