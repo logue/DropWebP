@@ -2,3 +2,23 @@
 # will have compiled files and executables
 /target/
 /gen/schemas
+# Build artifacts
+Cargo.lock
+*.o
+*.so
+*.a
+*.dylib
+*.dll
+
+# IDE and temporary files
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.env.local
+
+# macOS specific
+.cargo/advisory-db.lock
+build/

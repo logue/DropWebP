@@ -2701,6 +2701,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7a79a3332a6609480d7d0c9eab957bca6b455b91bb84e66d19f5ff66294b85b8"
 
 [[package]]
+name = "libaom-sys"
+version = "0.17.2+libaom.3.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7c4fce8aaf0c2d8534529b0698ed98ec1da8d35319588d20b0d79ce6446e4194"
+dependencies = [
+ "cmake",
+]
+
+[[package]]
 name = "libappindicator"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2731,6 +2740,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "490ca74b61e773140bebb086c81facb23273a99364a9ab0c92ab1532b90ade35"
 dependencies = [
  "cmake",
+ "libaom-sys",
  "libc",
 ]
 
@@ -7042,9 +7052,9 @@ dependencies = [
 
 [[package]]
 name = "zmij"
-version = "1.0.15"
+version = "1.0.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "94f63c051f4fe3c1509da62131a678643c5b6fbdc9273b2b79d4378ebda003d2"
+checksum = "dfcd145825aace48cff44a8844de64bf75feec3080e0aa5cdbde72961ae51a65"
 
 [[package]]
 name = "zopfli"

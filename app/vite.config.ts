@@ -95,7 +95,7 @@ export default defineConfig(({ command, mode }): UserConfig => {
           }
         : undefined,
       watch: {
-        // 3. tell Vite to ignore watching `src-tauri`
+        // 3. tell Vite to ignore watching `src-tauri` and other unnecessary directories
         ignored: [
           '**/src-tauri/**',
           '**/target/**',
@@ -103,12 +103,23 @@ export default defineConfig(({ command, mode }): UserConfig => {
           '**/.git/**',
           '**/dist/**',
           '**/*.lock',
-          '**/Meta.ts' // Prevent infinite loop from auto-generated file
+          '**/Meta.ts', // Prevent infinite loop from auto-generated file
+          '**/.DS_Store',
+          '**/*.swp',
+          '**/.turbo/**',
+          '**/pnpm-lock.yaml',
+          '**/.pnpm-debug.log',
+          '**/*.log'
         ],
-        // Increase polling interval on macOS to prevent false positives
+        // macOS FSEvents対応：ポーリングを無効にし、バッチ処理を強化
         usePolling: false,
-        interval: 1000,
-        batchTimeout: 1000
+        interval: 500,
+        batchTimeout: 200,
+        awaitWriteFinish: {
+          // ファイルの書き込みが完了するまで待機
+          stabilityThreshold: 100,
+          pollInterval: 100
+        }
       }
     },
     envPrefix: ['VITE_', 'TAURI_'],

@@ -54,12 +54,14 @@ jpegli_rs = { version = "0.6.0", package = "jpegli-rs" } # Note: Uses libjpeg-tu
 # Note: jxl-sys requires LLVM/Clang for bindgen on Windows
 # Install from: https://github.com/llvm/llvm-project/releases (e.g., LLVM-19.1.6-win64.exe)
 # Or install via winget: winget install LLVM.LLVM
-jxl-sys = "0.1.5"                                              # MIT/Apache-2.0 FFI bindings to libjxl (BSD-3-Clause)
+jxl-sys = "0.1.5" # MIT/Apache-2.0 FFI bindings to libjxl (BSD-3-Clause)
 kamadak-exif = "0.6.1"
-lcms2 = "6.1.1"                                                # Little CMS color management, linked via vcpkg
-libavif-sys = { version = "0.17.0", default-features = false } # Note: Uses system libavif (with aom) via vcpkg, no internal build
-libwebp-sys = "0.14.1"                                         # WebP codec, linked via vcpkg
-openjpeg-sys = "1.0.12"                                        # JPEG 2000 decoder, linked via vcpkg
+lcms2 = "6.1.1" # Little CMS color management, linked via vcpkg
+libavif-sys = { version = "0.17.0", default-features = false, features = [
+  "codec-aom",
+] } # Note: Uses system libavif (with aom) via vcpkg, no internal build
+libwebp-sys = "0.14.1" # WebP codec, linked via vcpkg
+openjpeg-sys = "1.0.12" # JPEG 2000 decoder, linked via vcpkg
 oxipng = "10.0.0"
 png = "0.18.0"
 rgb = "0.8.52"

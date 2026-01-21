@@ -297,8 +297,6 @@ fn detect_high_precision_profile(profile: &[u8], color_space: &str) -> bool {
 /// Detect transfer function from ICC profile
 /// PQ (ST.2084) and HLG are HDR transfer functions
 fn detect_transfer_function(profile: &[u8], description: &str) -> TransferFunction {
-    let profile_str = String::from_utf8_lossy(profile);
-
     // Priority 1: Check description from [ColorSpace] metadata
     // Apple Gain Map HDR uses a different approach, but we treat it as PQ for compatibility
     if description.contains("Gain Map HDR") || description.contains("GainMap") {
@@ -321,31 +319,50 @@ fn detect_transfer_function(profile: &[u8], description: &str) -> TransferFuncti
         return TransferFunction::Hlg;
     }
 
-    // Priority 2: Check ICC profile content
-    if profile_str.contains("PQ")
-        || profile_str.contains("ST.2084")
-        || profile_str.contains("SMPTE2084")
-        || profile_str.contains("ST2084")
-    {
-        return TransferFunction::Pq;
-    }
+    // Priority 2: Check ICC profile content only if description is available
+    // Avoid false positives from binary data (e.g., LCD display names containing "PQ")
+    if description != "Unknown" && !description.is_empty() {
+        let profile_str = String::from_utf8_lossy(profile);
 
-    if profile_str.contains("HLG") || profile_str.contains("Hybrid Log") {
-        return TransferFunction::Hlg;
-    }
+        // More specific checks to avoid false positives
+        // Only check if we find the keywords in a context that suggests HDR
+        if (profile_str.contains("ST.2084")
+            || profile_str.contains("SMPTE2084")
+            || profile_str.contains("ST2084"))
+            && (profile_str.contains("BT.2020")
+                || profile_str.contains("Rec2020")
+                || profile_str.contains("BT2020"))
+        {
+            println!("ICC Profile: Detected PQ transfer from profile content");
+            return TransferFunction::Pq;
+        }
 
-    // Check for sRGB
-    if profile_str.contains("sRGB") || description.contains("sRGB") {
-        return TransferFunction::Srgb;
-    }
+        if profile_str.contains("HLG") && profile_str.contains("BT.2020") {
+            println!("ICC Profile: Detected HLG transfer from profile content");
+            return TransferFunction::Hlg;
+        }
 
-    // Check for linear
-    if profile_str.contains("linear") || profile_str.contains("Linear") {
-        return TransferFunction::Linear;
+        // Check for sRGB
+        if profile_str.contains("sRGB") || description.contains("sRGB") {
+            return TransferFunction::Srgb;
+        }
+
+        // Check for linear
+        if profile_str.contains("linear") || profile_str.contains("Linear") {
+            return TransferFunction::Linear;
+        }
     }
 
     // Check for Display P3 (typically uses sRGB transfer function)
     if description.contains("Display P3") {
+        return TransferFunction::Srgb;
+    }
+
+    // Check for common profile descriptions that indicate sRGB
+    if description.contains("sRGB")
+        || description.contains("LCD")
+        || description.contains("Display")
+    {
         return TransferFunction::Srgb;
     }
 

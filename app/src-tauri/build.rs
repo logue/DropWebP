@@ -1,6 +1,21 @@
 use std::env;
+use std::path::Path;
 
 fn main() {
+    // Cargo依存ファイルの変更を監視
+    // これらのファイルが変更されない限り、ビルドスクリプトは再実行されない
+    println!("cargo:rerun-if-changed=build.rs");
+    println!("cargo:rerun-if-changed=Cargo.toml");
+    println!("cargo:rerun-if-changed=src/");
+    println!("cargo:rerun-if-changed=capabilities/");
+
+    // 環境変数の変更を監視
+    println!("cargo:rerun-if-env-changed=VCPKG_ROOT");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_VENDORED");
+    println!("cargo:rerun-if-env-changed=PKG_CONFIG_PATH");
+    println!("cargo:rerun-if-env-changed=TARGET");
+    println!("cargo:rerun-if-env-changed=HOST");
+
     // vcpkg経由でlibjxlとlibavifを取得（静的リンク優先）
     let use_vcpkg = env::var("CARGO_FEATURE_VENDORED").is_err(); // vendored featureがない場合にvcpkgを使用
 

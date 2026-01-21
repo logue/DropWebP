@@ -93,13 +93,6 @@ pub fn encode(
     };
     let (pixels_f32, has_alpha) = extract_pixel_data(&pixel_data);
 
-    println!(
-        "AVIF: Image properties - {}x{}, {} channels",
-        width,
-        height,
-        if has_alpha { 4 } else { 3 }
-    );
-
     // Determine bit depth based on content and settings
     // Auto mode intelligently selects bit depth for optimal quality/speed balance
     let target_depth = match options.bit_depth {
@@ -170,14 +163,44 @@ pub fn encode(
             return Err(AppError::Avif("Failed to create AVIF encoder".to_string()));
         }
 
+        // Check available codecs
+        let codec_name_encode = libavif_sys::avifCodecName(
+            libavif_sys::AVIF_CODEC_CHOICE_AUTO,
+            libavif_sys::AVIF_CODEC_FLAG_CAN_ENCODE,
+        );
+        let codec_name_str = if !codec_name_encode.is_null() {
+            std::ffi::CStr::from_ptr(codec_name_encode)
+                .to_string_lossy()
+                .into_owned()
+        } else {
+            "NONE".to_string()
+        };
+
+        println!("AVIF: Available encoder codec: {}", codec_name_str);
+
+        if codec_name_str == "NONE" {
+            libavif_sys::avifEncoderDestroy(encoder);
+            return Err(AppError::Avif(
+                "No AVIF encoder codec available. libavif was built without encoder support (aom or rav1e required)".to_string()
+            ));
+        }
+
         // Set encoder options
         (*encoder).maxThreads = options.threads.unwrap_or(0) as i32;
         (*encoder).speed = options.speed as i32;
 
+        // Set codec to AV1 (rav1e or aom)
+        (*encoder).codecChoice = libavif_sys::AVIF_CODEC_CHOICE_AUTO;
+
+        // Enable tiling for faster encoding (especially for large images)
+        (*encoder).tileRowsLog2 = 0;
+        (*encoder).tileColsLog2 = 0;
+
         println!(
-            "AVIF: Encoder settings - speed={}, maxThreads={} (0=auto)",
+            "AVIF: Encoder settings - speed={}, maxThreads={} (0=auto), codec={}",
             options.speed,
-            (*encoder).maxThreads
+            (*encoder).maxThreads,
+            codec_name_str
         );
 
         // Quality settings (0-100 to 0-63 for minQuantizer/maxQuantizer)
@@ -484,17 +507,6 @@ fn convert_to_rgb8(
     let pixel_count = (width * height) as usize;
     let expected_len = pixel_count * channels;
 
-    println!(
-        "AVIF: convert_to_rgb8 - width={}, height={}, has_alpha={}, channels={}, pixel_count={}, expected_len={}, input_len={}",
-        width,
-        height,
-        has_alpha,
-        channels,
-        pixel_count,
-        expected_len,
-        pixels_f32.len()
-    );
-
     if pixels_f32.len() != expected_len {
         return Err(AppError::Encode(format!(
             "Pixel data length mismatch: expected {}, got {}",
@@ -548,25 +560,6 @@ fn convert_to_rgb8(
                 rgb_pixels.push((a.clamp(0.0, 1.0) * 255.0) as u8);
             }
         }
-    }
-
-    // Debug: Print first few pixels
-    if rgb_pixels.len() >= 12 {
-        println!(
-            "AVIF: First 4 pixels (RGB): [{}, {}, {}] [{}, {}, {}] [{}, {}, {}] [{}, {}, {}]",
-            rgb_pixels[0],
-            rgb_pixels[1],
-            rgb_pixels[2],
-            rgb_pixels[3],
-            rgb_pixels[4],
-            rgb_pixels[5],
-            rgb_pixels[6],
-            rgb_pixels[7],
-            rgb_pixels[8],
-            rgb_pixels[9],
-            rgb_pixels[10],
-            rgb_pixels[11]
-        );
     }
 
     let format = if has_alpha {
