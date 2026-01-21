@@ -55,7 +55,21 @@
       "entitlements": null,
       "exceptionDomain": null,
       "signingIdentity": null,
-      "providerShortName": null
+      "providerShortName": null,
+      "dmg": {
+        "appPosition": {
+          "x": 180,
+          "y": 170
+        },
+        "applicationFolderPosition": {
+          "x": 480,
+          "y": 170
+        },
+        "windowSize": {
+          "width": 660,
+          "height": 400
+        }
+      }
     },
     "windows": {
       "webviewInstallMode": {
