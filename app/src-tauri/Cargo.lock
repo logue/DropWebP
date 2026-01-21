@@ -2572,20 +2572,24 @@ dependencies = [
 
 [[package]]
 name = "jpegli-rs"
-version = "0.6.0"
+version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "70fb613e928fdd34cc92789ecd888a233c76bbc05fb89e54ab7cbd3e05f6f9a5"
+checksum = "0b5a08b0e05332905bad7fda637804a30084378f85e9a3477dca152a41905d7e"
 dependencies = [
  "aligned-vec",
  "bytemuck",
  "enough",
  "imgref",
+ "lcms2",
  "linear-srgb",
  "multiversed",
  "multiversion",
  "rgb",
  "spin",
+ "thiserror 2.0.18",
+ "whereat",
  "wide",
+ "zune-jpeg 0.5.11",
 ]
 
 [[package]]
@@ -2828,9 +2832,9 @@ dependencies = [
 
 [[package]]
 name = "linear-srgb"
-version = "0.2.0"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d347d97e1549c03278cd1b4e09b99835ed9fc1e70ac0b9da68f5904941a7f41"
+checksum = "153732436b90b689934ad2d2997d5f0d2416163017ac76e6c0475dce9e7999c3"
 dependencies = [
  "bytemuck",
  "multiversed",
@@ -6284,6 +6288,12 @@ name = "weezl"
 version = "0.1.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a28ac98ddc8b9274cb41bb4d9d4d5c425b6020c50c46f25559911905610b4a88"
+
+[[package]]
+name = "whereat"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3ec598a1ade4224cfe3c5dace0d5d7deec9ed670503ff99d4946973c8c094534"
 
 [[package]]
 name = "wide"

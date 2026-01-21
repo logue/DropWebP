@@ -50,7 +50,10 @@ image = "0.25.9"
 imgref = "1.12.0"
 indexmap = "2.13.0"
 jpeg2k = "0.10.1"
-jpegli_rs = { version = "0.6.0", package = "jpegli-rs" } # Note: Uses libjpeg-turbo via vcpkg
+jpegli_rs = { version = "0.8.1", package = "jpegli-rs", default-features = false, features = [
+  "std",
+  "cms-lcms2",
+] } # Pure Rust JPEG encoder with perceptual optimizations
 # Note: jxl-sys requires LLVM/Clang for bindgen on Windows
 # Install from: https://github.com/llvm/llvm-project/releases (e.g., LLVM-19.1.6-win64.exe)
 # Or install via winget: winget install LLVM.LLVM
@@ -76,6 +79,7 @@ tauri-plugin-opener = "2.5.3"
 tauri-plugin-os = "2.3.2"
 tempfile = "3.24.0"
 thiserror = "2.0.18"
+# ultrahdr = { version = "0.1.3", default-features = true } # Ultra HDR (JPEG-R with gainmap) support - 将来の実装用
 
 [dev-dependencies]
 glib = "0.21.5"

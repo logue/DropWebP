@@ -60,7 +60,13 @@ const defaultPngOptions: PngOptions = {
   scale16: false
 } as const;
 
-const defaultJpegOptions: JpegOptions = { quality: 95, progressive: true, optimize: true };
+const defaultJpegOptions: JpegOptions = {
+  quality: 95,
+  progressive: true,
+  optimize: true,
+  ultraHdr: false,
+  gainmapQuality: 85
+};
 
 const defaultCommonOptions: CommonOptions = {
   sound: true,

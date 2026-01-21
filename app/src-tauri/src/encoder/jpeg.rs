@@ -1,6 +1,6 @@
 use crate::error::AppError;
 use crate::options::HighBitDepthImage;
-use jpegli_rs::encoder::{EncoderConfig, PixelLayout, Unstoppable};
+use jpegli_rs::encoder::{ChromaSubsampling, EncoderConfig, PixelLayout, Unstoppable};
 use serde::{Deserialize, Serialize};
 
 /// デフォルトの画質
@@ -11,6 +11,10 @@ const DEFAULT_QUALITY: u8 = 95;
 /// jpegliは、libjxlプロジェクトに含まれる高品質なJPEGエンコーダーです。
 /// 標準のJPEGエンコーダーよりも優れた圧縮率と画質を提供します。
 /// JPEG XLと同じ技術を活用し、高品質なJPEG画像を生成します。
+///
+/// # Ultra HDR サポート (将来実装予定)
+/// `ultra_hdr`オプションは将来のリリースでUltra HDR (JPEG-R)形式の
+/// エンコードをサポートする予定です。
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct JpegOptions {
@@ -27,6 +31,16 @@ pub struct JpegOptions {
     /// ファイルサイズをさらに削減
     #[serde(default = "default_optimize")]
     pub optimize: bool,
+
+    /// Ultra HDR (JPEG-R with gainmap) エンコード (将来実装予定)
+    /// 現在は無視されます
+    #[serde(default = "default_ultra_hdr")]
+    pub ultra_hdr: bool,
+
+    /// Ultra HDR Gainmapの画質 (1-100の範囲、デフォルト: 85)
+    /// 将来実装予定
+    #[serde(default = "default_gainmap_quality")]
+    pub gainmap_quality: u8,
 }
 
 fn default_progressive() -> bool {
@@ -37,12 +51,22 @@ fn default_optimize() -> bool {
     true
 }
 
+fn default_ultra_hdr() -> bool {
+    false
+}
+
+fn default_gainmap_quality() -> u8 {
+    85
+}
+
 impl Default for JpegOptions {
     fn default() -> Self {
         Self {
             quality: DEFAULT_QUALITY,
             progressive: true,
             optimize: true,
+            ultra_hdr: false,
+            gainmap_quality: 85,
         }
     }
 }
@@ -119,11 +143,21 @@ pub fn encode(
         rgb_data.len()
     );
 
-    // jpegli-rs新API
-    let config = EncoderConfig::new()
-        .quality(options.quality)
-        .progressive(options.progressive)
-        .optimize_huffman(options.optimize);
+    // jpegli-rs 0.8 新API: quality と chroma subsampling が必須パラメータ
+    let mut config = EncoderConfig::new(options.quality, ChromaSubsampling::Quarter);
+
+    if options.progressive {
+        config = config.progressive(true);
+    }
+
+    if options.optimize {
+        config = config.optimize_huffman(true);
+    }
+
+    // ICCプロファイルを設定に追加（jpegli-rs 0.8ではネイティブサポート）
+    if let Some(ref icc) = icc_profile {
+        config = config.icc_profile(icc.clone());
+    }
 
     println!("Encoding image data...");
     let mut encoder = config
@@ -134,14 +168,9 @@ pub fn encode(
         .push_packed(&rgb_data, Unstoppable)
         .map_err(|e| AppError::Encode(format!("Failed to push image data: {:?}", e)))?;
 
-    let mut jpeg_data = encoder
+    let jpeg_data = encoder
         .finish()
         .map_err(|e| AppError::Encode(format!("Failed to finish encoding: {:?}", e)))?;
-
-    // ICCプロファイルの追加（エンコード後にAPP2マーカーとして追加）
-    if let Some(icc) = icc_profile {
-        jpeg_data = add_icc_profile(jpeg_data, &icc)?;
-    }
 
     println!("jpegli encoding completed: {} bytes", jpeg_data.len());
 
@@ -151,6 +180,11 @@ pub fn encode(
 /// エンコード済みJPEGデータにICCプロファイルを追加
 ///
 /// JPEG形式では、ICCプロファイルはAPP2マーカー内に埋め込まれます
+///
+/// # 注意
+/// jpegli-rs 0.8以降はネイティブでICCプロファイルをサポートするため、
+/// この関数は後方互換性のために残されています
+#[allow(dead_code)]
 fn add_icc_profile(jpeg_data: Vec<u8>, icc: &[u8]) -> Result<Vec<u8>, AppError> {
     // JPEGマーカー: SOI(0xFFD8)の直後にAPP2マーカーを挿入
     if jpeg_data.len() < 2 || jpeg_data[0] != 0xFF || jpeg_data[1] != 0xD8 {
@@ -262,6 +296,8 @@ mod tests {
             quality: 95,
             progressive: true,
             optimize: true,
+            ultra_hdr: true,
+            gainmap_quality: 95,
         };
         let high_quality_size = estimate_size(&img, &high_quality_options);
 
@@ -270,6 +306,8 @@ mod tests {
             quality: 50,
             progressive: false,
             optimize: false,
+            ultra_hdr: false,
+            gainmap_quality: 50,
         };
         let low_quality_size = estimate_size(&img, &low_quality_options);
 
