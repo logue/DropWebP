@@ -20,14 +20,21 @@ echo "  APPIMAGE_EXTRACT_AND_RUN=$APPIMAGE_EXTRACT_AND_RUN"
 echo "  NO_STRIP=$NO_STRIP"
 echo ""
 
-# プロジェクトルートで依存関係をインストール
-echo "📦 ルート依存関係をインストール中..."
-pnpm install
-
-# appディレクトリで依存関係をインストール
+# appディレクトリのみで依存関係をインストール
+# (ルートのpostinstallスクリプトがdocsパッケージを要求するため、appのみインストール)
 echo "📦 アプリ依存関係をインストール中..."
+cd /workspace
+# node_modulesはDockerボリュームにマウントされているため、ホスト環境とは完全に分離
+# 初回またはpackage.json変更時のみインストールが必要
+if [ ! -d "app/node_modules/.pnpm" ]; then
+    echo "  初回インストール中..."
+    pnpm install --filter app --frozen-lockfile --ignore-scripts
+else
+    echo "  既存のnode_modulesを使用（必要に応じて更新）"
+    pnpm install --filter app --frozen-lockfile --ignore-scripts --offline 2>/dev/null || \
+    pnpm install --filter app --frozen-lockfile --ignore-scripts
+fi
 cd app
-pnpm install
 
 # ビルドターゲットを環境変数から取得（デフォルト: x86_64）
 TARGET="${BUILD_TARGET:-x86_64-unknown-linux-gnu}"
@@ -40,6 +47,10 @@ if [ "$TARGET" = "x86_64-unknown-linux-gnu" ]; then
     export CXX=g++
     export AR=ar
     export PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig
+    # libavif-sys, libaom-sysビルド用の環境変数
+    export CMAKE_TOOLCHAIN_FILE=""
+    export CMAKE_PREFIX_PATH="/usr"
+    export LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
     echo "🔧 ネイティブx86_64ビルド"
     echo "🔧 コンパイラ: CC=$CC, CXX=$CXX"
 elif [ "$TARGET" = "aarch64-unknown-linux-gnu" ]; then
@@ -48,6 +59,10 @@ elif [ "$TARGET" = "aarch64-unknown-linux-gnu" ]; then
     export CXX=g++
     export AR=ar
     export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig
+    # libavif-sys, libaom-sysビルド用の環境変数
+    export CMAKE_TOOLCHAIN_FILE=""
+    export CMAKE_PREFIX_PATH="/usr"
+    export LD_LIBRARY_PATH="/usr/lib/aarch64-linux-gnu:$LD_LIBRARY_PATH"
     echo "🔧 ネイティブARM64ビルド"
     echo "🔧 コンパイラ: CC=$CC, CXX=$CXX"
 fi
@@ -67,7 +82,17 @@ fi
 pnpm tauri build --target "$TARGET" $BUNDLE_ARGS
 
 echo "✅ ビルド完了！"
-echo "📦 成果物の場所: /workspace/app/src-tauri/target/$TARGET/release/bundle/"
+
+# 成果物の場所を表示
+BUNDLE_PATH="/workspace/app/src-tauri/target/$TARGET/release/bundle/"
+echo "📦 成果物の場所: $BUNDLE_PATH"
 
 # 成果物をリスト表示
-ls -lh "/workspace/app/src-tauri/target/$TARGET/release/bundle/" 2>/dev/null || true
+if [ -d "$BUNDLE_PATH" ]; then
+    ls -lh "$BUNDLE_PATH"
+    find "$BUNDLE_PATH" -type f \( -name "*.deb" -o -name "*.rpm" -o -name "*.AppImage" \) -exec ls -lh {} \;
+else
+    echo "⚠️  bundle ディレクトリが見つかりません"
+    echo "target/ の内容:"
+    find "/workspace/app/src-tauri/target" -name "*.deb" -o -name "*.rpm" 2>/dev/null || echo "パッケージファイルが見つかりません"
+fi

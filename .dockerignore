@@ -1,0 +1,32 @@
+# Node modules (Docker内で再インストール)
+node_modules
+app/node_modules
+docs/node_modules
+
+# Build outputs
+dist
+.output
+app/dist
+app/src-tauri/target
+
+# IDE
+.vscode
+.idea
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Temporary files
+*.tmp
+*.temp
+.cache

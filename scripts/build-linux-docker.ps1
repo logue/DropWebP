@@ -130,21 +130,20 @@ $PlatformSafe = $Platform -replace '/', '-'
 $CargoVolume = "dropwebp-cargo-cache-$PlatformSafe"
 $PnpmVolume = "dropwebp-pnpm-cache-$PlatformSafe"
 $TargetVolume = "dropwebp-target-cache-$PlatformSafe"
+$NodeModulesVolume = "dropwebp-node-modules-$PlatformSafe"
 
 # ボリュームが存在しない場合は作成
 docker volume create $CargoVolume 2>&1 | Out-Null
 docker volume create $PnpmVolume 2>&1 | Out-Null
 docker volume create $TargetVolume 2>&1 | Out-Null
+docker volume create $NodeModulesVolume 2>&1 | Out-Null
 
 Write-Host "キャッシュボリューム:" -ForegroundColor Green
 Write-Host "  - Cargo: $CargoVolume"
 Write-Host "  - pnpm: $PnpmVolume"
 Write-Host "  - Target: $TargetVolume"
+Write-Host "  - Node modules: $NodeModulesVolume (ホスト環境から完全に分離)"
 Write-Host ""
-
-# Dockerコンテナ内でビルドを実行
-# Windowsパスをlinuxパスに変換（WSLスタイル）
-$ProjectRootLinux = $ProjectRoot -replace '\\', '/' -replace '^([A-Z]):', { "/mnt/$($_.Groups[1].Value.ToLower())" }
 
 Write-Host "ビルドを実行中..." -ForegroundColor Blue
 $runArgs = @(
@@ -157,6 +156,7 @@ $runArgs = @(
     "-v", "${CargoVolume}:/root/.cargo/registry",
     "-v", "${PnpmVolume}:/pnpm/store",
     "-v", "${TargetVolume}:/workspace/app/src-tauri/target",
+    "-v", "${NodeModulesVolume}:/workspace/app/node_modules",
     "-e", "BUILD_TARGET=$BuildTarget",
     "-e", "APPIMAGE_EXTRACT_AND_RUN=1",
     "-e", "VERBOSE=1"
@@ -171,27 +171,41 @@ $runArgs += $ImageName
 
 docker @runArgs
 
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "`n❌ ビルドエラーが発生しました" -ForegroundColor Red
+    exit 1
+}
+
 Write-Host "`n✅ ビルド完了！`n" -ForegroundColor Green
 
 Write-Host "📋 成果物をホストにコピー中..." -ForegroundColor Blue
 
 # ホスト側のディレクトリを作成
 $TargetDir = Join-Path $ProjectRoot "app\src-tauri\target\$BuildTarget\release"
-New-Item -ItemType Directory -Force -Path $TargetDir | Out-Null
+$BundleDir = Join-Path $TargetDir "bundle"
+New-Item -ItemType Directory -Force -Path $BundleDir | Out-Null
 
-# Dockerボリュームからホストに成果物をコピー
+# Dockerボリュームから成果物（bundleディレクトリのみ）をホストにコピー
+Write-Host "  ボリューム $TargetVolume から成果物を取得中..." -ForegroundColor DarkGray
 docker run --rm `
+    --platform $Platform `
     -v "${TargetVolume}:/data" `
-    -v "${ProjectRoot}\app\src-tauri\target:/output" `
-    alpine sh -c "cp -r /data/$BuildTarget/release/bundle /output/$BuildTarget/release/ 2>/dev/null || echo 'Bundle not found in volume'"
+    -v "${ProjectRoot}:/output" `
+    alpine sh -c "if [ -d '/data/$BuildTarget/release/bundle' ]; then cp -rv /data/$BuildTarget/release/bundle/* /output/app/src-tauri/target/$BuildTarget/release/bundle/ && echo '✅ コピー完了'; else echo '❌ bundle ディレクトリが見つかりません: /data/$BuildTarget/release/bundle'; find /data -name '*.deb' -o -name '*.rpm' 2>/dev/null || echo 'パッケージファイルが見つかりません'; exit 1; fi"
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "`n⚠️  成果物のコピーに失敗しました" -ForegroundColor Yellow
+    Write-Host "Dockerボリュームの内容を確認しています..." -ForegroundColor Yellow
+    docker run --rm -v "${TargetVolume}:/data" alpine sh -c "echo 'Volume contents:'; ls -la /data/$BuildTarget/release/ 2>/dev/null || ls -la /data/ 2>/dev/null || echo 'Volume is empty'"
+    exit 1
+}
 
 Write-Host ""
 Write-Host "📦 成果物の場所:" -ForegroundColor Green
-Write-Host "   $TargetDir\bundle\"
+Write-Host "   $BundleDir\"
 Write-Host ""
 
 # 成果物のサイズを表示
-$BundleDir = Join-Path $TargetDir "bundle"
 
 if (Test-Path (Join-Path $BundleDir "deb")) {
     Write-Host "📊 .deb パッケージ:" -ForegroundColor Green

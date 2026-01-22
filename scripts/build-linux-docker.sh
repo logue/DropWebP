@@ -109,16 +109,19 @@ echo -e "${BLUE}🔨 Linux向けアプリケーションをビルド中...${NC}"
 CARGO_CACHE_VOLUME="dropwebp-cargo-cache-${PLATFORM//\//-}"
 PNPM_CACHE_VOLUME="dropwebp-pnpm-cache-${PLATFORM//\//-}"
 TARGET_CACHE_VOLUME="dropwebp-target-cache-${PLATFORM//\//-}"
+NODE_MODULES_VOLUME="dropwebp-node-modules-${PLATFORM//\//-}"
 
 # ボリュームが存在しない場合は作成
 docker volume create "$CARGO_CACHE_VOLUME" >/dev/null 2>&1 || true
 docker volume create "$PNPM_CACHE_VOLUME" >/dev/null 2>&1 || true
 docker volume create "$TARGET_CACHE_VOLUME" >/dev/null 2>&1 || true
+docker volume create "$NODE_MODULES_VOLUME" >/dev/null 2>&1 || true
 
 echo -e "${GREEN}キャッシュボリューム:${NC}"
 echo "  - Cargo: $CARGO_CACHE_VOLUME"
 echo "  - pnpm: $PNPM_CACHE_VOLUME"
 echo "  - Target: $TARGET_CACHE_VOLUME"
+echo "  - Node modules: $NODE_MODULES_VOLUME (ホスト環境から完全に分離)"
 echo ""
 
 # Dockerコンテナ内でビルドを実行
@@ -134,6 +137,7 @@ docker run --rm \
     -v "$CARGO_CACHE_VOLUME:/root/.cargo/registry" \
     -v "$PNPM_CACHE_VOLUME:/pnpm/store" \
     -v "$TARGET_CACHE_VOLUME:/workspace/app/src-tauri/target" \
+    -v "$NODE_MODULES_VOLUME:/workspace/app/node_modules" \
     -e BUILD_TARGET="$TARGET" \
     -e TAURI_BUNDLER_TARGETS="$BUNDLE_TARGETS" \
     -e APPIMAGE_EXTRACT_AND_RUN=1 \
@@ -141,19 +145,33 @@ docker run --rm \
     $DOCKER_RUN_ARGS \
     "$IMAGE_NAME"
 
+if [ $? -ne 0 ]; then
+    echo ""
+    echo -e "${RED}❌ ビルドエラーが発生しました${NC}"
+    exit 1
+fi
+
 echo ""
 echo -e "${GREEN}✅ ビルド完了！${NC}"
 echo ""
 echo -e "${BLUE}📋 成果物をホストにコピー中...${NC}"
 
 # ホスト側のディレクトリを作成
-mkdir -p "$PROJECT_ROOT/app/src-tauri/target/$TARGET/release"
+mkdir -p "$PROJECT_ROOT/app/src-tauri/target/$TARGET/release/bundle"
 
-# Dockerボリュームからホストに成果物をコピー
+# Dockerボリュームから成果物（bundleディレクトリのみ）をホストにコピー
 docker run --rm \
+    --platform "$PLATFORM" \
     -v "$TARGET_CACHE_VOLUME:/data" \
-    -v "$PROJECT_ROOT/app/src-tauri/target:/output" \
-    alpine sh -c "cp -r /data/$TARGET/release/bundle /output/$TARGET/release/ 2>/dev/null || echo 'Bundle not found in volume'"
+    -v "$PROJECT_ROOT:/output" \
+    alpine sh -c "if [ -d '/data/$TARGET/release/bundle' ]; then cp -rv /data/$TARGET/release/bundle/* /output/app/src-tauri/target/$TARGET/release/bundle/ && echo '✅ コピー完了'; else echo '❌ bundle ディレクトリが見つかりません: /data/$TARGET/release/bundle'; find /data -name '*.deb' -o -name '*.rpm' 2>/dev/null || echo 'パッケージファイルが見つかりません'; exit 1; fi"
+
+if [ $? -ne 0 ]; then
+    echo -e "${YELLOW}⚠️  成果物のコピーに失敗しました${NC}"
+    echo "Dockerボリュームの内容を確認しています..."
+    docker run --rm -v "$TARGET_CACHE_VOLUME:/data" alpine sh -c "echo 'Volume contents:'; ls -la /data/$TARGET/release/ 2>/dev/null || ls -la /data/ 2>/dev/null || echo 'Volume is empty'"
+    exit 1
+fi
 
 echo ""
 echo -e "${GREEN}📦 成果物の場所:${NC}"

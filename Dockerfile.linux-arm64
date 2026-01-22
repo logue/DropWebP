@@ -28,6 +28,10 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     pkg-config \
     nasm \
+    # bindgen用（jxl-sys, libavif-sysなどのFFIバインディング生成に必要）
+    libclang-dev \
+    llvm-dev \
+    clang \
     # jpegxl-rs vendored build dependencies
     libbrotli-dev \
     libgif-dev \
