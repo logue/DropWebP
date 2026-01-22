@@ -32,6 +32,8 @@
     "build:analyze": "pnpm --filter app build:analyze",
     "build:clean": "pnpm --recursive exec rimraf dist",
     "build:tauri": "pnpm --filter app build:tauri",
+    "build:tauri:linux-x64": "pnpm --filter app build:tauri:linux-docker-x64",
+    "build:tauri:linux-arm64": "pnpm --filter app build:tauri:linux-docker-arm64",
     "package:chocolatey": "pwsh ./scripts/build-chocolatey.ps1",
     "package:homebrew": "bash ./scripts/build-homebrew.sh",
     "generate": "pnpm --filter docs generate",

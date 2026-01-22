@@ -124,6 +124,22 @@ pnpm install
 pnpm run build:tauri
 ```
 
+#### Cross-platform Linux Build using Docker
+
+Build Linux packages from Windows or macOS using Docker:
+
+```bash
+# For Windows (PowerShell)
+pnpm run build:tauri:linux-x64    # Build x86_64 .deb and .rpm
+pnpm run build:tauri:linux-arm64  # Build ARM64 .deb and .rpm
+
+# For macOS/Linux (Bash)
+bash scripts/build-linux-docker.sh x64    # Build x86_64
+bash scripts/build-linux-docker.sh arm64  # Build ARM64
+```
+
+**Requirements**: Docker Desktop with Linux container support
+
 For detailed build instructions, see the documentation in `docs/content/{lang}/build-*.md`.
 
 ## 🌐 Localization
