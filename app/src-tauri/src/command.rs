@@ -258,7 +258,6 @@ pub async fn convert_with_progress(
                     progress_callback.clone(),
                 )
             }
-            /*
             EncodeOptions::Png(png_opts) => {
                 crate::encoder::png::encode_with_progress(
                     &img,
@@ -267,7 +266,6 @@ pub async fn convert_with_progress(
                     progress_callback.clone(),
                 )
             }
-            */
             // その他のフォーマットは通常のエンコード（ここには到達しないはず）
             _ => crate::encoder::encode(img, icc_profile, &options),
         }

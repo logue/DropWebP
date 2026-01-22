@@ -2,7 +2,7 @@ pub mod avif;
 pub mod common;
 pub mod jpeg;
 pub mod jxl;
-pub mod png; // Stub only - full implementation disabled due to oxipng 10.0 API changes
+pub mod png;
 pub mod progress;
 pub mod webp;
 
