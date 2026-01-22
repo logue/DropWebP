@@ -1,31 +1,56 @@
 # Construction pour Linux (avec Docker)
 
-Comment construire des binaires Linux depuis macOS en utilisant Docker
+Comment construire des binaires Linux depuis Windows, macOS ou Linux en utilisant Docker
 
 ## 📋 Prérequis
 
-- Docker Desktop pour Mac doit être installé
-- Espace disque suffisant (environ 5 Go nécessaires pour la construction initiale)
+### Commun à toutes les plateformes
+
+- Docker Desktop ou Docker Engine
+- pnpm (v10.2.0 ou supérieur)
+- 8 Go+ de RAM (16 Go recommandés)
+- 20 Go+ d'espace disque libre
+
+### Spécifique à la plateforme
+
+#### Windows
+- Windows 10/11 (64 bits)
+- WSL 2 (recommandé)
+- PowerShell 5.1 ou supérieur
+
+#### macOS
+- macOS 10.15 ou supérieur
+- Bash
+- Docker Desktop pour Mac
+
+#### Linux
+- Distribution Linux 64 bits
+- Docker Engine 20.10 ou supérieur
+- Bash
 
 ## 🚀 Utilisation
 
-### Construction pour x86_64 (AMD64)
+### Construction sur Windows
+
+```powershell
+# Exécuter depuis la racine du projet
+pnpm run build:tauri:linux-x64    # Linux x86_64
+pnpm run build:tauri:linux-arm64  # Linux ARM64
+
+# Ou exécuter le script directement
+pwsh .\scripts\build-linux-docker.ps1 -Target x64
+pwsh .\scripts\build-linux-docker.ps1 -Target arm64
+```
+
+### Construction sur macOS / Linux
 
 ```bash
 # Exécuter depuis la racine du projet
-./scripts/build-linux-docker.sh x64
+bash scripts/build-linux-docker.sh x64    # Linux x86_64
+bash scripts/build-linux-docker.sh arm64  # Linux ARM64
 
 # Ou depuis le répertoire app
 pnpm run build:tauri:linux-docker-x64
-```
-
-### Construction pour ARM64 (AArch64)
-
-```bash
-# Exécuter depuis la racine du projet
-./scripts/build-linux-docker.sh arm64
-
-# Ou depuis le répertoire app
 pnpm run build:tauri:linux-docker-arm64
 ```
 

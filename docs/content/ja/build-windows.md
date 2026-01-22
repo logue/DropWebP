@@ -4,14 +4,74 @@
 
 ## ビルド方法の選択
 
-Windowsでのビルドには2つの方法があります：
+Windowsでのビルドには3つの方法があります：
 
-1. **Docker環境でのビルド（推奨）**: クリーンな環境で依存関係の競合を回避
-2. **ネイティブ環境でのビルド**: より高速だが環境構築が複雑
+1. **DockerでLinuxビルド（推奨）**: Windows環境からLinux向けパッケージをビルド
+2. **Docker環境でWindowsビルド**: クリーンな環境で依存関係の競合を回避
+3. **ネイティブ環境でのビルド**: より高速だが環境構築が複雑
 
 ---
 
-## 方法1: Docker環境でのビルド（推奨）
+## 方法1: DockerでLinuxビルド（推奨）
+
+WindowsからDockerを使用してLinux向けパッケージ（.deb、.rpm）をビルドできます。
+
+### 前提条件
+
+- Windows 10/11 (64-bit)
+- Docker Desktop for Windows
+- WSL 2（推奨）
+- PowerShell 5.1以上
+- 8GB以上のRAM（16GB推奨）
+
+### 手順
+
+1. **Docker Desktop のインストール**
+
+   [Docker Desktop for Windows](https://www.docker.com/products/docker-desktop/)をダウンロードしてインストールします。
+
+2. **WSL 2 の有効化**
+
+   Docker Desktop の設定で「Use WSL 2 based engine」を有効にします（推奨）。
+
+3. **プロジェクトのクローン**
+
+   ```powershell
+   git clone https://github.com/logue/DropWebP.git
+   cd DropWebP
+   ```
+
+4. **Linuxパッケージのビルド**
+
+   ```powershell
+   # x86_64 Linux用
+   pnpm run build:tauri:linux-x64
+
+   # ARM64 Linux用
+   pnpm run build:tauri:linux-arm64
+
+   # または直接スクリプトを実行
+   pwsh .\scripts\build-linux-docker.ps1 -Target x64
+   ```
+
+5. **ビルド成果物の確認**
+
+   ビルドが成功すると、以下の場所にパッケージが生成されます：
+   - `app/src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/`
+   - `app/src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/rpm/`
+
+### Linux向けビルドの利点
+
+- ✅ WindowsからLinux向けパッケージを直接ビルド可能
+- ✅ CI/CD環境との一貫性
+- ✅ クロスプラットフォーム開発が容易
+- ✅ ホスト環境を汚さない
+
+> **詳細**: [Linux向けビルド（Docker使用）](./build-linux-docker.md)を参照してください。
+
+---
+
+## 方法2: Docker環境でWindowsビルド
 
 ### 前提条件
 
@@ -61,7 +121,7 @@ Windowsでのビルドには2つの方法があります：
 
 ---
 
-## 方法2: ネイティブ環境でのビルド
+## 方法3: ネイティブ環境でのビルド
 
 ## 1. Chocolateyのインストール
 

@@ -1,31 +1,56 @@
 # Linux构建（使用Docker）
 
-如何在macOS上使用Docker构建Linux二进制文件
+如何在Windows、macOS或Linux上使用Docker构建Linux二进制文件
 
 ## 📋 前置要求
 
-- 必须安装Docker Desktop for Mac
-- 足够的磁盘空间（初次构建需要约5GB）
+### 所有平台通用
+
+- Docker Desktop或Docker Engine
+- pnpm (v10.2.0或更高版本)
+- 8GB以上内存（16GB推荐）
+- 20GB以上空闲磁盘空间
+
+### 平台特定要求
+
+#### Windows
+- Windows 10/11 (64位)
+- WSL 2（推荐）
+- PowerShell 5.1或更高版本
+
+#### macOS
+- macOS 10.15或更高版本
+- Bash
+- Docker Desktop for Mac
+
+#### Linux
+- 64位Linux发行版
+- Docker Engine 20.10或更高版本
+- Bash
 
 ## 🚀 使用方法
 
-### 构建x86_64 (AMD64)版本
+### 在Windows上构建
+
+```powershell
+# 从项目根目录运行
+pnpm run build:tauri:linux-x64    # x86_64 Linux
+pnpm run build:tauri:linux-arm64  # ARM64 Linux
+
+# 或直接运行脚本
+pwsh .\scripts\build-linux-docker.ps1 -Target x64
+pwsh .\scripts\build-linux-docker.ps1 -Target arm64
+```
+
+### 在macOS / Linux上构建
 
 ```bash
 # 从项目根目录运行
-./scripts/build-linux-docker.sh x64
+bash scripts/build-linux-docker.sh x64    # x86_64 Linux
+bash scripts/build-linux-docker.sh arm64  # ARM64 Linux
 
 # 或从app目录运行
 pnpm run build:tauri:linux-docker-x64
-```
-
-### 构建ARM64 (AArch64)版本
-
-```bash
-# 从项目根目录运行
-./scripts/build-linux-docker.sh arm64
-
-# 或从app目录运行
 pnpm run build:tauri:linux-docker-arm64
 ```
 

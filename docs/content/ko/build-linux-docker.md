@@ -1,31 +1,56 @@
 # Linux용 빌드 (Docker 사용)
 
-macOS에서 Docker를 사용하여 Linux 바이너리를 빌드하는 방법
+Windows, macOS 또는 Linux에서 Docker를 사용하여 Linux 바이너리를 빌드하는 방법
 
 ## 📋 전제 조건
 
-- Docker Desktop for Mac이 설치되어 있어야 합니다
-- 충분한 디스크 공간 (초기 빌드에 약 5GB 필요)
+### 모든 플랫폼 공통
+
+- Docker Desktop 또는 Docker Engine
+- pnpm (v10.2.0 이상)
+- 8GB 이상의 RAM (16GB 권장)
+- 20GB 이상의 여유 디스크 공간
+
+### 플랫폼별 요구사항
+
+#### Windows
+- Windows 10/11 (64비트)
+- WSL 2 (권장)
+- PowerShell 5.1 이상
+
+#### macOS
+- macOS 10.15 이상
+- Bash
+- Docker Desktop for Mac
+
+#### Linux
+- 64비트 Linux 배포판
+- Docker Engine 20.10 이상
+- Bash
 
 ## 🚀 사용 방법
 
-### x86_64 (AMD64)용 빌드
+### Windows에서 빌드
+
+```powershell
+# 프로젝트 루트에서 실행
+pnpm run build:tauri:linux-x64    # x86_64 Linux
+pnpm run build:tauri:linux-arm64  # ARM64 Linux
+
+# 또는 스크립트를 직접 실행
+pwsh .\scripts\build-linux-docker.ps1 -Target x64
+pwsh .\scripts\build-linux-docker.ps1 -Target arm64
+```
+
+### macOS / Linux에서 빌드
 
 ```bash
 # 프로젝트 루트에서 실행
-./scripts/build-linux-docker.sh x64
+bash scripts/build-linux-docker.sh x64    # x86_64 Linux
+bash scripts/build-linux-docker.sh arm64  # ARM64 Linux
 
 # 또는 app 디렉토리에서
 pnpm run build:tauri:linux-docker-x64
-```
-
-### ARM64 (AArch64)용 빌드
-
-```bash
-# 프로젝트 루트에서 실행
-./scripts/build-linux-docker.sh arm64
-
-# 또는 app 디렉토리에서
 pnpm run build:tauri:linux-docker-arm64
 ```
 

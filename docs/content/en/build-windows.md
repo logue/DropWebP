@@ -4,14 +4,74 @@ This guide walks you through setting up the development environment for building
 
 ## Choose Your Build Method
 
-There are two ways to build on Windows:
+There are three ways to build on Windows:
 
-1. **Docker Environment (Recommended)**: Clean environment avoiding dependency conflicts
-2. **Native Environment**: Faster but more complex setup
+1. **Docker for Linux Build (Recommended)**: Build Linux packages from Windows
+2. **Docker Environment for Windows Build**: Clean environment avoiding dependency conflicts
+3. **Native Environment**: Faster but more complex setup
 
 ---
 
-## Method 1: Docker Environment Build (Recommended)
+## Method 1: Docker for Linux Build (Recommended)
+
+You can build Linux packages (.deb, .rpm) from Windows using Docker.
+
+### Prerequisites
+
+- Windows 10/11 (64-bit)
+- Docker Desktop for Windows
+- WSL 2 (recommended)
+- PowerShell 5.1 or higher
+- 8GB+ RAM (16GB recommended)
+
+### Steps
+
+1. **Install Docker Desktop**
+
+   Download and install [Docker Desktop for Windows](https://www.docker.com/products/docker-desktop/).
+
+2. **Enable WSL 2**
+
+   Enable "Use WSL 2 based engine" in Docker Desktop settings (recommended).
+
+3. **Clone the Project**
+
+   ```powershell
+   git clone https://github.com/logue/DropWebP.git
+   cd DropWebP
+   ```
+
+4. **Build Linux Packages**
+
+   ```powershell
+   # For x86_64 Linux
+   pnpm run build:tauri:linux-x64
+
+   # For ARM64 Linux
+   pnpm run build:tauri:linux-arm64
+
+   # Or run the script directly
+   pwsh .\scripts\build-linux-docker.ps1 -Target x64
+   ```
+
+5. **Check Build Artifacts**
+
+   Upon successful build, packages will be generated at:
+   - `app/src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/`
+   - `app/src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/rpm/`
+
+### Linux Build Benefits
+
+- ✅ Build Linux packages directly from Windows
+- ✅ Consistency with CI/CD pipelines
+- ✅ Easy cross-platform development
+- ✅ Keeps host environment clean
+
+> **More Info**: See [Building for Linux (Using Docker)](./build-linux-docker.md) for details.
+
+---
+
+## Method 2: Docker Environment for Windows Build
 
 ### Prerequisites
 
@@ -61,7 +121,7 @@ There are two ways to build on Windows:
 
 ---
 
-## Method 2: Native Environment Build
+## Method 3: Native Environment Build
 
 ## 1. Install Chocolatey
 
