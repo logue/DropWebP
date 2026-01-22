@@ -18,6 +18,22 @@ fn main() {
     println!("cargo:info=Building for target: {}", target);
     println!("cargo:info=Host architecture: {}", host);
 
+    // Windowsでのクロスコンパイルのためにvcpkgのtripletを設定
+    #[cfg(target_os = "windows")]
+    if env::var("VCPKGRS_TRIPLET").is_err() {
+        let triplet = if target.contains("aarch64") {
+            "arm64-windows-static-release"
+        } else if target.contains("x86_64") {
+            "x64-windows-static-release"
+        } else {
+            "x64-windows-static-release" // デフォルトはx64
+        };
+        unsafe {
+            env::set_var("VCPKGRS_TRIPLET", triplet);
+        }
+        println!("cargo:info=Setting vcpkg triplet to: {}", triplet);
+    }
+
     // macOSでのクロスコンパイルのためにvcpkgのtripletを設定
     #[cfg(target_os = "macos")]
     if env::var("VCPKGRS_TRIPLET").is_err() {
@@ -37,10 +53,29 @@ fn main() {
     // vcpkg の PKG_CONFIG_PATH を設定
     if let Ok(vcpkg_root) = env::var("VCPKG_ROOT") {
         let triplet = env::var("VCPKGRS_TRIPLET").unwrap_or_else(|_| {
-            if target.contains("x86_64") {
-                "x64-osx".to_string()
-            } else {
-                "arm64-osx".to_string()
+            #[cfg(target_os = "windows")]
+            {
+                if target.contains("aarch64") {
+                    "arm64-windows-static-release".to_string()
+                } else {
+                    "x64-windows-static-release".to_string()
+                }
+            }
+            #[cfg(target_os = "macos")]
+            {
+                if target.contains("x86_64") {
+                    "x64-osx".to_string()
+                } else {
+                    "arm64-osx".to_string()
+                }
+            }
+            #[cfg(not(any(target_os = "windows", target_os = "macos")))]
+            {
+                if target.contains("x86_64") {
+                    "x64-linux".to_string()
+                } else {
+                    "arm64-linux".to_string()
+                }
             }
         });
 

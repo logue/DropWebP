@@ -330,6 +330,17 @@ cd C:\vcpkg
 
 ### 3. Arm64向けビルド
 
+**重要:** Arm64向けビルドの前に、必ず以下の環境変数を設定してください：
+
+```powershell
+$env:VCPKGRS_TRIPLET="arm64-windows-static-release"
+$env:VCPKG_DEFAULT_TRIPLET="arm64-windows-static-release"
+$env:LIB_AOM_STATIC_LIB_PATH="C:/vcpkg/installed/arm64-windows-static-release/lib"
+$env:LIB_AOM_INCLUDE_PATH="C:/vcpkg/installed/arm64-windows-static-release/include"
+```
+
+その後、ビルドを実行します：
+
 ```powershell
 cd path\to\DropWebP\app
 pnpm run build:tauri:windows-arm64
@@ -343,6 +354,26 @@ cargo build --release --target aarch64-pc-windows-msvc
 cd ..
 pnpm tauri build --target aarch64-pc-windows-msvc
 ```
+
+**トラブルシューティング:**
+
+リンクエラー（`LNK2019: unresolved external symbol aom_*`や`library machine type 'x64' conflicts with target machine type 'ARM64'`）が発生する場合：
+
+1. ビルドキャッシュを完全にクリーンアップ：
+
+   ```powershell
+   cd app\src-tauri
+   cargo clean
+   ```
+
+2. 環境変数を設定してから再ビルド：
+   ```powershell
+   $env:VCPKGRS_TRIPLET="arm64-windows-static-release"
+   $env:VCPKG_DEFAULT_TRIPLET="arm64-windows-static-release"
+   $env:LIB_AOM_STATIC_LIB_PATH="C:/vcpkg/installed/arm64-windows-static-release/lib"
+   $env:LIB_AOM_INCLUDE_PATH="C:/vcpkg/installed/arm64-windows-static-release/include"
+   cargo build --release --target aarch64-pc-windows-msvc
+   ```
 
 ### 注意事項
 
