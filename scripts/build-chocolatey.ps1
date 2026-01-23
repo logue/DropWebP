@@ -58,9 +58,18 @@ $content = $content -replace "checksum64\s*=\s*'[^']*'", "checksum64     = '$che
 $content = $content -replace "\`$version\s*=\s*'[^']*'", "`$version = '$Version'"
 Set-Content -Path $installScript -Value $content -NoNewline
 
-# nuspecファイルを更新（テンプレートのプレースホルダーを置換）
+# nuspecファイルを更新（テンプレートから生成）
+$nuspecTemplate = Join-Path $chocoDir "drop-compress-image.nuspec.template"
 $nuspecFile = Join-Path $chocoDir "drop-compress-image.nuspec"
-$nuspecContent = Get-Content $nuspecFile -Raw
+
+# テンプレートが存在しない場合は、現在のファイルをテンプレートとして使用
+if (-not (Test-Path $nuspecTemplate)) {
+    Write-Host "⚠️  テンプレートファイルが見つかりません。現在のnuspecファイルをテンプレートとして使用します。" -ForegroundColor Yellow
+    Copy-Item -Path $nuspecFile -Destination $nuspecTemplate -Force
+}
+
+# テンプレートからコピーして置換
+$nuspecContent = Get-Content $nuspecTemplate -Raw
 $nuspecContent = $nuspecContent -replace '{{VERSION}}', $Version
 Set-Content -Path $nuspecFile -Value $nuspecContent -NoNewline
 
@@ -78,7 +87,7 @@ try {
 }
 
 Write-Host "`n=== Next Steps ===" -ForegroundColor Cyan
-Write-Host "1. Test the package locally:" -ForegroundColor White
-Write-Host "   choco install drop-compress-image -source $chocoDir" -ForegroundColor Gray
+Write-Host "1. Test the package locally (requires admin):" -ForegroundColor White
+Write-Host "   choco install drop-compress-image -source $chocoDir -y" -ForegroundColor Gray
 Write-Host "2. Push to Chocolatey Community Repository:" -ForegroundColor White
 Write-Host "   choco push $chocoDir\drop-compress-image.$Version.nupkg --source https://push.chocolatey.org/" -ForegroundColor Gray
