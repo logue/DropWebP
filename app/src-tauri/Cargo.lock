@@ -741,9 +741,9 @@ dependencies = [
 
 [[package]]
 name = "cfg-expr"
-version = "0.20.5"
+version = "0.20.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "21be0e1ce6cdb2ee7fff840f922fb04ead349e5cfb1e750b769132d44ce04720"
+checksum = "78cef5b5a1a6827c7322ae2a636368a573006b27cfa76c7ebd53e834daeaab6a"
 dependencies = [
  "smallvec",
  "target-lexicon 0.13.3",
@@ -1218,7 +1218,7 @@ dependencies = [
 
 [[package]]
 name = "drop-compress-image"
-version = "3.2.1"
+version = "3.2.2"
 dependencies = [
  "bytemuck",
  "cc",
@@ -2572,9 +2572,9 @@ dependencies = [
 
 [[package]]
 name = "jpegli-rs"
-version = "0.8.1"
+version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b5a08b0e05332905bad7fda637804a30084378f85e9a3477dca152a41905d7e"
+checksum = "a68983bebe8b1e7a7fa8ed40632076341e93b05ae734df308155601429c63fbf"
 dependencies = [
  "aligned-vec",
  "bytemuck",
@@ -2587,6 +2587,7 @@ dependencies = [
  "rgb",
  "spin",
  "thiserror 2.0.18",
+ "tinyvec",
  "whereat",
  "wide",
  "zune-jpeg 0.5.11",
@@ -5069,7 +5070,7 @@ version = "7.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "48c8f33736f986f16d69b6cb8b03f55ddcad5c41acc4ccc39dd88e84aa805e7f"
 dependencies = [
- "cfg-expr 0.20.5",
+ "cfg-expr 0.20.6",
  "heck 0.5.0",
  "pkg-config",
  "toml 0.9.11+spec-1.1.0",

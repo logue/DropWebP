@@ -43,14 +43,14 @@ switch ($Target.ToLower()) {
     { $_ -in "x64", "x86_64", "amd64" } {
         $BuildTarget = "x86_64-unknown-linux-gnu"
         $ArchName = "x86_64 (AMD64)"
-        $Dockerfile = "Dockerfile.linux-x64"
+        $Dockerfile = "docker/Dockerfile.linux-x64"
         $ImageName = "dropwebp-linux-x64-builder"
         $Platform = "linux/amd64"
     }
     { $_ -in "arm64", "aarch64" } {
         $BuildTarget = "aarch64-unknown-linux-gnu"
         $ArchName = "ARM64 (AArch64)"
-        $Dockerfile = "Dockerfile.linux-arm64"
+        $Dockerfile = "docker/Dockerfile.linux-arm64"
         $ImageName = "dropwebp-linux-arm64-builder"
         $Platform = "linux/arm64"
     }

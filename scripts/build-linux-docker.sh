@@ -31,14 +31,14 @@ case "$TARGET" in
     x64|x86_64|amd64)
         TARGET="x86_64-unknown-linux-gnu"
         ARCH_NAME="x86_64 (AMD64)"
-        DOCKERFILE="Dockerfile.linux-x64"
+        DOCKERFILE="docker/Dockerfile.linux-x64"
         IMAGE_NAME="dropwebp-linux-x64-builder"
         PLATFORM="linux/amd64"
         ;;
     arm64|aarch64)
         TARGET="aarch64-unknown-linux-gnu"
         ARCH_NAME="ARM64 (AArch64)"
-        DOCKERFILE="Dockerfile.linux-arm64"
+        DOCKERFILE="docker/Dockerfile.linux-arm64"
         IMAGE_NAME="dropwebp-linux-arm64-builder"
         PLATFORM="linux/arm64"
         ;;

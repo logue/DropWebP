@@ -23,7 +23,7 @@
     "@nuxtjs/sitemap": "^7.5.2",
     "@pinia/nuxt": "^0.11.3",
     "better-sqlite3": "^12.6.2",
-    "nuxt": "^4.2.2",
+    "nuxt": "^4.3.0",
     "nuxt-gtag": "^4.1.0",
     "pinia": "^3.0.4",
     "ufo": "^1.6.3",
@@ -32,7 +32,7 @@
     "vue-router": "^4.6.4",
     "vuetify": "^3.11.7",
     "vuetify-nuxt-module": "^0.19.3",
-    "zod": "^4.3.5"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^25.0.10",

@@ -95,9 +95,13 @@ pnpm --filter app build:tauri:mac-arm64      # Apple Silicon
 pnpm --filter app build:tauri:mac-x64        # Intel
 pnpm --filter app build:tauri:mac-universal  # Universal binary
 
-# Linux via Docker (from macOS)
-./scripts/build-linux-docker.sh x64
-./scripts/build-linux-docker.sh arm64
+# Linux via Docker
+cd scripts/docker
+./docker-build.sh x64    # or arm64
+
+# Or from project root
+./scripts/docker/docker-build.sh x64
+./scripts/docker/docker-build.sh arm64
 
 # Package managers
 pnpm run package:chocolatey  # Windows
@@ -209,7 +213,7 @@ Special case: JPEG → JPEG XL uses `jxl::transcode()` to skip decode/encode.
 ### Platform-Specific Code
 
 - **Windows**: Uses native APIs in `target.'cfg(windows)'.dependencies` for Windows-specific optimizations.
-- **Linux**: Built via Docker with Debian Bookworm + WebKit2GTK. See `DOCKER_BUILD.md`.
+- **Linux**: Built via Docker with Debian Bookworm + WebKit2GTK. See [docs/content/ja/docker-build.md](../docs/content/ja/docker-build.md).
 - **macOS Cross-compilation**: Uses `vendored` features for jpegxl-rs to enable x86_64 builds from Apple Silicon. See `INTEL_MAC_BUILD.md`.
 
 ## Key Files
@@ -231,7 +235,7 @@ Special case: JPEG → JPEG XL uses `jxl::transcode()` to skip decode/encode.
 - **Fix build issues**:
   - Check `MACOS_COMPATIBILITY.md` for M1/M2/M3 compatibility
   - Check `INTEL_MAC_BUILD.md` for Intel Mac cross-compilation (requires YASM and jpegxl-rs vendored feature)
-  - Check `DOCKER_BUILD.md` for Linux builds
+  - Check [docs/content/ja/docker-build.md](../docs/content/ja/docker-build.md) for Linux builds
 - **Platform-specific code**: Use `#[cfg(target_os = "macos")]` or `cfg(windows)` in Rust, feature flags in Cargo.toml
 
 ## Important Notes

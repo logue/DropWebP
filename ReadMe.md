@@ -102,7 +102,7 @@ cd C:\vcpkg
 # Set environment variable
 $env:VCPKG_ROOT = "C:\vcpkg"
 
-# Install dependencies (see docs/content/en/build-windows.md for details)
+# Install dependencies (see docs/content/ja/windows-build-vcpkg.md for details)
 cd path\to\DropWebP\app\src-tauri
 .\setup-vcpkg.ps1
 
@@ -112,7 +112,7 @@ pnpm install
 pnpm run build:tauri
 ```
 
-For detailed Windows build instructions including vcpkg setup, see [Windows Build Guide](./docs/content/en/build-windows.md).
+For detailed Windows build instructions including vcpkg setup, see [Windows Build Guide](./docs/content/ja/windows-build-vcpkg.md).
 
 **Build Issues?** See [WINDOWS_BUILD_FIX.md](WINDOWS_BUILD_FIX.md) for troubleshooting.
 
@@ -134,13 +134,35 @@ pnpm run build:tauri:linux-x64    # Build x86_64 .deb and .rpm
 pnpm run build:tauri:linux-arm64  # Build ARM64 .deb and .rpm
 
 # For macOS/Linux (Bash)
-bash scripts/build-linux-docker.sh x64    # Build x86_64
-bash scripts/build-linux-docker.sh arm64  # Build ARM64
+bash scripts/docker/docker-build.sh x64    # Build x86_64
+bash scripts/docker/docker-build.sh arm64  # Build ARM64
 ```
 
 **Requirements**: Docker Desktop with Linux container support
 
-For detailed build instructions, see the documentation in `docs/content/{lang}/build-*.md`.
+For detailed build instructions, see the [Development Documentation](./docs/content/ja/).
+
+## 📂 Project Structure
+
+```
+DropWebP/
+├── app/                    # Main Tauri application
+│   ├── src/               # Vue.js frontend (TypeScript + Vuetify)
+│   └── src-tauri/         # Rust backend (image processing)
+├── docs/                  # Documentation site (Nuxt 3)
+│   └── content/           # Multi-language documentation
+│       ├── ja/           # Japanese (日本語)
+│       ├── en/           # English
+│       ├── fr/           # French (Français)
+│       ├── ko/           # Korean (한국어)
+│       ├── zhHans/       # Simplified Chinese (简体中文)
+│       └── zhHant/       # Traditional Chinese (繁體中文)
+├── docker/                # Dockerfiles for cross-platform builds
+├── scripts/               # Build and deployment scripts
+│   ├── build/            # Native build scripts
+│   └── docker/           # Docker build scripts
+└── .github/              # GitHub Actions workflows
+```
 
 ## 🌐 Localization
 

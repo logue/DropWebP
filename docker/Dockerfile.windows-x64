@@ -44,7 +44,7 @@ RUN powershell -Command `
 WORKDIR C:\workspace
 
 # ビルドスクリプト（CMDバッチスクリプト）
-COPY docker-build.cmd C:\docker-build.cmd
+COPY scripts/docker/docker-build.cmd C:\docker-build.cmd
 
 # ラッパースクリプトを作成（vcvars64.bat実行後にビルドスクリプトを起動）
 # setlocalを使わずに環境変数を維持
