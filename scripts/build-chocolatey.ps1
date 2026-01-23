@@ -58,11 +58,11 @@ $content = $content -replace "checksum64\s*=\s*'[^']*'", "checksum64     = '$che
 $content = $content -replace "\`$version\s*=\s*'[^']*'", "`$version = '$Version'"
 Set-Content -Path $installScript -Value $content -NoNewline
 
-# nuspecファイルを更新
+# nuspecファイルを更新（テンプレートのプレースホルダーを置換）
 $nuspecFile = Join-Path $chocoDir "drop-compress-image.nuspec"
-$nuspec = [xml](Get-Content $nuspecFile)
-$nuspec.package.metadata.version = $Version
-$nuspec.Save($nuspecFile)
+$nuspecContent = Get-Content $nuspecFile -Raw
+$nuspecContent = $nuspecContent -replace '{{VERSION}}', $Version
+Set-Content -Path $nuspecFile -Value $nuspecContent -NoNewline
 
 Write-Host "Updated version to $Version" -ForegroundColor Green
 

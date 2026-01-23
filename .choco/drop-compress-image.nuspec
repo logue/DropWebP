@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
   <metadata>
     <id>drop-compress-image</id>
-    <version>3.0.2</version>
+    <version>{{VERSION}}</version>
     <packageSourceUrl>https://github.com/logue/DropWebP</packageSourceUrl>
     <owners>logue</owners>
     <title>Drop Compress Image</title>
@@ -15,8 +15,8 @@
     <projectSourceUrl>https://github.com/logue/DropWebP</projectSourceUrl>
     <docsUrl>https://logue.dev/DropWebP/</docsUrl>
     <bugTrackerUrl>https://github.com/logue/DropWebP/issues</bugTrackerUrl>
-    <tags>image webp avif jpeg-xl jxl png jpeg mozjpeg oxipng compression converter tauri zopfli</tags>
-    <summary>Desktop application that converts images to WebP/Avif/JPEG XL/PNG/JPEG format</summary>
+    <tags>image webp avif jpeg-xl jxl png jpeg jpegli oxipng compression converter tauri zopfli</tags>
+    <summary>Desktop application that converts images to WebP/Avif(HDR support)/JPEG XL/PNG/JPEG format</summary>
     <description>Drop Compress Image is a desktop application that converts images to WebP/Avif/JPEG XL/PNG/JPEG format using drag-and-drop functionality. Built with Vite, Vue 3, TypeScript, and Tauri.</description>
     <releaseNotes>https://github.com/logue/DropWebP/releases</releaseNotes>
   </metadata>

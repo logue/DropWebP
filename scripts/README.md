@@ -2,6 +2,20 @@
 
 このディレクトリには、プロジェクトのビルドとデプロイに使用するスクリプトが含まれています。
 
+## バージョン管理
+
+**すべてのビルドスクリプトは、ルートディレクトリの`.env`ファイルからバージョン情報を自動的に読み取ります。**
+
+```dotenv
+# .env
+VERSION=3.2.1
+PROJECT_NAME=drop-compress-image
+GITHUB_USER=logue
+GITHUB_REPO=DropWebP
+```
+
+バージョンを変更する場合は、`.env`ファイルの`VERSION`のみを更新してください。各パッケージマネージャーのテンプレートファイル（`.choco/drop-compress-image.nuspec`, `.homebrew/drop-compress-image.rb`）は、プレースホルダー `{{VERSION}}` を使用しており、ビルド時に自動的に置換されます。
+
 ## ディレクトリ構造
 
 ```
@@ -76,17 +90,47 @@ Linux向けクロスプラットフォームビルド（PowerShell）
 
 Windows用Chocolateyパッケージを作成
 
+`.env`からバージョンを読み取り、`.choco/drop-compress-image.nuspec`の`{{VERSION}}`プレースホルダーを置換します。
+
 ```powershell
+# .envから自動読み取り
 pnpm run package:chocolatey
+
+# バージョンを明示的に指定
+.\scripts\build-chocolatey.ps1 -Version 3.2.1
 ```
+
+**プロセス**:
+
+1. `.env`からバージョンを読み取り
+2. MSIファイルのSHA256チェックサムを計算
+3. `{{VERSION}}`を実際のバージョンに置換
+4. `.nupkg`パッケージを生成
+
+詳細: [.choco/README.md](../.choco/README.md)
 
 #### `build-homebrew.sh`
 
 macOS用Homebrewフォーミュラを生成
 
-```powershell
+`.env`からバージョンを読み取り、`.homebrew/drop-compress-image.rb`の`{{VERSION}}`と`{{SHA256_*}}`プレースホルダーを置換します。
+
+```bash
+# .envから自動読み取り
 pnpm run package:homebrew
+
+# バージョンを明示的に指定
+bash scripts/build-homebrew.sh 3.2.1
 ```
+
+**プロセス**:
+
+1. `.env`からバージョンを読み取り
+2. ARM64とx64版DMGファイルのSHA256を計算
+3. `{{VERSION}}`、`{{SHA256_AARCH64}}`、`{{SHA256_X64}}`を置換
+4. Formulaファイルを更新
+
+詳細: [.homebrew/README.md](../.homebrew/README.md)
 
 ### macOSビルド
 

@@ -124,20 +124,6 @@ setupSeoMeta();
                     download
                     prepend-icon="mdi-download"
                   />
-                  <v-list-item
-                    :href="downloads.macos.arm64"
-                    :subtitle="t('download.macos_arm_desc')"
-                    :title="t('download.macos_arm')"
-                    download
-                    prepend-icon="mdi-download"
-                  />
-                  <v-list-item
-                    :href="downloads.macos.x64"
-                    :subtitle="t('download.macos_intel_desc')"
-                    :title="t('download.macos_intel')"
-                    download
-                    prepend-icon="mdi-download"
-                  />
                 </v-list>
               </v-col>
               <!-- Linux x86_64 -->
@@ -287,8 +273,6 @@ en:
     window_requirement: Windows 11 or later
     macos: Download for macOS
     macos_universal: Universal Binary (Recommended)
-    macos_arm: Apple Silicon (M1/M2/M3)
-    macos_intel: Intel Mac
     linux: Download for Linux
     linux_x64: x86_64
     linux_arm64: ARM64
@@ -361,9 +345,7 @@ fr:
     windows: Télécharger pour Windows
     window_requirement: Windows 11 ou ultérieur
     macos: Télécharger pour macOS
-    macos_universal: Binaire Universel (Recommandé)
-    macos_arm: Apple Silicon (M1/M2/M3)
-    macos_intel: Mac Intel
+    macos_universal: Binaire Universel
     linux: Télécharger pour Linux
     linux_x64: x86_64
     linux_arm64: ARM64
@@ -437,9 +419,7 @@ ja:
     windows: Windows版をダウンロード
     window_requirement: Windows 11以降
     macos: macOS版をダウンロード
-    macos_universal: ユニバーサルバイナリ（推奨）
-    macos_arm: Apple Silicon (M1/M2/M3)
-    macos_intel: Intel Mac
+    macos_universal: ユニバーサルバイナリ
     linux: Linux版をダウンロード
     linux_x64: x86_64
     linux_arm64: ARM64
@@ -512,9 +492,7 @@ ko:
     windows: Windows용 다운로드
     window_requirement: Windows 11 이상
     macos: macOS용 다운로드
-    macos_universal: 유니버설 바이너리 (권장)
-    macos_arm: Apple Silicon (M1/M2/M3)
-    macos_intel: Intel Mac
+    macos_universal: 유니버설 바이너리
     linux: Linux용 다운로드
     linux_x64: x86_64
     linux_arm64: ARM64
@@ -587,8 +565,7 @@ zhHant:
     windows: 下載 Windows 版
     window_requirement: Windows 11 或更新版本
     macos: 下載 MacOS 版
-    macos_arm: Apple Silicon (M1 或更新版本)
-    macos_intel: Intel 處理器
+    macos_universal: 通用二進位檔
     linux: 下載 Linux 版
     linux_x64: x64
     linux_arm64: ARM64
@@ -657,8 +634,7 @@ zhHans:
     windows: 下载安装 Windows 版
     window_requirement: Windows 11 或更新版本
     macos: 下载安装 MacOS 版
-    macos_arm: Apple Silicon (M1 或更新版本)
-    macos_intel: 基于 Intel
+    macos_universal: 通用二进制文件
     linux: 下载安装 Linux 版
     linux_x64: x64
     linux_arm64: ARM64

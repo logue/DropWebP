@@ -1,16 +1,11 @@
 class DropCompressImage < Formula
   desc "Desktop application that converts images to WebP/Avif/JPEG XL format"
   homepage "https://github.com/logue/DropWebP"
-  version "3.0.2"
+  version "{{VERSION}}"
 
   on_macos do
-    if Hardware::CPU.arm?
-      url "https://github.com/logue/DropWebP/releases/download/v#{version}/Drop.Compress.Image_#{version}_aarch64.dmg"
-      sha256 "" # Will be filled after build
-    else
-      url "https://github.com/logue/DropWebP/releases/download/v#{version}/Drop.Compress.Image_#{version}_x64.dmg"
-      sha256 "" # Will be filled after build
-    end
+    url "https://github.com/logue/DropWebP/releases/download/v#{version}/Drop.Compress.Image_#{version}_universal.dmg"
+    sha256 "{{SHA256_UNIVERSAL}}"
   end
 
   def install

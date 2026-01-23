@@ -90,10 +90,8 @@ pnpm run lint:style
 # Build Tauri app for current platform
 pnpm run build:tauri
 
-# macOS specific builds
-pnpm --filter app build:tauri:mac-arm64      # Apple Silicon
-pnpm --filter app build:tauri:mac-x64        # Intel
-pnpm --filter app build:tauri:mac-universal  # Universal binary
+# macOS build (Universal binary for both Apple Silicon and Intel)
+pnpm --filter app build:tauri:mac
 
 # Linux via Docker
 cd scripts/docker
@@ -123,7 +121,7 @@ cargo build --release
 1. **Image Decoding Architecture**: The decoder (`decoder.rs`) handles 15+ formats with specialized decoders in `decoder/` subdirectory:
    - **Standard formats**: PNG, JPEG, TIFF, BMP, etc. via `image` crate with ICC profile extraction
    - **AVIF**: Custom decoder in `decoder/avif.rs` using libavif, supports HDR/10-bit
-   - **JPEG XL**: Custom decoder in `decoder/jxl.rs` using jpegxl-rs, HDR-capable
+   - **JPEG XL**: Custom decoder in `decoder/jxl.rs` using jpegxl-rs
    - **JPEG 2000**: Custom decoder in `decoder/jpeg2k.rs` using openjpeg-sys
 
    All decoders return `(HighBitDepthImage, Option<Vec<u8>>)` where the second value is ICC profile.
