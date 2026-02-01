@@ -1,0 +1,52 @@
+name: Build macOS x86_64
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-macos-x64:
+    runs-on: macos-13 # Intel-based macOS runner
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          brew install yasm nasm
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-apple-darwin
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "./app/src-tauri -> target"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build x86_64 binary
+        run: pnpm --filter app build:tauri:mac-x64
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-x64-binary
+          path: |
+            app/src-tauri/target/x86_64-apple-darwin/release/Drop Compress Image
+            app/src-tauri/target/x86_64-apple-darwin/release/bundle/
