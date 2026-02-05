@@ -39,7 +39,7 @@ pub fn send_log(level: LogLevel, message: &str) {
         let log_data = serde_json::json!({
             "level": level.as_str(),
             "message": message,
-            "timestamp": chrono::Utc::now().to_rfc3339()
+            "timestamp": jiff::Zoned::now().to_string()
         });
 
         if let Err(e) = app_handle.emit("log-message", &log_data) {
@@ -57,7 +57,7 @@ pub fn send_log_with_handle(app_handle: &AppHandle, level: LogLevel, message: &s
     let log_data = serde_json::json!({
         "level": level.as_str(),
         "message": message,
-        "timestamp": chrono::Utc::now().to_rfc3339()
+        "timestamp": jiff::Zoned::now().to_string()
     });
 
     if let Err(e) = app_handle.emit("log-message", &log_data) {

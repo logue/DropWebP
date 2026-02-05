@@ -143,8 +143,8 @@ pub fn encode(
         rgb_data.len()
     );
 
-    // jpegli-rs 0.8 新API: quality と chroma subsampling が必須パラメータ
-    let mut config = EncoderConfig::new(options.quality, ChromaSubsampling::Quarter);
+    // jpegli-rs 0.12 API: ycbcr() を使用してコンフィグを作成
+    let mut config = EncoderConfig::ycbcr(options.quality, ChromaSubsampling::Quarter);
 
     if options.progressive {
         config = config.progressive(true);
