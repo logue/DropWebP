@@ -32,7 +32,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22" # プロジェクトで使用しているバージョン
+          node-version: "24" # プロジェクトで使用しているバージョン
           cache: "pnpm"
           cache-dependency-path: pnpm-lock.yaml
 
