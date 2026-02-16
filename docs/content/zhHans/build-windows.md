@@ -223,6 +223,8 @@ set(VCPKG_BUILD_TYPE release)
 
 ### 安装依赖项
 
+> **注意（2026年2月更新）**：项目现在在Windows上使用`rav1e`（基于Rust的AV1编码器）进行AVIF编码。这样就不再需要`libaom`和`aom`包。`rav1e`避免了NASM的多遍优化要求，提高了Windows上的构建稳定性。
+
 使用自动安装脚本（推荐）：
 
 ```powershell
@@ -236,8 +238,7 @@ cd DropWebP\app\src-tauri
 cd C:\vcpkg
 
 # 使用x64-windows-static-release三元组安装（仅发布版）
-.\vcpkg install aom:x64-windows-static-release
-.\vcpkg install libavif[aom]:x64-windows-static-release
+# 注意：不再需要aom和libavif[aom]（使用rav1e）
 .\vcpkg install libjxl:x64-windows-static-release
 .\vcpkg install libwebp:x64-windows-static-release
 .\vcpkg install openjpeg:x64-windows-static-release
@@ -247,18 +248,19 @@ cd C:\vcpkg
 
 已安装的库：
 
-- **libaom**：AV1编码器（用于AVIF格式）
-- **libavif**：AVIF图像格式
+- **rav1e**：AV1编码器（基于Rust，用于AVIF编码） - 由Cargo自动构建
 - **libjxl**：JPEG XL图像格式
 - **libwebp**：WebP图像格式
 - **openjpeg**：JPEG 2000图像格式
 - **libjpeg-turbo**：JPEG图像处理（用于jpegli）
 - **lcms**：Little CMS色彩管理
 
+> **macOS/Linux用户注意**：由于这些平台上的NASM和CMake配置更加稳定，macOS和Linux仍然可以使用`libaom`。
+
 验证安装：
 
 ```powershell
-.\vcpkg list | Select-String "aom|avif|jxl|webp|openjpeg|jpeg|lcms"
+.\vcpkg list | Select-String "jxl|webp|openjpeg|jpeg|lcms"
 ```
 
 ## 10. 构建应用程序
@@ -319,8 +321,7 @@ set(VCPKG_BUILD_TYPE release)
 ```powershell
 cd C:\vcpkg
 
-.\vcpkg install aom:arm64-windows-static-release
-.\vcpkg install libavif[aom]:arm64-windows-static-release
+# 注意：不再需要aom和libavif[aom]（使用rav1e）
 .\vcpkg install libjxl:arm64-windows-static-release
 .\vcpkg install libwebp:arm64-windows-static-release
 .\vcpkg install openjpeg:arm64-windows-static-release

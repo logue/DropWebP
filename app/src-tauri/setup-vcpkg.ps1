@@ -1,5 +1,6 @@
 # vcpkg setup script for Windows
-# This script installs libaom and libavif via vcpkg for static linking
+# This script installs required C/C++ libraries via vcpkg for static linking
+# Note: AVIF encoding uses rav1e (Rust), so libaom is not required
 
 param(
     [string]$VcpkgRoot = $env:VCPKG_ROOT,
@@ -30,9 +31,8 @@ Write-Host "Using triplet: $Triplet" -ForegroundColor Green
 Write-Host ""
 
 # Install all C/C++ dependencies
+# Note: aom and libavif removed - using rav1e (Rust) for AVIF encoding
 $packages = @(
-    "aom:$Triplet",                # libaom (AV1 encoder for AVIF)
-    "libavif[aom]:$Triplet",       # libavif with aom codec
     "libjxl:$Triplet",             # libjxl (JPEG XL)
     "libwebp:$Triplet",            # libwebp (WebP codec)
     "openjpeg:$Triplet",           # OpenJPEG (JPEG 2000)
@@ -57,3 +57,4 @@ Write-Host "You can now build the project with:" -ForegroundColor Green
 Write-Host "  cargo build --release" -ForegroundColor Green
 Write-Host ""
 Write-Host "Note: Make sure VCPKG_ROOT environment variable is set in your shell" -ForegroundColor Yellow
+Write-Host "AVIF encoding uses rav1e (Rust-based), so libaom is not required" -ForegroundColor Cyan

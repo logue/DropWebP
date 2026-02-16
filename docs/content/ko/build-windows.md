@@ -223,6 +223,8 @@ set(VCPKG_BUILD_TYPE release)
 
 ### 종속성 설치
 
+> **참고 (2026년 2월 업데이트)**: 프로젝트는 이제 Windows에서 AVIF 인코딩을 위해 `rav1e`(Rust 기반 AV1 인코더)를 사용합니다. 이로 인해 `libaom` 및 `aom` 패키지가 더 이상 필요하지 않습니다. `rav1e`는 NASM의 멀티패스 최적화 요구 사항을 회피하고 Windows에서 빌드 안정성을 향상시킵니다.
+
 자동 설치 스크립트 사용(권장):
 
 ```powershell
@@ -236,8 +238,7 @@ cd DropWebP\app\src-tauri
 cd C:\vcpkg
 
 # x64-windows-static-release 트리플릿으로 설치(릴리스 전용)
-.\vcpkg install aom:x64-windows-static-release
-.\vcpkg install libavif[aom]:x64-windows-static-release
+# 참고: aom 및 libavif[aom]은 더 이상 필요하지 않습니다(rav1e 사용)
 .\vcpkg install libjxl:x64-windows-static-release
 .\vcpkg install libwebp:x64-windows-static-release
 .\vcpkg install openjpeg:x64-windows-static-release
@@ -247,18 +248,19 @@ cd C:\vcpkg
 
 설치된 라이브러리:
 
-- **libaom**: AV1 인코더(AVIF 형식용)
-- **libavif**: AVIF 이미지 형식
+- **rav1e**: AV1 인코더(Rust 기반, AVIF 인코딩용) - Cargo에 의해 자동으로 빌드됨
 - **libjxl**: JPEG XL 이미지 형식
 - **libwebp**: WebP 이미지 형식
 - **openjpeg**: JPEG 2000 이미지 형식
 - **libjpeg-turbo**: JPEG 이미지 처리(jpegli용)
 - **lcms**: Little CMS 색상 관리
 
+> **macOS/Linux 사용자 참고**: macOS와 Linux는 NASM 및 CMake 구성이 더 안정적이므로 여전히 `libaom`을 사용할 수 있습니다.
+
 설치 확인:
 
 ```powershell
-.\vcpkg list | Select-String "aom|avif|jxl|webp|openjpeg|jpeg|lcms"
+.\vcpkg list | Select-String "jxl|webp|openjpeg|jpeg|lcms"
 ```
 
 ## 10. 애플리케이션 빌드
@@ -319,8 +321,7 @@ set(VCPKG_BUILD_TYPE release)
 ```powershell
 cd C:\vcpkg
 
-.\vcpkg install aom:arm64-windows-static-release
-.\vcpkg install libavif[aom]:arm64-windows-static-release
+# 참고: aom 및 libavif[aom]은 더 이상 필요하지 않습니다(rav1e 사용)
 .\vcpkg install libjxl:arm64-windows-static-release
 .\vcpkg install libwebp:arm64-windows-static-release
 .\vcpkg install openjpeg:arm64-windows-static-release

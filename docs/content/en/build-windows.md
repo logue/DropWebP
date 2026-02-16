@@ -283,6 +283,8 @@ set(VCPKG_BUILD_TYPE release)
 
 ### Install Dependencies
 
+> **Note (Updated Feb 2026):** The project now uses `rav1e` (a Rust-based AV1 encoder) for AVIF encoding on Windows. This eliminates the need for `libaom` and `aom` packages. `rav1e` avoids NASM multipass optimization requirements and improves build stability on Windows.
+
 Use the automated installation script (recommended):
 
 ```powershell
@@ -296,8 +298,7 @@ Or install manually:
 cd C:\vcpkg
 
 # Install with x64-windows-static-release triplet (release-only)
-.\vcpkg install aom:x64-windows-static-release
-.\vcpkg install libavif[aom]:x64-windows-static-release
+# Note: aom and libavif[aom] are no longer required (using rav1e)
 .\vcpkg install libjxl:x64-windows-static-release
 .\vcpkg install libwebp:x64-windows-static-release
 .\vcpkg install openjpeg:x64-windows-static-release
@@ -307,18 +308,19 @@ cd C:\vcpkg
 
 Installed libraries:
 
-- **libaom**: AV1 encoder (for AVIF format)
-- **libavif**: AVIF image format
+- **rav1e**: AV1 encoder (Rust-based, for AVIF encoding) - automatically built by Cargo
 - **libjxl**: JPEG XL image format
 - **libwebp**: WebP image format
 - **openjpeg**: JPEG 2000 image format
 - **libjpeg-turbo**: JPEG image processing (for jpegli)
 - **lcms**: Little CMS color management
 
+> **Note for macOS/Linux users:** macOS and Linux can still use `libaom` as NASM and CMake configurations are more stable on those platforms.
+
 Verify installation:
 
 ```powershell
-.\vcpkg list | Select-String "aom|avif|jxl|webp|openjpeg|jpeg|lcms"
+.\vcpkg list | Select-String "jxl|webp|openjpeg|jpeg|lcms"
 ```
 
 ## 10. Build the Application
@@ -379,8 +381,7 @@ Install dependencies:
 ```powershell
 cd C:\vcpkg
 
-.\vcpkg install aom:arm64-windows-static-release
-.\vcpkg install libavif[aom]:arm64-windows-static-release
+# Note: aom and libavif[aom] are no longer required (using rav1e)
 .\vcpkg install libjxl:arm64-windows-static-release
 .\vcpkg install libwebp:arm64-windows-static-release
 .\vcpkg install openjpeg:arm64-windows-static-release

@@ -223,6 +223,8 @@ set(VCPKG_BUILD_TYPE release)
 
 ### Installer les dépendances
 
+> **Note (Mise à jour février 2026)** : Le projet utilise maintenant `rav1e` (un encodeur AV1 basé sur Rust) pour l'encodage AVIF sous Windows. Cela élimine le besoin des paquets `libaom` et `aom`. `rav1e` évite les exigences d'optimisation multipass de NASM et améliore la stabilité de la compilation sous Windows.
+
 Utilisez le script d'installation automatique (recommandé) :
 
 ```powershell
@@ -236,8 +238,7 @@ Ou installez manuellement :
 cd C:\vcpkg
 
 # Installer avec le triplet x64-windows-static-release (release uniquement)
-.\vcpkg install aom:x64-windows-static-release
-.\vcpkg install libavif[aom]:x64-windows-static-release
+# Note : aom et libavif[aom] ne sont plus nécessaires (utilisation de rav1e)
 .\vcpkg install libjxl:x64-windows-static-release
 .\vcpkg install libwebp:x64-windows-static-release
 .\vcpkg install openjpeg:x64-windows-static-release
@@ -247,18 +248,19 @@ cd C:\vcpkg
 
 Bibliothèques installées :
 
-- **libaom** : Encodeur AV1 (pour le format AVIF)
-- **libavif** : Format d'image AVIF
+- **rav1e** : Encodeur AV1 (basé sur Rust, pour l'encodage AVIF) - compilé automatiquement par Cargo
 - **libjxl** : Format d'image JPEG XL
 - **libwebp** : Format d'image WebP
 - **openjpeg** : Format d'image JPEG 2000
 - **libjpeg-turbo** : Traitement d'images JPEG (pour jpegli)
 - **lcms** : Gestion des couleurs Little CMS
 
+> **Note pour les utilisateurs macOS/Linux** : macOS et Linux peuvent toujours utiliser `libaom` car les configurations NASM et CMake sont plus stables sur ces plateformes.
+
 Vérifier l'installation :
 
 ```powershell
-.\vcpkg list | Select-String "aom|avif|jxl|webp|openjpeg|jpeg|lcms"
+.\vcpkg list | Select-String "jxl|webp|openjpeg|jpeg|lcms"
 ```
 
 ## 10. Construire l'Application
@@ -319,8 +321,7 @@ Installer les dépendances :
 ```powershell
 cd C:\vcpkg
 
-.\vcpkg install aom:arm64-windows-static-release
-.\vcpkg install libavif[aom]:arm64-windows-static-release
+# Note : aom et libavif[aom] ne sont plus nécessaires (utilisation de rav1e)
 .\vcpkg install libjxl:arm64-windows-static-release
 .\vcpkg install libwebp:arm64-windows-static-release
 .\vcpkg install openjpeg:arm64-windows-static-release

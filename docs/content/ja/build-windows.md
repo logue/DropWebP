@@ -283,6 +283,8 @@ set(VCPKG_BUILD_TYPE release)
 
 ### 依存ライブラリのインストール
 
+> **注意 (2026年2月更新):** AVIFエンコーダーとして、WindowsではRust製の`rav1e`を使用するようになりました。これにより、`libaom`および`aom`パッケージのインストールは不要になります。`rav1e`はNASMのmultipass optimization要件を回避し、Windowsでのビルドの安定性が向上します。
+
 自動インストールスクリプトを使用（推奨）:
 
 ```powershell
@@ -296,8 +298,7 @@ cd DropWebP\app\src-tauri
 cd C:\vcpkg
 
 # x64-windows-static-release tripletでインストール（リリース専用）
-.\vcpkg install aom:x64-windows-static-release
-.\vcpkg install libavif[aom]:x64-windows-static-release
+# 注: aomとlibavif[aom]は現在不要です（rav1e使用のため）
 .\vcpkg install libjxl:x64-windows-static-release
 .\vcpkg install libwebp:x64-windows-static-release
 .\vcpkg install openjpeg:x64-windows-static-release
@@ -307,18 +308,19 @@ cd C:\vcpkg
 
 インストールされるライブラリ:
 
-- **libaom**: AV1エンコーダー（AVIF形式用）
-- **libavif**: AVIF画像フォーマット
+- **rav1e**: AV1エンコーダー（Rust製、AVIFエンコード用）- Cargoで自動ビルド
 - **libjxl**: JPEG XL画像フォーマット
 - **libwebp**: WebP画像フォーマット
 - **openjpeg**: JPEG 2000画像フォーマット
 - **libjpeg-turbo**: JPEG画像処理（jpegli用）
 - **lcms**: Little CMS カラーマネジメント
 
+> **macOS/Linuxユーザーへの注記:** macOSとLinuxでは`libaom`を使用することも可能です。これらのプラットフォームではNASMやCMakeの設定が安定しているためです。
+
 インストール確認:
 
 ```powershell
-.\vcpkg list | Select-String "aom|avif|jxl|webp|openjpeg|jpeg|lcms"
+.\vcpkg list | Select-String "jxl|webp|openjpeg|jpeg|lcms"
 ```
 
 ## 10. アプリケーションのビルド
@@ -379,8 +381,7 @@ set(VCPKG_BUILD_TYPE release)
 ```powershell
 cd C:\vcpkg
 
-.\vcpkg install aom:arm64-windows-static-release
-.\vcpkg install libavif[aom]:arm64-windows-static-release
+# 注: aomとlibavif[aom]は現在不要です（rav1e使用のため）
 .\vcpkg install libjxl:arm64-windows-static-release
 .\vcpkg install libwebp:arm64-windows-static-release
 .\vcpkg install openjpeg:arm64-windows-static-release
@@ -417,7 +418,7 @@ pnpm tauri build --target aarch64-pc-windows-msvc
 
 **トラブルシューティング:**
 
-リンクエラー（`LNK2019: unresolved external symbol aom_*`や`library machine type 'x64' conflicts with target machine type 'ARM64'`）が発生する場合：
+リンクエラーが発生する場合：
 
 1. ビルドキャッシュを完全にクリーンアップ：
 
@@ -430,8 +431,6 @@ pnpm tauri build --target aarch64-pc-windows-msvc
    ```powershell
    $env:VCPKGRS_TRIPLET="arm64-windows-static-release"
    $env:VCPKG_DEFAULT_TRIPLET="arm64-windows-static-release"
-   $env:LIB_AOM_STATIC_LIB_PATH="C:/vcpkg/installed/arm64-windows-static-release/lib"
-   $env:LIB_AOM_INCLUDE_PATH="C:/vcpkg/installed/arm64-windows-static-release/include"
    cargo build --release --target aarch64-pc-windows-msvc
    ```
 
