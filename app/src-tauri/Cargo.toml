@@ -71,7 +71,7 @@ libavif-sys = { version = "0.17.0", default-features = false, features = [
 libwebp-sys = "0.14.2" # WebP codec, linked via vcpkg
 openjpeg-sys = "1.0.12" # JPEG 2000 decoder, linked via vcpkg
 oxipng = "10.1.0"
-png = "0.18.0"
+png = "0.18.1"
 rgb = "0.8.52"
 serde = "1.0.228"
 serde_json = "1.0.149"

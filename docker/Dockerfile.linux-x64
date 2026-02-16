@@ -1,6 +1,6 @@
 # Linux x86_64向けTauriアプリケーションビルド用Dockerfile
 # x86_64ネイティブビルド（ARM64 Macではエミュレーション）
-FROM --platform=linux/amd64 rust:1.92.0-bookworm
+FROM --platform=linux/amd64 rust:1.93.1-bookworm
 
 # 環境変数設定
 ENV DEBIAN_FRONTEND=noninteractive
@@ -62,7 +62,7 @@ RUN rustup target add x86_64-unknown-linux-gnu
 WORKDIR /workspace
 
 # ビルドスクリプト
-COPY docker-build.sh /usr/local/bin/
+COPY scripts/docker/docker-build.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-build.sh
 
 # デフォルトコマンド

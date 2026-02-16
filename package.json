@@ -70,7 +70,7 @@
     "stylelint-config-recommended-vue": "^1.6.1",
     "stylelint-order": "^7.0.1",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.55.0"
+    "typescript-eslint": "^8.56.0"
   },
   "resolutions": {
     "@isaacs/brace-expansion": ">=5.0.1",
