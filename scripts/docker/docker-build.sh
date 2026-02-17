@@ -4,6 +4,28 @@ set -e
 # CI環境であることを明示（pnpmがTTYなしで動作するため）
 export CI=true
 
+# .envファイルから環境変数を読み込み
+if [ -f "/workspace/.env" ]; then
+    echo "📄 .envファイルを読み込み中..."
+    set -a
+    source /workspace/.env
+    set +a
+    echo "  VERSION=$VERSION"
+    echo "  PROJECT_NAME=$PROJECT_NAME"
+
+    # バージョン情報を同期
+    echo "🔄 バージョン情報を同期中..."
+    if [ -n "$VERSION" ]; then
+        # Cargo.toml のバージョンを更新
+        sed -i "s/^version = \".*\"/version = \"$VERSION\"/" /workspace/app/src-tauri/Cargo.toml
+        echo "  Cargo.toml: version = $VERSION"
+
+        # tauri.conf.json のバージョンを更新
+        sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" /workspace/app/src-tauri/tauri.conf.json
+        echo "  tauri.conf.json: version = $VERSION"
+    fi
+fi
+
 # pkg-configがクロスコンパイルとして動作することを許可
 # Docker内でネイティブビルドしているが、Rustのターゲット指定でクロスコンパイルと誤認されるため
 export PKG_CONFIG_ALLOW_CROSS=1
