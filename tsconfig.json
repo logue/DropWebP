@@ -8,7 +8,7 @@
       "path": "./tsconfig.app.json"
     },
     {
-      "path": "./app"
+      "path": "./frontend"
     },
     {
       "path": "./docs"

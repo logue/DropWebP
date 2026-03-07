@@ -1,6 +1,6 @@
 <div align="center">
 
-![logo](./app/src-tauri/icons/Square284x284Logo.png)
+![logo](./backend/icons/Square284x284Logo.png)
 
 </div>
 
