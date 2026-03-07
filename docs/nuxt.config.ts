@@ -1,21 +1,22 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath, URL } from 'node:url';
 
-// Load version from .env file
-const loadVersionFromEnv = (): string => {
+// Load value from .env file
+const loadEnvValue = (key: string, defaultValue: string = ''): string => {
   try {
     const envPath = fileURLToPath(new URL('../.env', import.meta.url));
     const envContent = readFileSync(envPath, 'utf-8');
-    const versionRegex = /^VERSION=(.+)$/m;
-    const versionMatch = versionRegex.exec(envContent);
-    return versionMatch ? versionMatch[1].trim() : '0.0.0';
+    const regex = new RegExp(`^${key}=(.+)$`, 'm');
+    const match = regex.exec(envContent);
+    return match ? match[1]!.trim() : defaultValue;
   } catch {
-    console.warn('Failed to load version from .env, using default version');
-    return '0.0.0';
+    console.warn(`Failed to load ${key} from .env, using default value`);
+    return defaultValue;
   }
 };
 
-const version = loadVersionFromEnv();
+const version = loadEnvValue('VERSION', '0.0.0');
+const googleAnalyticsId = loadEnvValue('GOOGLE_ANALYTICS_ID', '');
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -42,12 +43,12 @@ export default defineNuxtConfig({
   // サイト設定
   site: {
     url: process.env.NUXT_PUBLIC_SITE_URL || 'https://logue.dev',
-    name: 'Drop Compress Image'
+    name: 'Tauri Vue3 App'
   },
 
   // アプリ設定
   app: {
-    baseURL: process.env.NUXT_APP_BASE_URL || '/DropWebP/',
+    baseURL: process.env.NUXT_APP_BASE_URL || '/tauri-vue3-app/',
     head: {
       link: [
         // app側と同じGoogle Fontsを読み込み
@@ -96,10 +97,12 @@ export default defineNuxtConfig({
       redirectOn: 'root' // recommended
     }
   },
-  // Google Analytics設定
-  gtag: {
-    id: 'G-2Y2FW3QEG4'
-  },
+  // Google Analytics設定（.envからIDを読み込み、空の場合は無効）
+  gtag: googleAnalyticsId
+    ? {
+        id: googleAnalyticsId
+      }
+    : undefined,
 
   // TypeScript パスエイリアス設定
   alias: {

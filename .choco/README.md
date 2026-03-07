@@ -6,30 +6,39 @@
 
 ```
 .choco/
-├── drop-compress-image.nuspec.template  # パッケージメタデータ（テンプレート）
-├── drop-compress-image.nuspec          # 生成されたファイル（.gitignore対象）
+├── app.nuspec.template                      # パッケージメタデータ（テンプレート）
+├── {APP_NAME_KEBAB}.nuspec                  # 生成されたファイル（.gitignore対象）
 └── tools/
-    └── chocolateyinstall.ps1           # インストールスクリプト
+    ├── chocolateyinstall.ps1.template       # インストールスクリプト（テンプレート）
+    ├── chocolateyuninstall.ps1.template     # アンインストールスクリプト（テンプレート）
+    ├── chocolateyinstall.ps1                # 生成されたファイル（.gitignore対象）
+    └── chocolateyuninstall.ps1              # 生成されたファイル（.gitignore対象）
 ```
 
-**注意**: `drop-compress-image.nuspec`はビルド時に自動生成されます。編集する場合は`.template`ファイルを編集してください。
+**注意**: `{APP_NAME_KEBAB}.nuspec`および`tools/*.ps1`ファイルはビルド時に自動生成されます。編集する場合は各`.template`ファイルを編集してください。
 
 ## バージョン管理
 
-**重要**: `drop-compress-image.nuspec.template`内のバージョンは、プレースホルダー `{{VERSION}}` を使用しています。
+**重要**: `app.nuspec.template`内の値は、プレースホルダーを使用しています。
 
 ```xml
+<id>{{APP_NAME_KEBAB}}</id>
 <version>{{VERSION}}</version>
+<title>{{APP_NAME}}</title>
+<description>{{APP_DESCRIPTION}}</description>
 ```
 
-実際のバージョンは、ビルド時に**ルートディレクトリの`.env`ファイル**から自動的に読み取られます：
+実際の値は、ビルド時に**ルートディレクトリの`.env`ファイル**から自動的に読み取られます：
 
 ```dotenv
 # .env
-VERSION=3.2.1
+VERSION=1.0.0
+APP_NAME=Your App Name
+APP_NAME_KEBAB=your-app-name
+APP_DESCRIPTION=Your app description
 ```
 
-ビルドスクリプトは、テンプレートから`drop-compress-image.nuspec`を生成し、プレースホルダーを実際のバージョンに置換します。
+ビルドスクリプトは、テンプレートから`{APP_NAME_KEBAB}.nuspec`を生成し、プレースホルダーを実際の値に置換します。
 
 ## パッケージのビルド
 
@@ -38,16 +47,16 @@ VERSION=3.2.1
 pnpm run package:chocolatey
 
 # または、バージョンを明示的に指定
-.\scripts\build-chocolatey.ps1 -Version 3.2.1
+.\scripts\build-chocolatey.ps1 -Version 1.0.0
 ```
 
 ビルドスクリプト (`scripts/build-chocolatey.ps1`) は以下の処理を行います：
 
-1. `.env`ファイルからバージョンを読み取り
-2. MSIファイル（`app/src-tauri/target/release/bundle/msi/*.msi`）を検索
+1. `.env`ファイルからバージョンとアプリケーション情報を読み取り
+2. MSIファイル（`backend/target/release/bundle/msi/*.msi`）を検索
 3. MSIファイルのSHA256チェックサムを計算
-4. `drop-compress-image.nuspec.template`から`drop-compress-image.nuspec`を生成
-5. `{{VERSION}}`プレースホルダーを実際のバージョンに置換
+4. `app.nuspec.template`から`{APP_NAME_KEBAB}.nuspec`を生成
+5. 全てのプレースホルダーを実際の値に置換
 6. `tools/chocolateyinstall.ps1`のチェックサムとバージョンを更新
 7. `.nupkg`パッケージファイルを生成
 
@@ -65,10 +74,10 @@ Chocolateyのインストールテストは**管理者権限のPowerShell**で�
 
 ```powershell
 # 管理者権限のPowerShellで実行
-choco install drop-compress-image -source .\.choco -y
+choco install {APP_NAME_KEBAB} -source .\.choco -y
 
 # アンインストール
-choco uninstall drop-compress-image -y
+choco uninstall {APP_NAME_KEBAB} -y
 ```
 
 #### 方法2: ローカルMSIファイルで直接テスト
@@ -77,7 +86,7 @@ GitHubにリリースする前にローカルでテストする場合：
 
 ```powershell
 # 管理者権限でMSIを直接インストール
-$msiPath = "app\src-tauri\target\release\bundle\msi\drop-compress-image_3.2.1_x64_en-US.msi"
+$msiPath = "backend\target\release\bundle\msi\{APP_NAME_KEBAB}_{VERSION}_x64_en-US.msi"
 Start-Process msiexec.exe -ArgumentList "/i `"$msiPath`" /qn /l*v install.log" -Wait
 
 # アンインストール
@@ -99,12 +108,12 @@ Start-Process msiexec.exe -ArgumentList "/x `"$msiPath`" /qn" -Wait
 
 ```powershell
 # Chocolatey Community Repositoryに公開
-choco push .\.choco\drop-compress-image.3.2.1.nupkg --source https://push.chocolatey.org/
+choco push .\.choco\{APP_NAME_KEBAB}.{VERSION}.nupkg --source https://push.chocolatey.org/
 ```
 
 ## 注意事項
 
 - **テンプレートファイルを編集**: `.nuspec.template`ファイルのバージョンは常に`{{VERSION}}`のままにしてください
-- **生成ファイルは編集不要**: `drop-compress-image.nuspec`（テンプレートなし）はビルド時に自動生成されるため、直接編集しないでください
+- **生成ファイルは編集不要**: `{APP_NAME_KEBAB}.nuspec`（テンプレートなし）はビルド時に自動生成されるため、直接編集しないでください
 - バージョン変更時は、ルートの`.env`ファイルのみを更新してください
-- ビルド前に、`app/src-tauri/target/release/bundle/msi`内にMSIファイルが存在することを確認してください
+- ビルド前に、`backend/target/release/bundle/msi`内にMSIファイルが存在することを確認してください

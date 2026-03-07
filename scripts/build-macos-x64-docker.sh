@@ -48,15 +48,15 @@ EOF
 
 # Build Docker image
 echo "📦 Building Docker image..."
-docker build -t dropwebp-macos-x64-builder -f "$PROJECT_ROOT/Dockerfile.macos-x64" "$PROJECT_ROOT"
+docker build -t tauri-vue3-macos-x64-builder -f "$PROJECT_ROOT/Dockerfile.macos-x64" "$PROJECT_ROOT"
 
 # Build the project
 echo "🔨 Building x86_64 macOS binary..."
 docker run --rm \
     -v "$PROJECT_ROOT:/workspace" \
-    -w /workspace/app/src-tauri \
-    dropwebp-macos-x64-builder \
+    -w /workspace/backend \
+    tauri-vue3-macos-x64-builder \
     cargo build --release --target x86_64-apple-darwin
 
 echo "✅ Build complete!"
-echo "Binary location: $PROJECT_ROOT/app/src-tauri/target/x86_64-apple-darwin/release/drop-compress-image"
+echo "Binary location: $PROJECT_ROOT/backend/target/x86_64-apple-darwin/release/tauri-vue3-app"

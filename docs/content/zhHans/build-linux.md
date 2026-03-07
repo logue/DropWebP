@@ -1,6 +1,6 @@
-# 为 Linux 构建 Drop Compress Image
+# 为 Linux 构建 Tauri Vue3 App
 
-本指南将引导您在 Ubuntu 24.04 LTS（和类似的基于 Debian 的发行版）上设置开发环境并构建 Drop Compress Image。
+本指南将引导您在 Ubuntu 24.04 LTS（和类似的基于 Debian 的发行版）上设置开发环境并构建 Tauri Vue3 App。
 
 ## 前提条件
 
@@ -58,7 +58,7 @@ gcc --version
 
 ## 步骤 3：安装 Rust
 
-Drop Compress Image 使用 Rust 构建，因此您需要安装 Rust 工具链。
+Tauri Vue3 App 使用 Rust 构建，因此您需要安装 Rust 工具链。
 
 ### 通过 rustup 安装 Rust
 
@@ -92,7 +92,7 @@ cargo --version
 
 ## 步骤 4：安装 Node.js
 
-Drop Compress Image 的前端使用 Vue.js 构建，需要 Node.js。
+Tauri Vue3 App 的前端使用 Vue.js 构建，需要 Node.js。
 
 ### 通过 NodeSource 存储库安装 Node.js
 
@@ -113,7 +113,7 @@ npm --version
 
 ## 步骤 5：安装 pnpm
 
-Drop Compress Image 使用 pnpm 作为包管理器，以获得更好的性能和磁盘效率。
+Tauri Vue3 App 使用 pnpm 作为包管理器，以获得更好的性能和磁盘效率。
 
 ### 安装 pnpm
 
@@ -129,7 +129,7 @@ pnpm --version
 
 ## 步骤 6：设置 vcpkg 并安装依赖项
 
-此项目使用 vcpkg 管理 C/C++ 图像处理库（libaom、libavif、libjxl 等）。
+此项目使用 vcpkg 对 C/C++ 库进行静态链接。请编辑 `backend/setup-vcpkg.sh` 来定义你需要的任意库。
 
 ### 安装 vcpkg 前提条件
 
@@ -159,7 +159,7 @@ source ~/.bashrc
 使用自动安装脚本（推荐）：
 
 ```bash
-cd ~/path/to/DropWebP/app/src-tauri
+cd ~/path/to/tauri-vuetify-starter/backend
 ./setup-vcpkg.sh
 ```
 
@@ -168,50 +168,30 @@ cd ~/path/to/DropWebP/app/src-tauri
 ```bash
 cd ~/vcpkg
 
-# x64 Linux 的情况
-./vcpkg install aom:x64-linux
-./vcpkg install libavif[aom]:x64-linux
-./vcpkg install libjxl:x64-linux
-./vcpkg install libwebp:x64-linux
-./vcpkg install openjpeg:x64-linux
-./vcpkg install libjpeg-turbo:x64-linux
-./vcpkg install lcms:x64-linux
+# x64 Linux 示例
+./vcpkg install <package>:x64-linux
 
-# ARM64 Linux 的情况
-./vcpkg install aom:arm64-linux
-./vcpkg install libavif[aom]:arm64-linux
-./vcpkg install libjxl:arm64-linux
-./vcpkg install libwebp:arm64-linux
-./vcpkg install openjpeg:arm64-linux
-./vcpkg install libjpeg-turbo:arm64-linux
-./vcpkg install lcms:arm64-linux
+# ARM64 Linux 示例
+./vcpkg install <package>:arm64-linux
 ```
 
-安装的库：
-
-- **libaom**：AV1 编码器（用于 AVIF 格式，**必需**）
-- **libavif**：AVIF 图像格式
-- **libjxl**：JPEG XL 图像格式
-- **libwebp**：WebP 图像格式
-- **openjpeg**：JPEG 2000 图像格式
-- **libjpeg-turbo**：JPEG 图像处理（用于 jpegli）
-- **lcms**：Little CMS 色彩管理
+安装哪些库取决于你在 `backend/setup-vcpkg.sh` 中的定义。
 
 ### 验证安装
 
 ```bash
-./vcpkg list | grep -E "aom|avif|jxl|webp|openjpeg|jpeg|lcms"
+./vcpkg list
 ```
 
-## 步骤 7：克隆和构建 Drop Compress Image
+## 步骤 7：克隆和构建 Tauri Vue3 App
 
-现在您已准备好克隆和构建 Drop Compress Image。
+现在您已准备好克隆和构建 Tauri Vue3 App。
 
 ### 克隆存储库
 
 ```bash
-git clone https://github.com/logue/DropWebP.git
-cd DropWebP
+git clone https://github.com/logue/tauri-vuetify-starter.git
+cd tauri-vuetify-starter
 ```
 
 ### 安装前端依赖项
@@ -244,7 +224,7 @@ pnpm dev:tauri
 pnpm build:tauri
 ```
 
-构建的应用程序将在 `app/src-tauri/target/release/` 中。
+构建的应用程序将在 `backend/target/release/` 中。
 
 ## 步骤 8：分发格式
 
@@ -258,7 +238,7 @@ AppImage 是一种通用包格式，可在大多数 Linux 发行版上运行：
 pnpm build:tauri
 ```
 
-AppImage 将在 `app/src-tauri/target/release/bundle/appimage/` 中。
+AppImage 将在 `backend/target/release/bundle/appimage/` 中。
 
 ### Debian 包 (.deb)
 
@@ -268,12 +248,12 @@ AppImage 将在 `app/src-tauri/target/release/bundle/appimage/` 中。
 pnpm build:tauri
 ```
 
-.deb 包将在 `app/src-tauri/target/release/bundle/deb/` 中。
+.deb 包将在 `backend/target/release/bundle/deb/` 中。
 
 安装它：
 
 ```bash
-sudo dpkg -i app/src-tauri/target/release/bundle/deb/*.deb
+sudo dpkg -i backend/target/release/bundle/deb/*.deb
 ```
 
 ### RPM 包 (.rpm)
@@ -285,7 +265,7 @@ sudo apt install -y rpm
 pnpm build:tauri
 ```
 
-.rpm 包将在 `app/src-tauri/target/release/bundle/rpm/` 中。
+.rpm 包将在 `backend/target/release/bundle/rpm/` 中。
 
 ## 故障排除
 
@@ -326,7 +306,7 @@ pnpm build:tauri
 
    ```bash
    # 使 AppImage 可执行
-   chmod +x app/src-tauri/target/release/bundle/appimage/*.AppImage
+   chmod +x backend/target/release/bundle/appimage/*.AppImage
    ```
 
 5. **缺少 GLIBC 版本**
@@ -356,17 +336,17 @@ sudo apt install -y intel-media-va-driver
 
 如果您遇到此处未涵盖的问题：
 
-1. 检查 [Drop Compress Image 存储库](https://github.com/logue/DropWebP) 的已知问题
+1. 检查 [Tauri Vue3 App 存储库](https://github.com/logue/tauri-vuetify-starter) 的已知问题
 2. 查看 [Tauri v2 文档](https://v2.tauri.app/start/prerequisites/) 以获取 Linux 特定指导
 3. 搜索现有的 GitHub 问题或创建新问题
 
 ## 下一步
 
-成功构建 Drop Compress Image 后：
+成功构建 Tauri Vue3 App 后：
 
 1. **运行测试**：执行 `pnpm test` 确保一切正常工作
 2. **开发**：使用 `pnpm dev:tauri` 进行热重载开发
 3. **自定义**：探索代码库并进行修改
 4. **分发**：使用 `pnpm build:tauri` 创建可分发的包
 
-您现在已准备好在 Linux 上开发和构建 Drop Compress Image！
+您现在已准备好在 Linux 上开发和构建 Tauri Vue3 App！

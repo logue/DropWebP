@@ -1,6 +1,6 @@
-# macOS用Drop Compress Imageのビルド
+# macOS用Tauri Vue3 Appのビルド
 
-このガイドでは、macOSシステムでの開発環境のセットアップとDrop Compress Imageのビルド手順を説明します。
+このガイドでは、macOSシステムでの開発環境のセットアップとTauri Vue3 Appのビルド手順を説明します。
 
 ## 前提条件
 
@@ -67,7 +67,7 @@ brew --version
 
 ## ステップ 3: Rustのインストール
 
-Drop Compress ImageはRustで構築されているため、Rustツールチェインをインストールする必要があります。
+Tauri Vue3 AppはRustで構築されているため、Rustツールチェインをインストールする必要があります。
 
 ### rustup経由でRustをインストール
 
@@ -94,7 +94,7 @@ cargo --version
 
 ## ステップ 4: Node.jsのインストール
 
-Drop Compress ImageのフロントエンドはVue.jsで構築されており、Node.jsが必要です。
+Tauri Vue3 AppのフロントエンドはVue.jsで構築されており、Node.jsが必要です。
 
 ### Homebrew経由でNode.jsをインストール
 
@@ -111,7 +111,7 @@ npm --version
 
 ## ステップ 5: pnpmのインストール
 
-Drop Compress Imageは、パフォーマンスとディスク効率を向上させるためにpnpmをパッケージマネージャーとして使用します。
+Tauri Vue3 Appは、パフォーマンスとディスク効率を向上させるためにpnpmをパッケージマネージャーとして使用します。
 
 ### pnpmのインストール
 
@@ -127,7 +127,7 @@ pnpm --version
 
 ## ステップ 6: vcpkgのセットアップと依存関係のインストール
 
-このプロジェクトではvcpkgを使用してC/C++画像処理ライブラリ（libaom、libavif、libjxl等）を管理します。
+このプロジェクトではvcpkgを使ってC/C++ライブラリを静的リンクします。必要なライブラリは `backend/setup-vcpkg.sh` を編集して定義してください。
 
 ### vcpkgのインストール
 
@@ -150,7 +150,7 @@ source ~/.zshrc
 自動インストールスクリプトを使用（推奨）:
 
 ```bash
-cd ~/path/to/DropWebP/app/src-tauri
+cd ~/path/to/tauri-vuetify-starter/backend
 ./setup-vcpkg.sh
 ```
 
@@ -159,50 +159,30 @@ cd ~/path/to/DropWebP/app/src-tauri
 ```bash
 cd ~/Developer/vcpkg
 
-# Apple Silicon (M1/M2/M3) の場合
-./vcpkg install aom:arm64-osx
-./vcpkg install libavif[aom]:arm64-osx
-./vcpkg install libjxl:arm64-osx
-./vcpkg install libwebp:arm64-osx
-./vcpkg install openjpeg:arm64-osx
-./vcpkg install libjpeg-turbo:arm64-osx
-./vcpkg install lcms:arm64-osx
+# Apple Silicon (M1/M2/M3) の例
+./vcpkg install <package>:arm64-osx
 
-# Intel Mac の場合
-./vcpkg install aom:x64-osx
-./vcpkg install libavif[aom]:x64-osx
-./vcpkg install libjxl:x64-osx
-./vcpkg install libwebp:x64-osx
-./vcpkg install openjpeg:x64-osx
-./vcpkg install libjpeg-turbo:x64-osx
-./vcpkg install lcms:x64-osx
+# Intel Mac の例
+./vcpkg install <package>:x64-osx
 ```
 
-インストールされるライブラリ：
-
-- **libaom**: AV1エンコーダー（AVIF形式用、**必須**）
-- **libavif**: AVIF画像フォーマット
-- **libjxl**: JPEG XL画像フォーマット
-- **libwebp**: WebP画像フォーマット
-- **openjpeg**: JPEG 2000画像フォーマット
-- **libjpeg-turbo**: JPEG画像処理（jpegli用）
-- **lcms**: Little CMS カラーマネジメント
+インストールされるライブラリは `backend/setup-vcpkg.sh` の定義内容に依存します。
 
 ### インストール確認
 
 ```bash
-./vcpkg list | grep -E "aom|avif|jxl|webp|openjpeg|jpeg|lcms"
+./vcpkg list
 ```
 
-## ステップ 7: Drop Compress Imageのクローンとビルド
+## ステップ 7: Tauri Vue3 Appのクローンとビルド
 
-これでDrop Compress Imageをクローンしてビルドする準備が整いました。
+これでTauri Vue3 Appをクローンしてビルドする準備が整いました。
 
 ### リポジトリのクローン
 
 ```bash
-git clone https://github.com/logue/DropWebP.git
-cd DropWebP
+git clone https://github.com/logue/tauri-vuetify-starter.git
+cd tauri-vuetify-starter
 ```
 
 ### フロントエンド依存関係のインストール
@@ -330,20 +310,20 @@ security find-identity -v -p codesigning
 
 ここでカバーされていない問題が発生した場合：
 
-1. [Drop Compress Imageリポジトリ](https://github.com/logue/DropWebP)で既知の問題を確認
+1. [Tauri Vue3 Appリポジトリ](https://github.com/logue/tauri-vuetify-starter)で既知の問題を確認
 2. macOS固有のガイダンスについて[Tauri v2ドキュメント](https://v2.tauri.app/start/prerequisites/)を確認
 3. 既存のGitHub Issueを検索するか、新しいIssueを作成
 
 ## 次のステップ
 
-Drop Compress Imageのビルドが成功したら：
+Tauri Vue3 Appのビルドが成功したら：
 
 1. **テストの実行**: `pnpm test`を実行してすべてが正しく動作することを確認
 2. **開発**: ホットリロードでの開発には`pnpm dev:tauri`を使用
 3. **カスタマイズ**: コードベースを探索して変更を加える
 4. **配布**: 配布可能なパッケージを作成するには`pnpm build:tauri`を使用
 
-これでmacOSでDrop Compress Imageを開発およびビルドする準備が整いました！
+これでmacOSでTauri Vue3 Appを開発およびビルドする準備が整いました！
 
 ## Intel Mac向けビルド
 
@@ -354,7 +334,7 @@ Apple Silicon Mac (M1/M2/M3) からIntel Mac (x86_64) 向けにクロスコン�
 Intel MacとApple Silicon Macの両方で動作する単一のバイナリを作成します：
 
 ```bash
-cd app
+cd frontend
 pnpm run build:tauri:mac-universal
 ```
 
@@ -393,7 +373,7 @@ arch -x86_64 /usr/local/bin/brew install libavif jpeg-xl
 #### ステップ3: ビルド実行
 
 ```bash
-cd app
+cd frontend
 pnpm run build:tauri:mac-x64
 ```
 
@@ -413,7 +393,7 @@ pnpm run build:tauri:mac-universal
 ### 成果物の場所
 
 ```text
-app/src-tauri/target/
+backend/target/
   ├── aarch64-apple-darwin/release/bundle/      # ARM64専用
   ├── x86_64-apple-darwin/release/bundle/       # x86_64専用
   └── universal-apple-darwin/release/bundle/    # Universal（両対応）

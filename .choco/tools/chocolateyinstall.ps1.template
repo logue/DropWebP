@@ -1,0 +1,18 @@
+$ErrorActionPreference = 'Stop'
+
+$packageName = '{{APP_NAME_KEBAB}}'
+$toolsDir = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
+$version = '{{VERSION}}'
+$url64 = "{{PROJECT_URL}}/releases/download/$version/{{APP_NAME_KEBAB}}_$($version)_x64_en-US.msi"
+$packageArgs = @{
+  packageName    = $packageName
+  fileType       = 'msi'
+  url64bit       = $url64
+  softwareName   = '{{APP_NAME}}*'
+  checksum64     = '{{CHECKSUM64}}'  # Will be filled by build script
+  checksumType64 = 'sha256'
+  silentArgs     = "/qn /norestart /l*v `"$($env:TEMP)\$($packageName).$($env:chocolateyPackageVersion).MsiInstall.log`""
+  validExitCodes = @(0, 3010, 1641)
+}
+
+Install-ChocolateyPackage @packageArgs

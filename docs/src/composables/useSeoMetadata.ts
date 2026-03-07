@@ -79,20 +79,20 @@ export const useSeoMetadata = () => {
     return {
       '@context': 'https://schema.org',
       '@type': 'SoftwareApplication',
-      name: 'Drop Compress Image',
-      applicationCategory: 'DesignApplication',
-      operatingSystem: 'Windows 11, macOS',
+      name: 'Tauri Vue3 App',
+      applicationCategory: 'DeveloperApplication',
+      operatingSystem: 'Windows, macOS, Linux',
       offers: {
         '@type': 'Offer',
         price: '0',
         priceCurrency: 'USD'
       },
       description: unref(t('lead.description[0]')),
-      url: `${unref(baseUrl)}/DropWebP`,
+      url: `${unref(baseUrl)}${sitePath}`,
       image: unref(ogImage),
       softwareVersion: unref(version),
-      releaseNotes: `https://github.com/logue/DropWebP/releases/tag/${unref(version)}`,
-      downloadUrl: `https://github.com/logue/DropWebP/releases/download/${unref(version)}/`,
+      releaseNotes: `https://github.com/logue/tauri-vuetify-starter/releases/tag/${unref(version)}`,
+      downloadUrl: `https://github.com/logue/tauri-vuetify-starter/releases/download/${unref(version)}/`,
       author: {
         '@type': 'Person',
         name: 'Logue',
@@ -114,10 +114,10 @@ export const useSeoMetadata = () => {
   // SEO メタデータの設定
   const setupSeoMeta = () => {
     useSeoMeta({
-      title: computed(() => `Drop Compress Image - ${t('lead.subtitle')}`),
-      ogSiteName: 'Drop Compress Image',
+      title: computed(() => `Tauri Vue3 App - ${t('lead.subtitle')}`),
+      ogSiteName: 'Tauri Vue3 App',
       description: computed(() => t('lead.description[0]')),
-      ogTitle: 'Drop Compress Image',
+      ogTitle: 'Tauri Vue3 App',
       ogDescription: computed(() => t('lead.subtitle')),
       ogImage: ogImage,
       ogUrl: currentUrl,
@@ -134,7 +134,7 @@ export const useSeoMetadata = () => {
         return localeMap[locale.value] || 'en_US';
       }),
       twitterCard: 'summary_large_image',
-      twitterTitle: 'Drop Compress Image',
+      twitterTitle: 'Tauri Vue3 App',
       twitterDescription: computed(() => t('lead.subtitle')),
       twitterImage: ogImage
     });

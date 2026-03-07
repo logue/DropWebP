@@ -4,7 +4,7 @@
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "=== Drop Compress Image - Windows Build ===" -ForegroundColor Cyan
+Write-Host "=== Tauri Vue3 App - Windows Build ===" -ForegroundColor Cyan
 Write-Host ""
 
 # ビルド環境の確認
@@ -39,8 +39,8 @@ if ($LASTEXITCODE -ne 0) {
 if ($args -contains "--clean") {
     Write-Host ""
     Write-Host "[3/6] Cleaning previous build..." -ForegroundColor Yellow
-    Remove-Item -Path "app\src-tauri\target" -Recurse -Force -ErrorAction SilentlyContinue
-    Remove-Item -Path "app\dist" -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path "backend\target" -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path "frontend\dist" -Recurse -Force -ErrorAction SilentlyContinue
     Write-Host "  Clean completed" -ForegroundColor Green
 } else {
     Write-Host ""
@@ -50,7 +50,7 @@ if ($args -contains "--clean") {
 # フロントエンドビルド
 Write-Host ""
 Write-Host "[4/6] Building frontend..." -ForegroundColor Yellow
-Set-Location app
+Set-Location frontend
 pnpm run build-only
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Error: Frontend build failed" -ForegroundColor Red
@@ -62,7 +62,7 @@ Set-Location ..
 # Rustバックエンドビルド（MSVC専用スクリプト使用）
 Write-Host ""
 Write-Host "[5/6] Building Rust backend with MSVC..." -ForegroundColor Yellow
-Set-Location app\src-tauri
+Set-Location backend
 
 # jpegxl-srcのパッチ適用とビルド
 .\build-msvc.ps1
@@ -77,7 +77,7 @@ Set-Location ..\..
 # Tauriバンドルの作成
 Write-Host ""
 Write-Host "[6/6] Creating Tauri bundles..." -ForegroundColor Yellow
-Set-Location app
+Set-Location frontend
 pnpm tauri build
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Warning: Bundle creation encountered issues" -ForegroundColor Yellow
@@ -89,7 +89,7 @@ Set-Location ..
 # ビルド成果物の表示
 Write-Host ""
 Write-Host "=== Build Artifacts ===" -ForegroundColor Cyan
-$bundlePath = "app\src-tauri\target\release\bundle"
+$bundlePath = "backend\target\release\bundle"
 if (Test-Path $bundlePath) {
     $installers = Get-ChildItem -Path $bundlePath -Recurse -File | `
         Where-Object { $_.Extension -in @('.exe', '.msi', '.nsis') }
@@ -110,4 +110,4 @@ Write-Host ""
 Write-Host "=== Build completed successfully! ===" -ForegroundColor Green
 Write-Host ""
 Write-Host "To run the application:" -ForegroundColor Cyan
-Write-Host "  .\app\src-tauri\target\release\drop-compress-image.exe" -ForegroundColor White
+Write-Host "  .\backend\target\release\tauri-vue3-app.exe" -ForegroundColor White

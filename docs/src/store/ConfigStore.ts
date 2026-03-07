@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref, watch, type Ref } from 'vue';
+import { type Ref, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 /** Config Store */

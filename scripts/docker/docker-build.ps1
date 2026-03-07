@@ -10,7 +10,7 @@ $env:CI = "true"
 # Node.jsのヒープサイズを増やす（メモリ不足エラーを防ぐ）
 $env:NODE_OPTIONS = "--max-old-space-size=4096"
 
-Write-Host "`n=== DropWebP Windows Build Script ===" -ForegroundColor Cyan
+Write-Host "`n=== Tauri Vue3 App Windows Build Script ===" -ForegroundColor Cyan
 
 # 環境確認
 Write-Host "`n[1/5] Checking environment..." -ForegroundColor Yellow
@@ -27,7 +27,7 @@ pnpm install --frozen-lockfile --node-linker=hoisted
 
 # Rustのキャッシュをクリア（初回ビルドの場合）
 Write-Host "`n[3/5] Cleaning Rust cache..." -ForegroundColor Yellow
-Set-Location app\src-tauri
+Set-Location backend
 
 # ホストのtargetディレクトリとの競合を避けるため、コンテナ内の別の場所を使用
 $env:CARGO_TARGET_DIR = "C:\build-temp\target"
@@ -38,7 +38,7 @@ Set-Location ..\..
 
 # フロントエンド＋Tauriビルド（一度だけ実行）
 Write-Host "`n[4/5] Building application..." -ForegroundColor Yellow
-Set-Location app
+Set-Location frontend
 # pnpm buildは内部でtype-check、build-only、build:tauriを並行実行する
 pnpm build
 Set-Location ..
@@ -46,7 +46,7 @@ Set-Location ..
 # ビルド成果物をホストディレクトリにコピー
 Write-Host "`n[5/5] Copying build artifacts..." -ForegroundColor Yellow
 $targetDir = "C:\build-temp\target\release"
-$destDir = "C:\workspace\app\src-tauri\target\release"
+$destDir = "C:\workspace\backend\target\release"
 
 if (Test-Path $targetDir) {
     # ディレクトリを作成
@@ -69,7 +69,7 @@ if (Test-Path $targetDir) {
 
 # ビルド成果物の確認
 Write-Host "`n[6/6] Build artifacts:" -ForegroundColor Yellow
-$bundlePath = "C:\workspace\app\src-tauri\target\release\bundle"
+$bundlePath = "C:\workspace\backend\target\release\bundle"
 if (Test-Path $bundlePath) {
     Get-ChildItem -Path $bundlePath -Recurse -File | `
         Where-Object { $_.Extension -in @('.exe', '.msi', '.nsis') } | `

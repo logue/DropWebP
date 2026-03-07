@@ -1,19 +1,13 @@
 /**
- * Content data composable for features and formats
+ * Content data composable for features
  */
-import avif from '@/assets/Avif-logo-rgb.svg';
-import jxl from '@/assets/JPEG_XL_logo.svg';
-import jpeg from '@/assets/Mozjpeg_logotype.svg';
-import webp from '@/assets/WebPLogo.svg';
-import png from '@/assets/zopfli-logo.png';
-
 export const useContentData = () => {
   const { tm } = useI18n();
 
   // 機能リスト
   const features = [
     {
-      icon: 'mdi-image-multiple',
+      icon: 'mdi-package-variant',
       key: 'multiple_formats'
     },
     {
@@ -21,7 +15,7 @@ export const useContentData = () => {
       key: 'high_speed'
     },
     {
-      icon: 'mdi-drag',
+      icon: 'mdi-application-outline',
       key: 'drag_drop'
     },
     {
@@ -33,18 +27,9 @@ export const useContentData = () => {
       key: 'dark_mode'
     },
     {
-      icon: 'mdi-clipboard-outline',
+      icon: 'mdi-shield-check',
       key: 'paste'
     }
-  ];
-
-  // フォーマットリスト
-  const formats = [
-    { key: 'webp', logo: webp },
-    { key: 'avif', logo: avif },
-    { key: 'jxl', logo: jxl },
-    { key: 'png', logo: png },
-    { key: 'jpeg', logo: jpeg }
   ];
 
   // 型安全なdescriptionの取得
@@ -57,20 +42,8 @@ export const useContentData = () => {
     }
   });
 
-  // フォーマット説明の取得
-  const getFormatDescriptions = (key: string) => {
-    try {
-      const descriptions = tm(`format.${key}.description`) as unknown;
-      return Array.isArray(descriptions) ? (descriptions as string[]) : [];
-    } catch {
-      return [];
-    }
-  };
-
   return {
     features,
-    formats,
-    leadDescriptions,
-    getFormatDescriptions
+    leadDescriptions
   };
 };

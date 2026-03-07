@@ -17,11 +17,11 @@ if [ -f "/workspace/.env" ]; then
     echo "🔄 バージョン情報を同期中..."
     if [ -n "$VERSION" ]; then
         # Cargo.toml のバージョンを更新
-        sed -i "s/^version = \".*\"/version = \"$VERSION\"/" /workspace/app/src-tauri/Cargo.toml
+        sed -i "s/^version = \".*\"/version = \"$VERSION\"/" /workspace/backend/Cargo.toml
         echo "  Cargo.toml: version = $VERSION"
 
         # tauri.conf.json のバージョンを更新
-        sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" /workspace/app/src-tauri/tauri.conf.json
+        sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" /workspace/backend/tauri.conf.json
         echo "  tauri.conf.json: version = $VERSION"
     fi
 fi
@@ -48,15 +48,15 @@ echo "📦 アプリ依存関係をインストール中..."
 cd /workspace
 # node_modulesはDockerボリュームにマウントされているため、ホスト環境とは完全に分離
 # 初回またはpackage.json変更時のみインストールが必要
-if [ ! -d "app/node_modules/.pnpm" ]; then
+if [ ! -d "frontend/node_modules/.pnpm" ]; then
     echo "  初回インストール中..."
-    pnpm install --filter app --frozen-lockfile --ignore-scripts
+    pnpm install --filter frontend --frozen-lockfile --ignore-scripts
 else
     echo "  既存のnode_modulesを使用（必要に応じて更新）"
-    pnpm install --filter app --frozen-lockfile --ignore-scripts --offline 2>/dev/null || \
-    pnpm install --filter app --frozen-lockfile --ignore-scripts
+    pnpm install --filter frontend --frozen-lockfile --ignore-scripts --offline 2>/dev/null || \
+    pnpm install --filter frontend --frozen-lockfile --ignore-scripts
 fi
-cd app
+cd frontend
 
 # ビルドターゲットを環境変数から取得（デフォルト: x86_64）
 TARGET="${BUILD_TARGET:-x86_64-unknown-linux-gnu}"
@@ -106,7 +106,7 @@ pnpm tauri build --target "$TARGET" $BUNDLE_ARGS
 echo "✅ ビルド完了！"
 
 # 成果物の場所を表示
-BUNDLE_PATH="/workspace/app/src-tauri/target/$TARGET/release/bundle/"
+BUNDLE_PATH="/workspace/backend/target/$TARGET/release/bundle/"
 echo "📦 成果物の場所: $BUNDLE_PATH"
 
 # 成果物をリスト表示
@@ -116,5 +116,5 @@ if [ -d "$BUNDLE_PATH" ]; then
 else
     echo "⚠️  bundle ディレクトリが見つかりません"
     echo "target/ の内容:"
-    find "/workspace/app/src-tauri/target" -name "*.deb" -o -name "*.rpm" 2>/dev/null || echo "パッケージファイルが見つかりません"
+    find "/workspace/backend/target" -name "*.deb" -o -name "*.rpm" 2>/dev/null || echo "パッケージファイルが見つかりません"
 fi

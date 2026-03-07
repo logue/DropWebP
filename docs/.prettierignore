@@ -1,0 +1,7 @@
+.husky/
+.vscode/
+pnpm-lock.yaml
+app/dist/
+backend/
+doc/.nuxt/
+doc/dist/

@@ -1,6 +1,6 @@
 {
-  "name": "drop-compress-image",
-  "description": "Drop Image Compress is a desktop application that converts images to WebP/Avif/JPEG XL format using drag-and-drop functionality. Built with Vite, Vue 3, TypeScript, and Tauri.",
+  "name": "tauri-vuetify-starter",
+  "description": "A modern desktop application template built with Tauri v2 and Vue 3",
   "license": "MIT",
   "type": "module",
   "private": true,
@@ -9,77 +9,45 @@
     "email": "logue@hotmail.co.jp",
     "url": "https://logue.dev/"
   },
-  "homepage": "https://logue.dev/DropWebP/",
+  "homepage": "https://github.com/logue/tauri-vuetify-starter",
   "repository": {
     "type": "git",
-    "url": "git@github.com:logue/DropWebP.git"
-  },
-  "bugs": {
-    "url": "https://github.com/logue/DropWebP/issues"
+    "url": "git@github.com:logue/tauri-vuetify-starter.git"
   },
   "engines": {
     "node": ">=24",
     "pnpm": ">=10"
   },
-  "packageManager": "pnpm@10.30.1",
+  "workspaces": [
+    "frontend",
+    "docs"
+  ],
+  "packageManager": "pnpm@10.30.3",
   "scripts": {
-    "dev": "pnpm --filter app dev",
-    "dev:tauri": "pnpm --filter app dev:tauri",
+    "dev": "pnpm --filter frontend dev",
+    "dev:tauri": "pnpm --filter frontend dev:tauri",
     "dev:docs": "pnpm --filter docs dev",
     "clean": "pnpm --recursive exec rimraf node_modules/.vite",
-    "build": "pnpm --filter app build",
+    "build": "pnpm --filter frontend build",
     "build:docs": "pnpm --filter docs build",
-    "build:analyze": "pnpm --filter app build:analyze",
+    "build:analyze": "pnpm --filter frontend build:analyze",
     "build:clean": "pnpm --recursive exec rimraf dist",
-    "build:tauri": "pnpm --filter app build:tauri",
-    "build:tauri:linux-x64": "pnpm --filter app build:tauri:linux-docker-x64",
-    "build:tauri:linux-arm64": "pnpm --filter app build:tauri:linux-docker-arm64",
+    "build:tauri": "pnpm --filter frontend build:tauri",
+    "build:tauri:linux-x64": "pnpm --filter frontend build:tauri:linux-docker-x64",
+    "build:tauri:linux-arm64": "pnpm --filter frontend build:tauri:linux-docker-arm64",
     "package:chocolatey": "pwsh ./scripts/build-chocolatey.ps1",
     "package:homebrew": "bash ./scripts/build-homebrew.sh",
     "generate": "pnpm --filter docs generate",
     "deploy": "pnpm --filter docs deploy",
-    "lint": "pnpm --filter app lint && pnpm --filter docs lint",
-    "lint:style": "pnpm --filter app lint:style && pnpm --filter docs lint:style",
-    "preview": "pnpm --filter app preview",
+    "lint": "pnpm --filter frontend lint && pnpm --filter docs lint",
+    "preview": "pnpm --filter frontend preview",
     "preview:docs": "pnpm --filter docs preview",
     "type-check": "pnpm --recursive exec vue-tsc --build --force",
-    "tauri": "pnpm --filter app tauri",
+    "tauri": "pnpm --filter frontend tauri",
     "prepare": "husky",
     "postinstall": "pnpm --filter docs nuxt:prepare"
   },
-  "devDependencies": {
-    "@tsconfig/node-lts": "^24.0.0",
-    "@types/node": "^25.3.0",
-    "eslint": "^10.0.1",
-    "eslint-import-resolver-custom-alias": "^1.3.2",
-    "eslint-import-resolver-typescript": "^4.4.4",
-    "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-vue": "^10.8.0",
-    "eslint-plugin-vuejs-accessibility": "^2.5.0",
-    "eslint-plugin-vuetify": "^2.5.3",
-    "@vue/eslint-config-prettier": "^10.2.0",
-    "@vue/eslint-config-typescript": "^14.7.0",
-    "@vue/tsconfig": "^0.8.1",
-    "@nuxt/eslint": "1.15.1",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
-    "postcss-html": "^1.8.1",
-    "prettier": "^3.8.1",
-    "stylelint": "^17.3.0",
-    "stylelint-config-recommended-scss": "^17.0.0",
-    "stylelint-config-recommended-vue": "^1.6.1",
-    "stylelint-order": "^7.0.1",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.56.0"
-  },
   "resolutions": {
-    "@isaacs/brace-expansion": ">=5.0.1",
-    "esbuild": ">=0.24.2",
-    "diff": ">=8.0.3",
-    "fast-xml-parser": ">=5.3.4",
-    "lodash": ">=4.17.23",
-    "h3": ">=1.15.5",
-    "js-yaml": ">=4.1.1",
-    "tar": ">=7.5.4"
+    "minimatch": ">=10.2.3"
   }
 }

@@ -20,9 +20,9 @@ const items: ComputedRef<DrawerMenuItem[]> = computed(() => [
     // to: localePath('/getting-started')
   },
   {
-    title: t('format_guide'),
-    icon: 'mdi-file-image',
-    to: localePath('/format-guide')
+    title: t('publishing'),
+    icon: 'mdi-package-variant',
+    to: localePath('/publishing')
   },
   {
     title: '-' // Divider
@@ -91,7 +91,7 @@ const items: ComputedRef<DrawerMenuItem[]> = computed(() => [
 en:
   home: Home
   getting_started: Getting Started
-  format_guide: Format Guide
+  publishing: Publishing Guide
   build_windows: Windows Build Instructions
   build_macos: macOS Build Instructions
   build_linux: Linux Build Instructions
@@ -99,7 +99,7 @@ en:
 fr:
   home: Accueil
   getting_started: Commencer
-  format_guide: Guide des formats
+  publishing: Guide de publication
   build_windows: Windows Instructions de construction
   build_macos: macOS Instructions de construction
   build_linux: Linux Instructions de construction
@@ -107,7 +107,7 @@ fr:
 ja:
   home: ホーム
   getting_started: はじめに
-  format_guide: フォーマットガイド
+  publishing: パッケージ公開ガイド
   build_windows: Windows ビルド手順
   build_macos: macOS ビルド手順
   build_linux: Linux ビルド手順
@@ -115,7 +115,7 @@ ja:
 ko:
   home: 홈
   getting_started: 시작하기
-  format_guide: 포맷 가이드
+  publishing: 패키지 게시 가이드
   build_windows: Windows 빌드 지침
   build_macos: macOS 빌드 지침
   build_linux: Linux 빌드 지침
@@ -123,7 +123,7 @@ ko:
 zhHant:
   home: 首頁
   getting_started: 入門
-  format_guide: 格式指南
+  publishing: 發布指南
   build_windows: Windows 建置說明
   build_macos: macOS 建置說明
   build_linux: Linux 建置說明
@@ -131,7 +131,7 @@ zhHant:
 zhHans:
   home: 主页
   getting_started: 入门
-  format_guide: 格式指南
+  publishing: 发布指南
   build_windows: Windows 构建说明
   build_macos: macOS 构建说明
   build_linux: Linux 构建说明

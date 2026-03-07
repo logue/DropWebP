@@ -14,16 +14,19 @@
 ### 平台特定要求
 
 #### Windows
+
 - Windows 10/11 (64位)
 - WSL 2（推荐）
 - PowerShell 5.1或更高版本
 
 #### macOS
+
 - macOS 10.15或更高版本
 - Bash
 - Docker Desktop for Mac
 
 #### Linux
+
 - 64位Linux发行版
 - Docker Engine 20.10或更高版本
 - Bash
@@ -59,7 +62,7 @@ pnpm run build:tauri:linux-docker-arm64
 构建产物将生成在以下目录中：
 
 ```text
-app/src-tauri/target/
+backend/target/
   ├── x86_64-unknown-linux-gnu/release/bundle/
   │   ├── deb/           # Debian/Ubuntu软件包
   │   ├── rpm/           # Red Hat/Fedora软件包
@@ -89,20 +92,20 @@ app/src-tauri/target/
 ### 重新构建Docker镜像
 
 ```bash
-docker build -f Dockerfile.linux-build -t dropwebp-linux-builder --no-cache .
+docker build -f Dockerfile.linux-build -t tauri-vue3-linux-builder --no-cache .
 ```
 
 ### 删除Docker镜像
 
 ```bash
-docker rmi dropwebp-linux-builder
+docker rmi tauri-vue3-linux-builder
 ```
 
 ### 清除构建缓存
 
 ```bash
-rm -rf app/src-tauri/target/x86_64-unknown-linux-gnu
-rm -rf app/src-tauri/target/aarch64-unknown-linux-gnu
+rm -rf backend/target/x86_64-unknown-linux-gnu
+rm -rf backend/target/aarch64-unknown-linux-gnu
 ```
 
 ## 📝 注意事项

@@ -1,8 +1,11 @@
 import configPrettier from '@vue/eslint-config-prettier';
 import withNuxt from './.nuxt/eslint.config.mjs';
+import markdown from '@eslint/markdown';
 
 import { globalIgnores } from 'eslint/config';
 import pluginVueA11y from 'eslint-plugin-vuejs-accessibility';
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
 
 /**
  * ESLint Config for Docs (Nuxt)
@@ -35,20 +38,29 @@ export default withNuxt(
     languageOptions: {
       parserOptions: {
         project: './tsconfig.json',
-        tsconfigRootDir: __dirname
+        tsconfigRootDir: dirname(fileURLToPath(import.meta.url))
       }
     }
   },
   ...pluginVueA11y.configs['flat/recommended'],
+  ...markdown.configs.recommended,
+  {
+    files: ['**/*.md'],
+    rules: {
+      'no-irregular-whitespace': 'off',
+      // Markdown内のコードブロックの言語指定がない場合は警告
+      'markdown/fenced-code-language': 'warn'
+    }
+  },
   {
     settings: {
       // This will do the trick
-      'import/parsers': {
+      'import-x/parsers': {
         espree: ['.js', '.cjs', '.mjs', '.jsx'],
         '@typescript-eslint/parser': ['.ts', '.tsx'],
         'vue-eslint-parser': ['.vue']
       },
-      'import/resolver': {
+      'import-x/resolver': {
         // You will also need to install and configure the TypeScript resolver
         // See also https://github.com/import-js/eslint-import-resolver-typescript#configuration
         typescript: true,

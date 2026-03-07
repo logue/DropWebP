@@ -52,5 +52,10 @@ Meta.ts
 
 # Package managers build artifacts
 .choco/*.nupkg
-.choco/drop-compress-image.nuspec
+.choco/*.nuspec
+!.choco/*.nuspec.template
+.choco/tools/*.ps1
+!.choco/tools/*.ps1.template
+.homebrew/*.rb
+!.homebrew/*.rb.template
 .homebrew/*.rb.bak

@@ -1,65 +1,43 @@
-# Drop Compress Image - AI Coding Agent Instructions
+# Tauri Vue3 App - AI Coding Agent Instructions
 
 ## Project Architecture
 
-**Tauri v2 desktop app** with Vue 3 frontend + Rust backend for high-performance image conversion to modern formats (AVIF, JPEG XL, WebP, PNG, JPEG).
-
-### Current Project Goal
-
-**HDR Support**: Preserve HDR (High Dynamic Range) metadata and color information when converting to JPEG XL and AVIF formats. This includes:
-
-- Maintaining ICC color profiles during decode/encode pipeline
-- Supporting high bit-depth images (10-bit, 12-bit)
-- Preserving HDR metadata (PQ, HLG transfer functions)
-- Ensuring color space accuracy for wide gamut images
-- _(Lower priority)_ JPEG HDR output using JPEG-LI with embedded HDR metadata
+**Tauri v2 desktop app** with Vue 3 frontend + Rust backend for building cross-platform desktop applications.
 
 ### Key Components
 
-- **Frontend**: Vue 3 + TypeScript + Vuetify + Pinia (located in `app/src/`)
-- **Backend**: Rust with Tauri v2 (located in `app/src-tauri/src/`)
-- **Documentation site**: Nuxt 3 (located in `docs/`)
-- **Workspace**: pnpm monorepo with 2 packages (`app/`, `docs/`)
+- **Frontend**: Vue 3 + TypeScript + Vuetify + Pinia (located in `frontend/src/`)
+- **Backend**: Rust with Tauri v2 (located in `backend/src/`)
+- **Workspace**: pnpm monorepo
 
 ### Rust Backend Structure
 
 ```
-app/src-tauri/src/
-├── lib.rs          # Public API exports (decode, encode, options, error, logging)
-├── command.rs      # Tauri commands: convert(), convert_with_progress()
-├── decoder.rs      # Image decoding (handles 15+ formats)
-├── encoder.rs      # Image encoding (avif, jxl, webp, png, jpeg)
-├── encoder/
-│   ├── progress.rs # Progress callback trait + Tauri event emitter
-│   ├── avif.rs     # AVIF encoding (libavif via codec-aom)
-│   ├── jxl.rs      # JPEG XL encoding + JPEG transcode
-│   ├── webp.rs     # WebP encoding with progress (lossy/lossless)
-│   ├── png.rs      # PNG encoding via oxipng with progress
-│   └── jpeg.rs     # JPEG encoding via jpegli
-├── options.rs      # EncodeOptions enum + PathInfo
-├── error.rs        # AppError type
+backend/src/
+├── lib.rs          # Public API exports (error, logging)
+├── main.rs         # Tauri app entry point with plugin initialization
+├── command.rs      # Tauri commands (sample commands for demonstration)
+├── error.rs        # AppError type with common error variants
 └── logging.rs      # Logging system with ResultExt trait
 ```
 
 ### Frontend Structure
 
 ```
-app/src/
+frontend/src/
+├── components/
+│   └── MainContent.vue        # Main application component
 ├── composables/
-│   ├── useImageConversionController.ts  # Main orchestrator
-│   ├── useImageConverter.ts             # Invokes Tauri commands
-│   ├── useDragAndDrop.ts                # Drag-and-drop handling
-│   ├── usePaste.ts                      # Clipboard paste handling
-│   ├── useFileSystem.ts                 # File operations
-│   └── useConversionState.ts            # Progress state management
+│   ├── useFileSystem.ts       # File operations (open/save dialogs)
+│   ├── useLogger.ts           # Frontend logging
+│   └── useNotification.ts     # System notifications
 ├── store/
-│   ├── ConfigStore.ts    # Theme, locale
-│   ├── GlobalStore.ts    # Loading, progress, messages
-│   └── SettingsStore.ts  # Format options (persisted)
-├── interfaces/           # TypeScript option interfaces
+│   ├── ConfigStore.ts         # Theme, locale
+│   └── GlobalStore.ts         # Loading, progress, messages
+├── locales/                   # i18n translation files (6 languages)
 └── plugins/
-    ├── i18n.ts          # Vue I18n with 5 languages
-    └── vuetify.ts       # Material Design components
+    ├── i18n.ts               # Vue I18n configuration
+    └── vuetify.ts            # Material Design components
 ```
 
 ## Critical Workflows
@@ -91,15 +69,10 @@ pnpm run lint:style
 pnpm run build:tauri
 
 # macOS build (Universal binary for both Apple Silicon and Intel)
-pnpm --filter app build:tauri:mac
+pnpm --filter frontend build:tauri:mac
 
 # Linux via Docker
-cd scripts/docker
-./docker-build.sh x64    # or arm64
-
-# Or from project root
-./scripts/docker/docker-build.sh x64
-./scripts/docker/docker-build.sh arm64
+./scripts/docker/docker-build.sh x64    # or arm64
 
 # Package managers
 pnpm run package:chocolatey  # Windows
@@ -109,7 +82,7 @@ pnpm run package:homebrew    # macOS
 ### Testing Rust code
 
 ```bash
-cd app/src-tauri
+cd backend
 cargo test
 cargo build --release
 ```
@@ -118,128 +91,103 @@ cargo build --release
 
 ### Rust Code Patterns
 
-1. **Image Decoding Architecture**: The decoder (`decoder.rs`) handles 15+ formats with specialized decoders in `decoder/` subdirectory:
-   - **Standard formats**: PNG, JPEG, TIFF, BMP, etc. via `image` crate with ICC profile extraction
-   - **AVIF**: Custom decoder in `decoder/avif.rs` using libavif, supports HDR/10-bit
-   - **JPEG XL**: Custom decoder in `decoder/jxl.rs` using jpegxl-rs
-   - **JPEG 2000**: Custom decoder in `decoder/jpeg2k.rs` using openjpeg-sys
-
-   All decoders return `(HighBitDepthImage, Option<Vec<u8>>)` where the second value is ICC profile.
-
-2. **HDR Color Management**: ICC color profiles are extracted during decoding and passed through to encoders. Both AVIF and JPEG XL encoders support embedding ICC profiles:
+1. **Tauri Commands**: Async functions with `#[tauri::command]` attribute:
 
    ```rust
-   let (img, icc_profile) = decoder::decode(&data)?;
-   encoder::encode(img, icc_profile, &options)?;
+   #[tauri::command]
+   async fn my_command(app: AppHandle, param: String) -> Result<String, String> {
+       // Implementation
+       Ok(result)
+   }
    ```
 
-   The `icc_profile` is `Option<Vec<u8>>` and must be preserved through the pipeline. For HDR images, this ensures color space information (Rec.2020, PQ/HLG transfer) is maintained.
-
-3. **Progress Reporting**: Encoders implement `ProgressCallback` trait. WebP and PNG support progress via callbacks. Check `encoder/progress.rs` for the pattern.
-
-4. **Error Handling**: Use `ResultExt` trait from `logging.rs` to auto-log errors:
+   Register commands in `main.rs`:
 
    ```rust
-   decoder::decode(&data)
-       .log_error(Some("Image decoding"))
+   tauri::Builder::default()
+       .invoke_handler(tauri::generate_handler![my_command])
+       .run(tauri::generate_context!())
+   ```
+
+2. **Error Handling**: Use `ResultExt` trait from `logging.rs` to auto-log errors:
+
+   ```rust
+   some_operation()
+       .log_error(Some("Operation name"))
        .map_err(|e| format!("Failed: {}", e))?
    ```
 
-5. **JPEG XL Transcode**: Fast path for JPEG→JXL without decode/encode. Check format first in `command.rs` convert functions.
-
-6. **Module Exports**: `lib.rs` re-exports public API. Keep modules private, expose only what's needed.
+3. **Module Exports**: `lib.rs` re-exports public API. Keep modules private, expose only what's needed.
 
 ### Frontend Patterns
 
-1. **Composables Architecture**: Each concern is isolated (conversion, drag-drop, paste, filesystem). `useImageConversionController` orchestrates them.
+1. **Composables Architecture**: Each concern is isolated (file operations, logging, notifications). Reusable logic as Vue composables.
 
 2. **State Management**:
-   - `SettingsStore`: User preferences (persisted to localStorage via pinia-plugin-persistedstate)
-   - `ConfigStore`: Theme and locale
+   - `ConfigStore`: Theme and locale (persisted to localStorage via pinia-plugin-persistedstate)
    - `GlobalStore`: Transient UI state (loading, progress, messages)
 
 3. **Tauri Commands**: Call via `@tauri-apps/api/core`:
 
    ```typescript
-   import { invoke } from '@tauri-apps/api/core';
-   await invoke<Uint8Array>('convert', { data, options });
+   import { invoke } from "@tauri-apps/api/core";
+   const result = await invoke<string>("my_command", { param: "value" });
    ```
 
-4. **Progress Events**: Listen via Tauri events:
+4. **Tauri Events**: Listen for events from Rust backend:
 
    ```typescript
-   import { listen } from '@tauri-apps/api/event';
-   await listen('encoding-progress', event => {
-     const { percent, stage, status } = event.payload;
+   import { listen } from "@tauri-apps/api/event";
+   await listen("my-event", (event) => {
+     console.log("Received:", event.payload);
    });
    ```
 
-5. **i18n**: Use `vue-i18n` composable in components. Translation files are in `src/locales/*.yml`.
+5. **i18n**: Use `vue-i18n` composable in components. Translation files are in `src/locales/*.yml` (6 languages: en, ja, fr, ko, zhHans, zhHant).
 
 ### Build Configuration
 
-1. **macOS Compatibility**: Uses `edition = "2021"`, `lto = "thin"`, `codegen-units = 16` for cross-M1/M2/M3 compatibility. See `MACOS_COMPATIBILITY.md`.
+1. **macOS Compatibility**: Uses `edition = "2024"`, `lto = "thin"`, `codegen-units = 16` for cross-Apple Silicon compatibility.
 
-2. **Static Linking**: All image libraries are statically linked. See `DEPENDENCY_ANALYSIS.md`.
+2. **Cargo Profile**: Release profile optimizes for speed (`opt-level = 3`) with thin LTO for compatibility.
 
-3. **Cargo Profile**: Release profile optimizes for speed (`opt-level = 3`) with thin LTO for compatibility.
+3. **Vite Config**: Uses path aliases `@/` for `src/`, file-based routing, and Vuetify auto-import.
 
-4. **Vite Config**: Uses path aliases `@/` for `src/`, file-based routing, and Vuetify auto-import.
+4. **Environment Variables**: All application metadata is configured via `.env` file (version, app name, author, URLs, etc.).
 
 ## Integration Points
 
 ### Tauri ↔ Frontend Communication
 
-- **Commands** (`command.rs`): `convert()`, `convert_with_progress()`
-- **Events**: `encoding-progress` (emitted from Rust via `TauriProgressCallback`)
+- **Commands** (`command.rs`): Sample commands: `echo_message()`, `get_app_version()`, `process_data()`
 - **Plugins**: dialog, fs, notification, opener, os (via `@tauri-apps/plugin-*`)
-
-### Image Processing Pipeline
-
-```
-Input File → Decoder (decoder.rs)
-          ↓
-   DynamicImage + ICC Profile
-          ↓
-   Format-specific encoder (encoder/*.rs)
-          ↓
-   Output bytes (Vec<u8>)
-```
-
-Special case: JPEG → JPEG XL uses `jxl::transcode()` to skip decode/encode.
 
 ### Platform-Specific Code
 
 - **Windows**: Uses native APIs in `target.'cfg(windows)'.dependencies` for Windows-specific optimizations.
-- **Linux**: Built via Docker with Debian Bookworm + WebKit2GTK. See [docs/content/ja/docker-build.md](../docs/content/ja/docker-build.md).
-- **macOS Cross-compilation**: Uses `vendored` features for jpegxl-rs to enable x86_64 builds from Apple Silicon. See `INTEL_MAC_BUILD.md`.
+- **Linux**: Built via Docker with Debian Bookworm + WebKit2GTK.
+- **macOS**: Supports Universal binaries (Apple Silicon + Intel).
 
 ## Key Files
 
-- [app/src-tauri/src/command.rs](app/src-tauri/src/command.rs) - Tauri command implementations
-- [app/src-tauri/src/encoder.rs](app/src-tauri/src/encoder.rs) - Main encode() function
-- [app/src-tauri/src/decoder.rs](app/src-tauri/src/decoder.rs) - Image decoding logic
-- [app/src/composables/useImageConversionController.ts](app/src/composables/useImageConversionController.ts) - Frontend orchestration
-- [app/src-tauri/Cargo.toml](app/src-tauri/Cargo.toml) - Rust dependencies and build config
-- [MACOS_COMPATIBILITY.md](MACOS_COMPATIBILITY.md) - Apple Silicon compatibility notes
-- [INTEL_MAC_BUILD.md](INTEL_MAC_BUILD.md) - Intel Mac cross-compilation from Apple Silicon
-- [DEPENDENCY_ANALYSIS.md](DEPENDENCY_ANALYSIS.md) - Static vs dynamic linking decisions
+- [backend/src/command.rs](backend/src/command.rs) - Tauri command implementations (add your commands here)
+- [backend/src/main.rs](backend/src/main.rs) - Application entry point
+- [frontend/src/components/MainContent.vue](frontend/src/components/MainContent.vue) - Main UI component
+- [backend/Cargo.toml](backend/Cargo.toml) - Rust dependencies and build config
+- [.env](.env) - Application configuration (version, name, author, URLs)
 
 ## Common Tasks
 
-- **Add new image format**: Create encoder in `app/src-tauri/src/encoder/newformat.rs`, add to `EncodeOptions` enum in `options.rs`, implement in `encoder.rs` encode function, add TypeScript interface in `app/src/interfaces/`
-- **Add progress support**: Implement `ProgressCallback` in encoder, check `webp.rs` or `png.rs` for reference pattern
-- **Update UI strings**: Edit `app/src/locales/*.yml` for all languages (en, fr, ja, ko, zhHans, zhHant)
-- **Fix build issues**:
-  - Check `MACOS_COMPATIBILITY.md` for M1/M2/M3 compatibility
-  - Check `INTEL_MAC_BUILD.md` for Intel Mac cross-compilation (requires YASM and jpegxl-rs vendored feature)
-  - Check [docs/content/ja/docker-build.md](../docs/content/ja/docker-build.md) for Linux builds
-- **Platform-specific code**: Use `#[cfg(target_os = "macos")]` or `cfg(windows)` in Rust, feature flags in Cargo.toml
+- **Add new Tauri command**: Add function to `backend/src/command.rs`, register in `main.rs`
+- **Add UI string**: Edit `frontend/src/locales/*.yml` for all languages (en, ja, fr, ko, zhHans, zhHant)
+- **Add composable**: Create new file in `frontend/src/composables/` following existing patterns
+- **Update configuration**: Edit `.env` file with your app name, version, URLs, etc.
+- **Platform-specific code**: Use `#[cfg(target_os = "macos")]` or `cfg(windows)` in Rust
 
 ## Important Notes
 
-- **pnpm workspace**: Always use `pnpm --filter app <command>` or `pnpm --filter docs <command>` for package-specific operations
-- **Rust edition**: Stick to edition 2024 (was 2021) for modern Rust features
+- **pnpm workspace**: Always use `pnpm --filter frontend <command>` for app-specific operations
+- **Rust edition**: Uses edition 2024 for modern Rust features
 - **Version management**: Version is in root `.env` file, synced to `Cargo.toml`, `package.json`, and `tauri.conf.json`
-- **Cross-compilation**: jpegxl-rs uses `vendored` feature to enable cross-compilation without system library dependencies. This allows building x86_64 Mac binaries from Apple Silicon without installing x86_64 Homebrew.
-- **No HEIC/HEIF support**: HEIC/HEIF format removed due to libheif-rs licensing constraints (LGPL-3.0). Modern iPhones capture in JPEG XL format (fully supported). For legacy HEIC files, users should convert via macOS Preview app (File → Export → JPEG) first. See `HEIC_REMOVAL_SUMMARY.md`.
+- **Package managers**: Build scripts generate `.nuspec` (Chocolatey) and `.rb` (Homebrew) files dynamically from `.env` configuration
+- **Template system**: All app-specific values are in `.env` - edit this file when creating a new project from this template

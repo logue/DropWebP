@@ -1,6 +1,6 @@
 # 개발 환경 설정 (Windows)
 
-Windows에서 Drop Compress Image의 개발 환경을 설정하는 가이드입니다.
+Windows에서 Tauri Vue3 App의 개발 환경을 설정하는 가이드입니다.
 
 ## 빌드 방법 선택
 
@@ -31,25 +31,25 @@ Windows에서 빌드하는 두 가지 방법이 있습니다:
 3. **프로젝트 클론**
 
    ```powershell
-   git clone https://github.com/logue/DropWebP.git
-   cd DropWebP
+   git clone https://github.com/logue/tauri-vuetify-starter.git
+   cd tauri-vuetify-starter
    ```
 
 4. **Docker 이미지 빌드** (처음에만, 30-60분 소요)
 
    ```powershell
-   docker build -f Dockerfile.windows-x64 -t dropwebp-windows-builder .
+   docker build -f Dockerfile.windows-x64 -t tauri-vue3-windows-builder .
    ```
 
 5. **애플리케이션 빌드**
 
    ```powershell
-   docker run --rm -v ${PWD}:C:\workspace dropwebp-windows-builder
+   docker run --rm -v ${PWD}:C:\workspace tauri-vue3-windows-builder
    ```
 
 6. **빌드 결과물 확인**
 
-   빌드 성공 시 실행 파일과 설치 프로그램이 `app/src-tauri/target/release/bundle/` 디렉토리에 생성됩니다.
+   빌드 성공 시 실행 파일과 설치 프로그램이 `backend/target/release/bundle/` 디렉토리에 생성됩니다.
 
 ### Docker 환경의 장점
 
@@ -98,8 +98,8 @@ git --version
 GitHub에서 프로젝트를 클론하고 프로젝트 디렉토리로 이동합니다.
 
 ```powershell
-git clone https://github.com/logue/DropWebP.git
-cd DropWebP
+git clone https://github.com/logue/tauri-vuetify-starter.git
+cd tauri-vuetify-starter
 ```
 
 ## 4. Visual Studio Community 2022 설치
@@ -223,12 +223,12 @@ set(VCPKG_BUILD_TYPE release)
 
 ### 종속성 설치
 
-> **참고 (2026년 2월 업데이트)**: 프로젝트는 이제 Windows에서 AVIF 인코딩을 위해 `rav1e`(Rust 기반 AV1 인코더)를 사용합니다. 이로 인해 `libaom` 및 `aom` 패키지가 더 이상 필요하지 않습니다. `rav1e`는 NASM의 멀티패스 최적화 요구 사항을 회피하고 Windows에서 빌드 안정성을 향상시킵니다.
+> **참고:** `backend/setup-vcpkg.ps1`은 정적 링크 설정 템플릿입니다. 필요한 라이브러리를 링크할 수 있도록 스크립트의 설치 대상을 수정하세요.
 
 자동 설치 스크립트 사용(권장):
 
 ```powershell
-cd DropWebP\app\src-tauri
+cd tauri-vuetify-starter\backend
 .\setup-vcpkg.ps1
 ```
 
@@ -237,25 +237,11 @@ cd DropWebP\app\src-tauri
 ```powershell
 cd C:\vcpkg
 
-# x64-windows-static-release 트리플릿으로 설치(릴리스 전용)
-# 참고: aom 및 libavif[aom]은 더 이상 필요하지 않습니다(rav1e 사용)
-.\vcpkg install libjxl:x64-windows-static-release
-.\vcpkg install libwebp:x64-windows-static-release
-.\vcpkg install openjpeg:x64-windows-static-release
-.\vcpkg install libjpeg-turbo:x64-windows-static-release
-.\vcpkg install lcms:x64-windows-static-release
+# x64-windows-static-release 트리플릿 설치 예시(릴리스 전용)
+.\vcpkg install <package>:x64-windows-static-release
 ```
 
-설치된 라이브러리:
-
-- **rav1e**: AV1 인코더(Rust 기반, AVIF 인코딩용) - Cargo에 의해 자동으로 빌드됨
-- **libjxl**: JPEG XL 이미지 형식
-- **libwebp**: WebP 이미지 형식
-- **openjpeg**: JPEG 2000 이미지 형식
-- **libjpeg-turbo**: JPEG 이미지 처리(jpegli용)
-- **lcms**: Little CMS 색상 관리
-
-> **macOS/Linux 사용자 참고**: macOS와 Linux는 NASM 및 CMake 구성이 더 안정적이므로 여전히 `libaom`을 사용할 수 있습니다.
+설치되는 라이브러리는 `backend/setup-vcpkg.ps1`의 설정에 따라 달라집니다.
 
 설치 확인:
 
@@ -268,7 +254,7 @@ cd C:\vcpkg
 1. app 디렉토리로 이동하고 종속성을 설치합니다:
 
    ```powershell
-   cd app
+   cd frontend
    pnpm install
    ```
 
@@ -321,25 +307,21 @@ set(VCPKG_BUILD_TYPE release)
 ```powershell
 cd C:\vcpkg
 
-# 참고: aom 및 libavif[aom]은 더 이상 필요하지 않습니다(rav1e 사용)
-.\vcpkg install libjxl:arm64-windows-static-release
-.\vcpkg install libwebp:arm64-windows-static-release
-.\vcpkg install openjpeg:arm64-windows-static-release
-.\vcpkg install libjpeg-turbo:arm64-windows-static-release
-.\vcpkg install lcms:arm64-windows-static-release
+# arm64-windows-static-release 트리플릿 설치 예시
+.\vcpkg install <package>:arm64-windows-static-release
 ```
 
 ### 3. Arm64용 빌드
 
 ```powershell
-cd path\to\DropWebP\app
+cd path\to\tauri-vuetify-starter\app
 pnpm run build:tauri:windows-arm64
 ```
 
 또는 수동으로 빌드:
 
 ```powershell
-cd app\src-tauri
+cd backend
 cargo build --release --target aarch64-pc-windows-msvc
 cd ..
 pnpm tauri build --target aarch64-pc-windows-msvc
@@ -349,4 +331,4 @@ pnpm tauri build --target aarch64-pc-windows-msvc
 
 - Arm64 바이너리는 Arm64 Windows 장치(Surface Pro X 등)에서만 실행됩니다
 - 크로스 빌드된 바이너리는 x64 머신에서 실행할 수 없습니다
-- 빌드 결과물은 `app/src-tauri/target/aarch64-pc-windows-msvc/release/`에 생성됩니다
+- 빌드 결과물은 `backend/target/aarch64-pc-windows-msvc/release/`에 생성됩니다

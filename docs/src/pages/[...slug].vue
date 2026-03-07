@@ -110,7 +110,7 @@ $colors-dark: (
 
 .markdown-body {
   color-scheme: light;
-  word-wrap: break-word;
+  overflow-wrap: break-word;
   color: var(--md-text);
 
   // Dark mode
@@ -451,7 +451,7 @@ $colors-dark: (
     margin-top: 0;
     margin-bottom: 0;
     font-size: 12px;
-    word-wrap: normal;
+    overflow-wrap: normal;
 
     code {
       font-size: 100%;
@@ -495,7 +495,7 @@ $colors-dark: (
     margin: 0;
     overflow: visible;
     line-height: inherit;
-    word-wrap: normal;
+    overflow-wrap: normal;
     background-color: transparent;
     border: 0;
   }
@@ -596,7 +596,7 @@ $colors-dark: (
   [type='button'],
   [type='reset'],
   [type='submit'] {
-    appearance: button;
+    appearance: auto;
   }
 
   [type='checkbox'],
@@ -637,7 +637,7 @@ $colors-dark: (
   }
 
   ::-webkit-file-upload-button {
-    appearance: button;
+    appearance: auto;
     font: inherit;
   }
 
@@ -828,7 +828,8 @@ $colors-dark: (
   g-emoji {
     display: inline-block;
     min-width: 1ch;
-    font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji';
+    font-family:
+      'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Segoe UI Symbol', sans-serif;
     font-size: 1em;
     font-style: normal !important;
     font-weight: 400;

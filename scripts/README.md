@@ -4,17 +4,37 @@
 
 ## バージョン管理
 
-**すべてのビルドスクリプトは、ルートディレクトリの`.env`ファイルからバージョン情報を自動的に読み取ります。**
+**すべてのビルドスクリプトは、ルートディレクトリの`.env`ファイルからバージョン情報とアプリケーション設定を自動的に読み取ります。**
 
 ```dotenv
 # .env
-VERSION=3.2.1
-PROJECT_NAME=drop-compress-image
-GITHUB_USER=logue
-GITHUB_REPO=DropWebP
+VERSION=1.0.0
+APP_NAME=Your App Name
+APP_NAME_KEBAB=your-app-name
+APP_DESCRIPTION=Your app description
+AUTHOR_NAME=Your Name
+GITHUB_USER=username
+GITHUB_REPO=repository-name
+PROJECT_URL=https://github.com/username/repository
 ```
 
-バージョンを変更する場合は、`.env`ファイルの`VERSION`のみを更新してください。各パッケージマネージャーのテンプレートファイル（`.choco/drop-compress-image.nuspec`, `.homebrew/drop-compress-image.rb`）は、プレースホルダー `{{VERSION}}` を使用しており、ビルド時に自動的に置換されます。
+バージョンやアプリケーション情報を変更する場合は、`.env`ファイルのみを更新してください。各パッケージマネージャーのテンプレートファイル（`.choco/app.nuspec.template`, `.homebrew/app.rb.template`）は、プレースホルダー（例: `{{VERSION}}`, `{{APP_NAME}}`）を使用しており、ビルド時に自動的に置換されます。
+
+### テンプレートファイル
+
+- **Chocolatey**: `.choco/app.nuspec.template` → `.choco/{APP_NAME_KEBAB}.nuspec`
+- **Homebrew**: `.homebrew/app.rb.template` → `.homebrew/{APP_NAME_KEBAB}.rb`
+
+テンプレートファイルの変数プレースホルダー：
+
+- `{{VERSION}}` - アプリケーションバージョン
+- `{{APP_NAME}}` - アプリケーション名
+- `{{APP_NAME_KEBAB}}` - ケバブケース形式のアプリケーション名
+- `{{APP_DESCRIPTION}}` - アプリケーションの説明
+- `{{AUTHOR_NAME}}` - 作者名
+- `{{GITHUB_USER}}` - GitHubユーザー名
+- `{{PROJECT_URL}}` - プロジェクトURL
+- その他、.envファイル内の変数
 
 ## ディレクトリ構造
 
@@ -90,21 +110,21 @@ Linux向けクロスプラットフォームビルド（PowerShell）
 
 Windows用Chocolateyパッケージを作成
 
-`.env`からバージョンを読み取り、`.choco/drop-compress-image.nuspec`の`{{VERSION}}`プレースホルダーを置換します。
+`.env`からバージョンとアプリケーション情報を読み取り、`.choco/app.nuspec.template`から`.choco/{APP_NAME_KEBAB}.nuspec`を生成し、全てのプレースホルダーを置換します。
 
 ```powershell
 # .envから自動読み取り
 pnpm run package:chocolatey
 
 # バージョンを明示的に指定
-.\scripts\build-chocolatey.ps1 -Version 3.2.1
+.\scripts\build-chocolatey.ps1 -Version 1.0.0
 ```
 
 **プロセス**:
 
-1. `.env`からバージョンを読み取り
+1. `.env`からバージョンとアプリケーション情報を読み取り
 2. MSIファイルのSHA256チェックサムを計算
-3. `{{VERSION}}`を実際のバージョンに置換
+3. `.choco/app.nuspec.template`から全ての変数を置換
 4. `.nupkg`パッケージを生成
 
 詳細: [.choco/README.md](../.choco/README.md)
@@ -113,7 +133,7 @@ pnpm run package:chocolatey
 
 macOS用Homebrewフォーミュラを生成
 
-`.env`からバージョンを読み取り、`.homebrew/drop-compress-image.rb`の`{{VERSION}}`と`{{SHA256_*}}`プレースホルダーを置換します。
+`.env`からバージョンとアプリケーション情報を読み取り、`.homebrew/app.rb.template`から`.homebrew/{APP_NAME_KEBAB}.rb`を生成し、全てのプレースホルダーを置換します。
 
 ```bash
 # .envから自動読み取り

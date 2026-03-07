@@ -1,7 +1,0 @@
-.husky/
-.vscode/
-pnpm-lock.yaml
-app/dist/
-app/src-tauri/
-doc/.nuxt/
-doc/dist/

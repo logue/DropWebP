@@ -30,7 +30,7 @@ fi
 echo "📋 バージョン: $VERSION"
 
 # Cargo.tomlのバージョンを更新
-CARGO_TOML="$PROJECT_ROOT/app/src-tauri/Cargo.toml"
+CARGO_TOML="$PROJECT_ROOT/backend/Cargo.toml"
 if [ -f "$CARGO_TOML" ]; then
     echo "🔧 Cargo.tomlを更新中..."
     sed -i.bak "s/^version = \".*\"/version = \"$VERSION\"/" "$CARGO_TOML"
@@ -40,7 +40,7 @@ else
 fi
 
 # tauri.conf.jsonのバージョンを更新
-TAURI_CONF="$PROJECT_ROOT/app/src-tauri/tauri.conf.json"
+TAURI_CONF="$PROJECT_ROOT/backend/tauri.conf.json"
 if [ -f "$TAURI_CONF" ]; then
     echo "🔧 tauri.conf.jsonを更新中..."
     sed -i.bak "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" "$TAURI_CONF"
@@ -49,10 +49,10 @@ else
     echo "⚠️  tauri.conf.jsonが見つかりません: $TAURI_CONF"
 fi
 
-# app/package.jsonのバージョンを更新または追加
-PACKAGE_JSON="$PROJECT_ROOT/app/package.json"
+# frontend/package.jsonのバージョンを更新または追加
+PACKAGE_JSON="$PROJECT_ROOT/frontend/package.json"
 if [ -f "$PACKAGE_JSON" ]; then
-    echo "🔧 app/package.jsonを更新中..."
+    echo "🔧 frontend/package.jsonを更新中..."
     if grep -q '"version"' "$PACKAGE_JSON"; then
         # versionフィールドが存在する場合、更新
         sed -i.bak "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" "$PACKAGE_JSON"
@@ -63,7 +63,7 @@ if [ -f "$PACKAGE_JSON" ]; then
     fi
     echo "  ✅ $PACKAGE_JSON: \"version\": \"$VERSION\""
 else
-    echo "⚠️  app/package.jsonが見つかりません: $PACKAGE_JSON"
+    echo "⚠️  frontend/package.jsonが見つかりません: $PACKAGE_JSON"
 fi
 
 # バックアップファイルを削除

@@ -1,0 +1,29 @@
+class {{CLASS_NAME}} < Formula
+  desc "{{HOMEBREW_DESC}}"
+  homepage "{{HOMEPAGE_URL}}"
+  version "{{VERSION}}"
+
+  on_macos do
+    url "{{PROJECT_URL}}/releases/download/v#{version}/{{APP_NAME}}_#{version}_universal.dmg"
+    sha256 "{{SHA256_UNIVERSAL}}"
+  end
+
+  def install
+    prefix.install "{{APP_NAME_KEBAB}}.app"
+  end
+
+  def caveats
+    <<~EOS
+      {{APP_NAME}} has been installed to:
+        #{prefix}
+
+      To use it, you can:
+        1. Open it from Applications folder
+        2. Or run: open "#{prefix}/{{APP_NAME_KEBAB}}.app"
+    EOS
+  end
+
+  test do
+    assert_predicate prefix/"{{APP_NAME_KEBAB}}.app", :exist?
+  end
+end

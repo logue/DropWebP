@@ -1,13 +1,13 @@
 # Node modules (Docker内で再インストール)
 node_modules
-app/node_modules
+frontend/node_modules
 docs/node_modules
 
 # Build outputs
 dist
 .output
-app/dist
-app/src-tauri/target
+frontend/dist
+backend/target
 
 # IDE
 .vscode

@@ -16,7 +16,7 @@ REM Set Rust target directory
 set "CARGO_TARGET_DIR=C:\build-temp\target"
 
 echo.
-echo === DropWebP Windows Build Script ===
+echo === Tauri Vue3 App Windows Build Script ===
 echo.
 
 REM Skip environment check and proceed to build
@@ -120,7 +120,7 @@ echo.
 
 REM Clean previous build cache to remove old CMake configuration
 echo Cleaning previous build cache...
-cd C:\workspace\app\src-tauri
+cd C:\workspace\backend
 cargo clean
 echo Build cache cleaned
 echo.
@@ -133,7 +133,7 @@ if exist "C:\build-temp" (
 )
 echo.
 
-cd C:\workspace\app\src-tauri
+cd C:\workspace\backend
 if not exist "!CARGO_TARGET_DIR!" mkdir "!CARGO_TARGET_DIR!"
 echo Target directory: !CARGO_TARGET_DIR!
 cd C:\workspace
@@ -148,7 +148,7 @@ REM Stage 1: Build frontend (needs node_modules\.bin intact)
 echo.
 echo Stage 1/2: Building Vue frontend with Vite...
 echo Current directory: %CD%
-cd C:\workspace\app
+cd C:\workspace\frontend
 echo Changed to: %CD%
 REM Skip type-check in Docker to save time (takes too long in container)
 echo Skipping type-check (Docker environment limitation)...
@@ -201,7 +201,7 @@ REM Copy build artifacts to host directory
 echo.
 echo [4/4] Copying build artifacts...
 set "SRC_DIR=C:\build-temp\target\release"
-set "DEST_DIR=C:\workspace\app\src-tauri\target\release"
+set "DEST_DIR=C:\workspace\backend\target\release"
 
 if exist "!SRC_DIR!" (
     if not exist "!DEST_DIR!" mkdir "!DEST_DIR!"
@@ -222,8 +222,8 @@ if exist "!SRC_DIR!" (
 REM Check build artifacts
 echo.
 echo Build artifacts:
-if exist C:\workspace\app\src-tauri\target\release\bundle (
-    for /r C:\workspace\app\src-tauri\target\release\bundle %%f in (*.exe *.msi) do (
+if exist C:\workspace\backend\target\release\bundle (
+    for /r C:\workspace\backend\target\release\bundle %%f in (*.exe *.msi) do (
         echo   - %%f
     )
 ) else (

@@ -1,6 +1,6 @@
 # Configuration de l'environnement de développement (Windows)
 
-Guide pour la configuration de l'environnement de développement de Drop Compress Image sur Windows.
+Guide pour la configuration de l'environnement de développement de Tauri Vue3 App sur Windows.
 
 ## Choisissez votre méthode de construction
 
@@ -31,25 +31,25 @@ Il existe deux façons de construire sur Windows :
 3. **Cloner le projet**
 
    ```powershell
-   git clone https://github.com/logue/DropWebP.git
-   cd DropWebP
+   git clone https://github.com/logue/tauri-vuetify-starter.git
+   cd tauri-vuetify-starter
    ```
 
 4. **Construire l'image Docker** (première fois seulement, prend 30-60 minutes)
 
    ```powershell
-   docker build -f Dockerfile.windows-x64 -t dropwebp-windows-builder .
+   docker build -f Dockerfile.windows-x64 -t tauri-vue3-windows-builder .
    ```
 
 5. **Construire l'application**
 
    ```powershell
-   docker run --rm -v ${PWD}:C:\workspace dropwebp-windows-builder
+   docker run --rm -v ${PWD}:C:\workspace tauri-vue3-windows-builder
    ```
 
 6. **Vérifier les artefacts de construction**
 
-   Une fois la construction réussie, les exécutables et installateurs seront générés dans le répertoire `app/src-tauri/target/release/bundle/`.
+   Une fois la construction réussie, les exécutables et installateurs seront générés dans le répertoire `backend/target/release/bundle/`.
 
 ### Avantages de l'environnement Docker
 
@@ -98,8 +98,8 @@ git --version
 Clonez le projet depuis GitHub et naviguez vers le répertoire du projet.
 
 ```powershell
-git clone https://github.com/logue/DropWebP.git
-cd DropWebP
+git clone https://github.com/logue/tauri-vuetify-starter.git
+cd tauri-vuetify-starter
 ```
 
 ## 4. Installer Visual Studio Community 2022
@@ -223,12 +223,12 @@ set(VCPKG_BUILD_TYPE release)
 
 ### Installer les dépendances
 
-> **Note (Mise à jour février 2026)** : Le projet utilise maintenant `rav1e` (un encodeur AV1 basé sur Rust) pour l'encodage AVIF sous Windows. Cela élimine le besoin des paquets `libaom` et `aom`. `rav1e` évite les exigences d'optimisation multipass de NASM et améliore la stabilité de la compilation sous Windows.
+> **Note :** `backend/setup-vcpkg.ps1` est un modèle de configuration de lien statique. Modifiez les cibles d'installation dans ce script pour lier les bibliothèques dont vous avez besoin.
 
 Utilisez le script d'installation automatique (recommandé) :
 
 ```powershell
-cd DropWebP\app\src-tauri
+cd tauri-vuetify-starter\backend
 .\setup-vcpkg.ps1
 ```
 
@@ -237,25 +237,11 @@ Ou installez manuellement :
 ```powershell
 cd C:\vcpkg
 
-# Installer avec le triplet x64-windows-static-release (release uniquement)
-# Note : aom et libavif[aom] ne sont plus nécessaires (utilisation de rav1e)
-.\vcpkg install libjxl:x64-windows-static-release
-.\vcpkg install libwebp:x64-windows-static-release
-.\vcpkg install openjpeg:x64-windows-static-release
-.\vcpkg install libjpeg-turbo:x64-windows-static-release
-.\vcpkg install lcms:x64-windows-static-release
+# Exemple d'installation avec le triplet x64-windows-static-release (release uniquement)
+.\vcpkg install <package>:x64-windows-static-release
 ```
 
-Bibliothèques installées :
-
-- **rav1e** : Encodeur AV1 (basé sur Rust, pour l'encodage AVIF) - compilé automatiquement par Cargo
-- **libjxl** : Format d'image JPEG XL
-- **libwebp** : Format d'image WebP
-- **openjpeg** : Format d'image JPEG 2000
-- **libjpeg-turbo** : Traitement d'images JPEG (pour jpegli)
-- **lcms** : Gestion des couleurs Little CMS
-
-> **Note pour les utilisateurs macOS/Linux** : macOS et Linux peuvent toujours utiliser `libaom` car les configurations NASM et CMake sont plus stables sur ces plateformes.
+Les bibliothèques installées dépendent de ce que vous définissez dans `backend/setup-vcpkg.ps1`.
 
 Vérifier l'installation :
 
@@ -268,7 +254,7 @@ Vérifier l'installation :
 1. Naviguez vers le répertoire app et installez les dépendances :
 
    ```powershell
-   cd app
+   cd frontend
    pnpm install
    ```
 
@@ -321,25 +307,21 @@ Installer les dépendances :
 ```powershell
 cd C:\vcpkg
 
-# Note : aom et libavif[aom] ne sont plus nécessaires (utilisation de rav1e)
-.\vcpkg install libjxl:arm64-windows-static-release
-.\vcpkg install libwebp:arm64-windows-static-release
-.\vcpkg install openjpeg:arm64-windows-static-release
-.\vcpkg install libjpeg-turbo:arm64-windows-static-release
-.\vcpkg install lcms:arm64-windows-static-release
+# Exemple d'installation avec le triplet arm64-windows-static-release
+.\vcpkg install <package>:arm64-windows-static-release
 ```
 
 ### 3. Construire pour Arm64
 
 ```powershell
-cd path\to\DropWebP\app
+cd path\to\tauri-vuetify-starter\app
 pnpm run build:tauri:windows-arm64
 ```
 
 Ou construire manuellement :
 
 ```powershell
-cd app\src-tauri
+cd backend
 cargo build --release --target aarch64-pc-windows-msvc
 cd ..
 pnpm tauri build --target aarch64-pc-windows-msvc
@@ -349,4 +331,4 @@ pnpm tauri build --target aarch64-pc-windows-msvc
 
 - Les binaires Arm64 ne fonctionneront que sur les appareils Windows Arm64 (par exemple, Surface Pro X)
 - Les binaires construits en mode croisé ne peuvent pas être exécutés sur des machines x64
-- Les artefacts de construction sont générés dans `app/src-tauri/target/aarch64-pc-windows-msvc/release/`
+- Les artefacts de construction sont générés dans `backend/target/aarch64-pc-windows-msvc/release/`

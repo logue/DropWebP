@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>{{APP_NAME_KEBAB}}</id>
+    <version>{{VERSION}}</version>
+    <packageSourceUrl>{{PROJECT_URL}}</packageSourceUrl>
+    <owners>{{GITHUB_USER}}</owners>
+    <title>{{APP_NAME}}</title>
+    <authors>{{AUTHOR_NAME}}</authors>
+    <projectUrl>{{PROJECT_URL}}</projectUrl>
+    <iconUrl>{{PROJECT_URL}}/raw/main/backend/icons/128x128.png</iconUrl>
+    <copyright>2025 {{AUTHOR_NAME}}</copyright>
+    <licenseUrl>{{PROJECT_URL}}/blob/main/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <projectSourceUrl>{{PROJECT_URL}}</projectSourceUrl>
+    <docsUrl>{{DOCS_URL}}</docsUrl>
+    <bugTrackerUrl>{{PROJECT_URL}}/issues</bugTrackerUrl>
+    <tags>{{CHOCOLATEY_TAGS}}</tags>
+    <summary>{{APP_SUMMARY}}</summary>
+    <description>{{APP_DESCRIPTION}}</description>
+    <releaseNotes>{{PROJECT_URL}}/releases</releaseNotes>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

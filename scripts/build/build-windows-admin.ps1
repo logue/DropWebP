@@ -40,16 +40,16 @@ if ($nasmInstalled) {
 
 Write-Host ""
 Write-Host "[ステップ 2/4] ビルドキャッシュをクリアします..." -ForegroundColor Yellow
-Set-Location "$PSScriptRoot\app\src-tauri"
+Set-Location "$PSScriptRoot\backend"
 cargo clean
 Write-Host "キャッシュをクリアしました。" -ForegroundColor Green
 
 Write-Host ""
 Write-Host "[ステップ 3/4] アプリケーションをビルドします..." -ForegroundColor Yellow
-Set-Location "$PSScriptRoot\app"
+Set-Location "$PSScriptRoot\frontend"
 
 # build-msvc.ps1を使用してビルド
-Set-Location src-tauri
+Set-Location ..\backend
 .\build-msvc.ps1
 
 $buildSuccess = ($LASTEXITCODE -eq 0)

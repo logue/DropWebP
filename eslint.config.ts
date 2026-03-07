@@ -7,9 +7,9 @@ export default [
     name: 'root/workspace-ignore',
     ignores: [
       // App specific
-      'app/dist/',
-      'app/public/',
-      'app/src-tauri/target/',
+      'frontend/dist/',
+      'frontend/public/',
+      'backend/target/',
       // Docs specific
       'docs/.nuxt/',
       'docs/.output/',

@@ -5,7 +5,7 @@ export const useDownloads = () => {
   const { t } = useI18n();
   const config = useRuntimeConfig();
   const version = config.public.appVersion as string;
-  const urlPrefix = `https://github.com/logue/DropWebP/releases/download/${version}/drop-compress-image_${version}_`;
+  const urlPrefix = `https://github.com/logue/tauri-vuetify-starter/releases/download/${version}/tauri-vue3-app_${version}_`;
 
   // OS検出
   const detectedOS = ref<'windows' | 'macos' | 'linux' | 'unknown'>('unknown');

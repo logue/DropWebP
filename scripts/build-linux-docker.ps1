@@ -44,14 +44,14 @@ switch ($Target.ToLower()) {
         $BuildTarget = "x86_64-unknown-linux-gnu"
         $ArchName = "x86_64 (AMD64)"
         $Dockerfile = "docker/Dockerfile.linux-x64"
-        $ImageName = "dropwebp-linux-x64-builder"
+        $ImageName = "tauri-vue3-linux-x64-builder"
         $Platform = "linux/amd64"
     }
     { $_ -in "arm64", "aarch64" } {
         $BuildTarget = "aarch64-unknown-linux-gnu"
         $ArchName = "ARM64 (AArch64)"
         $Dockerfile = "docker/Dockerfile.linux-arm64"
-        $ImageName = "dropwebp-linux-arm64-builder"
+        $ImageName = "tauri-vue3-linux-arm64-builder"
         $Platform = "linux/arm64"
     }
     default {
@@ -127,10 +127,10 @@ Write-Host "`n🔨 Linux向けアプリケーションをビルド中...`n" -For
 
 # キャッシュ用のDockerボリューム名
 $PlatformSafe = $Platform -replace '/', '-'
-$CargoVolume = "dropwebp-cargo-cache-$PlatformSafe"
-$PnpmVolume = "dropwebp-pnpm-cache-$PlatformSafe"
-$TargetVolume = "dropwebp-target-cache-$PlatformSafe"
-$NodeModulesVolume = "dropwebp-node-modules-$PlatformSafe"
+$CargoVolume = "tauri-vue3-cargo-cache-$PlatformSafe"
+$PnpmVolume = "tauri-vue3-pnpm-cache-$PlatformSafe"
+$TargetVolume = "tauri-vue3-target-cache-$PlatformSafe"
+$NodeModulesVolume = "tauri-vue3-node-modules-$PlatformSafe"
 
 # ボリュームが存在しない場合は作成
 docker volume create $CargoVolume 2>&1 | Out-Null
@@ -155,8 +155,8 @@ $runArgs = @(
     "-v", "${ProjectRoot}:/workspace",
     "-v", "${CargoVolume}:/root/.cargo/registry",
     "-v", "${PnpmVolume}:/pnpm/store",
-    "-v", "${TargetVolume}:/workspace/app/src-tauri/target",
-    "-v", "${NodeModulesVolume}:/workspace/app/node_modules",
+    "-v", "${TargetVolume}:/workspace/backend/target",
+    "-v", "${NodeModulesVolume}:/workspace/frontend/node_modules",
     "-e", "BUILD_TARGET=$BuildTarget",
     "-e", "APPIMAGE_EXTRACT_AND_RUN=1",
     "-e", "VERBOSE=1"
@@ -181,7 +181,7 @@ Write-Host "`n✅ ビルド完了！`n" -ForegroundColor Green
 Write-Host "📋 成果物をホストにコピー中..." -ForegroundColor Blue
 
 # ホスト側のディレクトリを作成
-$TargetDir = Join-Path $ProjectRoot "app\src-tauri\target\$BuildTarget\release"
+$TargetDir = Join-Path $ProjectRoot "backend\target\$BuildTarget\release"
 $BundleDir = Join-Path $TargetDir "bundle"
 New-Item -ItemType Directory -Force -Path $BundleDir | Out-Null
 
@@ -191,7 +191,7 @@ docker run --rm `
     --platform $Platform `
     -v "${TargetVolume}:/data" `
     -v "${ProjectRoot}:/output" `
-    alpine sh -c "if [ -d '/data/$BuildTarget/release/bundle' ]; then cp -rv /data/$BuildTarget/release/bundle/* /output/app/src-tauri/target/$BuildTarget/release/bundle/ && echo '✅ コピー完了'; else echo '❌ bundle ディレクトリが見つかりません: /data/$BuildTarget/release/bundle'; find /data -name '*.deb' -o -name '*.rpm' 2>/dev/null || echo 'パッケージファイルが見つかりません'; exit 1; fi"
+    alpine sh -c "if [ -d '/data/$BuildTarget/release/bundle' ]; then cp -rv /data/$BuildTarget/release/bundle/* /output/backend/target/$BuildTarget/release/bundle/ && echo '✅ コピー完了'; else echo '❌ bundle ディレクトリが見つかりません: /data/$BuildTarget/release/bundle'; find /data -name '*.deb' -o -name '*.rpm' 2>/dev/null || echo 'パッケージファイルが見つかりません'; exit 1; fi"
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "`n⚠️  成果物のコピーに失敗しました" -ForegroundColor Yellow
