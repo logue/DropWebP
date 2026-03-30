@@ -170,7 +170,7 @@ store/ConfigStore.ts
 store/GlobalStore.ts
 store/index.ts
 
-locales/*.yml                       (UPDATE CONTENT)
+locales/*.yaml                      (UPDATE CONTENT)
 
 plugins/i18n.ts
 plugins/vuetify.ts
@@ -741,7 +741,7 @@ export function useFileSystem() {
 VERSION=1.0.0
 ```
 
-### 10. Vue: src/locales/en.yml
+### 10. Vue: src/locales/en.yaml
 
 **REPLACE with generic messages:**
 
@@ -792,11 +792,11 @@ theme:
 
 **REPLICATE for other languages:**
 
-- `fr.yml` (French)
-- `ja.yml` (Japanese)
-- `ko.yml` (Korean)
-- `zhHans.yml` (Simplified Chinese)
-- `zhHant.yml` (Traditional Chinese)
+- `fr.yaml` (French)
+- `ja.yaml` (Japanese)
+- `ko.yaml` (Korean)
+- `zhHans.yaml` (Simplified Chinese)
+- `zhHant.yaml` (Traditional Chinese)
 
 ### 11. Root: ReadMe.md
 

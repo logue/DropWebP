@@ -4,6 +4,8 @@
 
 **Tauri v2 desktop app** with Vue 3 frontend + Rust backend for building cross-platform desktop applications.
 
+The baseline for this project's technical stack and directory structure is [tauri-vuetify-starter](https://github.com/logue/tauri-vuetify-starter). When documenting or implementing architecture-level changes, prioritize consistency with that reference.
+
 ### Key Components
 
 - **Frontend**: Vue 3 + TypeScript + Vuetify + Pinia (located in `frontend/src/`)
@@ -143,7 +145,7 @@ cargo build --release
    });
    ```
 
-5. **i18n**: Use `vue-i18n` composable in components. Translation files are in `src/locales/*.yml` (6 languages: en, ja, fr, ko, zhHans, zhHant).
+5. **i18n**: Use `vue-i18n` composable in components. Translation files are in `src/locales/*.yaml` (6 languages: en, ja, fr, ko, zhHans, zhHant).
 
 ### Build Configuration
 
@@ -179,7 +181,7 @@ cargo build --release
 ## Common Tasks
 
 - **Add new Tauri command**: Add function to `backend/src/command.rs`, register in `main.rs`
-- **Add UI string**: Edit `frontend/src/locales/*.yml` for all languages (en, ja, fr, ko, zhHans, zhHant)
+- **Add UI string**: Edit `frontend/src/locales/*.yaml` for all languages (en, ja, fr, ko, zhHans, zhHant)
 - **Add composable**: Create new file in `frontend/src/composables/` following existing patterns
 - **Update configuration**: Edit `.env` file with your app name, version, URLs, etc.
 - **Platform-specific code**: Use `#[cfg(target_os = "macos")]` or `cfg(windows)` in Rust

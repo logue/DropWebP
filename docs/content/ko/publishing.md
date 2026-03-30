@@ -114,7 +114,7 @@ brew install drop-compress-image
 
 ### Automated Publishing via GitHub Actions
 
-The repository includes a GitHub Actions workflow (`.github/workflows/release.yml`) that automates the entire process.
+The repository includes a GitHub Actions workflow (`.github/workflows/release.yaml`) that automates the entire process.
 
 #### Setup Secrets
 

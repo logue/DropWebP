@@ -83,7 +83,7 @@ export default defineConfig(({ command, mode }): UserConfig => {
         compositionOnly: false,
         // YAMLファイルを対象に（Vueファイルの<i18n>ブロックは自動検出される）
         include: [
-          fileURLToPath(new URL('./src/locales/**/*.yml', import.meta.url)),
+          fileURLToPath(new URL('./src/locales/**/*.yaml', import.meta.url)),
           fileURLToPath(new URL('./src/locales/**/*.yaml', import.meta.url))
         ],
         // YAMLを実行時ではなくビルド時に処理
