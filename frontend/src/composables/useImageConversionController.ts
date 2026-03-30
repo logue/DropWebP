@@ -104,14 +104,20 @@ export function useImageConversionController(t: ComposerTranslation) {
   /**
    * パスリストからファイル一覧を取得
    */
-  const scanFiles = async (paths: string[]): Promise<string[] | undefined> => {
+  const scanFiles = async (
+    paths: string[],
+    recursiveOverride?: boolean
+  ): Promise<string[] | undefined> => {
     state.start(t('scanning'));
     state.currentFile.value = t('scanning');
     await nextTick();
 
     let files: string[] = [];
     try {
-      files = await fileSystem.collectFiles(paths, settingsStore.commonOptions.recursive);
+      files = await fileSystem.collectFiles(
+        paths,
+        recursiveOverride ?? settingsStore.commonOptions.recursive
+      );
     } catch (e) {
       console.error(paths, e);
       globalStore.setMessage(e instanceof Error ? e.message : String(e));
@@ -158,7 +164,7 @@ export function useImageConversionController(t: ComposerTranslation) {
     if (!picked) return;
 
     const dir = Array.isArray(picked) ? picked[0] : picked;
-    const files = await scanFiles([dir]);
+    const files = await scanFiles([dir], true);
     if (files) await processFiles(files);
   };
 
@@ -204,7 +210,9 @@ export function useImageConversionController(t: ComposerTranslation) {
   usePaste(handlePaste);
 
   const { isDragging } = useDragAndDrop(async paths => {
-    const files = await scanFiles(paths);
+    const pathInfos = await Promise.all(paths.map(path => fileSystem.pathInfo(path)));
+    const hasDirectory = pathInfos.some(path => path.isDir);
+    const files = await scanFiles(paths, hasDirectory ? true : undefined);
     if (files) await processFiles(files);
   });
 
