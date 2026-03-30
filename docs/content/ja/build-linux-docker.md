@@ -14,16 +14,19 @@ Windows、macOS、LinuxからDocker経由でLinux向けのビルドを実行す�
 ### プラットフォーム別
 
 #### Windows
+
 - Windows 10/11 (64-bit)
 - WSL 2（推奨）
 - PowerShell 5.1以上
 
 #### macOS
+
 - macOS 10.15以上
 - Bash
 - Docker Desktop for Mac
 
 #### Linux
+
 - 64-bit Linux distribution
 - Docker Engine 20.10以上
 - Bash
@@ -147,6 +150,7 @@ MAKEFLAGS=-j4
 **症状**: ビルド中にメモリエラー
 
 **解決方法**:
+
 1. `.env`でメモリ制限を増やす
 2. Docker Desktopのリソース設定でメモリを増やす（Settings → Resources → Memory）
 3. 並列ビルド数を減らす（`BUILD_CPUS`を減らす）
@@ -154,6 +158,7 @@ MAKEFLAGS=-j4
 ### ビルドが遅い
 
 **解決方法**:
+
 - `.env`で並列度を増やす
 - Docker Desktopのリソース（CPU、メモリ）を増やす
 - SSDを使用する

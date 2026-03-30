@@ -1,0 +1,23 @@
+diff --git a/lib/composables/focusTrap.js b/lib/composables/focusTrap.js
+index 7b218cb34342b656cdaf8e99052ee76018a1c456..06e3193e321f43431a44efe33a615950d9f0bcab 100644
+--- a/lib/composables/focusTrap.js
++++ b/lib/composables/focusTrap.js
+@@ -130,11 +130,13 @@ export function useFocusTrap(props, {
+   onScopeDispose(() => {
+     registry.delete(trapId);
+     clearTimeout(focusTrapSuppressionTimeout);
+-    document.removeEventListener('pointerdown', onPointerdown);
+-    document.removeEventListener('focusin', captureOnFocus);
+-    document.removeEventListener('keydown', captureOnKeydown);
+-    if (--subscribers < 1) {
+-      document.removeEventListener('keydown', onKeydown);
++    if (IN_BROWSER) {
++      document.removeEventListener('pointerdown', onPointerdown);
++      document.removeEventListener('focusin', captureOnFocus);
++      document.removeEventListener('keydown', captureOnKeydown);
++      if (--subscribers < 1) {
++        document.removeEventListener('keydown', onKeydown);
++      }
+     }
+   });
+ }

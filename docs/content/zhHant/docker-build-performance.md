@@ -6,12 +6,12 @@
 
 ### 實際建置時間
 
-| 主機環境 | 目標 | 建置時間 | QEMU模擬 |
-|---------|------|---------|---------|
-| macOS (x64) | x64 Linux | 8-12分鐘 | 不需要 ✅ |
-| macOS (Apple Silicon) | x64 Linux | 10-15分鐘 | 使用Rosetta 2 |
-| Windows (x64) | x64 Linux | 10-15分鐘 | 不需要 ✅ |
-| Windows (x64) | ARM64 Linux | **30-60分鐘** | 需要 ❌ |
+| 主機環境              | 目標        | 建置時間      | QEMU模擬      |
+| --------------------- | ----------- | ------------- | ------------- |
+| macOS (x64)           | x64 Linux   | 8-12分鐘      | 不需要 ✅     |
+| macOS (Apple Silicon) | x64 Linux   | 10-15分鐘     | 使用Rosetta 2 |
+| Windows (x64)         | x64 Linux   | 10-15分鐘     | 不需要 ✅     |
+| Windows (x64)         | ARM64 Linux | **30-60分鐘** | 需要 ❌       |
 
 ### 關鍵觀察
 

@@ -6,12 +6,12 @@ This document explains the performance characteristics of Docker builds on diffe
 
 ### Actual Build Times
 
-| Host Environment | Target | Build Time | QEMU Emulation |
-|-----------------|--------|-----------|----------------|
-| macOS (x64) | x64 Linux | 8-12 min | Not required ✅ |
-| macOS (Apple Silicon) | x64 Linux | 10-15 min | Rosetta 2 used |
-| Windows (x64) | x64 Linux | 10-15 min | Not required ✅ |
-| Windows (x64) | ARM64 Linux | **30-60 min** | Required ❌ |
+| Host Environment      | Target      | Build Time    | QEMU Emulation  |
+| --------------------- | ----------- | ------------- | --------------- |
+| macOS (x64)           | x64 Linux   | 8-12 min      | Not required ✅ |
+| macOS (Apple Silicon) | x64 Linux   | 10-15 min     | Rosetta 2 used  |
+| Windows (x64)         | x64 Linux   | 10-15 min     | Not required ✅ |
+| Windows (x64)         | ARM64 Linux | **30-60 min** | Required ❌     |
 
 ### Key Observation
 
@@ -89,11 +89,10 @@ Virtualization:
   - WSL 2 (Linux VM on Hyper-V)
   - Docker Engine in WSL 2
 
-Layer Structure:
-  Windows (NTFS)
-    ↓ 9P protocol (slow)
+Layer Structure: Windows (NTFS)
+  ↓ 9P protocol (slow)
   WSL 2 (ext4 in VM)
-    ↓ Docker bind mount
+  ↓ Docker bind mount
   Container (ext4)
 
 Overhead: High
@@ -166,6 +165,7 @@ pnpm run build:tauri:linux-x64
 ```
 
 Reasons:
+
 - No QEMU emulation needed
 - Minimal file I/O
 - Sufficient for debugging and testing
@@ -182,6 +182,7 @@ jobs:
 ```
 
 Reasons:
+
 - High-performance GitHub infrastructure
 - Time savings through parallelization
 - Zero load on local machine
@@ -254,12 +255,12 @@ RUN cargo build --release
 
 ### Scenario-Based Recommendations
 
-| Scenario | Recommended Environment | Reason |
-|----------|------------------------|--------|
-| Daily development/testing | Windows x64 → x64 Linux | Fast, sufficient |
-| Pre-release testing | GitHub Actions | Parallel, fast |
-| Emergency release | Build in WSL 2 | Self-contained locally |
-| CI/CD | GitHub Actions | Automated, parallelized |
+| Scenario                  | Recommended Environment | Reason                  |
+| ------------------------- | ----------------------- | ----------------------- |
+| Daily development/testing | Windows x64 → x64 Linux | Fast, sufficient        |
+| Pre-release testing       | GitHub Actions          | Parallel, fast          |
+| Emergency release         | Build in WSL 2          | Self-contained locally  |
+| CI/CD                     | GitHub Actions          | Automated, parallelized |
 
 ### Practical Development Flow
 

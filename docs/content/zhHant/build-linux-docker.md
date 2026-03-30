@@ -14,16 +14,19 @@
 ### 平台特定要求
 
 #### Windows
+
 - Windows 10/11 (64位元)
 - WSL 2（推薦）
 - PowerShell 5.1或更高版本
 
 #### macOS
+
 - macOS 10.15或更高版本
 - Bash
 - Docker Desktop for Mac
 
 #### Linux
+
 - 64位元Linux發行版
 - Docker Engine 20.10或更高版本
 - Bash

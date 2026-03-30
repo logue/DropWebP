@@ -6,12 +6,12 @@ Ce document explique les caractéristiques de performance des builds Docker sur 
 
 ### Temps de build réels
 
-| Environnement hôte | Cible | Temps de build | Émulation QEMU |
-|-------------------|-------|---------------|----------------|
-| macOS (x64) | x64 Linux | 8-12 min | Non requis ✅ |
-| macOS (Apple Silicon) | x64 Linux | 10-15 min | Rosetta 2 utilisé |
-| Windows (x64) | x64 Linux | 10-15 min | Non requis ✅ |
-| Windows (x64) | ARM64 Linux | **30-60 min** | Requis ❌ |
+| Environnement hôte    | Cible       | Temps de build | Émulation QEMU    |
+| --------------------- | ----------- | -------------- | ----------------- |
+| macOS (x64)           | x64 Linux   | 8-12 min       | Non requis ✅     |
+| macOS (Apple Silicon) | x64 Linux   | 10-15 min      | Rosetta 2 utilisé |
+| Windows (x64)         | x64 Linux   | 10-15 min      | Non requis ✅     |
+| Windows (x64)         | ARM64 Linux | **30-60 min**  | Requis ❌         |
 
 ### Observation clé
 

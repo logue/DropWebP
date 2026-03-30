@@ -1,5 +1,5 @@
 {
-  "name": "tauri-vuetify-starter",
+  "name": "drop-webp",
   "description": "A modern desktop application template built with Tauri v2 and Vue 3",
   "license": "MIT",
   "type": "module",
@@ -9,10 +9,10 @@
     "email": "logue@hotmail.co.jp",
     "url": "https://logue.dev/"
   },
-  "homepage": "https://github.com/logue/tauri-vuetify-starter",
+  "homepage": "https://logue.dev/DropWebP",
   "repository": {
     "type": "git",
-    "url": "git@github.com:logue/tauri-vuetify-starter.git"
+    "url": "git@github.com:logue/DropWebP.git"
   },
   "engines": {
     "node": ">=24",
@@ -22,7 +22,7 @@
     "frontend",
     "docs"
   ],
-  "packageManager": "pnpm@10.30.3",
+  "packageManager": "pnpm@10.33.0",
   "scripts": {
     "dev": "pnpm --filter frontend dev",
     "dev:tauri": "pnpm --filter frontend dev:tauri",
@@ -49,5 +49,10 @@
   },
   "resolutions": {
     "minimatch": ">=10.2.3"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "vuetify@4.0.4": "patches/vuetify@4.0.4.patch"
+    }
   }
 }

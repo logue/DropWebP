@@ -14,16 +14,19 @@ Windows, macOS 또는 Linux에서 Docker를 사용하여 Linux 바이너리를 �
 ### 플랫폼별 요구사항
 
 #### Windows
+
 - Windows 10/11 (64비트)
 - WSL 2 (권장)
 - PowerShell 5.1 이상
 
 #### macOS
+
 - macOS 10.15 이상
 - Bash
 - Docker Desktop for Mac
 
 #### Linux
+
 - 64비트 Linux 배포판
 - Docker Engine 20.10 이상
 - Bash

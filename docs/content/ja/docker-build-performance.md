@@ -6,12 +6,12 @@
 
 ### ビルド時間の実測値
 
-| ホスト環境 | ターゲット | ビルド時間 | QEMUエミュレーション |
-|-----------|----------|-----------|-------------------|
-| macOS (x64) | x64 Linux | 8-12分 | 不要 ✅ |
-| macOS (Apple Silicon) | x64 Linux | 10-15分 | Rosetta 2使用 |
-| Windows (x64) | x64 Linux | 10-15分 | 不要 ✅ |
-| Windows (x64) | ARM64 Linux | **30-60分** | 必要 ❌ |
+| ホスト環境            | ターゲット  | ビルド時間  | QEMUエミュレーション |
+| --------------------- | ----------- | ----------- | -------------------- |
+| macOS (x64)           | x64 Linux   | 8-12分      | 不要 ✅              |
+| macOS (Apple Silicon) | x64 Linux   | 10-15分     | Rosetta 2使用        |
+| Windows (x64)         | x64 Linux   | 10-15分     | 不要 ✅              |
+| Windows (x64)         | ARM64 Linux | **30-60分** | 必要 ❌              |
 
 ### 重要な観察
 
@@ -89,11 +89,10 @@ RUN apt-get install -y qemu-user-static
   - WSL 2 (Linux VM on Hyper-V)
   - Docker Engine in WSL 2
 
-レイヤー構造:
-  Windows (NTFS)
-    ↓ 9P protocol (遅い)
+レイヤー構造: Windows (NTFS)
+  ↓ 9P protocol (遅い)
   WSL 2 (ext4 in VM)
-    ↓ Docker bind mount
+  ↓ Docker bind mount
   Container (ext4)
 
 オーバーヘッド: 大
@@ -166,6 +165,7 @@ pnpm run build:tauri:linux-x64
 ```
 
 理由:
+
 - QEMUエミュレーション不要
 - ファイルI/Oも最小限
 - デバッグ・テスト用には十分
@@ -182,6 +182,7 @@ jobs:
 ```
 
 理由:
+
 - GitHubの高性能インフラ
 - 並列実行で時間短縮
 - ローカルマシンの負荷ゼロ
@@ -254,12 +255,12 @@ RUN cargo build --release
 
 ### シナリオ別推奨
 
-| シナリオ | 推奨環境 | 理由 |
-|---------|---------|------|
-| 日常開発・テスト | Windows x64 → x64 Linux | 速い、十分 |
-| リリース前テスト | GitHub Actions | 並列、高速 |
-| 緊急リリース | WSL 2内でビルド | ローカルで完結 |
-| CI/CD | GitHub Actions | 自動化、並列化 |
+| シナリオ         | 推奨環境                | 理由           |
+| ---------------- | ----------------------- | -------------- |
+| 日常開発・テスト | Windows x64 → x64 Linux | 速い、十分     |
+| リリース前テスト | GitHub Actions          | 並列、高速     |
+| 緊急リリース     | WSL 2内でビルド         | ローカルで完結 |
+| CI/CD            | GitHub Actions          | 自動化、並列化 |
 
 ### 実用的な開発フロー
 

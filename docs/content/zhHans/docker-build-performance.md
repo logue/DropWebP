@@ -6,12 +6,12 @@
 
 ### 实际构建时间
 
-| 主机环境 | 目标 | 构建时间 | QEMU模拟 |
-|---------|------|---------|---------|
-| macOS (x64) | x64 Linux | 8-12分钟 | 不需要 ✅ |
-| macOS (Apple Silicon) | x64 Linux | 10-15分钟 | 使用Rosetta 2 |
-| Windows (x64) | x64 Linux | 10-15分钟 | 不需要 ✅ |
-| Windows (x64) | ARM64 Linux | **30-60分钟** | 需要 ❌ |
+| 主机环境              | 目标        | 构建时间      | QEMU模拟      |
+| --------------------- | ----------- | ------------- | ------------- |
+| macOS (x64)           | x64 Linux   | 8-12分钟      | 不需要 ✅     |
+| macOS (Apple Silicon) | x64 Linux   | 10-15分钟     | 使用Rosetta 2 |
+| Windows (x64)         | x64 Linux   | 10-15分钟     | 不需要 ✅     |
+| Windows (x64)         | ARM64 Linux | **30-60分钟** | 需要 ❌       |
 
 ### 关键观察
 
