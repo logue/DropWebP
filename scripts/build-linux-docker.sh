@@ -7,22 +7,59 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-# .envファイルを読み込む
+# .envファイルを安全に読み込む（未クォートのスペースを含む値に対応）
 if [ -f "$PROJECT_ROOT/.env" ]; then
     echo "📄 .envファイルを読み込んでいます..."
-    set -a
-    source "$PROJECT_ROOT/.env"
-    set +a
+    while IFS= read -r line || [ -n "$line" ]; do
+        case "$line" in
+            ''|'#'*)
+                continue
+                ;;
+        esac
+
+        key="${line%%=*}"
+        value="${line#*=}"
+
+        # 両端の空白を除去
+        key="${key#${key%%[![:space:]]*}}"
+        key="${key%${key##*[![:space:]]}}"
+        value="${value#${value%%[![:space:]]*}}"
+        value="${value%${value##*[![:space:]]}}"
+
+        # 先頭末尾が同じ引用符なら除去
+        if [[ "$value" == \"*\" && "$value" == *\" ]]; then
+            value="${value:1:${#value}-2}"
+        elif [[ "$value" == \'*\' && "$value" == *\' ]]; then
+            value="${value:1:${#value}-2}"
+        fi
+
+        [ -n "$key" ] && export "$key=$value"
+    done < "$PROJECT_ROOT/.env"
 fi
 
 # 色付き出力
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
+RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}🐳 Docker経由でLinux向けビルドを実行${NC}"
 echo ""
+
+# Docker利用可否を事前確認
+if ! command -v docker >/dev/null 2>&1; then
+    echo -e "${RED}❌ Dockerコマンドが見つかりません${NC}"
+    echo "Docker Desktop (or Docker Engine) をインストールしてください。"
+    exit 1
+fi
+
+if ! docker info >/dev/null 2>&1; then
+    echo -e "${RED}❌ Dockerデーモンに接続できません${NC}"
+    echo "Docker Desktop を起動し、正常に立ち上がっていることを確認してください。"
+    echo "確認コマンド: docker info"
+    exit 1
+fi
 
 # ターゲットアーキテクチャを引数から取得（デフォルト: x86_64）
 TARGET="${1:-x86_64-unknown-linux-gnu}"

@@ -4,12 +4,35 @@ set -e
 # CI環境であることを明示（pnpmがTTYなしで動作するため）
 export CI=true
 
-# .envファイルから環境変数を読み込み
+# .envファイルから環境変数を安全に読み込み（未クォートのスペースを含む値に対応）
 if [ -f "/workspace/.env" ]; then
     echo "📄 .envファイルを読み込み中..."
-    set -a
-    source /workspace/.env
-    set +a
+    while IFS= read -r line || [ -n "$line" ]; do
+        case "$line" in
+            ''|'#'*)
+                continue
+                ;;
+        esac
+
+        key="${line%%=*}"
+        value="${line#*=}"
+
+        # 両端の空白を除去
+        key="${key#${key%%[![:space:]]*}}"
+        key="${key%${key##*[![:space:]]}}"
+        value="${value#${value%%[![:space:]]*}}"
+        value="${value%${value##*[![:space:]]}}"
+
+        # 先頭末尾が同じ引用符なら除去
+        if [[ "$value" == \"*\" && "$value" == *\" ]]; then
+            value="${value:1:${#value}-2}"
+        elif [[ "$value" == \'*\' && "$value" == *\' ]]; then
+            value="${value:1:${#value}-2}"
+        fi
+
+        [ -n "$key" ] && export "$key=$value"
+    done < /workspace/.env
+
     echo "  VERSION=$VERSION"
     echo "  PROJECT_NAME=$PROJECT_NAME"
 
@@ -56,7 +79,6 @@ else
     pnpm install --filter frontend --frozen-lockfile --ignore-scripts --offline 2>/dev/null || \
     pnpm install --filter frontend --frozen-lockfile --ignore-scripts
 fi
-cd frontend
 
 # ビルドターゲットを環境変数から取得（デフォルト: x86_64）
 TARGET="${BUILD_TARGET:-x86_64-unknown-linux-gnu}"
@@ -94,14 +116,14 @@ echo "🔨 Tauriアプリケーションをビルド中..."
 
 # Docker環境ではAppImageを除外（linuxdeployがFUSEを必要とするため）
 if [ -z "$TAURI_BUNDLER_TARGETS" ]; then
-    BUNDLE_ARGS="--bundles deb,rpm"
+    BUNDLE_TARGETS="deb,rpm"
     echo "📦 ビルドターゲット: deb, rpm (AppImageはDocker環境では除外)"
 else
-    BUNDLE_ARGS="--bundles $TAURI_BUNDLER_TARGETS"
+    BUNDLE_TARGETS="$TAURI_BUNDLER_TARGETS"
     echo "📦 ビルドターゲット: $TAURI_BUNDLER_TARGETS"
 fi
 
-pnpm tauri build --target "$TARGET" $BUNDLE_ARGS
+node /workspace/scripts/run-tauri-build.mjs --target "$TARGET" --bundles "$BUNDLE_TARGETS"
 
 echo "✅ ビルド完了！"
 
