@@ -1,6 +1,6 @@
 # Windows Build Environment Setup
 
-This guide walks you through setting up the development environment for building Tauri Vue3 App on Windows.
+This guide walks you through setting up the development environment for building Drop Compress Image on Windows.
 
 ## Choose Your Build Method
 
@@ -37,8 +37,8 @@ You can build Linux packages (.deb, .rpm) from Windows using Docker.
 3. **Clone the Project**
 
    ```powershell
-   git clone https://github.com/logue/tauri-vuetify-starter.git
-   cd tauri-vuetify-starter
+   git clone https://github.com/logue/DropWebP.git
+   cd DropWebP
    ```
 
 4. **Build Linux Packages**
@@ -57,8 +57,8 @@ You can build Linux packages (.deb, .rpm) from Windows using Docker.
 5. **Check Build Artifacts**
 
    Upon successful build, packages will be generated at:
-   - `backend/target/x86_64-unknown-linux-gnu/release/bundle/deb/`
-   - `backend/target/x86_64-unknown-linux-gnu/release/bundle/rpm/`
+   - `app/src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/`
+   - `app/src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/rpm/`
 
 ### Linux Build Benefits
 
@@ -91,25 +91,25 @@ You can build Linux packages (.deb, .rpm) from Windows using Docker.
 3. **Clone the Project**
 
    ```powershell
-   git clone https://github.com/logue/tauri-vuetify-starter.git
-   cd tauri-vuetify-starter
+   git clone https://github.com/logue/DropWebP.git
+   cd DropWebP
    ```
 
 4. **Build Docker Image** (first time only, takes 30-60 minutes)
 
    ```powershell
-   docker build -f Dockerfile.windows-x64 -t tauri-vue3-windows-builder .
+   docker build -f Dockerfile.windows-x64 -t dropwebp-windows-builder .
    ```
 
 5. **Build the Application**
 
    ```powershell
-   docker run --rm -v ${PWD}:C:\workspace tauri-vue3-windows-builder
+   docker run --rm -v ${PWD}:C:\workspace dropwebp-windows-builder
    ```
 
 6. **Check Build Artifacts**
 
-   Upon successful build, executables and installers will be generated in the `backend/target/release/bundle/` directory.
+   Upon successful build, executables and installers will be generated in the `app/src-tauri/target/release/bundle/` directory.
 
 ### Docker Environment Benefits
 
@@ -158,8 +158,8 @@ You can build Linux packages (.deb, .rpm) from Windows using Docker.
 1. Clone the project from GitHub and navigate to the project directory:
 
    ```powershell
-   git clone https://github.com/logue/tauri-vuetify-starter.git
-   cd tauri-vuetify-starter
+   git clone https://github.com/logue/DropWebP.git
+   cd DropWebP
    ```
 
 ## 4. Install Visual Studio Community 2022
@@ -283,12 +283,12 @@ set(VCPKG_BUILD_TYPE release)
 
 ### Install Dependencies
 
-> **Note:** `backend/setup-vcpkg.ps1` is a static-link setup template. Edit the install target(s) in the script to link any libraries you need.
+> **Note (Updated Feb 2026):** The project now uses `rav1e` (a Rust-based AV1 encoder) for AVIF encoding on Windows. This eliminates the need for `libaom` and `aom` packages. `rav1e` avoids NASM multipass optimization requirements and improves build stability on Windows.
 
 Use the automated installation script (recommended):
 
 ```powershell
-cd tauri-vuetify-starter\backend
+cd DropWebP\app\src-tauri
 .\setup-vcpkg.ps1
 ```
 
@@ -297,11 +297,25 @@ Or install manually:
 ```powershell
 cd C:\vcpkg
 
-# Example install with x64-windows-static-release triplet (release-only)
-.\vcpkg install <package>:x64-windows-static-release
+# Install with x64-windows-static-release triplet (release-only)
+# Note: aom and libavif[aom] are no longer required (using rav1e)
+.\vcpkg install libjxl:x64-windows-static-release
+.\vcpkg install libwebp:x64-windows-static-release
+.\vcpkg install openjpeg:x64-windows-static-release
+.\vcpkg install libjpeg-turbo:x64-windows-static-release
+.\vcpkg install lcms:x64-windows-static-release
 ```
 
-Installed libraries depend on what you define in `backend/setup-vcpkg.ps1`.
+Installed libraries:
+
+- **rav1e**: AV1 encoder (Rust-based, for AVIF encoding) - automatically built by Cargo
+- **libjxl**: JPEG XL image format
+- **libwebp**: WebP image format
+- **openjpeg**: JPEG 2000 image format
+- **libjpeg-turbo**: JPEG image processing (for jpegli)
+- **lcms**: Little CMS color management
+
+> **Note for macOS/Linux users:** macOS and Linux can still use `libaom` as NASM and CMake configurations are more stable on those platforms.
 
 Verify installation:
 
@@ -314,7 +328,7 @@ Verify installation:
 1. Navigate to the app directory and install dependencies:
 
    ```powershell
-   cd frontend
+   cd app
    pnpm install
    ```
 
@@ -367,21 +381,25 @@ Install dependencies:
 ```powershell
 cd C:\vcpkg
 
-# Example install with arm64-windows-static-release triplet
-.\vcpkg install <package>:arm64-windows-static-release
+# Note: aom and libavif[aom] are no longer required (using rav1e)
+.\vcpkg install libjxl:arm64-windows-static-release
+.\vcpkg install libwebp:arm64-windows-static-release
+.\vcpkg install openjpeg:arm64-windows-static-release
+.\vcpkg install libjpeg-turbo:arm64-windows-static-release
+.\vcpkg install lcms:arm64-windows-static-release
 ```
 
 ### 3. Build for Arm64
 
 ```powershell
-cd path\to\tauri-vuetify-starter\app
+cd path\to\DropWebP\app
 pnpm run build:tauri:windows-arm64
 ```
 
 Or build manually:
 
 ```powershell
-cd backend
+cd app\src-tauri
 cargo build --release --target aarch64-pc-windows-msvc
 cd ..
 pnpm tauri build --target aarch64-pc-windows-msvc
@@ -391,4 +409,4 @@ pnpm tauri build --target aarch64-pc-windows-msvc
 
 - Arm64 binaries will only run on Arm64 Windows devices (e.g., Surface Pro X)
 - Cross-built binaries cannot be executed on x64 machines
-- Build artifacts are generated in `backend/target/aarch64-pc-windows-msvc/release/`
+- Build artifacts are generated in `app/src-tauri/target/aarch64-pc-windows-msvc/release/`

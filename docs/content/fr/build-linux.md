@@ -1,6 +1,6 @@
-# Construire Tauri Vue3 App pour Linux
+# Construire Drop Compress Image pour Linux
 
-Ce guide vous accompagne dans la configuration de l'environnement de développement et la construction de Tauri Vue3 App sur Ubuntu 24.04 LTS (et distributions similaires basées sur Debian).
+Ce guide vous accompagne dans la configuration de l'environnement de développement et la construction de Drop Compress Image sur Ubuntu 24.04 LTS (et distributions similaires basées sur Debian).
 
 ## Prérequis
 
@@ -58,7 +58,7 @@ Vous devriez voir une sortie montrant GCC version 13.x ou supérieure.
 
 ## Étape 3 : Installer Rust
 
-Tauri Vue3 App est construit avec Rust, vous devrez donc installer la chaîne d'outils Rust.
+Drop Compress Image est construit avec Rust, vous devrez donc installer la chaîne d'outils Rust.
 
 ### Installer Rust via rustup
 
@@ -92,7 +92,7 @@ Vous devriez voir les informations de version pour `rustc` et `cargo`.
 
 ## Étape 4 : Installer Node.js
 
-Le frontend de Tauri Vue3 App est construit avec Vue.js et nécessite Node.js.
+Le frontend de Drop Compress Image est construit avec Vue.js et nécessite Node.js.
 
 ### Installer Node.js via le Dépôt NodeSource
 
@@ -113,7 +113,7 @@ Vous devriez voir Node.js version 22.x ou supérieure.
 
 ## Étape 5 : Installer pnpm
 
-Tauri Vue3 App utilise pnpm comme gestionnaire de paquets pour de meilleures performances et efficacité disque.
+Drop Compress Image utilise pnpm comme gestionnaire de paquets pour de meilleures performances et efficacité disque.
 
 ### Installer pnpm
 
@@ -129,7 +129,7 @@ pnpm --version
 
 ## Étape 6 : Configurer vcpkg et Installer les Dépendances
 
-Ce projet utilise vcpkg pour le lien statique des bibliothèques C/C++. Modifiez `backend/setup-vcpkg.sh` pour définir les bibliothèques dont vous avez besoin.
+Ce projet utilise vcpkg pour gérer les bibliothèques de traitement d'images C/C++ (libaom, libavif, libjxl, etc.).
 
 ### Installer les Prérequis de vcpkg
 
@@ -159,7 +159,7 @@ source ~/.bashrc
 Utilisez le script d'installation automatique (recommandé) :
 
 ```bash
-cd ~/path/to/tauri-vuetify-starter/backend
+cd ~/path/to/DropWebP/app/src-tauri
 ./setup-vcpkg.sh
 ```
 
@@ -168,30 +168,50 @@ Ou installez manuellement :
 ```bash
 cd ~/vcpkg
 
-# Exemple pour Linux x64
-./vcpkg install <package>:x64-linux
+# Pour Linux x64
+./vcpkg install aom:x64-linux
+./vcpkg install libavif[aom]:x64-linux
+./vcpkg install libjxl:x64-linux
+./vcpkg install libwebp:x64-linux
+./vcpkg install openjpeg:x64-linux
+./vcpkg install libjpeg-turbo:x64-linux
+./vcpkg install lcms:x64-linux
 
-# Exemple pour Linux ARM64
-./vcpkg install <package>:arm64-linux
+# Pour Linux ARM64
+./vcpkg install aom:arm64-linux
+./vcpkg install libavif[aom]:arm64-linux
+./vcpkg install libjxl:arm64-linux
+./vcpkg install libwebp:arm64-linux
+./vcpkg install openjpeg:arm64-linux
+./vcpkg install libjpeg-turbo:arm64-linux
+./vcpkg install lcms:arm64-linux
 ```
 
-Les bibliothèques installées dépendent de ce que vous définissez dans `backend/setup-vcpkg.sh`.
+Bibliothèques installées :
+
+- **libaom** : Encodeur AV1 (pour le format AVIF, **requis**)
+- **libavif** : Format d'image AVIF
+- **libjxl** : Format d'image JPEG XL
+- **libwebp** : Format d'image WebP
+- **openjpeg** : Format d'image JPEG 2000
+- **libjpeg-turbo** : Traitement d'images JPEG (pour jpegli)
+- **lcms** : Gestion des couleurs Little CMS
 
 ### Vérifier l'Installation
 
 ```bash
-./vcpkg list
+./vcpkg list | grep -E "aom|avif|jxl|webp|openjpeg|jpeg|lcms"
 ```
 
-## Étape 7 : Cloner et Construire Tauri Vue3 App
+## Étape 7 : Cloner et Construire Drop Compress Image
 
-Maintenant vous êtes prêt à cloner et construire Tauri Vue3 App.
+Maintenant vous êtes prêt à cloner et construire Drop Compress Image.
 
 ### Cloner le Référentiel
 
 ```bash
-git clone https://github.com/logue/tauri-vuetify-starter.git
-cd tauri-vuetify-starter
+git clone https://github.com/logue/DropWebP.git
+cd DropWebP
 ```
 
 ### Installer les Dépendances Frontend
@@ -224,7 +244,7 @@ Pour la production :
 pnpm build:tauri
 ```
 
-L'application construite sera dans `backend/target/release/`.
+L'application construite sera dans `app/src-tauri/target/release/`.
 
 ## Étape 8 : Formats de Distribution
 
@@ -238,7 +258,7 @@ AppImage est un format de paquet universel qui fonctionne sur la plupart des dis
 pnpm build:tauri
 ```
 
-L'AppImage sera dans `backend/target/release/bundle/appimage/`.
+L'AppImage sera dans `app/src-tauri/target/release/bundle/appimage/`.
 
 ### Paquet Debian (.deb)
 
@@ -248,12 +268,12 @@ Pour les distributions basées sur Debian/Ubuntu :
 pnpm build:tauri
 ```
 
-Le paquet .deb sera dans `backend/target/release/bundle/deb/`.
+Le paquet .deb sera dans `app/src-tauri/target/release/bundle/deb/`.
 
 Installez-le avec :
 
 ```bash
-sudo dpkg -i backend/target/release/bundle/deb/*.deb
+sudo dpkg -i app/src-tauri/target/release/bundle/deb/*.deb
 ```
 
 ### Paquet RPM (.rpm)
@@ -265,7 +285,7 @@ sudo apt install -y rpm
 pnpm build:tauri
 ```
 
-Le paquet .rpm sera dans `backend/target/release/bundle/rpm/`.
+Le paquet .rpm sera dans `app/src-tauri/target/release/bundle/rpm/`.
 
 ## Dépannage
 
@@ -306,7 +326,7 @@ Le paquet .rpm sera dans `backend/target/release/bundle/rpm/`.
 
    ```bash
    # Rendre l'AppImage exécutable
-   chmod +x backend/target/release/bundle/appimage/*.AppImage
+   chmod +x app/src-tauri/target/release/bundle/appimage/*.AppImage
    ```
 
 5. **Version GLIBC Manquante**
@@ -336,17 +356,17 @@ sudo apt install -y intel-media-va-driver
 
 Si vous rencontrez des problèmes non couverts ici :
 
-1. Vérifiez le [référentiel Tauri Vue3 App](https://github.com/logue/tauri-vuetify-starter) pour les problèmes connus
+1. Vérifiez le [référentiel Drop Compress Image](https://github.com/logue/DropWebP) pour les problèmes connus
 2. Consultez la [documentation Tauri v2](https://v2.tauri.app/start/prerequisites/) pour des conseils spécifiques à Linux
 3. Recherchez les issues GitHub existantes ou créez-en une nouvelle
 
 ## Prochaines Étapes
 
-Une fois que Tauri Vue3 App est construit avec succès :
+Une fois que Drop Compress Image est construit avec succès :
 
 1. **Exécuter les Tests** : Exécutez `pnpm test` pour vous assurer que tout fonctionne correctement
 2. **Développement** : Utilisez `pnpm dev:tauri` pour le développement avec rechargement à chaud
 3. **Personnalisation** : Explorez la base de code et apportez vos modifications
 4. **Distribution** : Utilisez `pnpm build:tauri` pour créer des paquets distribuables
 
-Vous êtes maintenant prêt à développer et construire Tauri Vue3 App sur Linux !
+Vous êtes maintenant prêt à développer et construire Drop Compress Image sur Linux !

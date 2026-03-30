@@ -1,6 +1,6 @@
-# Linux용 Tauri Vue3 App 빌드
+# Linux용 Drop Compress Image 빌드
 
-이 가이드는 Ubuntu 24.04 LTS(및 유사한 Debian 기반 배포판)에서 개발 환경을 설정하고 Tauri Vue3 App를 빌드하는 과정을 안내합니다。
+이 가이드는 Ubuntu 24.04 LTS(및 유사한 Debian 기반 배포판)에서 개발 환경을 설정하고 Drop Compress Image를 빌드하는 과정을 안내합니다。
 
 ## 사전 요구사항
 
@@ -58,7 +58,7 @@ GCC 버전 13.x 이상이 표시되어야 합니다.
 
 ## 단계 3: Rust 설치
 
-Tauri Vue3 App는 Rust로 빌드되므로 Rust 툴체인을 설치해야 합니다.
+Drop Compress Image는 Rust로 빌드되므로 Rust 툴체인을 설치해야 합니다.
 
 ### rustup을 통한 Rust 설치
 
@@ -92,7 +92,7 @@ cargo --version
 
 ## 단계 4: Node.js 설치
 
-Tauri Vue3 App의 프론트엔드는 Vue.js로 빌드되어 Node.js가 필요합니다.
+Drop Compress Image의 프론트엔드는 Vue.js로 빌드되어 Node.js가 필요합니다.
 
 ### NodeSource 저장소를 통한 Node.js 설치
 
@@ -113,7 +113,7 @@ Node.js 버전 22.x 이상이 표시되어야 합니다.
 
 ## 단계 5: pnpm 설치
 
-Tauri Vue3 App는 성능과 디스크 효율성을 위해 pnpm을 패키지 관리자로 사용합니다.
+Drop Compress Image는 성능과 디스크 효율성을 위해 pnpm을 패키지 관리자로 사용합니다.
 
 ### pnpm 설치
 
@@ -129,7 +129,7 @@ pnpm --version
 
 ## 단계 6: vcpkg 설정 및 종속성 설치
 
-이 프로젝트는 vcpkg를 사용해 C/C++ 라이브러리를 정적 링크합니다. 필요한 라이브러리는 `backend/setup-vcpkg.sh`를 수정해 정의하세요.
+이 프로젝트는 vcpkg를 사용하여 C/C++ 이미지 처리 라이브러리(libaom, libavif, libjxl 등)를 관리합니다.
 
 ### vcpkg 선행 조건 설치
 
@@ -159,7 +159,7 @@ source ~/.bashrc
 자동 설치 스크립트 사용(권장):
 
 ```bash
-cd ~/path/to/tauri-vuetify-starter/backend
+cd ~/path/to/DropWebP/app/src-tauri
 ./setup-vcpkg.sh
 ```
 
@@ -168,30 +168,50 @@ cd ~/path/to/tauri-vuetify-starter/backend
 ```bash
 cd ~/vcpkg
 
-# x64 Linux 예시
-./vcpkg install <package>:x64-linux
+# x64 Linux의 경우
+./vcpkg install aom:x64-linux
+./vcpkg install libavif[aom]:x64-linux
+./vcpkg install libjxl:x64-linux
+./vcpkg install libwebp:x64-linux
+./vcpkg install openjpeg:x64-linux
+./vcpkg install libjpeg-turbo:x64-linux
+./vcpkg install lcms:x64-linux
 
-# ARM64 Linux 예시
-./vcpkg install <package>:arm64-linux
+# ARM64 Linux의 경우
+./vcpkg install aom:arm64-linux
+./vcpkg install libavif[aom]:arm64-linux
+./vcpkg install libjxl:arm64-linux
+./vcpkg install libwebp:arm64-linux
+./vcpkg install openjpeg:arm64-linux
+./vcpkg install libjpeg-turbo:arm64-linux
+./vcpkg install lcms:arm64-linux
 ```
 
-설치되는 라이브러리는 `backend/setup-vcpkg.sh`의 설정에 따라 달라집니다.
+설치된 라이브러리:
+
+- **libaom**: AV1 인코더(AVIF 형식용, **필수**)
+- **libavif**: AVIF 이미지 형식
+- **libjxl**: JPEG XL 이미지 형식
+- **libwebp**: WebP 이미지 형식
+- **openjpeg**: JPEG 2000 이미지 형식
+- **libjpeg-turbo**: JPEG 이미지 처리(jpegli용)
+- **lcms**: Little CMS 색상 관리
 
 ### 설치 확인
 
 ```bash
-./vcpkg list
+./vcpkg list | grep -E "aom|avif|jxl|webp|openjpeg|jpeg|lcms"
 ```
 
-## 단계 7: Tauri Vue3 App 복제 및 빌드
+## 단계 7: Drop Compress Image 복제 및 빌드
 
-이제 Tauri Vue3 App를 복제하고 빌드할 준비가 되었습니다.
+이제 Drop Compress Image를 복제하고 빌드할 준비가 되었습니다.
 
 ### 리포지토리 복제
 
 ```bash
-git clone https://github.com/logue/tauri-vuetify-starter.git
-cd tauri-vuetify-starter
+git clone https://github.com/logue/DropWebP.git
+cd DropWebP
 ```
 
 ### 프론트엔드 종속성 설치
@@ -224,7 +244,7 @@ pnpm dev:tauri
 pnpm build:tauri
 ```
 
-빌드된 애플리케이션은 `backend/target/release/`에 있습니다.
+빌드된 애플리케이션은 `app/src-tauri/target/release/`에 있습니다.
 
 ## 단계 8: 배포 형식
 
@@ -238,7 +258,7 @@ AppImage는 대부분의 Linux 배포판에서 작동하는 범용 패키지 형
 pnpm build:tauri
 ```
 
-AppImage는 `backend/target/release/bundle/appimage/`에 있습니다.
+AppImage는 `app/src-tauri/target/release/bundle/appimage/`에 있습니다.
 
 ### Debian 패키지 (.deb)
 
@@ -248,12 +268,12 @@ Debian/Ubuntu 기반 배포판용:
 pnpm build:tauri
 ```
 
-.deb 패키지는 `backend/target/release/bundle/deb/`에 있습니다.
+.deb 패키지는 `app/src-tauri/target/release/bundle/deb/`에 있습니다.
 
 설치:
 
 ```bash
-sudo dpkg -i backend/target/release/bundle/deb/*.deb
+sudo dpkg -i app/src-tauri/target/release/bundle/deb/*.deb
 ```
 
 ### RPM 패키지 (.rpm)
@@ -265,7 +285,7 @@ sudo apt install -y rpm
 pnpm build:tauri
 ```
 
-.rpm 패키지는 `backend/target/release/bundle/rpm/`에 있습니다.
+.rpm 패키지는 `app/src-tauri/target/release/bundle/rpm/`에 있습니다.
 
 ## 문제 해결
 
@@ -306,7 +326,7 @@ pnpm build:tauri
 
    ```bash
    # AppImage를 실행 가능하게 만들기
-   chmod +x backend/target/release/bundle/appimage/*.AppImage
+   chmod +x app/src-tauri/target/release/bundle/appimage/*.AppImage
    ```
 
 5. **GLIBC 버전 누락**
@@ -336,17 +356,17 @@ sudo apt install -y intel-media-va-driver
 
 여기서 다루지 않은 문제가 발생하면:
 
-1. 알려진 문제에 대해 [Tauri Vue3 App 리포지토리](https://github.com/logue/tauri-vuetify-starter) 확인
+1. 알려진 문제에 대해 [Drop Compress Image 리포지토리](https://github.com/logue/DropWebP) 확인
 2. Linux 관련 가이드는 [Tauri v2 문서](https://v2.tauri.app/start/prerequisites/) 참고
 3. 기존 GitHub 이슈 검색하거나 새 이슈 생성
 
 ## 다음 단계
 
-Tauri Vue3 App가 성공적으로 빌드되면:
+Drop Compress Image가 성공적으로 빌드되면:
 
 1. **테스트 실행**: `pnpm test`를 실행하여 모든 것이 올바르게 작동하는지 확인
 2. **개발**: 핫 리로딩이 포함된 개발에는 `pnpm dev:tauri` 사용
 3. **사용자 정의**: 코드베이스를 탐색하고 수정 사항 적용
 4. **배포**: 배포 가능한 패키지를 만들려면 `pnpm build:tauri` 사용
 
-이제 Linux에서 Tauri Vue3 App를 개발하고 빌드할 준비가 되었습니다!
+이제 Linux에서 Drop Compress Image를 개발하고 빌드할 준비가 되었습니다!

@@ -15,7 +15,7 @@ const loadEnvValue = (key: string, defaultValue: string = ''): string => {
   }
 };
 
-const version = loadEnvValue('VERSION', '0.0.0');
+const version = loadEnvValue('VERSION', '3.3.0');
 const googleAnalyticsId = loadEnvValue('GOOGLE_ANALYTICS_ID', '');
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
@@ -48,7 +48,7 @@ export default defineNuxtConfig({
 
   // アプリ設定
   app: {
-    baseURL: process.env.NUXT_APP_BASE_URL || '/tauri-vue3-app/',
+    baseURL: process.env.NUXT_APP_BASE_URL || '/DropWebP/',
     head: {
       link: [
         // app側と同じGoogle Fontsを読み込み

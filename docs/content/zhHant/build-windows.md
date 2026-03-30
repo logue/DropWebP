@@ -1,6 +1,6 @@
 # 設置開發環境（Windows）
 
-在Windows上為Tauri Vue3 App設置開發環境的指南。
+在Windows上為Drop Compress Image設置開發環境的指南。
 
 ## 選擇構建方法
 
@@ -31,25 +31,25 @@ Windows上有兩種構建方式：
 3. **克隆專案**
 
    ```powershell
-   git clone https://github.com/logue/tauri-vuetify-starter.git
-   cd tauri-vuetify-starter
+   git clone https://github.com/logue/DropWebP.git
+   cd DropWebP
    ```
 
 4. **構建Docker映像**（僅首次，需要30-60分鐘）
 
    ```powershell
-   docker build -f Dockerfile.windows-x64 -t tauri-vue3-windows-builder .
+   docker build -f Dockerfile.windows-x64 -t dropwebp-windows-builder .
    ```
 
 5. **構建應用程式**
 
    ```powershell
-   docker run --rm -v ${PWD}:C:\workspace tauri-vue3-windows-builder
+   docker run --rm -v ${PWD}:C:\workspace dropwebp-windows-builder
    ```
 
 6. **檢查構建產物**
 
-   構建成功後，可執行文件和安裝程序將生成在`backend/target/release/bundle/`目錄中。
+   構建成功後，可執行文件和安裝程序將生成在`app/src-tauri/target/release/bundle/`目錄中。
 
 ### Docker環境的優勢
 
@@ -98,8 +98,8 @@ git --version
 從GitHub克隆項目並導航到項目目錄。
 
 ```powershell
-git clone https://github.com/logue/tauri-vuetify-starter.git
-cd tauri-vuetify-starter
+git clone https://github.com/logue/DropWebP.git
+cd DropWebP
 ```
 
 ## 4. 安裝Visual Studio Community 2022
@@ -223,12 +223,12 @@ set(VCPKG_BUILD_TYPE release)
 
 ### 安裝依賴項
 
-> **注意：**`backend/setup-vcpkg.ps1` 是靜態連結設定範本。請編輯腳本中的安裝目標，以連結你需要的任意程式庫。
+> **注意（2026年2月更新）**：專案現在在Windows上使用`rav1e`（基於Rust的AV1編碼器）進行AVIF編碼。這樣就不再需要`libaom`和`aom`套件。`rav1e`避免了NASM的多遍最佳化要求，提高了Windows上的建構穩定性。
 
 使用自動安裝腳本（推薦）：
 
 ```powershell
-cd tauri-vuetify-starter\backend
+cd DropWebP\app\src-tauri
 .\setup-vcpkg.ps1
 ```
 
@@ -237,11 +237,25 @@ cd tauri-vuetify-starter\backend
 ```powershell
 cd C:\vcpkg
 
-# 使用 x64-windows-static-release 三元組的安裝範例（僅發布版）
-.\vcpkg install <package>:x64-windows-static-release
+# 使用x64-windows-static-release三元組安裝（僅發布版）
+# 注意：不再需要aom和libavif[aom]（使用rav1e）
+.\vcpkg install libjxl:x64-windows-static-release
+.\vcpkg install libwebp:x64-windows-static-release
+.\vcpkg install openjpeg:x64-windows-static-release
+.\vcpkg install libjpeg-turbo:x64-windows-static-release
+.\vcpkg install lcms:x64-windows-static-release
 ```
 
-安裝哪些程式庫取決於你在 `backend/setup-vcpkg.ps1` 中的定義。
+已安裝的庫：
+
+- **rav1e**：AV1編碼器（基於Rust，用於AVIF編碼） - 由Cargo自動建構
+- **libjxl**：JPEG XL圖像格式
+- **libwebp**：WebP圖像格式
+- **openjpeg**：JPEG 2000圖像格式
+- **libjpeg-turbo**：JPEG圖像處理（用於jpegli）
+- **lcms**：Little CMS色彩管理
+
+> **macOS/Linux使用者注意**：由於這些平台上的NASM和CMake設定更加穩定，macOS和Linux仍然可以使用`libaom`。
 
 驗證安裝：
 
@@ -254,7 +268,7 @@ cd C:\vcpkg
 1. 導航到 app 目錄並安裝相依性：
 
    ```powershell
-   cd frontend
+   cd app
    pnpm install
    ```
 
@@ -307,21 +321,25 @@ set(VCPKG_BUILD_TYPE release)
 ```powershell
 cd C:\vcpkg
 
-# 使用 arm64-windows-static-release 三元組的安裝範例
-.\vcpkg install <package>:arm64-windows-static-release
+# 注意：不再需要aom和libavif[aom]（使用rav1e）
+.\vcpkg install libjxl:arm64-windows-static-release
+.\vcpkg install libwebp:arm64-windows-static-release
+.\vcpkg install openjpeg:arm64-windows-static-release
+.\vcpkg install libjpeg-turbo:arm64-windows-static-release
+.\vcpkg install lcms:arm64-windows-static-release
 ```
 
 ### 3. 為 Arm64 建構
 
 ```powershell
-cd path\to\tauri-vuetify-starter\app
+cd path\to\DropWebP\app
 pnpm run build:tauri:windows-arm64
 ```
 
 或手動建構：
 
 ```powershell
-cd backend
+cd app\src-tauri
 cargo build --release --target aarch64-pc-windows-msvc
 cd ..
 pnpm tauri build --target aarch64-pc-windows-msvc
@@ -331,4 +349,4 @@ pnpm tauri build --target aarch64-pc-windows-msvc
 
 - Arm64 二進位檔案僅在 Arm64 Windows 設備（例如 Surface Pro X）上執行
 - 交叉編譯的二進位檔案無法在 x64 機器上執行
-- 建構產物在 `backend/target/aarch64-pc-windows-msvc/release/` 中生成
+- 建構產物在 `app/src-tauri/target/aarch64-pc-windows-msvc/release/` 中生成

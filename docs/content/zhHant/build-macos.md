@@ -1,6 +1,6 @@
-# 為 macOS 建構 Tauri Vue3 App
+# 為 macOS 建構 Drop Compress Image
 
-本指南將引導您在 macOS 系統上設置開發環境並建構 Tauri Vue3 App。
+本指南將引導您在 macOS 系統上設置開發環境並建構 Drop Compress Image。
 
 ## 先決條件
 
@@ -67,7 +67,7 @@ brew --version
 
 ## 步驟 3：安裝 Rust
 
-Tauri Vue3 App 使用 Rust 建構，因此您需要安裝 Rust 工具鏈。
+Drop Compress Image 使用 Rust 建構，因此您需要安裝 Rust 工具鏈。
 
 ### 透過 rustup 安裝 Rust
 
@@ -94,7 +94,7 @@ cargo --version
 
 ## 步驟 4：安裝 Node.js
 
-Tauri Vue3 App 的前端使用 Vue.js 建構，需要 Node.js。
+Drop Compress Image 的前端使用 Vue.js 建構，需要 Node.js。
 
 ### 透過 Homebrew 安裝 Node.js
 
@@ -111,7 +111,7 @@ npm --version
 
 ## 步驟 5：安裝 pnpm
 
-Tauri Vue3 App 使用 pnpm 作為套件管理器，以獲得更好的效能和磁碟效率。
+Drop Compress Image 使用 pnpm 作為套件管理器，以獲得更好的效能和磁碟效率。
 
 ### 安裝 pnpm
 
@@ -127,7 +127,7 @@ pnpm --version
 
 ## 步驟 6：設置 vcpkg 並安裝相依性
 
-此項目使用 vcpkg 進行 C/C++ 程式庫的靜態連結。請編輯 `backend/setup-vcpkg.sh` 以定義你需要的任意程式庫。
+此項目使用 vcpkg 管理 C/C++ 圖像處理程式庫（libaom、libavif、libjxl 等）。
 
 ### 安裝 vcpkg
 
@@ -150,7 +150,7 @@ source ~/.zshrc
 使用自動安裝腳本（推薦）：
 
 ```bash
-cd ~/path/to/tauri-vuetify-starter/backend
+cd ~/path/to/DropWebP/app/src-tauri
 ./setup-vcpkg.sh
 ```
 
@@ -159,30 +159,50 @@ cd ~/path/to/tauri-vuetify-starter/backend
 ```bash
 cd ~/Developer/vcpkg
 
-# Apple Silicon (M1/M2/M3) 範例
-./vcpkg install <package>:arm64-osx
+# Apple Silicon (M1/M2/M3) 的情況
+./vcpkg install aom:arm64-osx
+./vcpkg install libavif[aom]:arm64-osx
+./vcpkg install libjxl:arm64-osx
+./vcpkg install libwebp:arm64-osx
+./vcpkg install openjpeg:arm64-osx
+./vcpkg install libjpeg-turbo:arm64-osx
+./vcpkg install lcms:arm64-osx
 
-# Intel Mac 範例
-./vcpkg install <package>:x64-osx
+# Intel Mac 的情況
+./vcpkg install aom:x64-osx
+./vcpkg install libavif[aom]:x64-osx
+./vcpkg install libjxl:x64-osx
+./vcpkg install libwebp:x64-osx
+./vcpkg install openjpeg:x64-osx
+./vcpkg install libjpeg-turbo:x64-osx
+./vcpkg install lcms:x64-osx
 ```
 
-安裝哪些程式庫取決於你在 `backend/setup-vcpkg.sh` 中的定義。
+安裝的程式庫：
+
+- **libaom**：AV1 編碼器（用於 AVIF 格式，**必需**）
+- **libavif**：AVIF 圖像格式
+- **libjxl**：JPEG XL 圖像格式
+- **libwebp**：WebP 圖像格式
+- **openjpeg**：JPEG 2000 圖像格式
+- **libjpeg-turbo**：JPEG 圖像處理（用於 jpegli）
+- **lcms**：Little CMS 色彩管理
 
 ### 驗證安裝
 
 ```bash
-./vcpkg list
+./vcpkg list | grep -E "aom|avif|jxl|webp|openjpeg|jpeg|lcms"
 ```
 
-## 步驟 7：複製和建構 Tauri Vue3 App
+## 步驟 7：複製和建構 Drop Compress Image
 
-現在您已準備好複製和建構 Tauri Vue3 App。
+現在您已準備好複製和建構 Drop Compress Image。
 
 ### 複製存儲庫
 
 ```bash
-git clone https://github.com/logue/tauri-vuetify-starter.git
-cd tauri-vuetify-starter
+git clone https://github.com/logue/DropWebP.git
+cd DropWebP
 ```
 
 ### 安裝前端相依性
@@ -369,7 +389,7 @@ pnpm run build:tauri:mac-x64
 建構產物根據目標生成在以下位置：
 
 ```
-backend/target/
+app/src-tauri/target/
 ├── aarch64-apple-darwin/release/   # ARM64 建構
 │   └── bundle/
 ├── x86_64-apple-darwin/release/    # Intel 建構
@@ -382,17 +402,17 @@ backend/target/
 
 如果您遇到此處未涵蓋的問題：
 
-1. 檢查 [Tauri Vue3 App 存儲庫](https://github.com/logue/tauri-vuetify-starter) 的已知問題
+1. 檢查 [Drop Compress Image 存儲庫](https://github.com/logue/DropWebP) 的已知問題
 2. 查看 [Tauri v2 文件](https://v2.tauri.app/start/prerequisites/) 以獲取 macOS 特定指導
 3. 搜尋現有的 GitHub 問題或建立新問題
 
 ## 下一步
 
-成功建構 Tauri Vue3 App 後：
+成功建構 Drop Compress Image 後：
 
 1. **執行測試**：執行 `pnpm test` 確保一切正常工作
 2. **開發**：使用 `pnpm tauri dev` 進行熱重載開發
 3. **自訂**：探索程式碼基礎並進行修改
 4. **分發**：使用 `pnpm tauri build` 建立可分發的套件
 
-您現在已準備好在 macOS 上開發和建構 Tauri Vue3 App！
+您現在已準備好在 macOS 上開發和建構 Drop Compress Image！

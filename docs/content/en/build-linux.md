@@ -1,6 +1,6 @@
-# Build Tauri Vue3 App for Linux
+# Build Drop Compress Image for Linux
 
-This guide walks you through setting up the development environment and building Tauri Vue3 App on Ubuntu 24.04 LTS (and similar Debian-based distributions).
+This guide walks you through setting up the development environment and building Drop Compress Image on Ubuntu 24.04 LTS (and similar Debian-based distributions).
 
 ## Prerequisites
 
@@ -58,7 +58,7 @@ You should see output showing GCC version 13.x or higher.
 
 ## Step 3: Install Rust
 
-Tauri Vue3 App is built with Rust, so you'll need to install the Rust toolchain.
+Drop Compress Image is built with Rust, so you'll need to install the Rust toolchain.
 
 ### Install Rust via rustup
 
@@ -92,7 +92,7 @@ You should see version information for both `rustc` and `cargo`.
 
 ## Step 4: Install Node.js
 
-The frontend of Tauri Vue3 App is built with Vue.js and requires Node.js.
+The frontend of Drop Compress Image is built with Vue.js and requires Node.js.
 
 ### Install Node.js via NodeSource Repository
 
@@ -113,7 +113,7 @@ You should see Node.js version 22.x or higher.
 
 ## Step 5: Install pnpm
 
-Tauri Vue3 App uses pnpm as its package manager for better performance and disk efficiency.
+Drop Compress Image uses pnpm as its package manager for better performance and disk efficiency.
 
 ### Install pnpm
 
@@ -129,7 +129,7 @@ pnpm --version
 
 ## Step 6: Set Up vcpkg and Install Dependencies
 
-This project uses vcpkg for static linking of C/C++ libraries. Edit `backend/setup-vcpkg.sh` to define any libraries you need.
+This project uses vcpkg to manage C/C++ image processing libraries (libaom, libavif, libjxl, etc.).
 
 ### Install vcpkg Prerequisites
 
@@ -159,7 +159,7 @@ source ~/.bashrc
 Use the automated installation script (recommended):
 
 ```bash
-cd ~/path/to/tauri-vuetify-starter/backend
+cd ~/path/to/DropWebP/app/src-tauri
 ./setup-vcpkg.sh
 ```
 
@@ -168,30 +168,50 @@ Or install manually:
 ```bash
 cd ~/vcpkg
 
-# Example for x64 Linux
-./vcpkg install <package>:x64-linux
+# For x64 Linux
+./vcpkg install aom:x64-linux
+./vcpkg install libavif[aom]:x64-linux
+./vcpkg install libjxl:x64-linux
+./vcpkg install libwebp:x64-linux
+./vcpkg install openjpeg:x64-linux
+./vcpkg install libjpeg-turbo:x64-linux
+./vcpkg install lcms:x64-linux
 
-# Example for ARM64 Linux
-./vcpkg install <package>:arm64-linux
+# For ARM64 Linux
+./vcpkg install aom:arm64-linux
+./vcpkg install libavif[aom]:arm64-linux
+./vcpkg install libjxl:arm64-linux
+./vcpkg install libwebp:arm64-linux
+./vcpkg install openjpeg:arm64-linux
+./vcpkg install libjpeg-turbo:arm64-linux
+./vcpkg install lcms:arm64-linux
 ```
 
-Installed libraries depend on what you define in `backend/setup-vcpkg.sh`.
+Installed libraries:
+
+- **libaom**: AV1 encoder (for AVIF format, **required**)
+- **libavif**: AVIF image format
+- **libjxl**: JPEG XL image format
+- **libwebp**: WebP image format
+- **openjpeg**: JPEG 2000 image format
+- **libjpeg-turbo**: JPEG image processing (for jpegli)
+- **lcms**: Little CMS color management
 
 ### Verify Installation
 
 ```bash
-./vcpkg list
+./vcpkg list | grep -E "aom|avif|jxl|webp|openjpeg|jpeg|lcms"
 ```
 
-## Step 7: Clone and Build Tauri Vue3 App
+## Step 7: Clone and Build Drop Compress Image
 
-Now you're ready to clone and build Tauri Vue3 App.
+Now you're ready to clone and build Drop Compress Image.
 
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/logue/tauri-vuetify-starter.git
-cd tauri-vuetify-starter
+git clone https://github.com/logue/DropWebP.git
+cd DropWebP
 ```
 
 ### Install Frontend Dependencies
@@ -224,7 +244,7 @@ For production:
 pnpm build:tauri
 ```
 
-The built application will be in `backend/target/release/`.
+The built application will be in `app/src-tauri/target/release/`.
 
 ## Step 8: Distribution Formats
 
@@ -238,7 +258,7 @@ AppImage is a universal package format that works on most Linux distributions:
 pnpm build:tauri
 ```
 
-The AppImage will be in `backend/target/release/bundle/appimage/`.
+The AppImage will be in `app/src-tauri/target/release/bundle/appimage/`.
 
 ### Debian Package (.deb)
 
@@ -248,12 +268,12 @@ For Debian/Ubuntu-based distributions:
 pnpm build:tauri
 ```
 
-The .deb package will be in `backend/target/release/bundle/deb/`.
+The .deb package will be in `app/src-tauri/target/release/bundle/deb/`.
 
 Install it with:
 
 ```bash
-sudo dpkg -i backend/target/release/bundle/deb/*.deb
+sudo dpkg -i app/src-tauri/target/release/bundle/deb/*.deb
 ```
 
 ### RPM Package (.rpm)
@@ -265,7 +285,7 @@ sudo apt install -y rpm
 pnpm build:tauri
 ```
 
-The .rpm package will be in `backend/target/release/bundle/rpm/`.
+The .rpm package will be in `app/src-tauri/target/release/bundle/rpm/`.
 
 ## Troubleshooting
 
@@ -306,7 +326,7 @@ The .rpm package will be in `backend/target/release/bundle/rpm/`.
 
    ```bash
    # Make AppImage executable
-   chmod +x backend/target/release/bundle/appimage/*.AppImage
+   chmod +x app/src-tauri/target/release/bundle/appimage/*.AppImage
    ```
 
 5. **Missing GLIBC Version**
@@ -336,17 +356,17 @@ sudo apt install -y intel-media-va-driver
 
 If you encounter issues not covered here:
 
-1. Check the [Tauri Vue3 App repository](https://github.com/logue/tauri-vuetify-starter) for known issues
+1. Check the [Drop Compress Image repository](https://github.com/logue/DropWebP) for known issues
 2. Review the [Tauri v2 documentation](https://v2.tauri.app/start/prerequisites/) for Linux-specific guidance
 3. Search existing GitHub issues or create a new one
 
 ## Next Steps
 
-Once you have Tauri Vue3 App built successfully:
+Once you have Drop Compress Image built successfully:
 
 1. **Run Tests**: Execute `pnpm test` to ensure everything works correctly
 2. **Development**: Use `pnpm dev:tauri` for development with hot reloading
 3. **Customization**: Explore the codebase and make your modifications
 4. **Distribution**: Use `pnpm build:tauri` to create distributable packages
 
-You're now ready to develop and build Tauri Vue3 App on Linux!
+You're now ready to develop and build Drop Compress Image on Linux!

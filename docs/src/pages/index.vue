@@ -17,7 +17,7 @@ setupSeoMeta();
 
 <template>
   <v-card class="mb-6 bg-transparent mx-auto" flat tag="section" max-width="960">
-    <v-card-title class="text-h4 text-center pa-3" tag="h2">Tauri Vue3 App</v-card-title>
+    <v-card-title class="text-h4 text-center pa-3" tag="h2">Drop Compress Image</v-card-title>
     <v-card-subtitle class="text-center pb-4">{{ t('lead.subtitle') }}</v-card-subtitle>
     <v-card-text class="text-center">
       <!-- Language Links -->
@@ -63,25 +63,26 @@ setupSeoMeta();
     </v-card-subtitle>
 
     <!-- Primary Download Button (Auto-detected) -->
-    <v-card-actions class="justify-center mb-4 d-flex flex-column">
-      <v-btn
-        :href="primaryDownload.url"
-        :prepend-icon-color="primaryDownload.iconColor"
-        :prepend-icon="primaryDownload.icon"
-        class="px-8 py-4"
-        download
-        height="100"
-        size="x-large"
-        spaced="both"
-        stacked
-        variant="elevated"
-      >
-        <span class="text-center">
-          <div class="text-h6 mb-1 text-primary">{{ primaryDownload.label }}</div>
-          <small class="text-medium-emphasis">{{ primaryDownload.subtitle }}</small>
-        </span>
-      </v-btn>
-      <br />
+    <v-card-body class="d-flex flex-column align-center gap-4">
+      <div>
+        <v-btn
+          :href="primaryDownload.url"
+          :prepend-icon-color="primaryDownload.iconColor"
+          :prepend-icon="primaryDownload.icon"
+          class="px-8 py-4 btn-block"
+          download
+          height="100"
+          size="x-large"
+          spaced="both"
+          stacked
+          variant="elevated"
+        >
+          <span class="text-center">
+            <div class="text-h6 mb-1 text-primary">{{ primaryDownload.label }}</div>
+            <small class="text-medium-emphasis">{{ primaryDownload.subtitle }}</small>
+          </span>
+        </v-btn>
+      </div>
       <!-- Alternative Downloads Expansion Panel -->
       <v-expansion-panels elevation="2">
         <v-expansion-panel>
@@ -187,7 +188,7 @@ setupSeoMeta();
           </v-expansion-panel-text>
         </v-expansion-panel>
       </v-expansion-panels>
-    </v-card-actions>
+    </v-card-body>
   </v-card>
 
   <v-card class="mb-6 bg-transparent" flat tag="section">
@@ -196,12 +197,14 @@ setupSeoMeta();
     <v-card-text>
       <v-row class="mb-5">
         <v-col v-for="item in features" :key="item.key" cols="12" md="4">
-          <v-card class="h-100">
-            <v-icon :icon="item.icon" size="64" color="primary" class="ma-4 mx-auto w-100" />
-            <v-card-title class="text-h6 text-center mt-2" tag="h3">
+          <v-card class="h-100 text-center">
+            <div class="pa-5">
+              <v-icon :icon="item.icon" size="64" color="primary" class="ma-4 w-100" />
+            </div>
+            <v-card-title class="text-h6 mt-2" tag="h3">
               {{ t(`features.${item.key}.title`) }}
             </v-card-title>
-            <v-card-text class="text-center">
+            <v-card-text>
               {{ t(`features.${item.key}.description`) }}
             </v-card-text>
           </v-card>

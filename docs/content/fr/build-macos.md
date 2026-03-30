@@ -1,6 +1,6 @@
-# Construire Tauri Vue3 App pour macOS
+# Construire Drop Compress Image pour macOS
 
-Ce guide vous accompagne dans la configuration de l'environnement de développement et la construction de Tauri Vue3 App sur les systèmes macOS.
+Ce guide vous accompagne dans la configuration de l'environnement de développement et la construction de Drop Compress Image sur les systèmes macOS.
 
 ## Prérequis
 
@@ -67,7 +67,7 @@ brew --version
 
 ## Étape 3 : Installer Rust
 
-Tauri Vue3 App est construit avec Rust, vous devrez donc installer la chaîne d'outils Rust.
+Drop Compress Image est construit avec Rust, vous devrez donc installer la chaîne d'outils Rust.
 
 ### Installer Rust via rustup
 
@@ -94,7 +94,7 @@ Vous devriez voir les informations de version pour `rustc` et `cargo`.
 
 ## Étape 4 : Installer Node.js
 
-Le frontend de Tauri Vue3 App est construit avec Vue.js et nécessite Node.js.
+Le frontend de Drop Compress Image est construit avec Vue.js et nécessite Node.js.
 
 ### Installer Node.js via Homebrew
 
@@ -111,7 +111,7 @@ npm --version
 
 ## Étape 5 : Installer pnpm
 
-Tauri Vue3 App utilise pnpm comme gestionnaire de paquets pour de meilleures performances et efficacité disque.
+Drop Compress Image utilise pnpm comme gestionnaire de paquets pour de meilleures performances et efficacité disque.
 
 ### Installer pnpm
 
@@ -127,7 +127,7 @@ pnpm --version
 
 ## Étape 6 : Configurer vcpkg et Installer les Dépendances
 
-Ce projet utilise vcpkg pour le lien statique des bibliothèques C/C++. Modifiez `backend/setup-vcpkg.sh` pour définir les bibliothèques dont vous avez besoin.
+Ce projet utilise vcpkg pour gérer les bibliothèques de traitement d'images C/C++ (libaom, libavif, libjxl, etc.).
 
 ### Installer vcpkg
 
@@ -150,7 +150,7 @@ source ~/.zshrc
 Utilisez le script d'installation automatique (recommandé) :
 
 ```bash
-cd ~/path/to/tauri-vuetify-starter/backend
+cd ~/path/to/DropWebP/app/src-tauri
 ./setup-vcpkg.sh
 ```
 
@@ -159,30 +159,50 @@ Ou installez manuellement :
 ```bash
 cd ~/Developer/vcpkg
 
-# Exemple pour Apple Silicon (M1/M2/M3)
-./vcpkg install <package>:arm64-osx
+# Pour Apple Silicon (M1/M2/M3)
+./vcpkg install aom:arm64-osx
+./vcpkg install libavif[aom]:arm64-osx
+./vcpkg install libjxl:arm64-osx
+./vcpkg install libwebp:arm64-osx
+./vcpkg install openjpeg:arm64-osx
+./vcpkg install libjpeg-turbo:arm64-osx
+./vcpkg install lcms:arm64-osx
 
-# Exemple pour Mac Intel
-./vcpkg install <package>:x64-osx
+# Pour Mac Intel
+./vcpkg install aom:x64-osx
+./vcpkg install libavif[aom]:x64-osx
+./vcpkg install libjxl:x64-osx
+./vcpkg install libwebp:x64-osx
+./vcpkg install openjpeg:x64-osx
+./vcpkg install libjpeg-turbo:x64-osx
+./vcpkg install lcms:x64-osx
 ```
 
-Les bibliothèques installées dépendent de ce que vous définissez dans `backend/setup-vcpkg.sh`.
+Bibliothèques installées :
+
+- **libaom** : Encodeur AV1 (pour le format AVIF, **requis**)
+- **libavif** : Format d'image AVIF
+- **libjxl** : Format d'image JPEG XL
+- **libwebp** : Format d'image WebP
+- **openjpeg** : Format d'image JPEG 2000
+- **libjpeg-turbo** : Traitement d'images JPEG (pour jpegli)
+- **lcms** : Gestion des couleurs Little CMS
 
 ### Vérifier l'Installation
 
 ```bash
-./vcpkg list
+./vcpkg list | grep -E "aom|avif|jxl|webp|openjpeg|jpeg|lcms"
 ```
 
-## Étape 7 : Cloner et Construire Tauri Vue3 App
+## Étape 7 : Cloner et Construire Drop Compress Image
 
-Maintenant vous êtes prêt à cloner et construire Tauri Vue3 App.
+Maintenant vous êtes prêt à cloner et construire Drop Compress Image.
 
 ### Cloner le Référentiel
 
 ```bash
-git clone https://github.com/logue/tauri-vuetify-starter.git
-cd tauri-vuetify-starter
+git clone https://github.com/logue/DropWebP.git
+cd DropWebP
 ```
 
 ### Installer les Dépendances Frontend
@@ -310,20 +330,20 @@ security find-identity -v -p codesigning
 
 Si vous rencontrez des problèmes non couverts ici :
 
-1. Vérifiez le [référentiel Tauri Vue3 App](https://github.com/logue/tauri-vuetify-starter) pour les problèmes connus
+1. Vérifiez le [référentiel Drop Compress Image](https://github.com/logue/DropWebP) pour les problèmes connus
 2. Consultez la [documentation Tauri v2](https://v2.tauri.app/start/prerequisites/) pour des conseils spécifiques à macOS
 3. Recherchez les issues GitHub existantes ou créez-en une nouvelle
 
 ## Prochaines Étapes
 
-Une fois que Tauri Vue3 App est construit avec succès :
+Une fois que Drop Compress Image est construit avec succès :
 
 1. **Exécuter les Tests** : Exécutez `pnpm test` pour vous assurer que tout fonctionne correctement
 2. **Développement** : Utilisez `pnpm tauri dev` pour le développement avec rechargement à chaud
 3. **Personnalisation** : Explorez la base de code et apportez vos modifications
 4. **Distribution** : Utilisez `pnpm tauri build` pour créer des paquets distribuables
 
-Vous êtes maintenant prêt à développer et construire Tauri Vue3 App sur macOS !
+Vous êtes maintenant prêt à développer et construire Drop Compress Image sur macOS !
 
 ## Compilation pour Intel Mac
 
@@ -334,7 +354,7 @@ Si vous souhaitez compiler pour Intel Mac (x86_64) à partir d'un Mac Apple Sili
 Créez un binaire unique qui fonctionne sur les Mac Intel et Apple Silicon :
 
 ```bash
-cd frontend
+cd app
 pnpm run build:tauri:mac-universal
 ```
 
@@ -373,7 +393,7 @@ Ou utilisez le script de configuration :
 #### Étape 3 : Compiler
 
 ```bash
-cd frontend
+cd app
 pnpm run build:tauri:mac-x64
 ```
 
@@ -393,7 +413,7 @@ pnpm run build:tauri:mac-universal
 ### Emplacement des artefacts de compilation
 
 ```text
-backend/target/
+app/src-tauri/target/
   ├── aarch64-apple-darwin/release/bundle/      # ARM64 uniquement
   ├── x86_64-apple-darwin/release/bundle/       # x86_64 uniquement
   └── universal-apple-darwin/release/bundle/    # Universel (les deux)

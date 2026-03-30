@@ -1,182 +1,182 @@
-# パッケージの公開
+# Publishing Packages
 
-このガイドでは、Tauri Vue3 AppをChocolateyとHomebrewに公開する方法を説明します。
+This guide explains how to publish Drop Compress Image to Chocolatey and Homebrew.
 
-## 前提条件
+## Prerequisites
 
-### Chocolatey（Windows）
+### Chocolatey (Windows)
 
-- Chocolateyをインストール: <https://chocolatey.org/install>
-- <https://community.chocolatey.org/>でアカウントを作成
-- アカウントページからAPIキーを取得
+- Install Chocolatey: <https://chocolatey.org/install>
+- Create an account at <https://community.chocolatey.org/>
+- Get your API key from your account page
 
-### Homebrew（macOS）
+### Homebrew (macOS)
 
-- Homebrew tap用のGitHubリポジトリを作成（例：`homebrew-tap`）
-- `repo`スコープを持つGitHub Personal Access Tokenを生成
+- Create a GitHub repository for your Homebrew tap (e.g., `homebrew-tap`)
+- Generate a GitHub Personal Access Token with `repo` scope
 
-## パッケージのビルド
+## Building Packages
 
-### 1. Tauriアプリケーションのビルド
+### 1. Build the Tauri Application
 
 ```bash
 pnpm build:tauri
 ```
 
-これにより、以下の場所にプラットフォーム固有のインストーラーが作成されます：
+This will create platform-specific installers in:
 
-- Windows: `backend/target/release/bundle/msi/`
-- macOS: `backend/target/release/bundle/dmg/`
-- Linux: `backend/target/release/bundle/deb/` または `appimage/`
+- Windows: `app/src-tauri/target/release/bundle/msi/`
+- macOS: `app/src-tauri/target/release/bundle/dmg/`
+- Linux: `app/src-tauri/target/release/bundle/deb/` or `appimage/`
 
-### 2. Chocolateyパッケージの生成（Windows）
+### 2. Generate Chocolatey Package (Windows)
 
 ```powershell
 pnpm package:chocolatey
 ```
 
-または手動で：
+Or manually:
 
 ```powershell
-.\scripts\build-chocolatey.ps1 -Version {VERSION}
+.\scripts\build-chocolatey.ps1 -Version 2.3.0
 ```
 
-これにより以下が実行されます：
+This will:
 
-- MSIファイルのSHA256チェックサムを計算
-- 正しいチェックサムで`chocolateyinstall.ps1`を更新
-- `.choco/{APP_NAME_KEBAB}.{VERSION}.nupkg`を作成
+- Calculate SHA256 checksum of the MSI file
+- Update `chocolateyinstall.ps1` with the correct checksum
+- Create `.choco/drop-compress-image.2.3.0.nupkg`
 
-### 3. Homebrewフォーミュラの生成（macOS）
+### 3. Generate Homebrew Formula (macOS)
 
 ```bash
 pnpm package:homebrew
 ```
 
-または手動で：
+Or manually:
 
 ```bash
-./scripts/build-homebrew.sh {VERSION}
+./scripts/build-homebrew.sh 2.3.0
 ```
 
-これにより以下が実行されます：
+This will:
 
-- ARM64とx64の両方のDMGファイルのSHA256チェックサムを計算
-- チェックサムで`.homebrew/{APP_NAME_KEBAB}.rb`を更新
+- Calculate SHA256 checksums for both ARM64 and x64 DMG files
+- Update `.homebrew/drop-compress-image.rb` with checksums
 
-## 公開
+## Publishing
 
 ### Chocolatey
 
-1. **まずローカルでテスト：**
+1. **Test locally first:**
 
 ```powershell
-choco install {APP_NAME_KEBAB} -source .choco
+choco install drop-compress-image -source .choco
 ```
 
-2. **Chocolatey Community Repositoryにプッシュ：**
+2. **Push to Chocolatey Community Repository:**
 
 ```powershell
 choco apikey --key YOUR-API-KEY --source https://push.chocolatey.org/
-choco push .choco/{APP_NAME_KEBAB}.{VERSION}.nupkg --source https://push.chocolatey.org/
+choco push .choco/drop-compress-image.2.3.0.nupkg --source https://push.chocolatey.org/
 ```
 
-3. **モデレーションキューを監視：**
+3. **Monitor the moderation queue:**
 
-- <https://community.chocolatey.org/packages/{APP_NAME_KEBAB}>にアクセス
-- パッケージはモデレーターによってレビューされます（通常48時間以内）
+- Go to <https://community.chocolatey.org/packages/drop-compress-image>
+- The package will be reviewed by moderators (usually within 48 hours)
 
 ### Homebrew
 
-1. **tapリポジトリを作成**（初回のみ）：
+1. **Create a tap repository** (first time only):
 
 ```bash
-# GitHubで新しいリポジトリを作成：homebrew-tap
+# Create a new repository on GitHub: homebrew-tap
 git clone https://github.com/YOUR-USERNAME/homebrew-tap.git
 cd homebrew-tap
 ```
 
-2. **フォーミュラをコピー：**
+2. **Copy the formula:**
 
 ```bash
-cp .homebrew/{APP_NAME_KEBAB}.rb Formula/{APP_NAME_KEBAB}.rb
-git add Formula/{APP_NAME_KEBAB}.rb
-git commit -m "Add {APP_NAME_KEBAB} {VERSION}"
+cp .homebrew/drop-compress-image.rb Formula/drop-compress-image.rb
+git add Formula/drop-compress-image.rb
+git commit -m "Add drop-compress-image 2.3.0"
 git push
 ```
 
-3. **ユーザーは以下でインストール可能：**
+3. **Users can now install with:**
 
 ```bash
 brew tap YOUR-USERNAME/tap
-brew install {APP_NAME_KEBAB}
+brew install drop-compress-image
 ```
 
-### GitHub Actionsによる自動公開
+### Automated Publishing via GitHub Actions
 
-リポジトリには、プロセス全体を自動化するGitHub Actionsワークフロー（`.github/workflows/release.yml`）が含まれています。
+The repository includes a GitHub Actions workflow (`.github/workflows/release.yml`) that automates the entire process.
 
-#### シークレットの設定
+#### Setup Secrets
 
-GitHubリポジトリ設定に以下のシークレットを追加します：
+Add these secrets to your GitHub repository settings:
 
-1. **CHOCOLATEY_API_KEY**: ChocolateyのAPIキー
-2. **HOMEBREW_TAP_TOKEN**: tapリポジトリ用のGitHub Personal Access Token
+1. **CHOCOLATEY_API_KEY**: Your Chocolatey API key
+2. **HOMEBREW_TAP_TOKEN**: GitHub Personal Access Token for your tap repository
 
-#### リリースのトリガー
+#### Trigger a Release
 
-1. **`tauri.conf.json`と`package.json`のバージョンを更新**
+1. **Update version in `tauri.conf.json` and `package.json`**
 
-2. **gitタグを作成してプッシュ：**
+2. **Create and push a git tag:**
 
 ```bash
-git tag v{VERSION}
-git push origin v{VERSION}
+git tag v2.3.0
+git push origin v2.3.0
 ```
 
-3. **ワークフローが自動的に以下を実行：**
-   - Windows、macOS（ARM64とx64）、Linux向けにビルド
-   - GitHub Releaseを作成
-   - Chocolateyパッケージを生成してコミュニティリポジトリにプッシュ
-   - Homebrewフォーミュラを生成してtapリポジトリにPRを作成
+3. **The workflow will automatically:**
+   - Build for Windows, macOS (ARM64 & x64), and Linux
+   - Create a GitHub Release
+   - Generate Chocolatey package and push to community repository
+   - Generate Homebrew formula and create PR to tap repository
 
-## バージョン管理
+## Version Management
 
-常に以下のバージョンを同期させてください：
+Always keep versions synchronized across:
 
 - `package.json` → `version`
-- `backend/tauri.conf.json` → `version`
-- `backend/Cargo.toml` → `version`
+- `app/src-tauri/tauri.conf.json` → `version`
+- `app/src-tauri/Cargo.toml` → `version`
 
-## トラブルシューティング
+## Troubleshooting
 
 ### Chocolatey
 
-**問題**：パッケージがモデレーション失敗
+**Issue**: Package fails moderation
 
-- <https://community.chocolatey.org/>でモデレーションコメントを確認
-- 一般的な問題：不正なチェックサム、依存関係の欠落、インストールの問題
-- 修正してバージョンを上げて再送信
+- Check the moderation comments at <https://community.chocolatey.org/>
+- Common issues: incorrect checksums, missing dependencies, installation issues
+- Fix and resubmit with an incremented version
 
-**問題**：チェックサムの不一致
+**Issue**: Checksum mismatch
 
-- チェックサム計算後にMSIファイルが変更されていないことを確認
-- `pnpm package:chocolatey`でパッケージを再ビルド
+- Ensure the MSI file hasn't changed since checksum calculation
+- Rebuild the package with `pnpm package:chocolatey`
 
 ### Homebrew
 
-**問題**：インストール時のSHA256不一致
+**Issue**: SHA256 mismatch during installation
 
-- DMGファイルがGitHub releasesにアップロードされていることを確認
-- フォーミュラ内のURLが実際のリリースアセットと一致することを確認
-- チェックサムを再計算：`shasum -a 256 *.dmg`
+- Verify the DMG files are uploaded to GitHub releases
+- Ensure URLs in the formula match the actual release assets
+- Recalculate checksums: `shasum -a 256 Drop.Compress.Image_*.dmg`
 
-**問題**：macOSでアプリが開かない
+**Issue**: App won't open on macOS
 
-- アプリが適切に署名され公証されていることを確認
-- Gatekeeperがブロックしているか確認：`xattr -d com.apple.quarantine /Applications/Tauri\ Vue3\ App.app`
+- Ensure the app is properly signed and notarized
+- Check if Gatekeeper is blocking: `xattr -d com.apple.quarantine /Applications/Drop\ Compress\ Image.app`
 
-## リソース
+## Resources
 
 - [Chocolatey Package Creation](https://docs.chocolatey.org/en-us/create/create-packages)
 - [Homebrew Formula Cookbook](https://docs.brew.sh/Formula-Cookbook)
