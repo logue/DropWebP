@@ -18,16 +18,37 @@ fi
 
 # .envファイルを読み込み
 echo "📄 .envファイルを読み込み中..."
-set -a
-source "$ENV_FILE"
-set +a
+get_env_value() {
+    local key="$1"
+    local line value
+    line=$(grep -E "^${key}=" "$ENV_FILE" | tail -n 1 || true)
+    value="${line#*=}"
+    value=$(printf '%s' "$value" | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')
+
+    if [[ "$value" == \"*\" && "$value" == *\" ]]; then
+        value="${value:1:${#value}-2}"
+    elif [[ "$value" == \'*\' && "$value" == *\' ]]; then
+        value="${value:1:${#value}-2}"
+    fi
+
+    printf '%s' "$value"
+}
+
+VERSION="$(get_env_value "VERSION")"
+APP_IDENTIFIER="$(get_env_value "APP_IDENTIFIER")"
 
 if [ -z "$VERSION" ]; then
     echo "❌ VERSIONが.envファイルで定義されていません"
     exit 1
 fi
 
+if [ -z "$APP_IDENTIFIER" ]; then
+    echo "❌ APP_IDENTIFIERが.envファイルで定義されていません"
+    exit 1
+fi
+
 echo "📋 バージョン: $VERSION"
+echo "📋 Identifier: $APP_IDENTIFIER"
 
 # Cargo.tomlのバージョンを更新
 CARGO_TOML="$PROJECT_ROOT/backend/Cargo.toml"
@@ -44,7 +65,9 @@ TAURI_CONF="$PROJECT_ROOT/backend/tauri.conf.json"
 if [ -f "$TAURI_CONF" ]; then
     echo "🔧 tauri.conf.jsonを更新中..."
     sed -i.bak "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" "$TAURI_CONF"
+    sed -i.bak "s/\"identifier\": \".*\"/\"identifier\": \"$APP_IDENTIFIER\"/" "$TAURI_CONF"
     echo "  ✅ $TAURI_CONF: \"version\": \"$VERSION\""
+    echo "  ✅ $TAURI_CONF: \"identifier\": \"$APP_IDENTIFIER\""
 else
     echo "⚠️  tauri.conf.jsonが見つかりません: $TAURI_CONF"
 fi

@@ -14,13 +14,20 @@ if [[ ! -f "$ENV_PATH" ]]; then
 fi
 
 VERSION=$(grep "^VERSION=" "$ENV_PATH" | cut -d'=' -f2 | tr -d ' \r\n')
+APP_IDENTIFIER=$(grep "^APP_IDENTIFIER=" "$ENV_PATH" | cut -d'=' -f2- | sed -E 's/^[[:space:]]+|[[:space:]]+$//g' | sed -E 's/^"(.*)"$/\1/' | sed -E "s/^'(.*)'$/\1/")
 
 if [[ -z "$VERSION" ]]; then
     echo "❌ Error: VERSION not found in .env"
     exit 1
 fi
 
+if [[ -z "$APP_IDENTIFIER" ]]; then
+    echo "❌ Error: APP_IDENTIFIER not found in .env"
+    exit 1
+fi
+
 echo "✅ Found version: $VERSION"
+echo "✅ Found identifier: $APP_IDENTIFIER"
 
 # Update frontend/package.json
 echo "📝 Updating frontend/package.json..."
@@ -45,13 +52,14 @@ TAURI_CONF_PATH="backend/tauri.conf.json"
 if [[ -f "$TAURI_CONF_PATH" ]]; then
     # Use jq if available, otherwise use sed
     if command -v jq &> /dev/null; then
-        jq --arg version "$VERSION" '.version = $version' "$TAURI_CONF_PATH" > "${TAURI_CONF_PATH}.tmp"
+        jq --arg version "$VERSION" --arg identifier "$APP_IDENTIFIER" '.version = $version | .identifier = $identifier' "$TAURI_CONF_PATH" > "${TAURI_CONF_PATH}.tmp"
         mv "${TAURI_CONF_PATH}.tmp" "$TAURI_CONF_PATH"
     else
         sed -i.bak -E "s/\"version\": \"[^\"]+\"/\"version\": \"$VERSION\"/" "$TAURI_CONF_PATH"
+        sed -i.bak -E "s/\"identifier\": \"[^\"]+\"/\"identifier\": \"$APP_IDENTIFIER\"/" "$TAURI_CONF_PATH"
         rm -f "${TAURI_CONF_PATH}.bak"
     fi
-    echo "✓ Updated backend/tauri.conf.json to version $VERSION"
+    echo "✓ Updated backend/tauri.conf.json to version $VERSION and identifier $APP_IDENTIFIER"
 else
     echo "⚠️  Warning: $TAURI_CONF_PATH not found"
 fi
