@@ -49,10 +49,5 @@
   },
   "resolutions": {
     "minimatch": ">=10.2.3"
-  },
-  "pnpm": {
-    "patchedDependencies": {
-      "vuetify@4.0.4": "patches/vuetify@4.0.4.patch"
-    }
   }
 }

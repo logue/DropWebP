@@ -43,7 +43,7 @@ export default defineStore('config', () => {
    *
    * @param locale - Locale
    */
-  const setLocale = (l: string) => (locale.value = l);
+  const setLocale = (l: typeof locale.value) => (locale.value = l);
 
   return { theme, locale, toggleTheme, setLocale };
 });

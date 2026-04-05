@@ -14,6 +14,12 @@ const drawer: Ref<boolean> = ref(false);
 
 /** Toggle Dark mode */
 const isDark: ComputedRef<string> = computed(() => (configStore.theme ? 'dark' : 'light'));
+
+/** Ensure theme-color meta receives a string value */
+const themeColor: ComputedRef<string> = computed(() => {
+  const primary = theme.computedThemes.value?.[isDark.value]?.colors?.primary;
+  return typeof primary === 'string' ? primary : '#1976D2';
+});
 </script>
 
 <template>
@@ -40,9 +46,6 @@ const isDark: ComputedRef<string> = computed(() => (configStore.theme ? 'dark' :
     </v-footer>
   </v-app>
   <teleport to="head">
-    <meta
-      name="theme-color"
-      :content="theme.computedThemes.value?.[isDark]?.colors?.primary ?? '#1976D2'"
-    />
+    <meta name="theme-color" :content="themeColor" />
   </teleport>
 </template>
