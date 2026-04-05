@@ -2,9 +2,15 @@ import { execSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { syncTauriConfigFromEnv } from "./sync-tauri-config-from-env.mjs";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(scriptDir, "..");
+
+const syncResult = syncTauriConfigFromEnv(repoRoot);
+console.log("Synced Tauri config from .env");
+console.log(`  version=${syncResult.version}`);
+console.log(`  identifier=${syncResult.identifier}`);
 
 const env = {
   ...process.env,

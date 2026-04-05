@@ -57,7 +57,7 @@ jpegli_rs = { version = "0.12.0", package = "jpegli-rs", default-features = fals
 # Note: jxl-sys requires LLVM/Clang for bindgen on Windows
 # Install from: https://github.com/llvm/llvm-project/releases (e.g., LLVM-19.1.6-win64.exe)
 # Or install via winget: winget install LLVM.LLVM
-jxl-sys = "0.1.5"      # MIT/Apache-2.0 FFI bindings to libjxl (BSD-3-Clause)
+jxl-sys = "0.1.10"     # MIT/Apache-2.0 FFI bindings to libjxl (BSD-3-Clause)
 kamadak-exif = "0.6.1"
 lcms2 = "6.1.1"        # Little CMS color management, linked via vcpkg
 # AVIF encoder: Using rav1e (pure Rust AV1 encoder) instead of codec-aom
@@ -76,8 +76,8 @@ rgb = "0.8.53"
 serde = "1.0.228"
 serde_json = "1.0.149"
 tauri = { version = "2.10.3", features = [] }
-tauri-plugin-dialog = "2.6.0"
-tauri-plugin-fs = "2.4.5"
+tauri-plugin-dialog = "2.7.0"
+tauri-plugin-fs = "2.5.0"
 tauri-plugin-log = "2.8.0"
 tauri-plugin-notification = "2.3.3"
 tauri-plugin-opener = "2.5.3"
@@ -87,7 +87,7 @@ thiserror = "2.0.18"
 # ultrahdr = { version = "0.1.3", default-features = true } # Ultra HDR (JPEG-R with gainmap) support - 将来の実装用
 
 [dev-dependencies]
-glib = "0.22.3"
+glib = "0.22.4"
 
 [profile.release]
 lto = "thin"       # Thin LTO (互換性重視)
