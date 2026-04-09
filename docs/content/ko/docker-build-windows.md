@@ -1,213 +1,59 @@
-# Windows環境でのDockerを使用したLinuxビルド
+# Windows에서 Docker로 Linux 빌드
 
-このガイドでは、Windows環境からDockerを使用してLinux向けのビルドを行う方法を説明します。
+이 문서는 Windows 환경에서 Docker를 사용해 Linux 패키지를 빌드하는 방법을 설명합니다.
 
-## 前提条件
+## 사전 요구 사항
 
-### 1. Docker Desktopのインストール
+- Windows 10/11 (64-bit)
+- Docker Desktop (WSL 2 백엔드 권장)
+- PowerShell 5.1 이상
+- 메모리 8GB 이상 (16GB 권장)
+- 디스크 여유 공간 20GB 이상
 
-1. [Docker Desktop for Windows](https://www.docker.com/products/docker-desktop/) をダウンロードしてインストール
-2. Docker Desktopを起動し、完全に起動するまで待つ
-3. 設定で「Use WSL 2 based engine」が有効になっていることを確認（推奨）
+## 빌드 명령
 
-### 2. システム要件
-
-- **Windows 10/11** (64-bit)
-- **WSL 2** (推奨)
-- **メモリ**: 最低 8GB RAM (16GB推奨)
-- **ディスク空き容量**: 最低 20GB
-
-### 3. PowerShellの要件
-
-PowerShell 5.1以上が必要です（Windows 10/11には標準搭載）
+프로젝트 루트에서 실행:
 
 ```powershell
-# PowerShellのバージョン確認
-$PSVersionTable.PSVersion
-```
-
-## ビルド方法
-
-### 基本的なビルド
-
-プロジェクトルートから以下のコマンドを実行：
-
-```powershell
-# x86_64 (AMD64) Linux用
 pnpm run build:tauri:linux-x64
-
-# ARM64 Linux用
 pnpm run build:tauri:linux-arm64
 ```
 
-または、直接スクリプトを実行：
+직접 스크립트 실행:
 
 ```powershell
-# x86_64ビルド
 pwsh .\scripts\build-linux-docker.ps1 -Target x64
-
-# ARM64ビルド
 pwsh .\scripts\build-linux-docker.ps1 -Target arm64
 ```
 
-### AppImageを含めたビルド
-
-デフォルトでは `.deb` と `.rpm` のみが生成されます。AppImageも生成したい場合：
+AppImage 포함:
 
 ```powershell
 pwsh .\scripts\build-linux-docker.ps1 -Target x64 -IncludeAppImage
 ```
 
-> **注意**: AppImageのビルドにはFUSEが必要で、Docker環境では制限があります。
-
-## ビルド設定のカスタマイズ
-
-`.env` ファイルでビルド設定をカスタマイズできます：
+## .env 설정
 
 ```bash
-# Docker Build Settings
-BUILD_CPUS=4              # 使用するCPUコア数
-BUILD_MEMORY=8g           # メモリ制限
-CARGO_BUILD_JOBS=4        # Cargoの並列ジョブ数
-MAKEFLAGS=-j4             # Makeの並列度
-INCLUDE_APPIMAGE=false    # AppImageを含めるか
-```
-
-## ビルド成果物
-
-ビルドが完了すると、以下の場所に成果物が生成されます：
-
-```
-app/src-tauri/target/<target>/release/bundle/
-├── deb/
-│   └── drop-compress-image_<version>_<arch>.deb
-└── rpm/
-    └── drop-compress-image-<version>-1.<arch>.rpm
-```
-
-例：
-
-- `app/src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/`
-- `app/src-tauri/target/aarch64-unknown-linux-gnu/release/bundle/deb/`
-
-## トラブルシューティング
-
-### Docker Desktopが起動していない
-
-```
-❌ エラー: Docker Desktop が起動していません。
-```
-
-**解決方法**: Docker Desktopを起動してから、再度実行してください。
-
-### メモリ不足エラー
-
-```
-error: linking with `cc` failed: exit status: 1
-```
-
-**解決方法**: `.env`ファイルでメモリ制限を増やす、またはDocker Desktopの設定でメモリを増やします：
-
-1. Docker Desktop → Settings → Resources → Memory
-2. メモリスライダーを増やす（推奨: 8GB以上）
-3. Apply & Restartをクリック
-
-### ビルドが遅い
-
-**解決方法**: CPUコア数とメモリを増やす
-
-```bash
-# .envファイルに追加
-BUILD_CPUS=8
-BUILD_MEMORY=16g
-CARGO_BUILD_JOBS=8
-```
-
-### WSL 2バックエンドが無効
-
-**解決方法**:
-
-1. Docker Desktop → Settings → General
-2. "Use the WSL 2 based engine"にチェック
-3. Apply & Restart
-
-### ビルドキャッシュをクリアしたい
-
-Dockerボリュームを削除：
-
-```powershell
-docker volume rm dropwebp-cargo-cache-linux-amd64
-docker volume rm dropwebp-pnpm-cache-linux-amd64
-docker volume rm dropwebp-target-cache-linux-amd64
-```
-
-ARM64の場合：
-
-```powershell
-docker volume rm dropwebp-cargo-cache-linux-arm64
-docker volume rm dropwebp-pnpm-cache-linux-arm64
-docker volume rm dropwebp-target-cache-linux-arm64
-```
-
-## 高度な使用方法
-
-### クロスプラットフォームビルド
-
-Windows環境から両方のアーキテクチャをビルド：
-
-```powershell
-# x86_64とARM64の両方をビルド
-pnpm run build:tauri:linux-x64
-pnpm run build:tauri:linux-arm64
-```
-
-### カスタムDockerfile
-
-独自のDockerfileを使用する場合：
-
-```powershell
-docker build -f YourDockerfile.linux-x64 -t your-builder .
-```
-
-### デバッグモード
-
-詳細なログ出力を有効にする：
-
-```powershell
-$env:VERBOSE = "1"
-pwsh .\scripts\build-linux-docker.ps1 -Target x64
-```
-
-## パフォーマンス最適化
-
-### 推奨設定（高性能PC）
-
-```bash
-# .envファイル
-BUILD_CPUS=12
-BUILD_MEMORY=16g
-CARGO_BUILD_JOBS=12
-MAKEFLAGS=-j12
-```
-
-### 推奨設定（一般的なPC）
-
-```bash
-# .envファイル
 BUILD_CPUS=4
 BUILD_MEMORY=8g
 CARGO_BUILD_JOBS=4
 MAKEFLAGS=-j4
+INCLUDE_APPIMAGE=false
 ```
 
-## 参考資料
+## 산출물
 
-- [Docker Desktop for Windows](https://docs.docker.com/desktop/windows/)
-- [WSL 2](https://docs.microsoft.com/en-us/windows/wsl/install)
-- [Tauri Documentation](https://tauri.app/v1/guides/building/)
+```text
+app/src-tauri/target/<target>/release/bundle/
+```
 
-## 関連ドキュメント
+- `.deb`
+- `.rpm`
+- `.AppImage` (선택)
 
-- [DOCKER_BUILD.md](docker-build.md) - macOS/Linuxでのビルド手順
-- [WINDOWS_BUILD_VCPKG.md](./WINDOWS_BUILD_VCPKG.md) - Windowsネイティブビルド
-- [MACOS_COMPATIBILITY.md](./MACOS_COMPATIBILITY.md) - macOS互換性情報
+## 문제 해결
+
+- Docker Desktop이 실행 중인지 확인
+- 메모리 부족 시 Docker 메모리 또는 `.env` 값을 증가
+- 빌드가 느리면 CPU/메모리 설정과 캐시 볼륨 확인

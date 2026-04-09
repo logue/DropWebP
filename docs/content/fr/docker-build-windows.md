@@ -1,81 +1,81 @@
-# Windows環境でのDockerを使用したLinuxビルド
+# Build Linux avec Docker depuis Windows
 
-このガイドでは、Windows環境からDockerを使用してLinux向けのビルドを行う方法を説明します。
+Ce guide explique comment effectuer un build Linux depuis un environnement Windows en utilisant Docker.
 
-## 前提条件
+## Prerequis
 
-### 1. Docker Desktopのインストール
+### 1. Installer Docker Desktop
 
-1. [Docker Desktop for Windows](https://www.docker.com/products/docker-desktop/) をダウンロードしてインストール
-2. Docker Desktopを起動し、完全に起動するまで待つ
-3. 設定で「Use WSL 2 based engine」が有効になっていることを確認（推奨）
+1. Telechargez et installez [Docker Desktop for Windows](https://www.docker.com/products/docker-desktop/).
+2. Lancez Docker Desktop et attendez qu'il soit completement demarre.
+3. Verifiez que l'option "Use WSL 2 based engine" est activee dans les parametres (recommande).
 
-### 2. システム要件
+### 2. Configuration systeme
 
 - **Windows 10/11** (64-bit)
-- **WSL 2** (推奨)
-- **メモリ**: 最低 8GB RAM (16GB推奨)
-- **ディスク空き容量**: 最低 20GB
+- **WSL 2** (recommande)
+- **Memoire**: minimum 8 Go de RAM (16 Go recommandes)
+- **Espace disque libre**: minimum 20 Go
 
-### 3. PowerShellの要件
+### 3. Version PowerShell
 
-PowerShell 5.1以上が必要です（Windows 10/11には標準搭載）
+PowerShell 5.1 ou version ulterieure est requis (fourni par defaut sur Windows 10/11).
 
 ```powershell
-# PowerShellのバージョン確認
+# Verifier la version de PowerShell
 $PSVersionTable.PSVersion
 ```
 
-## ビルド方法
+## Procedure de build
 
-### 基本的なビルド
+### Build de base
 
-プロジェクトルートから以下のコマンドを実行：
+Depuis la racine du projet, executez l'une des commandes suivantes:
 
 ```powershell
-# x86_64 (AMD64) Linux用
+# Linux x86_64 (AMD64)
 pnpm run build:tauri:linux-x64
 
-# ARM64 Linux用
+# Linux ARM64
 pnpm run build:tauri:linux-arm64
 ```
 
-または、直接スクリプトを実行：
+Vous pouvez aussi executer le script directement:
 
 ```powershell
-# x86_64ビルド
+# Build x86_64
 pwsh .\scripts\build-linux-docker.ps1 -Target x64
 
-# ARM64ビルド
+# Build ARM64
 pwsh .\scripts\build-linux-docker.ps1 -Target arm64
 ```
 
-### AppImageを含めたビルド
+### Build avec AppImage
 
-デフォルトでは `.deb` と `.rpm` のみが生成されます。AppImageも生成したい場合：
+Par defaut, seuls les paquets `.deb` et `.rpm` sont generes. Pour generer aussi une AppImage:
 
 ```powershell
 pwsh .\scripts\build-linux-docker.ps1 -Target x64 -IncludeAppImage
 ```
 
-> **注意**: AppImageのビルドにはFUSEが必要で、Docker環境では制限があります。
+> **Remarque**: la generation AppImage necessite FUSE, qui peut etre limite en environnement Docker.
 
-## ビルド設定のカスタマイズ
+## Personnaliser les parametres de build
 
-`.env` ファイルでビルド設定をカスタマイズできます：
+Vous pouvez personnaliser les parametres via le fichier `.env`:
 
 ```bash
 # Docker Build Settings
-BUILD_CPUS=4              # 使用するCPUコア数
-BUILD_MEMORY=8g           # メモリ制限
-CARGO_BUILD_JOBS=4        # Cargoの並列ジョブ数
-MAKEFLAGS=-j4             # Makeの並列度
-INCLUDE_APPIMAGE=false    # AppImageを含めるか
+BUILD_CPUS=4              # Nombre de coeurs CPU a utiliser
+BUILD_MEMORY=8g           # Limite memoire
+CARGO_BUILD_JOBS=4        # Nombre de jobs Cargo en parallele
+MAKEFLAGS=-j4             # Niveau de parallelisme Make
+INCLUDE_APPIMAGE=false    # Inclure ou non AppImage
 ```
 
-## ビルド成果物
+## Artefacts de build
 
-ビルドが完了すると、以下の場所に成果物が生成されます：
+Une fois le build termine, les artefacts sont generes ici:
 
 ```
 app/src-tauri/target/<target>/release/bundle/
@@ -85,55 +85,55 @@ app/src-tauri/target/<target>/release/bundle/
     └── drop-compress-image-<version>-1.<arch>.rpm
 ```
 
-例：
+Exemples:
 
 - `app/src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/`
 - `app/src-tauri/target/aarch64-unknown-linux-gnu/release/bundle/deb/`
 
-## トラブルシューティング
+## Depannage
 
-### Docker Desktopが起動していない
+### Docker Desktop n'est pas demarre
 
 ```
-❌ エラー: Docker Desktop が起動していません。
+❌ Erreur: Docker Desktop n'est pas demarre.
 ```
 
-**解決方法**: Docker Desktopを起動してから、再度実行してください。
+**Solution**: demarrez Docker Desktop, puis relancez la commande.
 
-### メモリ不足エラー
+### Erreur de memoire insuffisante
 
 ```
 error: linking with `cc` failed: exit status: 1
 ```
 
-**解決方法**: `.env`ファイルでメモリ制限を増やす、またはDocker Desktopの設定でメモリを増やします：
+**Solution**: augmentez la limite memoire dans le fichier `.env` ou dans Docker Desktop:
 
-1. Docker Desktop → Settings → Resources → Memory
-2. メモリスライダーを増やす（推奨: 8GB以上）
-3. Apply & Restartをクリック
+1. Docker Desktop -> Settings -> Resources -> Memory
+2. Augmentez le curseur memoire (recommande: 8 Go ou plus)
+3. Cliquez sur Apply & Restart
 
-### ビルドが遅い
+### Build trop lent
 
-**解決方法**: CPUコア数とメモリを増やす
+**Solution**: augmentez le nombre de coeurs CPU et la memoire.
 
 ```bash
-# .envファイルに追加
+# A ajouter dans le fichier .env
 BUILD_CPUS=8
 BUILD_MEMORY=16g
 CARGO_BUILD_JOBS=8
 ```
 
-### WSL 2バックエンドが無効
+### Backend WSL 2 desactive
 
-**解決方法**:
+**Solution**:
 
-1. Docker Desktop → Settings → General
-2. "Use the WSL 2 based engine"にチェック
-3. Apply & Restart
+1. Docker Desktop -> Settings -> General
+2. Cochez "Use the WSL 2 based engine"
+3. Cliquez sur Apply & Restart
 
-### ビルドキャッシュをクリアしたい
+### Nettoyer le cache de build
 
-Dockerボリュームを削除：
+Supprimez les volumes Docker:
 
 ```powershell
 docker volume rm dropwebp-cargo-cache-linux-amd64
@@ -141,7 +141,7 @@ docker volume rm dropwebp-pnpm-cache-linux-amd64
 docker volume rm dropwebp-target-cache-linux-amd64
 ```
 
-ARM64の場合：
+Pour ARM64:
 
 ```powershell
 docker volume rm dropwebp-cargo-cache-linux-arm64
@@ -149,65 +149,65 @@ docker volume rm dropwebp-pnpm-cache-linux-arm64
 docker volume rm dropwebp-target-cache-linux-arm64
 ```
 
-## 高度な使用方法
+## Utilisation avancee
 
-### クロスプラットフォームビルド
+### Build multiplateforme
 
-Windows環境から両方のアーキテクチャをビルド：
+Depuis Windows, vous pouvez builder les deux architectures:
 
 ```powershell
-# x86_64とARM64の両方をビルド
+# Build x86_64 et ARM64
 pnpm run build:tauri:linux-x64
 pnpm run build:tauri:linux-arm64
 ```
 
-### カスタムDockerfile
+### Dockerfile personnalise
 
-独自のDockerfileを使用する場合：
+Pour utiliser un Dockerfile personnalise:
 
 ```powershell
 docker build -f YourDockerfile.linux-x64 -t your-builder .
 ```
 
-### デバッグモード
+### Mode debug
 
-詳細なログ出力を有効にする：
+Pour activer des logs detailles:
 
 ```powershell
 $env:VERBOSE = "1"
 pwsh .\scripts\build-linux-docker.ps1 -Target x64
 ```
 
-## パフォーマンス最適化
+## Optimisation des performances
 
-### 推奨設定（高性能PC）
+### Parametres recommandes (PC performant)
 
 ```bash
-# .envファイル
+# Fichier .env
 BUILD_CPUS=12
 BUILD_MEMORY=16g
 CARGO_BUILD_JOBS=12
 MAKEFLAGS=-j12
 ```
 
-### 推奨設定（一般的なPC）
+### Parametres recommandes (PC standard)
 
 ```bash
-# .envファイル
+# Fichier .env
 BUILD_CPUS=4
 BUILD_MEMORY=8g
 CARGO_BUILD_JOBS=4
 MAKEFLAGS=-j4
 ```
 
-## 参考資料
+## Ressources
 
 - [Docker Desktop for Windows](https://docs.docker.com/desktop/windows/)
 - [WSL 2](https://docs.microsoft.com/en-us/windows/wsl/install)
 - [Tauri Documentation](https://tauri.app/v1/guides/building/)
 
-## 関連ドキュメント
+## Documents lies
 
-- [DOCKER_BUILD.md](docker-build.md) - macOS/Linuxでのビルド手順
-- [WINDOWS_BUILD_VCPKG.md](./WINDOWS_BUILD_VCPKG.md) - Windowsネイティブビルド
-- [MACOS_COMPATIBILITY.md](./MACOS_COMPATIBILITY.md) - macOS互換性情報
+- [DOCKER_BUILD.md](docker-build.md) - Procedure de build sur macOS/Linux
+- [WINDOWS_BUILD_VCPKG.md](./WINDOWS_BUILD_VCPKG.md) - Build natif Windows
+- [MACOS_COMPATIBILITY.md](./MACOS_COMPATIBILITY.md) - Informations de compatibilite macOS

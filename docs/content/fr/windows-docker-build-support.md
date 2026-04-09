@@ -1,67 +1,64 @@
-# Windows環境でのDockerによるLinuxビルド対応
+# Support du build Linux avec Docker depuis Windows
 
-## 変更概要
+## Resume
 
-Windows環境からDockerを使用してLinux向けのパッケージ（.deb、.rpm）をビルドできるようになりました。
+Le projet supporte maintenant le build de paquets Linux (.deb et .rpm) depuis Windows via Docker.
 
-## 追加されたファイル
+## Fichiers ajoutes
 
-### 1. `scripts/build-linux-docker.ps1`
+### `scripts/build-linux-docker.ps1`
 
-Windows用のPowerShellビルドスクリプト。以下の機能を提供：
+Script PowerShell pour Windows avec:
 
-- Docker Desktop起動チェック
-- x86_64およびARM64ターゲットのサポート
-- ビルド設定のカスタマイズ（CPU、メモリ、並列度）
-- キャッシュボリュームの管理
-- AppImageオプションのサポート
+- Verification de Docker Desktop
+- Support des cibles x86_64 et ARM64
+- Parametrage CPU/memoire/parallelisme
+- Gestion de cache Docker
+- Option AppImage
 
-### 2. `DOCKER_BUILD_WINDOWS.md`
+### `docker-build-windows.md`
 
-Windows環境でのDockerビルドに関する詳細なドキュメント：
+Guide detaille pour Windows:
 
-- 前提条件とシステム要件
-- ビルド方法と手順
-- トラブルシューティングガイド
-- パフォーマンス最適化のヒント
+- Prerequis
+- Commandes de build
+- Depannage
+- Optimisation des performances
 
-### 3. `DOCKER_BUILD.md`
+### `docker-build.md`
 
-すべてのプラットフォームに対応した総合的なDockerビルドドキュメント：
+Guide global multi-plateforme:
 
-- 対応プラットフォーム一覧
-- ビルドプロセスの説明
-- キャッシュ管理
-- よくある質問
+- Plateformes supportees
+- Processus de build
+- Gestion du cache
+- FAQ
 
-## 変更されたファイル
+## Fichiers modifies
 
-### 1. `app/package.json`
+### `app/package.json`
 
-Linuxビルドスクリプトをクロスプラットフォーム対応に変更：
+Les scripts Linux Docker sont multiplateforme:
 
 ```json
 "build:tauri:linux-docker-x64": "node -e \"require('child_process').execSync(process.platform === 'win32' ? 'pwsh ..\\\\scripts\\\\build-linux-docker.ps1 -Target x64' : 'bash ../scripts/build-linux-docker.sh x64', {stdio: 'inherit'})\"",
 "build:tauri:linux-docker-arm64": "node -e \"require('child_process').execSync(process.platform === 'win32' ? 'pwsh ..\\\\scripts\\\\build-linux-docker.ps1 -Target arm64' : 'bash ../scripts/build-linux-docker.sh arm64', {stdio: 'inherit'})\""
 ```
 
-これにより、`pnpm run build:tauri:linux-docker-x64`がWindows、macOS、Linuxすべてで動作します。
+### `package.json` (racine)
 
-### 2. `package.json`（ルート）
-
-Linuxビルド用のショートカットコマンドを追加：
+Ajout de raccourcis:
 
 ```json
 "build:tauri:linux-x64": "pnpm --filter app build:tauri:linux-docker-x64",
 "build:tauri:linux-arm64": "pnpm --filter app build:tauri:linux-docker-arm64"
 ```
 
-### 3. `.env`
+### `.env`
 
-Dockerビルド設定用の環境変数コメントを追加：
+Variables de build Docker documentees:
 
 ```bash
-# Docker Build Settings (optional)
 # BUILD_CPUS=4
 # BUILD_MEMORY=8g
 # CARGO_BUILD_JOBS=4
@@ -69,126 +66,65 @@ Dockerビルド設定用の環境変数コメントを追加：
 # INCLUDE_APPIMAGE=false
 ```
 
-### 4. `ReadMe.md`
+## Utilisation
 
-DockerによるLinuxビルドの情報を追加：
-
-- Windows用のビルドコマンド
-- macOS/Linux用のビルドコマンド
-- 必要な要件（Docker Desktop）
-
-## 使用方法
-
-### Windows環境でのビルド
+### Windows
 
 ```powershell
-# プロジェクトルートから
-pnpm run build:tauri:linux-x64    # x86_64 Linux
-pnpm run build:tauri:linux-arm64  # ARM64 Linux
+pnpm run build:tauri:linux-x64
+pnpm run build:tauri:linux-arm64
 
-# または直接スクリプトを実行
 pwsh .\scripts\build-linux-docker.ps1 -Target x64
 pwsh .\scripts\build-linux-docker.ps1 -Target arm64 -IncludeAppImage
 ```
 
-### macOS/Linux環境でのビルド（変更なし）
+### macOS/Linux
 
 ```bash
-# 既存のBashスクリプトを継続使用
 bash scripts/build-linux-docker.sh x64
 bash scripts/build-linux-docker.sh arm64
 ```
 
-## 前提条件
+## Prerequis
 
 ### Windows
 
 - Windows 10/11 (64-bit)
-- Docker Desktop for Windows
-- WSL 2（推奨）
-- 8GB以上のRAM（16GB推奨）
-- PowerShell 5.1以上
+- Docker Desktop
+- WSL 2 recommande
+- 8 Go RAM minimum (16 Go recommandes)
+- PowerShell 5.1+
 
 ### macOS/Linux
 
-- Docker Desktop または Docker Engine
-- 8GB以上のRAM（16GB推奨）
+- Docker Desktop ou Docker Engine
+- 8 Go RAM minimum (16 Go recommandes)
 - Bash
 
-## ビルド設定のカスタマイズ
+## Resultats
 
-`.env`ファイルで設定をカスタマイズ可能：
+Les artefacts sont dans:
 
-```bash
-BUILD_CPUS=4              # 使用するCPUコア数
-BUILD_MEMORY=8g           # メモリ制限
-CARGO_BUILD_JOBS=4        # Cargoの並列ジョブ数
-MAKEFLAGS=-j4             # Makeの並列度
-INCLUDE_APPIMAGE=false    # AppImageを含めるか
-```
-
-## 生成される成果物
-
-ビルド完了後、以下の場所に成果物が生成されます：
-
-```
+```text
 app/src-tauri/target/<target>/release/bundle/
-├── deb/
-│   └── drop-compress-image_<version>_<arch>.deb
-└── rpm/
-    └── drop-compress-image-<version>-1.<arch>.rpm
 ```
 
-例：
+## Depannage
 
-- `app/src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/`
-- `app/src-tauri/target/aarch64-unknown-linux-gnu/release/bundle/`
+### Docker Desktop non demarre
 
-## トラブルシューティング
-
-### Docker Desktopが起動していない
-
-スクリプトは自動的にDocker Desktopの起動状態をチェックし、エラーメッセージを表示します：
-
-```
-❌ エラー: Docker Desktop が起動していません。
-Docker Desktop を起動してから、再度実行してください。
+```text
+❌ Erreur: Docker Desktop n'est pas demarre.
 ```
 
-### メモリ不足
+Lancer Docker Desktop puis relancer la commande.
 
-Docker Desktopの設定でメモリを増やす、または`.env`でメモリ制限を調整してください。
+### Memoire insuffisante
 
-詳細は `DOCKER_BUILD_WINDOWS.md` を参照してください。
+Augmenter la memoire Docker ou la valeur `BUILD_MEMORY` dans `.env`.
 
-## 技術的な詳細
+## Liens
 
-### PowerShellスクリプトの特徴
-
-1. **Docker起動チェック**: ビルド前にDockerの動作を確認
-2. **クロスプラットフォーム**: Windowsパスを適切に処理
-3. **キャッシュ管理**: Dockerボリュームを使用した高速再ビルド
-4. **エラーハンドリング**: わかりやすいエラーメッセージ
-5. **進行状況表示**: 色付きの進行状況メッセージ
-
-### package.jsonのクロスプラットフォーム対応
-
-Node.jsの`child_process.execSync`と`process.platform`を使用して、OSに応じて適切なスクリプトを実行：
-
-- Windows: PowerShellスクリプト（`.ps1`）
-- macOS/Linux: Bashスクリプト（`.sh`）
-
-これにより、同じ`pnpm run`コマンドがすべてのプラットフォームで動作します。
-
-## 今後の拡張可能性
-
-- GitHub Actionsでの自動ビルド対応
-- Windows Dockerfileの追加（現在はLinuxのみ）
-- ビルドキャッシュの最適化
-- マルチステージビルドによる高速化
-
-## 参考ドキュメント
-
-- [DOCKER_BUILD_WINDOWS.md](./DOCKER_BUILD_WINDOWS.md) - Windows固有の詳細手順
-- [DOCKER_BUILD.md](docker-build.md) - すべてのプラットフォーム向けガイド
-- [ReadMe.md](./ReadMe.md) - プロジェクト概要
+- [docker-build-windows.md](docker-build-windows.md)
+- [docker-build.md](docker-build.md)
+- [ReadMe.md](../../../ReadMe.md)
