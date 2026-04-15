@@ -87,7 +87,7 @@ thiserror = "2.0.18"
 # ultrahdr = { version = "0.1.3", default-features = true } # Ultra HDR (JPEG-R with gainmap) support - 将来の実装用
 
 [dev-dependencies]
-glib = "0.22.4"
+glib = "0.22.5"
 
 [profile.release]
 lto = "thin"       # Thin LTO (互換性重視)

@@ -46,6 +46,7 @@ export default withNuxt(
   ...markdown.configs.recommended,
   {
     files: ['**/*.md'],
+    language: 'markdown/gfm',
     rules: {
       'no-irregular-whitespace': 'off',
       // Markdown内のコードブロックの言語指定がない場合は警告
