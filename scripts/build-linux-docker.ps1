@@ -130,18 +130,21 @@ $PlatformSafe = $Platform -replace '/', '-'
 $CargoVolume = "tauri-vue3-cargo-cache-$PlatformSafe"
 $PnpmVolume = "tauri-vue3-pnpm-cache-$PlatformSafe"
 $TargetVolume = "tauri-vue3-target-cache-$PlatformSafe"
+$WorkspaceNodeModulesVolume = "tauri-vue3-workspace-node-modules-$PlatformSafe"
 $NodeModulesVolume = "tauri-vue3-node-modules-$PlatformSafe"
 
 # ボリュームが存在しない場合は作成
 docker volume create $CargoVolume 2>&1 | Out-Null
 docker volume create $PnpmVolume 2>&1 | Out-Null
 docker volume create $TargetVolume 2>&1 | Out-Null
+docker volume create $WorkspaceNodeModulesVolume 2>&1 | Out-Null
 docker volume create $NodeModulesVolume 2>&1 | Out-Null
 
 Write-Host "キャッシュボリューム:" -ForegroundColor Green
 Write-Host "  - Cargo: $CargoVolume"
 Write-Host "  - pnpm: $PnpmVolume"
 Write-Host "  - Target: $TargetVolume"
+Write-Host "  - Workspace node_modules: $WorkspaceNodeModulesVolume"
 Write-Host "  - Node modules: $NodeModulesVolume (ホスト環境から完全に分離)"
 Write-Host ""
 
@@ -156,6 +159,7 @@ $runArgs = @(
     "-v", "${CargoVolume}:/root/.cargo/registry",
     "-v", "${PnpmVolume}:/pnpm/store",
     "-v", "${TargetVolume}:/workspace/backend/target",
+    "-v", "${WorkspaceNodeModulesVolume}:/workspace/node_modules",
     "-v", "${NodeModulesVolume}:/workspace/frontend/node_modules",
     "-e", "BUILD_TARGET=$BuildTarget",
     "-e", "APPIMAGE_EXTRACT_AND_RUN=1",

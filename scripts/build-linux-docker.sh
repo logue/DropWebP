@@ -146,18 +146,21 @@ echo -e "${BLUE}🔨 Linux向けアプリケーションをビルド中...${NC}"
 CARGO_CACHE_VOLUME="tauri-vue3-cargo-cache-${PLATFORM//\//-}"
 PNPM_CACHE_VOLUME="tauri-vue3-pnpm-cache-${PLATFORM//\//-}"
 TARGET_CACHE_VOLUME="tauri-vue3-target-cache-${PLATFORM//\//-}"
+WORKSPACE_NODE_MODULES_VOLUME="tauri-vue3-workspace-node-modules-${PLATFORM//\//-}"
 NODE_MODULES_VOLUME="tauri-vue3-node-modules-${PLATFORM//\//-}"
 
 # ボリュームが存在しない場合は作成
 docker volume create "$CARGO_CACHE_VOLUME" >/dev/null 2>&1 || true
 docker volume create "$PNPM_CACHE_VOLUME" >/dev/null 2>&1 || true
 docker volume create "$TARGET_CACHE_VOLUME" >/dev/null 2>&1 || true
+docker volume create "$WORKSPACE_NODE_MODULES_VOLUME" >/dev/null 2>&1 || true
 docker volume create "$NODE_MODULES_VOLUME" >/dev/null 2>&1 || true
 
 echo -e "${GREEN}キャッシュボリューム:${NC}"
 echo "  - Cargo: $CARGO_CACHE_VOLUME"
 echo "  - pnpm: $PNPM_CACHE_VOLUME"
 echo "  - Target: $TARGET_CACHE_VOLUME"
+echo "  - Workspace node_modules: $WORKSPACE_NODE_MODULES_VOLUME"
 echo "  - Node modules: $NODE_MODULES_VOLUME (ホスト環境から完全に分離)"
 echo ""
 
@@ -174,6 +177,7 @@ docker run --rm \
     -v "$CARGO_CACHE_VOLUME:/root/.cargo/registry" \
     -v "$PNPM_CACHE_VOLUME:/pnpm/store" \
     -v "$TARGET_CACHE_VOLUME:/workspace/backend/target" \
+    -v "$WORKSPACE_NODE_MODULES_VOLUME:/workspace/node_modules" \
     -v "$NODE_MODULES_VOLUME:/workspace/frontend/node_modules" \
     -e BUILD_TARGET="$TARGET" \
     -e TAURI_BUNDLER_TARGETS="$BUNDLE_TARGETS" \
