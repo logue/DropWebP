@@ -24,14 +24,16 @@ const PROJECT_SITE = 'https://logue.dev/DropWebP/';
       </v-tooltip>
     </template>
     <template #default="{ isActive }">
-      <v-card width="360" :title="t('about_title')">
+      <v-card :title="t('about_title')" width="360">
         <v-card-text class="text-center">
+          <!-- eslint-disable @intlify/vue-i18n/no-raw-text -- App brand name and build metadata are not localizable -->
           <h2>Drop Compress Image</h2>
           <p>
             Version {{ Meta.version }}
             <br />
             <small>(Build: {{ Meta.date }})</small>
           </p>
+          <!-- eslint-enable @intlify/vue-i18n/no-raw-text -->
           <p>
             <a :href="PROJECT_SITE" target="_blank" @click.prevent="openUrl(PROJECT_SITE)">
               {{ PROJECT_SITE }}

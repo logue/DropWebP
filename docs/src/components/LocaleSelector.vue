@@ -29,6 +29,11 @@ const availableLocales = computed(() =>
   (locales.value as any[]).filter((l: any) => l.code !== locale.value)
 );
 
+/**
+ * Switch the active i18n locale and navigate to the corresponding localized route.
+ *
+ * @param code - Target locale code.
+ */
 const switchLanguage = async (code: Locale) => {
   await navigateTo(switchLocalePath(code));
 };

@@ -7,7 +7,7 @@ const settingsStore = useSettingsStore();
 </script>
 
 <template>
-  <v-card flat :title="t('title')">
+  <v-card :title="t('title')" flat>
     <v-card-text>
       <v-slider
         v-model="settingsStore.pngOptions.optimizationLevel"
@@ -22,9 +22,9 @@ const settingsStore = useSettingsStore();
         <template #append>
           <v-text-field
             v-model="settingsStore.pngOptions.optimizationLevel"
-            readonly
             variant="underlined"
             style="width: 60px"
+            readonly
           />
         </template>
       </v-slider>
@@ -77,14 +77,14 @@ const settingsStore = useSettingsStore();
         persistent-hint
       />
 
-      <v-radio-group v-model="settingsStore.pngOptions.interlace" inline :label="t('interlace')">
+      <v-radio-group v-model="settingsStore.pngOptions.interlace" :label="t('interlace')" inline>
         <v-tooltip :text="t('interlace_item.no_change_hint')" location="top">
           <template #activator="{ props }">
             <v-radio
               v-bind="props"
               :label="t('interlace_item.no_change')"
-              color="primary"
               :value="null"
+              color="primary"
             />
           </template>
         </v-tooltip>
@@ -93,8 +93,8 @@ const settingsStore = useSettingsStore();
             <v-radio
               v-bind="props"
               :label="t('interlace_item.disabled')"
-              color="primary"
               :value="false"
+              color="primary"
             />
           </template>
         </v-tooltip>
@@ -103,8 +103,8 @@ const settingsStore = useSettingsStore();
             <v-radio
               v-bind="props"
               :label="t('interlace_item.enabled')"
-              color="primary"
               :value="true"
+              color="primary"
             />
           </template>
         </v-tooltip>

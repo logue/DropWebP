@@ -388,7 +388,7 @@ pnpm run build:tauri:mac-x64
 
 빌드 결과물은 타겟에 따라 다음 위치에 생성됩니다:
 
-```
+```text
 app/src-tauri/target/
 ├── aarch64-apple-darwin/release/   # ARM64 빌드
 │   └── bundle/

@@ -5,9 +5,6 @@ import type { ComposerTranslation } from 'vue-i18n';
 import { open, save } from '@tauri-apps/plugin-dialog';
 import { useSound } from '@vueuse/sound';
 
-import completeSound from '../assets/sounds/complete.mp3';
-import errorSound from '../assets/sounds/error.mp3';
-
 import { useConversionState } from './useConversionState';
 import { useDragAndDrop } from './useDragAndDrop';
 import { useFileSystem } from './useFileSystem';
@@ -16,6 +13,17 @@ import { useImageConverter } from './useImageConverter';
 import { useNotification } from './useNotification';
 import { usePaste } from './usePaste';
 
+import completeSound from '@/assets/sounds/complete.mp3';
+import errorSound from '@/assets/sounds/error.mp3';
+
+/**
+ * Composable that orchestrates the image conversion workflow,
+ * coordinating file selection, conversion, notifications, sound feedback,
+ * drag-and-drop, and clipboard paste handling.
+ *
+ * @param t - Vue I18n translation function used for localized messages.
+ * @returns Reactive state and action methods for the conversion UI.
+ */
 export function useImageConversionController(t: ComposerTranslation) {
   const globalStore = useGlobalStore();
   const settingsStore = useSettingsStore();
@@ -45,6 +53,7 @@ export function useImageConversionController(t: ComposerTranslation) {
     await nextTick();
 
     for (let i = 0; i < files.length; i++) {
+      // eslint-disable-next-line security/detect-object-injection -- i is a numeric loop index over a controlled array
       const file = files[i];
       if (!file) continue;
 

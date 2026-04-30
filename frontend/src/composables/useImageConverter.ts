@@ -99,6 +99,7 @@ export function useImageConverter() {
 
     // マッピングオブジェクトから動的に値を取得し、optionsを一度に構築
     const options = {
+      // eslint-disable-next-line security/detect-object-injection -- format key is validated by the `in optionsMap` check above
       [format]: toRaw(optionsMap[format])
     };
 

@@ -17,12 +17,12 @@ const settingsStore = useSettingsStore();
         :max="100"
         :min="1"
         color="primary"
-        persistent-hint
         step="0.1"
         type="number"
+        persistent-hint
       >
         <template #append>
-          <v-text-field v-model="settingsStore.avifOptions.quality" readonly variant="underlined" />
+          <v-text-field v-model="settingsStore.avifOptions.quality" variant="underlined" readonly />
         </template>
       </v-slider>
       <v-slider
@@ -36,8 +36,8 @@ const settingsStore = useSettingsStore();
         <template #append>
           <v-text-field
             v-model="settingsStore.avifOptions.alphaQuality"
-            readonly
             variant="underlined"
+            readonly
           />
         </template>
       </v-slider>
@@ -74,12 +74,12 @@ const settingsStore = useSettingsStore();
         :max="10"
         :min="1"
         color="primary"
-        persistent-hint
         step="1"
         type="number"
+        persistent-hint
       >
         <template #append>
-          <v-text-field v-model="settingsStore.avifOptions.speed" readonly variant="underlined" />
+          <v-text-field v-model="settingsStore.avifOptions.speed" variant="underlined" readonly />
         </template>
       </v-slider>
       <v-number-input
@@ -88,8 +88,8 @@ const settingsStore = useSettingsStore();
         :label="t('threads')"
         :max="10"
         :min="1"
-        clearable
         type="number"
+        clearable
         persistent-hint
       />
     </v-card-text>

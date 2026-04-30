@@ -30,7 +30,7 @@ clang --version
 
 You should see output similar to:
 
-```
+```text
 Apple clang version 15.0.0 (clang-1500.0.40.1)
 Target: arm64-apple-darwin23.0.0
 Thread model: posix

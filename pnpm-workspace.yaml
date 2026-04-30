@@ -3,8 +3,9 @@ packages:
   - docs
 
 onlyBuiltDependencies:
-  - '@parcel/watcher'
+  - "@parcel/watcher"
   - better-sqlite3
+  - core-js
   - esbuild
   - unrs-resolver
   - vue-demi

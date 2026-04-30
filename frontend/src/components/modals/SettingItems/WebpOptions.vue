@@ -30,12 +30,12 @@ const settingsStore = useSettingsStore();
         :max="6"
         :min="0"
         color="primary"
-        persistent-hint
         step="1"
         type="number"
+        persistent-hint
       >
         <template #append>
-          <v-text-field v-model="settingsStore.webpOptions.method" readonly variant="underlined" />
+          <v-text-field v-model="settingsStore.webpOptions.method" variant="underlined" readonly />
         </template>
       </v-slider>
 
@@ -84,12 +84,12 @@ const settingsStore = useSettingsStore();
         :max="100"
         :min="0"
         color="primary"
-        persistent-hint
         step="0.1"
         type="number"
+        persistent-hint
       >
         <template #append>
-          <v-text-field v-model="settingsStore.webpOptions.quality" readonly variant="underlined" />
+          <v-text-field v-model="settingsStore.webpOptions.quality" variant="underlined" readonly />
         </template>
       </v-slider>
 
@@ -102,15 +102,15 @@ const settingsStore = useSettingsStore();
         :max="100"
         :min="0"
         color="primary"
-        persistent-hint
         step="1"
         type="number"
+        persistent-hint
       >
         <template #append>
           <v-text-field
             v-model="settingsStore.webpOptions.alphaQuality"
-            readonly
             variant="underlined"
+            readonly
           />
         </template>
       </v-slider>
@@ -135,15 +135,15 @@ const settingsStore = useSettingsStore();
         :max="100"
         :min="0"
         color="primary"
-        persistent-hint
         step="1"
         type="number"
+        persistent-hint
       >
         <template #append>
           <v-text-field
             v-model="settingsStore.webpOptions.filterStrength"
-            readonly
             variant="underlined"
+            readonly
           />
         </template>
       </v-slider>
@@ -157,15 +157,15 @@ const settingsStore = useSettingsStore();
         :max="7"
         :min="0"
         color="primary"
-        persistent-hint
         step="1"
         type="number"
+        persistent-hint
       >
         <template #append>
           <v-text-field
             v-model="settingsStore.webpOptions.filterSharpness"
-            readonly
             variant="underlined"
+            readonly
           />
         </template>
       </v-slider>
@@ -179,15 +179,15 @@ const settingsStore = useSettingsStore();
         :max="100"
         :min="0"
         color="primary"
-        persistent-hint
         step="1"
         type="number"
+        persistent-hint
       >
         <template #append>
           <v-text-field
             v-model="settingsStore.webpOptions.snsStrength"
-            readonly
             variant="underlined"
+            readonly
           />
         </template>
       </v-slider>

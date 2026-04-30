@@ -58,6 +58,12 @@ export const useContentData = () => {
   });
 
   // フォーマット説明の取得
+  /**
+   * Get the localized description list for a given image format key.
+   *
+   * @param key - Format identifier (e.g. 'webp', 'avif').
+   * @returns Array of localized description lines, or empty array if missing.
+   */
   const getFormatDescriptions = (key: string) => {
     try {
       const descriptions = tm(`format.${key}.description`) as unknown;

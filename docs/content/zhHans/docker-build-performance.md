@@ -47,7 +47,7 @@
 
 #### Windows的I/O路径
 
-```
+```text
 C:\Users\...\DropWebP (NTFS)
   ↓ 9P网络协议
 /mnt/c/Users/.../DropWebP (WSL 2)
@@ -57,7 +57,7 @@ C:\Users\...\DropWebP (NTFS)
 
 #### macOS的I/O路径
 
-```
+```text
 /Users/.../DropWebP (APFS)
   ↓ VirtioFS（优化）
 /workspace (Container)

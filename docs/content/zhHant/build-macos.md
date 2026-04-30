@@ -388,7 +388,7 @@ pnpm run build:tauri:mac-x64
 
 建構產物根據目標生成在以下位置：
 
-```
+```text
 app/src-tauri/target/
 ├── aarch64-apple-darwin/release/   # ARM64 建構
 │   └── bundle/

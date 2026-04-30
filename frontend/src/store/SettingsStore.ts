@@ -110,11 +110,17 @@ export default defineStore(
       commonOptions.value.outputPath = FolderType.Picture;
     };
 
+    /** Reset common conversion options to defaults. */
     const resetCommonOptions = () => (commonOptions.value = { ...defaultCommonOptions });
+    /** Reset AVIF format options to defaults. */
     const resetAvifOptions = () => (avifOptions.value = { ...defaultAvifOptions });
+    /** Reset WebP format options to defaults. */
     const resetWebpOptions = () => (webpOptions.value = { ...defaultWebpOptions });
+    /** Reset JPEG XL format options to defaults. */
     const resetJxlOptions = () => (jxlOptions.value = { ...defaultJxlOptions });
+    /** Reset PNG format options to defaults. */
     const resetPngOptions = () => (pngOptions.value = { ...defaultPngOptions });
+    /** Reset JPEG format options to defaults. */
     const resetJpegOptions = () => (jpegOptions.value = { ...defaultJpegOptions });
 
     /** 出力先ディレクトリ選択ダイアログ */
@@ -128,6 +134,11 @@ export default defineStore(
       }
     };
 
+    /**
+     * Set the output directory path based on a folder type shortcut.
+     *
+     * @param type - Folder type to map to a system directory.
+     */
     const setOutputPath = async (type?: FolderType) => {
       switch (type) {
         default:

@@ -47,7 +47,7 @@ macOS x64 → x64 Linux 빌드는 빠른 반면, Windows x64 → ARM64 Linux 빌
 
 #### Windows의 I/O 경로
 
-```
+```text
 C:\Users\...\DropWebP (NTFS)
   ↓ 9P 네트워크 프로토콜
 /mnt/c/Users/.../DropWebP (WSL 2)
@@ -57,7 +57,7 @@ C:\Users\...\DropWebP (NTFS)
 
 #### macOS의 I/O 경로
 
-```
+```text
 /Users/.../DropWebP (APFS)
   ↓ VirtioFS (최적화됨)
 /workspace (Container)

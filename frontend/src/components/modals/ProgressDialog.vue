@@ -1,19 +1,29 @@
 <script setup lang="ts">
-import type { PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 
-defineProps({
-  dialog: { type: Boolean, default: false },
-  title: { type: String, required: true },
-  currentFile: { type: String, default: '' },
-  progress: {
-    type: Number as PropType<number>,
-    required: false,
-    default: 0
-  },
-  inProgress: { type: Boolean, default: false }
+/**
+ * Progress dialog props.
+ */
+interface Props {
+  /** Whether the dialog is shown. */
+  dialog?: boolean;
+  /** Dialog title. */
+  title: string;
+  /** Currently processed file path. */
+  currentFile?: string;
+  /** Progress percentage (0-100). */
+  progress?: number;
+  /** Whether processing is in progress. */
+  inProgress?: boolean;
+}
+
+withDefaults(defineProps<Props>(), {
+  dialog: false,
+  currentFile: '',
+  progress: 0,
+  inProgress: false
 });
 
 const emit = defineEmits<{
@@ -25,14 +35,14 @@ const emit = defineEmits<{
 <template>
   <v-dialog
     :model-value="dialog"
-    persistent
     style="cursor: wait"
     width="auto"
+    persistent
     @update:model-value="emit('update:dialog', $event)"
   >
-    <v-card width="512" prepend-icon="mdi-arrow-collapse-vertical" :title="title">
+    <v-card :title="title" width="512" prepend-icon="mdi-arrow-collapse-vertical">
       <template #actions>
-        <v-btn class="ms-auto" :text="t('cancel')" @click="emit('update:inProgress', false)" />
+        <v-btn :text="t('cancel')" class="ms-auto" @click="emit('update:inProgress', false)" />
       </template>
       <v-card-text>
         {{ currentFile }}
@@ -43,6 +53,7 @@ const emit = defineEmits<{
           height="25"
         >
           <template #default="{ value }">
+            <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -- '%' is a universal symbol, not localizable text -->
             <strong v-if="progress">{{ Math.ceil(value) }}%</strong>
           </template>
         </v-progress-linear>

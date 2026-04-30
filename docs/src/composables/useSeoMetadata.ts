@@ -112,6 +112,10 @@ export const useSeoMetadata = () => {
   });
 
   // SEO メタデータの設定
+  /**
+   * Apply SEO meta tags and structured data to the current page,
+   * binding reactive translations and locale-aware OpenGraph fields.
+   */
   const setupSeoMeta = () => {
     useSeoMeta({
       title: computed(() => `Tauri Vue3 App - ${t('lead.subtitle')}`),

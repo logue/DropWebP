@@ -9,7 +9,7 @@ const settingsStore = useSettingsStore();
 </script>
 
 <template>
-  <v-card flat :title="t('title')">
+  <v-card :title="t('title')" flat>
     <v-card-text>
       <v-switch
         v-model="settingsStore.jxlOptions.lossless"
@@ -26,13 +26,13 @@ const settingsStore = useSettingsStore();
         color="primary"
         max="15.0"
         min="0.1"
-        persistent-hint
         step="0.1"
-        thumb-label
         type="number"
+        persistent-hint
+        thumb-label
       >
         <template #append>
-          <v-text-field v-model="settingsStore.jxlOptions.quality" readonly variant="underlined" />
+          <v-text-field v-model="settingsStore.jxlOptions.quality" variant="underlined" readonly />
         </template>
       </v-slider>
       <v-select
@@ -91,15 +91,15 @@ const settingsStore = useSettingsStore();
         color="primary"
         max="4"
         min="0"
-        persistent-hint
         step="1"
         type="number"
+        persistent-hint
       >
         <template #append>
           <v-text-field
             v-model="settingsStore.jxlOptions.decodingSpeed"
-            readonly
             variant="underlined"
+            readonly
           />
         </template>
       </v-slider>
@@ -109,9 +109,9 @@ const settingsStore = useSettingsStore();
         :label="t('init_buffer_size')"
         :min="32"
         :step="32"
+        type="number"
         clearable
         persistent-hint
-        type="number"
       />
     </v-card-text>
     <v-card-actions>

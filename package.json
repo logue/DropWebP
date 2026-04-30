@@ -48,9 +48,6 @@
     "postinstall": "pnpm --filter docs nuxt:prepare"
   },
   "resolutions": {
-    "serialize-javascript": ">=7.0.5",
-    "js-yaml": ">=4.1.1",
-    "unhead": ">=3.0.4",
-    "vite": ">=8.0.8"
+    "js-yaml": ">=4.1.1"
   }
 }

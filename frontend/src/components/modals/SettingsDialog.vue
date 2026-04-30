@@ -40,44 +40,44 @@ const tab = ref('common');
               <v-list nav>
                 <v-list-item
                   :title="t('common_options')"
-                  value="common"
                   :active="tab === 'common'"
+                  value="common"
                   @click="tab = 'common'"
                 />
                 <v-list-item
                   :title="t('webp_options')"
-                  value="webp"
                   :active="tab === 'webp'"
+                  value="webp"
                   @click="tab = 'webp'"
                 />
                 <v-list-item
                   :title="t('avif_options')"
-                  value="avif"
                   :active="tab === 'avif'"
+                  value="avif"
                   @click="tab = 'avif'"
                 />
                 <v-list-item
                   :title="t('jxl_options')"
-                  value="jxl"
                   :active="tab === 'jxl'"
+                  value="jxl"
                   @click="tab = 'jxl'"
                 />
                 <v-list-item
                   :title="t('png_options')"
-                  value="png"
                   :active="tab === 'png'"
+                  value="png"
                   @click="tab = 'png'"
                 />
                 <v-list-item
                   :title="t('jpeg_options')"
-                  value="jpeg"
                   :active="tab === 'jpeg'"
+                  value="jpeg"
                   @click="tab = 'jpeg'"
                 />
               </v-list>
             </v-navigation-drawer>
             <v-main class="overflow-y-auto">
-              <v-card flat class="pa-2">
+              <v-card class="pa-2" flat>
                 <v-window v-model="tab">
                   <v-window-item value="common">
                     <common-options />

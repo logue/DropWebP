@@ -56,23 +56,35 @@ export function useFormatConfig(t: ComposerTranslation) {
   }));
 
   /**
-   * フォーマット情報を取得
+   * Get format information for a given output format.
+   *
+   * @param format - Target output format.
+   * @returns Format metadata such as label, color, and description.
    */
   const getFormatInfo = (format: OutputFormat): FormatInfo => {
+    // eslint-disable-next-line security/detect-object-injection -- format is a typed enum key, not user input
     return formats.value[format];
   };
 
   /**
-   * フォーマットのラベルを取得
+   * Get the localized label for a format.
+   *
+   * @param format - Target output format.
+   * @returns Localized format label.
    */
   const getFormatLabel = (format: OutputFormat): string => {
+    // eslint-disable-next-line security/detect-object-injection -- format is a typed enum key, not user input
     return formats.value[format].label;
   };
 
   /**
-   * フォーマットの色を取得
+   * Get the theme color associated with a format.
+   *
+   * @param format - Target output format.
+   * @returns Color name string.
    */
   const getFormatColor = (format: OutputFormat): string => {
+    // eslint-disable-next-line security/detect-object-injection -- format is a typed enum key, not user input
     return formats.value[format].color;
   };
 

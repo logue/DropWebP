@@ -77,7 +77,7 @@ INCLUDE_APPIMAGE=false    # Inclure ou non AppImage
 
 Une fois le build termine, les artefacts sont generes ici:
 
-```
+```text
 app/src-tauri/target/<target>/release/bundle/
 ├── deb/
 │   └── drop-compress-image_<version>_<arch>.deb
@@ -94,7 +94,7 @@ Exemples:
 
 ### Docker Desktop n'est pas demarre
 
-```
+```text
 ❌ Erreur: Docker Desktop n'est pas demarre.
 ```
 
@@ -102,7 +102,7 @@ Exemples:
 
 ### Erreur de memoire insuffisante
 
-```
+```text
 error: linking with `cc` failed: exit status: 1
 ```
 

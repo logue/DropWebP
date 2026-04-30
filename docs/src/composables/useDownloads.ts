@@ -12,6 +12,10 @@ export const useDownloads = () => {
   const detectedArch = ref<'x64' | 'arm64' | 'unknown'>('unknown');
 
   // クライアントサイドでのOS検出
+  /**
+   * Detect the user's OS and CPU architecture from `navigator.userAgent`,
+   * populating the `detectedOS` and `detectedArch` refs.
+   */
   const detectPlatform = () => {
     if (!import.meta.client) return;
 

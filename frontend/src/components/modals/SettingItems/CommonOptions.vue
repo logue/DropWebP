@@ -7,7 +7,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <v-card flat :title="t('title')">
+  <v-card :title="t('title')" flat>
     <v-card-text>
       <div class="d-flex">
         <v-switch

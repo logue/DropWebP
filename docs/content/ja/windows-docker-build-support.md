@@ -131,7 +131,7 @@ INCLUDE_APPIMAGE=false    # AppImageを含めるか
 
 ビルド完了後、以下の場所に成果物が生成されます：
 
-```
+```text
 app/src-tauri/target/<target>/release/bundle/
 ├── deb/
 │   └── drop-compress-image_<version>_<arch>.deb
@@ -150,7 +150,7 @@ app/src-tauri/target/<target>/release/bundle/
 
 スクリプトは自動的にDocker Desktopの起動状態をチェックし、エラーメッセージを表示します：
 
-```
+```text
 ❌ エラー: Docker Desktop が起動していません。
 Docker Desktop を起動してから、再度実行してください。
 ```

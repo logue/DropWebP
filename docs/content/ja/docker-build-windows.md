@@ -77,7 +77,7 @@ INCLUDE_APPIMAGE=false    # AppImageを含めるか
 
 ビルドが完了すると、以下の場所に成果物が生成されます：
 
-```
+```text
 app/src-tauri/target/<target>/release/bundle/
 ├── deb/
 │   └── drop-compress-image_<version>_<arch>.deb
@@ -94,7 +94,7 @@ app/src-tauri/target/<target>/release/bundle/
 
 ### Docker Desktopが起動していない
 
-```
+```text
 ❌ エラー: Docker Desktop が起動していません。
 ```
 
@@ -102,7 +102,7 @@ app/src-tauri/target/<target>/release/bundle/
 
 ### メモリ不足エラー
 
-```
+```text
 error: linking with `cc` failed: exit status: 1
 ```
 

@@ -28,6 +28,12 @@ const { t } = useI18n();
 const headings = ref<Heading[]>([]);
 const activeId = ref<string>('');
 
+/**
+ * Convert a heading text into a URL-safe slug, preserving CJK characters.
+ *
+ * @param text - The heading text to slugify.
+ * @returns A lowercase, hyphenated identifier suitable for use as an HTML id.
+ */
 const generateId = (text: string): string => {
   return text
     .toLowerCase()
@@ -35,6 +41,10 @@ const generateId = (text: string): string => {
     .replaceAll(/[^\w\-\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]/g, '');
 };
 
+/**
+ * Scan the document for `h2`/`h3` elements, ensure each has an `id`,
+ * and store the resulting outline in `headings`.
+ */
 const extractHeadings = () => {
   const headingElements = document.querySelectorAll('h2, h3');
   const result: Heading[] = [];
@@ -59,6 +69,10 @@ const extractHeadings = () => {
   headings.value = result;
 };
 
+/**
+ * Update the active table-of-contents entry based on the current scroll
+ * position, highlighting the most recently passed heading.
+ */
 const updateActiveHeading = () => {
   const scrollPosition = window.scrollY + 100;
   const headingElements = document.querySelectorAll('h2, h3');

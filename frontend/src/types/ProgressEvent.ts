@@ -26,7 +26,7 @@ export const EncoderProgressSupport = {
    * @returns True if progress monitoring is supported
    */
   isSupported(format: string): boolean {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- runtime check against readonly tuple requires widening
     return this.supported.includes(format as any);
   }
 } as const;

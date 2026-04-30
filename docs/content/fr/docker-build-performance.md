@@ -47,7 +47,7 @@ Vitesse : 10-50x plus lent ❌
 
 #### Chemin I/O sous Windows
 
-```
+```text
 C:\Users\...\DropWebP (NTFS)
   ↓ Protocole réseau 9P
 /mnt/c/Users/.../DropWebP (WSL 2)
@@ -57,7 +57,7 @@ C:\Users\...\DropWebP (NTFS)
 
 #### Chemin I/O sous macOS
 
-```
+```text
 /Users/.../DropWebP (APFS)
   ↓ VirtioFS (optimisé)
 /workspace (Container)

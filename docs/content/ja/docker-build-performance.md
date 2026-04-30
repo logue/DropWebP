@@ -102,7 +102,7 @@ RUN apt-get install -y qemu-user-static
 
 #### Windows環境でのI/O経路
 
-```
+```text
 C:\Users\...\DropWebP (NTFS)
   ↓ 9Pネットワークプロトコル
 /mnt/c/Users/.../DropWebP (WSL 2)
@@ -118,7 +118,7 @@ C:\Users\...\DropWebP (NTFS)
 
 #### macOS環境でのI/O経路
 
-```
+```text
 /Users/.../DropWebP (APFS)
   ↓ VirtioFS (最適化済み)
 /workspace (Container)

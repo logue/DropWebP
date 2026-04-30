@@ -7,7 +7,7 @@ const settingsStore = useSettingsStore();
 </script>
 
 <template>
-  <v-card flat :title="t('title')">
+  <v-card :title="t('title')" flat>
     <v-card-text>
       <v-switch
         v-model="settingsStore.jpegOptions.progressive"
@@ -39,12 +39,12 @@ const settingsStore = useSettingsStore();
         color="primary"
         max="100"
         min="1"
-        persistent-hint
         step="1"
         type="number"
+        persistent-hint
       >
         <template #append>
-          <v-text-field v-model="settingsStore.jpegOptions.quality" readonly variant="underlined" />
+          <v-text-field v-model="settingsStore.jpegOptions.quality" variant="underlined" readonly />
         </template>
       </v-slider>
     </v-card-text>

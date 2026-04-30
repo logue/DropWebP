@@ -139,7 +139,7 @@ MAKEFLAGS=-j4
 
 ### Docker Not Found (Windows)
 
-```
+```text
 ❌ Error: Docker Desktop is not running.
 ```
 

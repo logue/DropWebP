@@ -33,6 +33,11 @@ const contextMenuX = ref(0);
 const contextMenuY = ref(0);
 
 // 右クリックハンドラー
+/**
+ * Show the custom context menu at the cursor position when the user right-clicks.
+ *
+ * @param e - The mouse event from the contextmenu listener.
+ */
 const onRightClick = (e: MouseEvent) => {
   e.preventDefault();
   contextMenuX.value = e.clientX;
@@ -41,6 +46,10 @@ const onRightClick = (e: MouseEvent) => {
 };
 
 // ペースト処理(コンテキストメニューから)
+/**
+ * Handle the "paste" action triggered from the custom context menu by
+ * reading clipboard contents and dispatching a synthetic paste event.
+ */
 const onPasteFromContextMenu = async () => {
   try {
     // navigator.clipboard APIを使用してクリップボードから画像を読み取る
@@ -133,8 +142,8 @@ const onPasteFromContextMenu = async () => {
               :label="t('lossless_compression')"
               :hint="t('lossless_hint_webp')"
               color="primary"
-              persistent-hint
               density="comfortable"
+              persistent-hint
             />
           </div>
         </v-expand-transition>
@@ -146,8 +155,8 @@ const onPasteFromContextMenu = async () => {
               :label="t('lossless_compression')"
               :hint="t('lossless_hint_jxl')"
               color="primary"
-              persistent-hint
               density="comfortable"
+              persistent-hint
             />
           </div>
         </v-expand-transition>

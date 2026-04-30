@@ -8,6 +8,11 @@ const { t, availableLocales } = useI18n();
 /** グローバルストア */
 const configStore = useConfigStore();
 // localeの変更はストアのアクション経由で行う
+/**
+ * Change the active application locale via the config store.
+ *
+ * @param newLocale - Target locale code (e.g. 'en', 'ja').
+ */
 function changeLocale(newLocale: string) {
   configStore.setLocale(newLocale);
 }
@@ -16,7 +21,8 @@ function changeLocale(newLocale: string) {
 <template>
   <v-menu location="bottom">
     <template #activator="{ props }">
-      <v-btn v-bind="props" icon variant="plain">
+      <v-btn v-bind="props" variant="plain" icon>
+        <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -- MDI icon name, not localizable text -->
         <v-icon>mdi-translate</v-icon>
         <v-tooltip :text="t('locale')" activator="parent" location="bottom" />
       </v-btn>

@@ -102,7 +102,7 @@ Overhead: High
 
 #### I/O Path on Windows
 
-```
+```text
 C:\Users\...\DropWebP (NTFS)
   ↓ 9P network protocol
 /mnt/c/Users/.../DropWebP (WSL 2)
@@ -118,7 +118,7 @@ C:\Users\...\DropWebP (NTFS)
 
 #### I/O Path on macOS
 
-```
+```text
 /Users/.../DropWebP (APFS)
   ↓ VirtioFS (optimized)
 /workspace (Container)
