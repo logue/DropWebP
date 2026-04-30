@@ -9,68 +9,75 @@ pub use common::{IccProfileInfo, TransferFunction};
 
 use crate::error::AppError;
 use crate::options::HighBitDepthImage;
-use exif;
 use image::{self, DynamicImage, GenericImageView, ImageFormat};
 use std::io::Cursor;
 use std::path::Path;
 
-/// ファイルパスから画像をデコードし、HighBitDepthImageとして返す
-/// HEIC形式の場合はOS標準APIを使用
+/// Decode an image from a file path and return it as a `HighBitDepthImage`.
+///
+/// HEIC inputs are decoded with the OS-native API for HDR-capable 16-bit output.
+///
+/// # Arguments
+/// - `path`: filesystem path to the source image.
+///
+/// # Returns
+/// Tuple of decoded image and optional ICC profile bytes.
+///
+/// # Errors
+/// Returns `AppError` when the file cannot be read or the format is unsupported.
+// Used by the binary crate via `crate::decoder::decode_from_path`.
+#[allow(dead_code)]
 pub fn decode_from_path<P: AsRef<Path>>(
     path: P,
 ) -> Result<(HighBitDepthImage, Option<Vec<u8>>), AppError> {
     let decode_start = std::time::Instant::now();
 
-    // ファイルを読み込む
-    let data = std::fs::read(path.as_ref()).map_err(|e| AppError::IoError(e))?;
+    // Read the file from disk.
+    let data = std::fs::read(path.as_ref()).map_err(AppError::IoError)?;
 
-    // フォーマットを検出
+    // Detect the image format.
     let format = detect_format(&data)
         .ok_or_else(|| AppError::Decode("Unsupported or unknown image format".to_string()))?;
 
-    // HEICの場合はOS標準APIを使用（HDR対応16-bit）
+    // For HEIC, use the OS-native API (HDR-capable 16-bit).
     if matches!(format, DetectedFormat::Heic) {
         println!("Decoder: Using OS-native HEIC decoder (HDR-capable)...");
         let path_ref = path.as_ref();
         let (mut img, icc_profile) = heic::decode_heic(path_ref)?;
 
-        // EXIF Orientation を処理して画像を回転
-        if let Ok(exif_data) = std::fs::read(path_ref) {
-            if let Ok(exif_reader) =
+        // Apply EXIF Orientation by rotating/flipping the image.
+        if let Ok(exif_data) = std::fs::read(path_ref)
+            && let Ok(exif_reader) =
                 exif::Reader::new().read_from_container(&mut std::io::Cursor::new(&exif_data))
-            {
-                if let Some(orientation_field) =
-                    exif_reader.get_field(exif::Tag::Orientation, exif::In::PRIMARY)
-                {
-                    if let Some(orientation_value) = orientation_field.value.get_uint(0) {
-                        println!("HEIC: EXIF Orientation detected: {}", orientation_value);
-                        img = match orientation_value {
-                            1 => img,                     // Normal
-                            2 => img.fliph(),             // Flip horizontal
-                            3 => img.rotate180(),         // Rotate 180
-                            4 => img.flipv(),             // Flip vertical
-                            5 => img.rotate90().fliph(),  // Rotate 90 CW + flip horizontal
-                            6 => img.rotate90(),          // Rotate 90 CW
-                            7 => img.rotate270().fliph(), // Rotate 270 CW + flip horizontal
-                            8 => img.rotate270(),         // Rotate 270 CW
-                            _ => img,
-                        };
-                    }
-                }
-            }
+            && let Some(orientation_field) =
+                exif_reader.get_field(exif::Tag::Orientation, exif::In::PRIMARY)
+            && let Some(orientation_value) = orientation_field.value.get_uint(0)
+        {
+            println!("HEIC: EXIF Orientation detected: {}", orientation_value);
+            img = match orientation_value {
+                1 => img,                     // Normal
+                2 => img.fliph(),             // Flip horizontal
+                3 => img.rotate180(),         // Rotate 180
+                4 => img.flipv(),             // Flip vertical
+                5 => img.rotate90().fliph(),  // Rotate 90 CW + flip horizontal
+                6 => img.rotate90(),          // Rotate 90 CW
+                7 => img.rotate270().fliph(), // Rotate 270 CW + flip horizontal
+                8 => img.rotate270(),         // Rotate 270 CW
+                _ => img,
+            };
         }
 
-        // HEICは16-bit RGBA (Rgba16)でデコードされる
-        // 元の色空間（Display P3、PQ transfer functionなど）をそのまま保持
+        // HEIC is decoded into 16-bit RGBA (Rgba16); the original color space
+        // (Display P3, PQ transfer function, etc.) is preserved as-is.
         let high_bit_img = match img {
             DynamicImage::ImageRgba16(rgba16) => {
                 println!("HEIC: 16-bit image detected, preserving original color space");
-                // 16-bit u16をf32に正規化（0-65535 → 0.0-1.0）
-                // カラースペース変換は行わず、元の値をそのまま保持
+                // Normalize 16-bit u16 values to f32 (0-65535 -> 0.0-1.0).
+                // No color space conversion is performed; values are kept as-is.
                 HighBitDepthImage::Rgba(DynamicImage::ImageRgba16(rgba16).to_rgba32f())
             }
             DynamicImage::ImageRgba8(rgba) => {
-                // フォールバック: 8-bit RGBA (SDR)
+                // Fallback: 8-bit RGBA (SDR).
                 println!("HEIC: 8-bit image, converting to f32");
                 HighBitDepthImage::Rgba(image::DynamicImage::ImageRgba8(rgba).to_rgba32f())
             }
@@ -94,7 +101,7 @@ pub fn decode_from_path<P: AsRef<Path>>(
         return Ok((high_bit_img, icc_profile));
     }
 
-    // その他の形式は従来のdecode関数を使用
+    // Other formats fall back to the regular `decode` function.
     let result = decode(&data);
     println!(
         "Decoder: Image decoded in {:.2}s",
@@ -103,33 +110,41 @@ pub fn decode_from_path<P: AsRef<Path>>(
     result
 }
 
-/// バイトデータから画像をデコードし、HighBitDepthImageとして返す
-/// サポートする形式: JPEG 2000, JPEG XL, そして imageクレートが対応する形式
-/// # 引数
-/// - `image_bytes`: 画像のバイトデータ
-/// # 戻り値
-/// - 成功した場合は `HighBitDepthImage` を返します。
-/// - 失敗した場合は `AppError` を返します。
-/// # 注意
-/// - JPEG 2000形式のデコードには `jpeg2k` クレートを使用しています。
-///   ただし、このクレートはすべてのJPEG 2000ファイルに対応しているわけではないため、特定のファイルでエラーが発生する可能性があります。
-/// - HEIC/HEIF形式はOS標準APIを使用してデコードします：
+/// Decode image bytes and return them as a `HighBitDepthImage`.
+///
+/// Supported formats: JPEG 2000, JPEG XL, and any format the `image` crate
+/// can recognize.
+///
+/// # Arguments
+/// - `image_bytes`: raw image bytes.
+///
+/// # Returns
+/// Tuple of decoded image and optional ICC profile bytes.
+///
+/// # Errors
+/// Returns `AppError::Decode` for unsupported, malformed, or HEIC inputs
+/// (HEIC requires `decode_from_path`).
+///
+/// # Notes
+/// - JPEG 2000 decoding uses the `jpeg2k` crate, which does not handle every
+///   JPEG 2000 file; some inputs may fail.
+/// - HEIC/HEIF decoding uses OS-native APIs:
 ///   - Windows: Windows Imaging Component (WIC)
 ///   - macOS: ImageIO framework
-///   - Linux: heif-convert コマンド (要 libheif-tools パッケージ)
+///   - Linux: `heif-convert` command (requires the `libheif-tools` package)
 pub fn decode(image_bytes: &[u8]) -> Result<(HighBitDepthImage, Option<Vec<u8>>), AppError> {
-    // まず、バイトデータから画像形式を判別する
+    // First, identify the image format from the byte data.
     let format = detect_format(image_bytes)
         .ok_or_else(|| AppError::Decode("Unsupported or unknown image format".to_string()))?;
 
-    // 判別した形式に応じて、適切なデコーダーを呼び出す
+    // Dispatch to the appropriate decoder based on the detected format.
     match format {
         DetectedFormat::Avif => {
             println!("Decoder: Using AVIF decoder...");
             avif::decode(image_bytes)
         }
         DetectedFormat::Heic => {
-            // HEICはファイルパスが必要なため、decode_from_pathを使用する必要がある
+            // HEIC requires a file path, so the caller must use `decode_from_path`.
             Err(AppError::Decode(
                 "HEIC format requires file path. Use decode_from_path() instead.".to_string(),
             ))
@@ -146,62 +161,64 @@ pub fn decode(image_bytes: &[u8]) -> Result<(HighBitDepthImage, Option<Vec<u8>>)
             println!("Decoder: Using image decoder...");
             let icc_profile = extract_icc_profile(image_bytes);
 
-            // 1. まずはDynamicImageとしてメモリから読み込む
+            // 1. Load the bytes into a DynamicImage from memory.
             let img: DynamicImage = image::load_from_memory(image_bytes)
                 .map_err(|e| AppError::Decode(e.to_string()))?;
 
-            // 2. カラータイプとビット深度を分析
+            // 2. Inspect color type and bit depth.
             let color_type = img.color();
             let (width, height) = img.dimensions();
 
             println!("PNG: {}x{} - {:?}", width, height, color_type);
 
-            // ICCプロファイル分析によるワイドガムット検出
+            // Detect wide-gamut content via ICC profile analysis.
             let has_wide_gamut_profile = if let Some(ref profile) = icc_profile {
-                println!("PNG: ICCプロファイル検出 - サイズ: {}bytes", profile.len());
-                // 大きなICCプロファイル（Display P3, Rec2020など）はワイドガムットの可能性
+                println!("PNG: ICC profile detected - size: {} bytes", profile.len());
+                // Larger ICC profiles (Display P3, Rec2020, etc.) likely indicate wide gamut.
                 profile.len() > 400 && profile.len() < 1000
             } else {
                 false
             };
 
-            // ビット深度判定：16-bit形式 または ワイドガムットICCプロファイル付き8-bit
+            // Bit depth decision: 16-bit formats, or 8-bit with a wide-gamut ICC profile.
             let requires_high_precision = match color_type {
                 image::ColorType::L16 | image::ColorType::Rgb16 | image::ColorType::Rgba16 => {
-                    println!("PNG: 16-bit画像として高精度処理");
+                    println!("PNG: 16-bit image, using high-precision processing");
                     true
                 }
                 _ if has_wide_gamut_profile => {
-                    println!("PNG: 8-bit画像だがワイドガムットICCプロファイル検出 - 高精度処理");
+                    println!(
+                        "PNG: 8-bit image with wide-gamut ICC profile - using high-precision processing"
+                    );
                     true
                 }
                 _ => {
-                    println!("PNG: 標準8-bit画像として処理");
+                    println!("PNG: standard 8-bit image processing");
                     false
                 }
             };
 
-            // 3. ビット深度に応じた適切な変換
+            // 3. Convert appropriately based on bit depth.
             if requires_high_precision {
-                println!("PNG: 高精度f32変換を実行");
-                return match color_type {
-                    // アルファチャンネルを持たない形式の場合
+                println!("PNG: running high-precision f32 conversion");
+                match color_type {
+                    // Formats without an alpha channel.
                     image::ColorType::L8
                     | image::ColorType::L16
                     | image::ColorType::Rgb8
                     | image::ColorType::Rgb16 => {
                         Ok((HighBitDepthImage::Rgb(img.to_rgb32f()), icc_profile))
                     }
-                    // アルファチャンネルを持つ形式の場合
+                    // Formats that include an alpha channel.
                     _ => Ok((HighBitDepthImage::Rgba(img.to_rgba32f()), icc_profile)),
-                };
+                }
             } else {
-                println!("PNG: 標準精度処理（8-bit効率化）");
-                // 8-bit標準画像：効率的な変換（不要な高精度変換を避ける）
-                return match color_type {
-                    // アルファチャンネルを持たない形式の場合
+                println!("PNG: standard-precision processing (8-bit fast path)");
+                // Standard 8-bit images: efficient conversion (avoid unnecessary high-precision).
+                match color_type {
+                    // Formats without an alpha channel.
                     image::ColorType::L8 | image::ColorType::Rgb8 => {
-                        // 8-bitデータを効率的にf32に変換（0-1範囲）
+                        // Convert 8-bit data to f32 efficiently (range 0-1).
                         let rgb8_img = img.to_rgb8();
                         let pixels_f32: Vec<f32> = rgb8_img
                             .pixels()
@@ -218,10 +235,10 @@ pub fn decode(image_bytes: &[u8]) -> Result<(HighBitDepthImage, Option<Vec<u8>>)
 
                         Ok((HighBitDepthImage::Rgb(buffer), icc_profile))
                     }
-                    // アルファチャンネルを持つ8-bit形式の場合
+                    // 8-bit format with alpha channel.
                     image::ColorType::La8 | image::ColorType::Rgba8 => {
-                        println!("PNG: 8-bit RGBA画像を効率的に変換");
-                        // 8-bitデータを効率的にf32に変換（0-1範囲）
+                        println!("PNG: efficient conversion for 8-bit RGBA image");
+                        // Convert 8-bit data to f32 efficiently (range 0-1).
                         let rgba8_img = img.to_rgba8();
                         let pixels_f32: Vec<f32> = rgba8_img
                             .pixels()
@@ -238,9 +255,9 @@ pub fn decode(image_bytes: &[u8]) -> Result<(HighBitDepthImage, Option<Vec<u8>>)
 
                         Ok((HighBitDepthImage::Rgba(buffer), icc_profile))
                     }
-                    // その他（16-bit等）はフォールバック
+                    // Other types (16-bit, etc.) fall through to the general path.
                     _ => {
-                        println!("PNG: フォールバック - 高精度変換");
+                        println!("PNG: fallback - high-precision conversion");
                         match color_type {
                             image::ColorType::L8
                             | image::ColorType::L16
@@ -251,48 +268,48 @@ pub fn decode(image_bytes: &[u8]) -> Result<(HighBitDepthImage, Option<Vec<u8>>)
                             _ => Ok((HighBitDepthImage::Rgba(img.to_rgba32f()), icc_profile)),
                         }
                     }
-                };
+                }
             }
         }
     }
 }
 
-// 独自の形式を定義するためのenum
+// Internal enumeration for the formats this decoder explicitly handles.
 enum DetectedFormat {
     Avif,
     Heic,
     Jpeg2000,
     Jxl,
-    // imageクレートがサポートするその他の形式
+    // Any other format supported by the `image` crate.
     Standard(ImageFormat),
 }
 
-/// バイトデータのマジックナンバーから画像形式を判別する
+/// Detect the image format from the magic-number prefix of the byte data.
 fn detect_format(bytes: &[u8]) -> Option<DetectedFormat> {
-    // HEIC/AVIF (ISOBMFFコンテナ) のチェック
-    // ftyp ボックスが "heic", "heix", "avif" などを含むか
+    // Check for HEIC/AVIF (ISOBMFF container).
+    // Look for an ftyp box containing "heic", "heix", "avif", etc.
     if bytes.len() > 12 && &bytes[4..8] == b"ftyp" {
         let ftyp = &bytes[8..12];
         if ftyp == b"heic" || ftyp == b"heix" || ftyp == b"hevc" || ftyp == b"heim" {
             return Some(DetectedFormat::Heic);
         }
-        // AVIFの判別
+        // Detect AVIF.
         if ftyp == b"avif" || ftyp == b"avis" {
             return Some(DetectedFormat::Avif);
         }
     }
 
-    // JPEG 2000のチェック
+    // Check for JPEG 2000.
     if bytes.starts_with(b"\x00\x00\x00\x0CjP  \r\n\x87\n") {
         return Some(DetectedFormat::Jpeg2000);
     }
 
-    // JPEG XLのチェック
+    // Check for JPEG XL.
     if bytes.starts_with(b"\xFF\x0A") || bytes.starts_with(b"\x00\x00\x00\x0CJXL ") {
         return Some(DetectedFormat::Jxl);
     }
 
-    // 上記のいずれでもない場合、imageクレートの形式推測に任せる
+    // Otherwise, defer to the `image` crate's format detection.
     if let Ok(format) = image::guess_format(bytes) {
         return Some(DetectedFormat::Standard(format));
     }
@@ -300,28 +317,35 @@ fn detect_format(bytes: &[u8]) -> Option<DetectedFormat> {
     None
 }
 
+/// Extract an embedded ICC profile from PNG or JPEG byte data.
+///
+/// # Arguments
+/// - `bytes`: raw image bytes.
+///
+/// # Returns
+/// `Some(profile)` when an ICC profile could be extracted, otherwise `None`.
 pub fn extract_icc_profile(bytes: &[u8]) -> Option<Vec<u8>> {
-    // --- PNGの場合 ---
-    // PNGのマジックナンバー (89 50 4E 47 0D 0A 1A 0A) を確認
+    // --- PNG branch ---
+    // Verify the PNG magic number (89 50 4E 47 0D 0A 1A 0A).
     if bytes.starts_with(&[0x89, 0x50, 0x4E, 0x47]) {
         let decoder = png::Decoder::new(Cursor::new(bytes));
-        if let Ok(reader) = decoder.read_info() {
-            if let Some(profile) = &reader.info().icc_profile {
-                // iCCPチャンクからプロファイルデータを取得
-                return Some(profile.to_vec());
-            }
+        if let Ok(reader) = decoder.read_info()
+            && let Some(profile) = &reader.info().icc_profile
+        {
+            // Return the profile data from the iCCP chunk.
+            return Some(profile.to_vec());
         }
         return None;
     }
 
-    // --- JPEGの場合 ---
-    // JPEGのマジックナンバー (FF D8) を確認
+    // --- JPEG branch ---
+    // Verify the JPEG magic number (FF D8).
     if bytes.starts_with(&[0xFF, 0xD8]) {
         let mut icc_chunks = std::collections::BTreeMap::new();
-        let mut pos = 2; // SOIマーカーの後からスキャン開始
+        let mut pos = 2; // Begin scanning right after the SOI marker.
 
         while pos < bytes.len() - 4 {
-            // マーカー (FFで始まる) を探す
+            // Look for marker bytes (those starting with 0xFF).
             if bytes[pos] != 0xFF {
                 pos += 1;
                 continue;
@@ -329,21 +353,21 @@ pub fn extract_icc_profile(bytes: &[u8]) -> Option<Vec<u8>> {
 
             let marker = bytes[pos + 1];
 
-            // APP2マーカー (FF E2) かどうかを確認
+            // Check whether this is an APP2 marker (FF E2).
             if marker == 0xE2 {
                 let length = u16::from_be_bytes([bytes[pos + 2], bytes[pos + 3]]) as usize;
                 let segment_data = &bytes[pos + 4..pos + 2 + length];
 
-                // "ICC_PROFILE" という識別子があるか確認
+                // Check for the "ICC_PROFILE" identifier.
                 if segment_data.starts_with(b"ICC_PROFILE\0") {
-                    // チャンク情報を取得
+                    // Parse the chunk metadata.
                     let chunk_index = segment_data[12];
                     let total_chunks = segment_data[13];
                     let profile_part = &segment_data[14..];
 
                     icc_chunks.insert(chunk_index, profile_part);
 
-                    // 全てのチャンクが集まったか確認
+                    // Check whether all chunks have been collected.
                     if icc_chunks.len() == total_chunks as usize {
                         let mut full_profile = Vec::new();
                         for i in 1..=total_chunks {
@@ -355,7 +379,7 @@ pub fn extract_icc_profile(bytes: &[u8]) -> Option<Vec<u8>> {
                     }
                 }
             }
-            // 次のマーカーへ移動
+            // Advance to the next marker.
             let length = u16::from_be_bytes([bytes[pos + 2], bytes[pos + 3]]) as usize;
             pos += 2 + length;
         }
@@ -363,6 +387,6 @@ pub fn extract_icc_profile(bytes: &[u8]) -> Option<Vec<u8>> {
         return None;
     }
 
-    // 未対応のフォーマット
+    // Unsupported container.
     None
 }

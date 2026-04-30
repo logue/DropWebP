@@ -1,13 +1,13 @@
 use std::env;
 
 fn main() {
-    // Cargo依存ファイルの変更を監視
+    // Watch for changes to Cargo build inputs.
     println!("cargo:rerun-if-changed=build.rs");
     println!("cargo:rerun-if-changed=Cargo.toml");
     println!("cargo:rerun-if-changed=src/");
     println!("cargo:rerun-if-changed=capabilities/");
 
-    // 環境変数の変更を監視
+    // Watch for changes to relevant environment variables.
     println!("cargo:rerun-if-env-changed=VCPKG_ROOT");
     println!("cargo:rerun-if-env-changed=TARGET");
     println!("cargo:rerun-if-env-changed=HOST");
@@ -18,7 +18,7 @@ fn main() {
     println!("cargo:info=Building for target: {}", target);
     println!("cargo:info=Host architecture: {}", host);
 
-    // Windowsでのクロスコンパイルのためにvcpkgのtripletを設定
+    // Set the vcpkg triplet for cross-compilation on Windows.
     #[cfg(target_os = "windows")]
     if env::var("VCPKGRS_TRIPLET").is_err() {
         let triplet = if target.contains("aarch64") {
@@ -26,7 +26,7 @@ fn main() {
         } else if target.contains("x86_64") {
             "x64-windows-static-release"
         } else {
-            "x64-windows-static-release" // デフォルトはx64
+            "x64-windows-static-release" // Default to x64.
         };
         unsafe {
             env::set_var("VCPKGRS_TRIPLET", triplet);
@@ -34,15 +34,14 @@ fn main() {
         println!("cargo:info=Setting vcpkg triplet to: {}", triplet);
     }
 
-    // macOSでのクロスコンパイルのためにvcpkgのtripletを設定
+    // Set the vcpkg triplet for cross-compilation on macOS.
     #[cfg(target_os = "macos")]
     if env::var("VCPKGRS_TRIPLET").is_err() {
         let triplet = if target.contains("x86_64") {
             "x64-osx"
-        } else if target.contains("aarch64") {
-            "arm64-osx"
         } else {
-            "arm64-osx" // デフォルトはarm64
+            // Default to arm64 for both aarch64 and unknown targets.
+            "arm64-osx"
         };
         unsafe {
             env::set_var("VCPKGRS_TRIPLET", triplet);
@@ -50,7 +49,7 @@ fn main() {
         println!("cargo:info=Setting vcpkg triplet to: {}", triplet);
     }
 
-    // vcpkg の PKG_CONFIG_PATH を設定
+    // Set PKG_CONFIG_PATH for vcpkg.
     if let Ok(vcpkg_root) = env::var("VCPKG_ROOT") {
         let triplet = env::var("VCPKGRS_TRIPLET").unwrap_or_else(|_| {
             #[cfg(target_os = "windows")]
@@ -83,7 +82,7 @@ fn main() {
         println!("cargo:info=Setting PKG_CONFIG_PATH to: {}", pkg_config_path);
 
         unsafe {
-            // 既存のPKG_CONFIG_PATHに追加
+            // Append to existing PKG_CONFIG_PATH.
             let current_path = env::var("PKG_CONFIG_PATH").unwrap_or_default();
             let new_path = if current_path.is_empty() {
                 pkg_config_path
@@ -94,9 +93,9 @@ fn main() {
         }
     }
 
-    // vcpkgを使用したC/C++ライブラリ管理
-    // システムパッケージマネージャー（brew、apt、rpm等）への依存を避け、
-    // vcpkgで統一的にライブラリを管理
+    // Manage C/C++ libraries via vcpkg.
+    // Avoid relying on system package managers (brew, apt, rpm, etc.) and
+    // standardize on vcpkg for cross-platform consistency.
     println!("cargo:rustc-env=SYSTEM_DEPS_LINK=static");
     println!("cargo:rustc-env=SYSTEM_DEPS_BUILD_INTERNAL=never");
 
@@ -141,15 +140,15 @@ fn main() {
             for include_path in &lib.include_paths {
                 println!("cargo:include={}", include_path.display());
             }
-            // libaom-sysに内部ビルドをスキップさせる
-            // libaom-sys 0.17.xが認識する正式な環境変数を設定
+            // Tell libaom-sys to skip its internal build.
+            // Set the official environment variables recognized by libaom-sys 0.17.x.
             unsafe {
                 if !lib.link_paths.is_empty() && !lib.include_paths.is_empty() {
                     let lib_dir = lib.link_paths[0].to_str().unwrap();
                     let inc_dir = lib.include_paths[0].to_str().unwrap();
                     let pkgconfig_dir = format!("{}/pkgconfig", lib_dir);
 
-                    // libaom-sysのbuild.rsが参照する環境変数（必須）
+                    // Required environment variables consumed by libaom-sys/build.rs.
                     env::set_var("LIB_AOM_STATIC_LIB_PATH", lib_dir);
                     env::set_var("LIB_AOM_INCLUDE_PATH", inc_dir);
                     env::set_var("LIB_AOM_PKG_CONFIG_PATH", &pkgconfig_dir);
@@ -177,7 +176,7 @@ fn main() {
             for include_path in &lib.include_paths {
                 println!("cargo:include={}", include_path.display());
             }
-            // libavif-sysに内部ビルドをスキップさせる
+            // Tell libavif-sys to skip its internal build.
             unsafe {
                 if !lib.link_paths.is_empty() {
                     env::set_var("AVIF_LIB_DIR", lib.link_paths[0].to_str().unwrap());
@@ -228,7 +227,7 @@ fn main() {
         }
     }
 
-    // libjpeg-turbo (jpegli_rsが使用)
+    // libjpeg-turbo (used by jpegli_rs).
     match vcpkg::Config::new().lib_name("jpeg").probe("libjpeg-turbo") {
         Ok(_lib) => {
             println!("cargo:info=Found libjpeg-turbo via vcpkg");
@@ -253,14 +252,14 @@ fn main() {
         }
     }
 
-    // Windows環境での設定
+    // Windows-specific configuration.
     #[cfg(target_os = "windows")]
     {
         if let Ok(_vcpkg_root) = env::var("VCPKG_ROOT") {
             let target = env::var("TARGET").unwrap_or_default();
             let profile = env::var("PROFILE").unwrap_or_else(|_| "debug".to_string());
 
-            // プロファイルに応じてトリプレットを選択
+            // Choose the triplet based on the build profile.
             let triplet = if target.contains("aarch64") {
                 if profile == "release" {
                     "arm64-windows-static-release"
@@ -286,8 +285,8 @@ fn main() {
             println!("cargo:info=Using vcpkg triplet: {}", actual_triplet);
 
             unsafe {
-                // libavif-sysとlibaom-sysに内部ビルドをスキップさせる
-                // Windows特有の環境変数も設定
+                // Tell libavif-sys and libaom-sys to skip their internal builds.
+                // Also set Windows-specific environment variables.
                 env::set_var("LIBAVIF_NO_LOCAL_BUILD", "1");
                 env::set_var("LIBAOM_NO_LOCAL_BUILD", "1");
                 env::set_var("LIBAOM_NO_FETCH", "1");
@@ -301,7 +300,7 @@ fn main() {
         }
     }
 
-    // macOS環境での設定
+    // macOS-specific configuration.
     #[cfg(target_os = "macos")]
     {
         let target = env::var("TARGET").unwrap_or_default();
@@ -312,7 +311,7 @@ fn main() {
             println!("cargo:info=Cross-compiling from {} to {}", host, target);
         }
 
-        // VCPKG_ROOTの設定（未設定の場合はデフォルトパスを探す）
+        // Configure VCPKG_ROOT (probe a default path when unset).
         if env::var("VCPKG_ROOT").is_err() {
             let default_vcpkg_path =
                 format!("{}/Developer/vcpkg", env::var("HOME").unwrap_or_default());
@@ -336,8 +335,8 @@ fn main() {
             }
             println!("cargo:info=Using vcpkg triplet: {}", triplet);
 
-            // x86_64クロスコンパイル時は、libaom/libavifの内部ビルドを無効化
-            // vcpkgでビルド済みのライブラリを使用
+            // For x86_64 cross-compilation, disable libaom/libavif internal builds.
+            // Use the libraries pre-built by vcpkg instead.
             if is_cross_compiling && target.contains("x86_64") {
                 println!("cargo:info=Using vcpkg pre-built libraries for x86_64 cross-compilation");
 
@@ -354,7 +353,7 @@ fn main() {
         }
     }
 
-    // Linux環境での設定
+    // Linux-specific configuration.
     #[cfg(target_os = "linux")]
     {
         let target = env::var("TARGET").unwrap_or_default();
@@ -365,8 +364,8 @@ fn main() {
             println!("cargo:info=Cross-compiling from {} to {}", host, target);
         }
 
-        // GTK/WebKit依存関係のチェック（Tauri要件）
-        // これらはpkg-config経由で取得する必要がある
+        // Check GTK/WebKit dependencies (required by Tauri).
+        // These must be discovered via pkg-config.
         let gtk_libs = ["gtk+-3.0", "webkit2gtk-4.1", "glib-2.0", "gobject-2.0"];
         for lib in gtk_libs {
             match pkg_config::probe_library(lib) {
@@ -378,7 +377,7 @@ fn main() {
             }
         }
 
-        // vcpkg triplet設定（画像処理ライブラリ用）
+        // vcpkg triplet configuration (used for image processing libraries).
         if env::var("VCPKG_ROOT").is_ok() {
             let triplet = if target.contains("x86_64") {
                 "x64-linux"

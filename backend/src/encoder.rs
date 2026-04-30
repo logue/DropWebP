@@ -10,23 +10,29 @@ use crate::error::AppError;
 use crate::options::{EncodeOptions, HighBitDepthImage};
 use std::borrow::Cow;
 
-/// 画像を指定された形式でエンコードします。
-/// # 引数
-/// - `img`: 変換対象の画像 (HighBitDepthImage)
-/// - `options`: エンコードオプション (EncodeOptions)
-/// # 戻り値
-/// - 成功した場合はエンコードされたバイト列を `Vec<u8>` として返します。
-/// - 失敗した場合は `Box<dyn Error>` を返します。
-/// # 注意
-/// - AVIF形式のエンコードには `ravif` クレートを使用しています。ビルド時に `libavif` ライブラリがシステムにインストールされている必要があります。
-/// - WebP形式のエンコードには `libwebp-sys` クレートを使用しています。ビルド時に `libwebp` ライブラリがシステムにインストールされている必要があります。
-/// - JPEG XL形式のエンコードには `jpegxl-rs` クレートを使用しています。ビルド時に `libjxl` ライブラリがシステムにインストールされている必要があります。
+/// Encode an image into the requested format.
+///
+/// # Arguments
+/// - `img`: source image (`HighBitDepthImage`).
+/// - `icc_profile`: optional ICC profile bytes to embed.
+/// - `options`: encoding options (`EncodeOptions`).
+///
+/// # Returns
+/// Encoded bytes on success.
+///
+/// # Errors
+/// Returns `AppError` when encoding fails for the selected format.
+///
+/// # Notes
+/// - AVIF encoding uses the `libavif-sys` crate; `libavif` must be available at build time.
+/// - WebP encoding uses the `libwebp-sys` crate; `libwebp` must be available at build time.
+/// - JPEG XL encoding uses `jxl-sys`; `libjxl` must be available at build time.
 pub fn encode(
     img: HighBitDepthImage,
     icc_profile: Option<Vec<u8>>,
     options: &EncodeOptions,
 ) -> Result<Vec<u8>, AppError> {
-    // match式の結果を変数に束縛する
+    // Bind the result of the match expression to a local variable.
     let result = match options {
         EncodeOptions::Avif(opts) => {
             println!("Adapter: Converting AvifOptions for ravif encoder...");
@@ -50,16 +56,18 @@ pub fn encode(
         }
     };
 
-    // match式から受け取った結果を返す
+    // Return the result captured from the match expression.
     result
 }
 
-/// 指定された形式での画像ファイルサイズを推定します。
-/// # 引数
-/// - `img`: 変換対象の画像 (HighBitDepthImage)
-/// - `options`: エンコードオプション (EncodeOptions)
-/// # 戻り値
-/// - 推定されるファイルサイズをバイト単位で返します。
+/// Estimate the encoded file size for the requested format.
+///
+/// # Arguments
+/// - `img`: source image (`HighBitDepthImage`).
+/// - `options`: encoding options (`EncodeOptions`).
+///
+/// # Returns
+/// Estimated size in bytes.
 pub fn estimate_size(img: &HighBitDepthImage, options: &EncodeOptions) -> usize {
     let (width, height, channels) = match img {
         HighBitDepthImage::Rgb(buf) => (buf.width(), buf.height(), 3),
@@ -77,34 +85,34 @@ pub fn estimate_size(img: &HighBitDepthImage, options: &EncodeOptions) -> usize 
     }
 }
 
-/// HighBitDepthImageからエンコード用のピクセルデータを効率的に抽出します。
+/// Extract pixel data from a `HighBitDepthImage` for encoding.
 ///
-/// - 元の画像がRGB8/RGBA8形式の場合、データを借用して不要なコピーを避けます。
-/// - ARGB形式の場合は、ARGBからRGBAに変換して所有権を持つデータを生成します。
-/// - それ以外の形式の場合は、RGBA8に変換して所有権を持つデータを生成します。
+/// - For RGB/RGBA images, the underlying buffer is borrowed to avoid copies.
+/// - For ARGB images, the data is converted to RGBA in an owned buffer.
 ///
 /// # Arguments
-/// * `img` - 処理対象の`HighBitDepthImage`への参照。
+/// * `img` - Reference to the source `HighBitDepthImage`.
 ///
 /// # Returns
-/// * `(Cow<'a, [f32]>, bool)` - ピクセルデータと、アルファチャンネルの有無 (`true`ならRGBA) のタプル。
+/// Tuple `(Cow<'a, [f32]>, bool)` of the pixel data and a flag indicating whether
+/// an alpha channel is present (`true` means RGBA).
 pub fn extract_pixel_data(img: &HighBitDepthImage) -> (Cow<'_, [f32]>, bool) {
     match img {
         HighBitDepthImage::Rgba(buffer) => (Cow::Borrowed(buffer.as_raw()), true),
         HighBitDepthImage::Rgb(buffer) => (Cow::Borrowed(buffer.as_raw()), false),
         HighBitDepthImage::Argb(buffer) => {
-            // ARGBからRGBAに変換
+            // Convert ARGB to RGBA.
             let argb_pixels = buffer.as_raw();
             let mut rgba_pixels = Vec::with_capacity(argb_pixels.len());
 
-            // ARGBピクセル（A, R, G, B）をRGBAピクセル（R, G, B, A）に変換
+            // Convert each ARGB pixel (A, R, G, B) to RGBA pixel (R, G, B, A).
             for chunk in argb_pixels.chunks_exact(4) {
                 let a = chunk[0]; // Alpha
                 let r = chunk[1]; // Red
                 let g = chunk[2]; // Green
                 let b = chunk[3]; // Blue
 
-                // RGBAの順序で格納
+                // Store in RGBA order.
                 rgba_pixels.extend_from_slice(&[r, g, b, a]);
             }
 

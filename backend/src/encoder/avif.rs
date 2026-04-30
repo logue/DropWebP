@@ -11,7 +11,7 @@ use std::ptr;
 /// bit_depth: Bit depth (BitDepth::Auto, BitDepth::Eight, BitDepth::Ten, BitDepth::Twelve)
 /// alpha_quality: Alpha channel quality (1-100, higher values mean better quality)
 /// speed: Encoding speed (0-10). 0 is highest quality but slowest, 10 is fastest
-/// color_model: Color model (ColorModel::YCbCr, ColorModel::RGB)
+/// color_model: Color model (ColorModel::YCbCr, ColorModel::Rgb)
 /// threads: Number of threads to use (None for automatic)
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -39,11 +39,12 @@ pub enum BitDepth {
 
 /// Color model enumeration
 /// - YCbCr: YCbCr color model (better compression)
-/// - RGB: RGB color model (better color accuracy)
+/// - Rgb: RGB color model (better color accuracy)
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ColorModel {
     YCbCr,
-    RGB,
+    #[serde(rename = "RGB", alias = "Rgb")]
+    Rgb,
 }
 
 /// Encode HighBitDepthImage to AVIF format using libavif-sys with HDR support
@@ -91,7 +92,7 @@ pub fn encode(
         HighBitDepthImage::Rgba(buf) => buf.dimensions(),
         HighBitDepthImage::Argb(buf) => buf.dimensions(),
     };
-    let (pixels_f32, has_alpha) = extract_pixel_data(&pixel_data);
+    let (pixels_f32, has_alpha) = extract_pixel_data(pixel_data);
 
     // Determine bit depth based on content and settings
     // Auto mode intelligently selects bit depth for optimal quality/speed balance
@@ -324,11 +325,11 @@ pub fn encode(
         }
 
         // Create RGB image
-        // Note: avifRGBImage は RGB 入力を表現し、avifImage の色空間設定が
-        // RGB→YUV 変換のターゲットになる
+        // Note: avifRGBImage represents the RGB input, while the color space
+        // configured on avifImage is the target of the RGB->YUV conversion.
         let rgb_image = libavif_sys::avifRGBImage {
-            width: width as u32,
-            height: height as u32,
+            width,
+            height,
             depth: rgb_depth as u32,
             format: rgb_format,
             chromaUpsampling: libavif_sys::AVIF_CHROMA_UPSAMPLING_AUTOMATIC,
@@ -339,7 +340,7 @@ pub fn encode(
             isFloat: 0,
             maxThreads: options.threads.unwrap_or(0) as i32,
             pixels: rgb_pixels.as_ptr() as *mut u8,
-            rowBytes: row_bytes as u32,
+            rowBytes: row_bytes,
         };
 
         println!(
@@ -425,7 +426,7 @@ pub fn encode(
             encoder,
             image,
             1,
-            libavif_sys::AVIF_ADD_IMAGE_FLAG_SINGLE as u32,
+            libavif_sys::AVIF_ADD_IMAGE_FLAG_SINGLE,
         );
         println!(
             "AVIF: avifEncoderAddImage took {:.2}s",
@@ -712,6 +713,8 @@ fn apply_pq_eotf_inverse(linear: f32) -> f32 {
 }
 
 /// Convert linear RGB to sRGB gamma
+// Retained for future PQ/HLG transfer function support.
+#[allow(dead_code)]
 fn linear_to_srgb(linear: f32) -> f32 {
     let clamped = linear.clamp(0.0, 1.0);
     if clamped <= 0.0031308 {

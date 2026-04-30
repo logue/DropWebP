@@ -123,7 +123,7 @@ fn hlg_to_linear(hlg: f32) -> f32 {
     // HLG inverse OETF (ITU-R BT.2100)
     let a = 0.17883277;
     let b = 0.28466892; // 1 - 4a
-    let c = 0.55991073; // 0.5 - a * ln(4a)
+    let c = 0.559_910_7; // 0.5 - a * ln(4a)
 
     let y = if hlg <= 0.5 {
         // Lower range: quadratic
@@ -162,7 +162,7 @@ pub fn decode(data: &[u8]) -> Result<(HighBitDepthImage, Option<Vec<u8>>), AppEr
 
         // Parse the AVIF data
         let result =
-            avifDecoderSetIOMemory(decoder, data.as_ptr() as *const u8, data.len() as usize);
+            avifDecoderSetIOMemory(decoder, data.as_ptr(), data.len());
 
         if result != AVIF_RESULT_OK {
             return Err(AppError::Decode(format!(
@@ -440,8 +440,7 @@ pub fn decode(data: &[u8]) -> Result<(HighBitDepthImage, Option<Vec<u8>>), AppEr
                 .filter(|(i, _)| i % 4 != 3) // Skip alpha
                 .map(|(_, &v)| v)
                 .min_by(|a, b| a.partial_cmp(b).unwrap())
-            {
-                if let Some(max_val) = pixels_f32
+                && let Some(max_val) = pixels_f32
                     .iter()
                     .enumerate()
                     .filter(|(i, _)| i % 4 != 3)
@@ -453,7 +452,6 @@ pub fn decode(data: &[u8]) -> Result<(HighBitDepthImage, Option<Vec<u8>>), AppEr
                         min_val, max_val, is_hdr
                     );
                 }
-            }
 
             let buffer = ImageBuffer::<Rgba<f32>, Vec<f32>>::from_raw(width, height, pixels_f32)
                 .ok_or_else(|| {

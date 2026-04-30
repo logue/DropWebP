@@ -7,6 +7,8 @@ mod logging;
 mod options;
 use std::time::Instant;
 
+/// Application entry point. Initializes the Tauri runtime, registers plugins
+/// and Vue-callable commands, then enters the event loop.
 fn main() {
     let start_time = Instant::now();
     println!("[{:.2?}] App start", start_time.elapsed());
@@ -16,7 +18,7 @@ fn main() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_notification::init())
-        // Vue から呼び出せるコマンド関数を登録
+        // Register commands invokable from the frontend.
         .invoke_handler(tauri::generate_handler![
             command::convert,
             command::convert_with_progress,
@@ -25,7 +27,7 @@ fn main() {
             command::estimate_size
         ])
         .setup(|app| {
-            // Initialize logging system
+            // Initialize logging system.
             logging::init_logging(app.handle().clone());
             logging::send_log(logging::LogLevel::Info, "Application started successfully");
             Ok(())

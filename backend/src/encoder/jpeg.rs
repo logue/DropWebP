@@ -3,42 +3,36 @@ use crate::options::HighBitDepthImage;
 use jpegli_rs::encoder::{ChromaSubsampling, EncoderConfig, PixelLayout, Unstoppable};
 use serde::{Deserialize, Serialize};
 
-/// デフォルトの画質
+/// Default quality.
 const DEFAULT_QUALITY: u8 = 95;
 
-/// JPEG (jpegli) エンコードオプション
+/// JPEG (jpegli) encoding options.
 ///
-/// jpegliは、libjxlプロジェクトに含まれる高品質なJPEGエンコーダーです。
-/// 標準のJPEGエンコーダーよりも優れた圧縮率と画質を提供します。
-/// JPEG XLと同じ技術を活用し、高品質なJPEG画像を生成します。
+/// jpegli is a high-quality JPEG encoder bundled with the libjxl project.
+/// It produces better compression and quality than a standard JPEG encoder
+/// by reusing JPEG XL technology while still emitting standard JPEG output.
 ///
-/// # Ultra HDR サポート (将来実装予定)
-/// `ultra_hdr`オプションは将来のリリースでUltra HDR (JPEG-R)形式の
-/// エンコードをサポートする予定です。
+/// # Future Ultra HDR support
+/// The `ultra_hdr` option is reserved for future support of Ultra HDR (JPEG-R).
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct JpegOptions {
-    /// 画質 (1-100の範囲、デフォルト: 95)
-    /// 85以上を推奨（高品質）
+    /// Quality (1-100 range, default: 95). 85 or higher is recommended.
     pub quality: u8,
 
-    /// プログレッシブJPEG（推奨）
-    /// Webでの読み込みパフォーマンスが向上
+    /// Progressive JPEG (recommended). Improves perceived load time on the web.
     #[serde(default = "default_progressive")]
     pub progressive: bool,
 
-    /// 最適化（推奨）
-    /// ファイルサイズをさらに削減
+    /// Optimize Huffman tables (recommended). Further reduces file size.
     #[serde(default = "default_optimize")]
     pub optimize: bool,
 
-    /// Ultra HDR (JPEG-R with gainmap) エンコード (将来実装予定)
-    /// 現在は無視されます
+    /// Ultra HDR (JPEG-R with gain map) encoding (planned). Currently ignored.
     #[serde(default = "default_ultra_hdr")]
     pub ultra_hdr: bool,
 
-    /// Ultra HDR Gainmapの画質 (1-100の範囲、デフォルト: 85)
-    /// 将来実装予定
+    /// Quality of the Ultra HDR gain map (1-100 range, default: 85). Reserved for future use.
     #[serde(default = "default_gainmap_quality")]
     pub gainmap_quality: u8,
 }
@@ -71,21 +65,23 @@ impl Default for JpegOptions {
     }
 }
 
-/// 画像をJPEG (jpegli) 形式でエンコードします
+/// Encode an image to JPEG using jpegli.
 ///
-/// # 引数
-/// - `img`: 変換対象の高ビット深度画像
-/// - `icc_profile`: ICCプロファイル（オプション）
-/// - `options`: JPEGエンコードオプション
+/// # Arguments
+/// - `img`: source high-bit-depth image.
+/// - `icc_profile`: optional ICC profile to embed.
+/// - `options`: JPEG encoding options.
 ///
-/// # 戻り値
-/// - 成功した場合はエンコードされたJPEGデータを `Vec<u8>` として返します
-/// - 失敗した場合は `AppError` を返します
+/// # Returns
+/// Encoded JPEG bytes on success.
 ///
-/// # 注意
-/// - jpegliは標準JPEGより高品質でJPEG XL技術を活用
-/// - 透明度はサポートされません（RGBAはRGBに変換されます）
-/// - 推奨画質範囲は85-100です
+/// # Errors
+/// Returns `AppError` when jpegli fails.
+///
+/// # Notes
+/// - jpegli yields higher quality than standard JPEG and reuses JPEG XL technology.
+/// - Transparency is not supported; RGBA inputs are flattened to RGB.
+/// - The recommended quality range is 85-100.
 pub fn encode(
     img: &HighBitDepthImage,
     icc_profile: Option<Vec<u8>>,
@@ -97,7 +93,7 @@ pub fn encode(
         options.quality, options.progressive, options.optimize
     );
 
-    // 画質の検証
+    // Validate the requested quality.
     if options.quality < 85 {
         println!(
             "Warning: Quality {} is below recommended minimum of 85 for high-quality JPEG",
@@ -105,11 +101,11 @@ pub fn encode(
         );
     }
 
-    // 画像の次元とRGBデータを取得
+    // Get image dimensions and RGB data.
     let (width, height, rgb_data) = match img {
         HighBitDepthImage::Rgb(buf) => {
             let (w, h) = buf.dimensions();
-            // f32からu8への変換
+            // Convert from f32 to u8.
             let data: Vec<u8> = buf
                 .as_raw()
                 .iter()
@@ -119,7 +115,7 @@ pub fn encode(
         }
         HighBitDepthImage::Rgba(buf) | HighBitDepthImage::Argb(buf) => {
             let (w, h) = buf.dimensions();
-            // RGBAをRGBに変換（透明度を破棄）
+            // Convert RGBA to RGB (alpha is discarded).
             println!("Warning: Converting RGBA to RGB (alpha channel will be discarded)");
             let mut rgb_data = Vec::with_capacity((w * h * 3) as usize);
 
@@ -143,7 +139,7 @@ pub fn encode(
         rgb_data.len()
     );
 
-    // jpegli-rs 0.12 API: ycbcr() を使用してコンフィグを作成
+    // jpegli-rs 0.12 API: build a config via ycbcr().
     let mut config = EncoderConfig::ycbcr(options.quality, ChromaSubsampling::Quarter);
 
     if options.progressive {
@@ -154,7 +150,7 @@ pub fn encode(
         config = config.optimize_huffman(true);
     }
 
-    // ICCプロファイルを設定に追加（jpegli-rs 0.8ではネイティブサポート）
+    // Add the ICC profile to the config (jpegli-rs 0.8+ supports this natively).
     if let Some(ref icc) = icc_profile {
         config = config.icc_profile(icc.clone());
     }
@@ -177,96 +173,96 @@ pub fn encode(
     Ok(jpeg_data)
 }
 
-/// エンコード済みJPEGデータにICCプロファイルを追加
+/// Append an ICC profile to already-encoded JPEG data.
 ///
-/// JPEG形式では、ICCプロファイルはAPP2マーカー内に埋め込まれます
+/// In JPEG, ICC profiles are embedded in APP2 markers.
 ///
-/// # 注意
-/// jpegli-rs 0.8以降はネイティブでICCプロファイルをサポートするため、
-/// この関数は後方互換性のために残されています
+/// # Notes
+/// jpegli-rs 0.8 and later support ICC profiles natively, so this helper is
+/// retained only for backwards compatibility.
 #[allow(dead_code)]
 fn add_icc_profile(jpeg_data: Vec<u8>, icc: &[u8]) -> Result<Vec<u8>, AppError> {
-    // JPEGマーカー: SOI(0xFFD8)の直後にAPP2マーカーを挿入
+    // JPEG marker: insert APP2 right after the SOI (0xFFD8) marker.
     if jpeg_data.len() < 2 || jpeg_data[0] != 0xFF || jpeg_data[1] != 0xD8 {
         return Err(AppError::Encode(
             "Invalid JPEG: missing SOI marker".to_string(),
         ));
     }
 
-    // APP2マーカー (0xFFE2) + "ICC_PROFILE\0" + シーケンス番号
+    // APP2 marker (0xFFE2) + "ICC_PROFILE\0" + sequence number.
     const MAX_CHUNK_SIZE: usize = 65533 - 14; // 65535 - marker(2) - length(2) - "ICC_PROFILE\0"(12) - seq(2)
-    let chunk_count = (icc.len() + MAX_CHUNK_SIZE - 1) / MAX_CHUNK_SIZE;
+    let chunk_count = icc.len().div_ceil(MAX_CHUNK_SIZE);
 
     let mut result = Vec::with_capacity(jpeg_data.len() + icc.len() + chunk_count * 18);
 
-    // SOIマーカーをコピー
+    // Copy the SOI marker.
     result.extend_from_slice(&jpeg_data[0..2]);
 
-    // ICCプロファイルをチャンク化してAPP2マーカーとして追加
+    // Split the ICC profile into chunks and append them as APP2 markers.
     for (i, chunk) in icc.chunks(MAX_CHUNK_SIZE).enumerate() {
-        result.push(0xFF); // マーカー開始
-        result.push(0xE2); // APP2
+        result.push(0xFF); // Start of marker.
+        result.push(0xE2); // APP2.
 
         let seg_len = 2 + 12 + 2 + chunk.len(); // length(2) + "ICC_PROFILE\0"(12) + seq(2) + data
         result.push((seg_len >> 8) as u8);
         result.push(seg_len as u8);
 
-        result.extend_from_slice(b"ICC_PROFILE\0"); // 識別子
-        result.push((i + 1) as u8); // 現在のチャンク番号 (1-based)
-        result.push(chunk_count as u8); // 総チャンク数
+        result.extend_from_slice(b"ICC_PROFILE\0"); // Identifier.
+        result.push((i + 1) as u8); // Current chunk number (1-based).
+        result.push(chunk_count as u8); // Total chunk count.
 
         result.extend_from_slice(chunk);
     }
 
-    // 残りのJPEGデータをコピー
+    // Copy the rest of the JPEG data.
     result.extend_from_slice(&jpeg_data[2..]);
 
     Ok(result)
 }
 
-/// JPEGファイルサイズを推定
+/// Estimate JPEG file size.
 ///
-/// # 引数
-/// - `img`: 変換対象の高ビット深度画像
-/// - `options`: JPEGエンコードオプション
+/// # Arguments
+/// - `img`: source high-bit-depth image.
+/// - `options`: JPEG encoding options.
 ///
-/// # 戻り値
-/// 推定されるJPEGファイルサイズ（バイト単位）
+/// # Returns
+/// Estimated JPEG file size in bytes.
 ///
-/// # 注意
-/// これは推定値であり、実際のファイルサイズとは異なる場合があります
+/// # Notes
+/// This is an estimate; actual file size may differ.
 pub fn estimate_size(img: &HighBitDepthImage, options: &JpegOptions) -> usize {
     let (width, height) = match img {
         HighBitDepthImage::Rgb(buf) => buf.dimensions(),
         HighBitDepthImage::Rgba(buf) | HighBitDepthImage::Argb(buf) => buf.dimensions(),
     };
 
-    // 基本的なピクセル数（JPEGは常にRGBなので3チャンネル）
+    // Base pixel count (JPEG output is always RGB, so 3 channels).
     let pixel_count = (width * height) as usize;
     let uncompressed_size = pixel_count * 3; // RGB = 3 bytes per pixel
 
-    // 品質に基づく圧縮率の推定
-    // JPEGの圧縮率は品質設定に大きく依存する
+    // Estimate compression ratio based on quality.
+    // JPEG compression depends heavily on the quality setting.
     let compression_ratio = match options.quality {
-        95..=100 => 0.15, // 高品質: 85%圧縮
-        85..=94 => 0.10,  // 標準品質: 90%圧縮
-        70..=84 => 0.08,  // 中品質: 92%圧縮
-        50..=69 => 0.06,  // 低品質: 94%圧縮
-        _ => 0.04,        // 非常に低品質: 96%圧縮
+        95..=100 => 0.15, // High quality: ~85% reduction
+        85..=94 => 0.10,  // Standard quality: ~90% reduction
+        70..=84 => 0.08,  // Mid quality: ~92% reduction
+        50..=69 => 0.06,  // Low quality: ~94% reduction
+        _ => 0.04,        // Very low quality: ~96% reduction
     };
 
-    // 最適化とプログレッシブの影響を考慮
-    let optimization_factor = if options.optimize { 0.95 } else { 1.0 }; // 最適化で5%削減
-    let progressive_factor = if options.progressive { 1.02 } else { 1.0 }; // プログレッシブで2%増加
+    // Account for optimization and progressive encoding effects.
+    let optimization_factor = if options.optimize { 0.95 } else { 1.0 }; // ~5% reduction with optimization
+    let progressive_factor = if options.progressive { 1.02 } else { 1.0 }; // ~2% growth with progressive
 
-    // 基本推定サイズ
+    // Base estimated size.
     let base_size = (uncompressed_size as f64 * compression_ratio) as usize;
 
-    // ファクターを適用
+    // Apply factors.
     let estimated_size = (base_size as f64 * optimization_factor * progressive_factor) as usize;
 
-    // 最小サイズを保証（ヘッダーやメタデータのサイズを考慮）
-    let min_size = 2048; // 最低2KBは必要
+    // Guarantee a minimum size (header and metadata overhead).
+    let min_size = 2048; // At least 2 KB.
     estimated_size.max(min_size)
 }
 
@@ -286,12 +282,12 @@ mod tests {
     fn test_estimate_size_quality_variations() {
         use image::ImageBuffer;
 
-        // テスト用の画像を作成（100x100 RGB）
+        // Create a test image (100x100 RGB).
         let img_buffer: ImageBuffer<image::Rgb<f32>, Vec<f32>> =
             ImageBuffer::from_raw(100, 100, vec![0.5f32; 100 * 100 * 3]).unwrap();
         let img = HighBitDepthImage::Rgb(img_buffer);
 
-        // 高品質設定
+        // High quality settings.
         let high_quality_options = JpegOptions {
             quality: 95,
             progressive: true,
@@ -301,7 +297,7 @@ mod tests {
         };
         let high_quality_size = estimate_size(&img, &high_quality_options);
 
-        // 低品質設定
+        // Low quality settings.
         let low_quality_options = JpegOptions {
             quality: 50,
             progressive: false,
@@ -311,10 +307,10 @@ mod tests {
         };
         let low_quality_size = estimate_size(&img, &low_quality_options);
 
-        // 低品質の方がファイルサイズが小さいことを確認
+        // Confirm that lower quality yields a smaller file size.
         assert!(low_quality_size < high_quality_size);
 
-        // 最小サイズが保証されていることを確認
+        // Confirm the minimum size guarantee.
         assert!(high_quality_size >= 2048);
         assert!(low_quality_size >= 2048);
     }

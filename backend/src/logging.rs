@@ -2,10 +2,10 @@ use crate::error::AppError;
 use std::sync::OnceLock;
 use tauri::{AppHandle, Emitter};
 
-// グローバルなAppHandleの保存
+/// Global storage for the Tauri `AppHandle` used by logging helpers.
 static APP_HANDLE: OnceLock<AppHandle> = OnceLock::new();
 
-/// ログレベル定義
+/// Severity levels supported by the logging facade.
 #[derive(Debug, Clone, Copy)]
 #[allow(dead_code)]
 pub enum LogLevel {
@@ -16,6 +16,8 @@ pub enum LogLevel {
 }
 
 impl LogLevel {
+    /// Return the lowercase string representation of the level
+    /// (e.g. `"info"`), suitable for serialization.
     pub fn as_str(&self) -> &'static str {
         match self {
             LogLevel::Debug => "debug",

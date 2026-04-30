@@ -1,3 +1,6 @@
+// All public items are consumed by the binary crate (command.rs) for progress event emission.
+#![allow(dead_code)]
+
 /// Progress callback trait for encoding operations
 ///
 /// This trait allows encoders to report progress during encoding.
@@ -49,7 +52,7 @@ impl TauriProgressCallback {
     }
 
     fn emit_event(&self, event: ProgressEvent) {
-        // AppHandleからイベントを送信
+        // Emit event via the AppHandle.
         use tauri::Emitter;
         if let Err(e) = self.app.emit(&self.event_name, event) {
             eprintln!("Failed to emit progress event: {}", e);

@@ -7,13 +7,19 @@ use std::sync::Arc;
 use std::{self, path::Path};
 use tauri::AppHandle;
 
-/// Uint8Arrayバイナリデータを圧縮してUint8Arrayで返します。
-/// # 引数
-/// - `data`: 変換対象の画像データのバイト列
-/// - `options`: エンコードオプション
-/// # 戻り値
-/// - 成功した場合は WebP のバイト列を `Vec<u8>` として返します。
-/// - 失敗した場合は `Box<dyn Error>` を返します。
+/// Compress a `Uint8Array` payload of image bytes and return the encoded result.
+///
+/// # Arguments
+/// - `data`: raw bytes of the source image to convert
+/// - `options`: encoder selection and parameters
+/// - `app`: Tauri application handle (used for progress and logging events)
+///
+/// # Returns
+/// The encoded bytes on success, or a string describing the failure on error.
+///
+/// # Errors
+/// Returns an error string when decoding, size estimation, or encoding fails,
+/// or when the spawn-blocking task itself panics.
 #[tauri::command]
 pub async fn convert(
     data: Vec<u8>,
@@ -23,46 +29,52 @@ pub async fn convert(
     send_log_with_handle(&app, LogLevel::Info, "Starting compression...");
 
     let app_clone = app.clone();
-    // spawn_blocking でUIをフリーズさせずに重い処理を実行
+    // Run heavy work on a blocking thread so the UI stays responsive.
     let converted_data = tauri::async_runtime::spawn_blocking(move || {
-        // まず、デコードする前にJPEGトランスコードの条件をチェックする
-        // `if let` を使って、JXLオプションの場合のみ中身を取り出す
-        if let EncodeOptions::Jxl(jxl_opts) = &options {
-            // `guess_format`がJPEGを返した場合にのみ、このブロックに入る
-            if guess_format(&data).map_or(false, |format| format == ImageFormat::Jpeg) {
+        // Check for the JPEG -> JPEG XL transcode fast path before decoding.
+        if let EncodeOptions::Jxl(_jxl_opts) = &options {
+            // Only enter when the input is detected as JPEG.
+            if guess_format(&data).is_ok_and(|format| format == ImageFormat::Jpeg) {
                 send_log_with_handle(
                     &app_clone,
                     LogLevel::Info,
                     "JPEG detected for JPEG XL target. Using transcode path...",
                 );
 
-                // トランスコードを実行し、成功したら`return`で即座に関数を抜ける
+                // Run the transcode and return immediately on success.
                 return crate::encoder::jxl::transcode(&data)
                     .log_error(Some("JPEG to JPEG XL transcode"))
                     .map_err(|e| format!("Failed to transcode JPEG to JPEG XL: {}", e));
             }
         }
-        // --- 上記のif条件に当てはまらなかった場合、通常のデコード→エンコード処理に進む ---
+        // Fall through to the regular decode -> encode pipeline.
 
-        // 入力データのサイズを保存
+        // Remember the input size for ratio reporting.
         let input_size = data.len();
 
-        // HEICフォーマットチェック - ファイルパスが必要なため特別処理
-        let is_heic = data.len() >= 12 &&
-                      &data[4..8] == b"ftyp" &&
-                      (&data[8..12] == b"heic" || &data[8..12] == b"heix" ||
-                       &data[8..12] == b"hevc" || &data[8..12] == b"heim");
+        // HEIC needs a real file path, so detect it via the magic bytes here.
+        let is_heic = data.len() >= 12
+            && &data[4..8] == b"ftyp"
+            && (&data[8..12] == b"heic"
+                || &data[8..12] == b"heix"
+                || &data[8..12] == b"hevc"
+                || &data[8..12] == b"heim");
 
-        // 画像デコード
+        // Decode the input image.
         let decoded_data = if is_heic {
-            // HEICの場合は一時ファイルに保存してdecode_from_pathを使用
+            // For HEIC, persist the bytes to a temp file and use `decode_from_path`.
             use std::io::Write;
             let mut temp_file = tempfile::NamedTempFile::new()
                 .map_err(|e| format!("Failed to create temp file: {}", e))?;
-            temp_file.write_all(&data)
+            temp_file
+                .write_all(&data)
                 .map_err(|e| format!("Failed to write temp file: {}", e))?;
 
-            send_log_with_handle(&app_clone, LogLevel::Info, "Decoding HEIC image using OS-native decoder...");
+            send_log_with_handle(
+                &app_clone,
+                LogLevel::Info,
+                "Decoding HEIC image using OS-native decoder...",
+            );
             crate::decoder::decode_from_path(temp_file.path())
                 .log_error(Some("HEIC decoding"))
                 .map_err(|e| format!("Failed to decode HEIC image: {}", e))?
@@ -74,11 +86,11 @@ pub async fn convert(
 
         let (img, icc_profile) = decoded_data;
 
-        // 推計サイズの算出
+        // Estimate the output size before encoding.
         send_log_with_handle(&app_clone, LogLevel::Info, "Estimating output size...");
         let estimated_size = crate::encoder::estimate_size(&img, &options);
 
-        // 画像エンコード
+        // Encode the image.
         send_log_with_handle(
             &app_clone,
             LogLevel::Info,
@@ -93,7 +105,7 @@ pub async fn convert(
             .log_error(Some("Image encoding"))
             .map_err(|e| format!("Failed to encode image: {}", e))?;
 
-        // 実際のエンコード結果のサイズをログ出力
+        // Log the actual encoded size and ratio.
         send_log_with_handle(
             &app_clone,
             LogLevel::Info,
@@ -115,20 +127,26 @@ pub async fn convert(
     converted_data
 }
 
-/// Uint8Arrayバイナリデータを圧縮してUint8Arrayで返します（進捗付き）
-/// # 引数
-/// - `data`: 変換対象の画像データのバイト列
-/// - `options`: エンコードオプション
-/// - `app`: Tauriアプリケーションハンドル
-/// # 戻り値
-/// - 成功した場合は圧縮されたバイト列を `Vec<u8>` として返します。
-/// - 失敗した場合はエラーメッセージを `String` として返します。
-/// # 進捗イベント
-/// - イベント名: "encoding-progress"
-/// - ペイロード: { percent: number, stage: string, status: "progress" | "complete" | "error" }
-/// # 注意
-/// - 進捗監視は WebP (lossy) と PNG でのみサポートされています
-/// - その他のフォーマットは通常の `convert` コマンドと同じ動作になります
+/// Compress a `Uint8Array` payload with progress events emitted to the frontend.
+///
+/// # Arguments
+/// - `data`: raw bytes of the source image to convert
+/// - `options`: encoder selection and parameters
+/// - `app`: Tauri application handle used to emit progress events
+///
+/// # Returns
+/// The encoded bytes on success, or a string describing the failure on error.
+///
+/// # Errors
+/// Returns an error string when decoding, size estimation, or encoding fails.
+///
+/// # Events
+/// Emits `"encoding-progress"` with payload
+/// `{ percent: number, stage: string, status: "progress" | "complete" | "error" }`.
+///
+/// # Notes
+/// Progress monitoring is currently supported only for WebP (lossy) and PNG.
+/// Other formats fall back to the regular [`convert`] command.
 #[tauri::command]
 pub async fn convert_with_progress(
     data: Vec<u8>,
@@ -141,7 +159,7 @@ pub async fn convert_with_progress(
         "Starting compression with progress monitoring...",
     );
 
-    // フォーマット名を取得
+    // Identify the target format name.
     let format_name = match &options {
         EncodeOptions::Webp(_) => "webp",
         EncodeOptions::Png(_) => "png",
@@ -150,7 +168,7 @@ pub async fn convert_with_progress(
         EncodeOptions::Jpeg(_) => "jpeg",
     };
 
-    // 進捗監視サポート確認
+    // Check whether progress monitoring is supported.
     let supports_progress = EncoderCapabilities::supports_progress(format_name);
 
     if !supports_progress {
@@ -173,15 +191,15 @@ pub async fn convert_with_progress(
 
     let app_clone = app.clone();
     let converted_data = tauri::async_runtime::spawn_blocking(move || {
-        // 進捗コールバックを作成
+        // Build the progress callback that emits Tauri events.
         let progress_callback = Arc::new(TauriProgressCallback::new(
             app_clone.clone(),
             "encoding-progress".to_string(),
         ));
 
-        // JXLトランスコードチェック（進捗なし）
-        if let EncodeOptions::Jxl(jxl_opts) = &options {
-            if guess_format(&data).map_or(false, |format| format == ImageFormat::Jpeg) {
+        // JPEG -> JPEG XL transcode fast path (no progress reporting).
+        if let EncodeOptions::Jxl(_jxl_opts) = &options
+            && guess_format(&data).is_ok_and(|format| format == ImageFormat::Jpeg) {
                 send_log_with_handle(
                     &app_clone,
                     LogLevel::Info,
@@ -192,17 +210,18 @@ pub async fn convert_with_progress(
                     .log_error(Some("JPEG to JPEG XL transcode"))
                     .map_err(|e| format!("Failed to transcode JPEG to JPEG XL: {}", e));
             }
-        }
 
         let input_size = data.len();
 
-        // HEICフォーマットチェック
-        let is_heic = data.len() >= 12 &&
-                      &data[4..8] == b"ftyp" &&
-                      (&data[8..12] == b"heic" || &data[8..12] == b"heix" ||
-                       &data[8..12] == b"hevc" || &data[8..12] == b"heim");
+        // HEIC magic-byte detection.
+        let is_heic = data.len() >= 12
+            && &data[4..8] == b"ftyp"
+            && (&data[8..12] == b"heic"
+                || &data[8..12] == b"heix"
+                || &data[8..12] == b"hevc"
+                || &data[8..12] == b"heim");
 
-        // 画像デコード
+        // Decode the input image.
         progress_callback.on_progress(0.0, "Decoding image");
         let decoded_data = if is_heic {
             use std::io::Write;
@@ -235,7 +254,7 @@ pub async fn convert_with_progress(
 
         let (img, icc_profile) = decoded_data;
 
-        // 推計サイズの算出
+        // Estimate the output size.
         progress_callback.on_progress(10.0, "Estimating output size");
         let estimated_size = crate::encoder::estimate_size(&img, &options);
 
@@ -248,25 +267,22 @@ pub async fn convert_with_progress(
             ),
         );
 
-        // 進捗付きエンコード
+        // Encode with progress reporting where supported.
         let encoded_data = match &options {
-            EncodeOptions::Webp(webp_opts) => {
-                crate::encoder::webp::encode_with_progress(
-                    &img,
-                    icc_profile,
-                    webp_opts,
-                    progress_callback.clone(),
-                )
-            }
-            EncodeOptions::Png(png_opts) => {
-                crate::encoder::png::encode_with_progress(
-                    &img,
-                    icc_profile,
-                    png_opts,
-                    progress_callback.clone(),
-                )
-            }
-            // その他のフォーマットは通常のエンコード（ここには到達しないはず）
+            EncodeOptions::Webp(webp_opts) => crate::encoder::webp::encode_with_progress(
+                &img,
+                icc_profile,
+                webp_opts,
+                progress_callback.clone(),
+            ),
+            EncodeOptions::Png(png_opts) => crate::encoder::png::encode_with_progress(
+                &img,
+                icc_profile,
+                png_opts,
+                progress_callback.clone(),
+            ),
+            // Other formats fall through to the standard encoder (this branch
+            // is unreachable in practice because of the supports_progress gate above).
             _ => crate::encoder::encode(img, icc_profile, &options),
         }
         .log_error(Some("Image encoding"))
@@ -300,13 +316,18 @@ pub async fn convert_with_progress(
     converted_data
 }
 
-/// 圧縮後のファイルサイズを推定
-/// # 引数
-/// - `data`: 変換対象の画像データのバイト列
-/// - `options`: エンコードオプション
-/// # 戻り値
-/// - 成功した場合は推定サイズを `usize` として返します。
-/// - 失敗した場合はエラーメッセージを `String` として返します。
+/// Estimate the size of the encoded output without performing the full encode.
+///
+/// # Arguments
+/// - `data`: raw bytes of the source image
+/// - `options`: encoder selection and parameters
+///
+/// # Returns
+/// The estimated output size in bytes on success, or a string describing the
+/// failure on error.
+///
+/// # Errors
+/// Returns an error string when decoding fails or the spawn-blocking task panics.
 #[tauri::command]
 pub async fn estimate_size(
     data: Vec<u8>,
@@ -317,7 +338,7 @@ pub async fn estimate_size(
 
     let app_clone = app.clone();
     let size = tauri::async_runtime::spawn_blocking(move || {
-        // まず画像をデコード
+        // Decode the source image first.
         send_log_with_handle(
             &app_clone,
             LogLevel::Info,
@@ -327,7 +348,7 @@ pub async fn estimate_size(
             .log_error(Some("Image decoding for estimation"))
             .map_err(|e| format!("Failed to decode image: {}", e))?;
 
-        // オプションに応じてサイズ推定
+        // Estimate based on the chosen options.
         let size = crate::encoder::estimate_size(&img, &options);
 
         Ok::<usize, String>(size)
@@ -342,21 +363,26 @@ pub async fn estimate_size(
     Ok(size)
 }
 
-/// ファイルパスを解析して、ファイル名、拡張子、親ディレクトリを抽出します。
-/// # 引数
-/// - `path_str`: 解析対象のファイルパス文字列
-/// # 戻り値
-/// - 成功した場合は `PathInfo` 構造体を返します。
-/// - 失敗した場合はエラーメッセージを `String` として返します。
+/// Inspect a filesystem path and return name, extension, parent directory and
+/// presence flags as a [`PathInfo`] structure.
+///
+/// # Arguments
+/// - `path_str`: filesystem path to inspect
+///
+/// # Returns
+/// A [`PathInfo`] describing the path components and metadata.
+///
+/// # Errors
+/// Currently always succeeds; the result type is preserved for forward
+/// compatibility.
 #[tauri::command]
 pub fn get_path_info(path_str: String) -> Result<PathInfo, String> {
     let path = Path::new(&path_str);
 
-    // 最初に一度だけ存在確認を行う
+    // Check existence once up front.
     let exists = path.exists();
 
-    // パスが存在する場合のみ、ファイルかディレクトリかを判定する
-    // 存在しない場合は、どちらも false になる
+    // Distinguish file vs. directory only when the path actually exists.
     let is_file = if exists { path.is_file() } else { false };
     let is_dir = if exists { path.is_dir() } else { false };
 
@@ -384,12 +410,16 @@ pub fn get_path_info(path_str: String) -> Result<PathInfo, String> {
     Ok(info)
 }
 
-/// 指定されたパスのファイルまたはディレクトリを削除します。
-/// # 引数
-/// - `path_str`: 削除対象のファイルまたはディレクトリのパス文字列
-/// # 戻り値
-/// - 成功した場合は `Ok(())` を返します。
-/// - 失敗した場合はエラーメッセージを `String` として返します。
+/// Delete a file or directory at the given path.
+///
+/// # Arguments
+/// - `path_str`: target path to remove (file or directory)
+///
+/// # Returns
+/// `Ok(())` on success.
+///
+/// # Errors
+/// Returns an error string when the underlying filesystem call fails.
 #[tauri::command]
 pub async fn delete_path(path_str: String) -> Result<(), String> {
     let path = Path::new(&path_str);

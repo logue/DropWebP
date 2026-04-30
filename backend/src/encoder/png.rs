@@ -11,36 +11,36 @@ pub struct PngOptions {
     #[serde(default = "default_optimization_level")]
     pub optimization_level: u8, // 0-6
     #[serde(default)]
-    pub use_zopfli: bool, // Zopfli 圧縮を使用（遅いが高圧縮）
+    pub use_zopfli: bool, // Use Zopfli compression (slower but smaller).
     #[serde(default)]
-    pub strip_metadata: bool, // メタデータを削除
+    pub strip_metadata: bool, // Strip metadata.
     #[serde(default)]
-    pub bit_depth_reduction: bool, // ビット深度削減を試行
+    pub bit_depth_reduction: bool, // Try reducing bit depth.
     #[serde(default)]
-    pub color_type_reduction: bool, // カラータイプ削減を試行
+    pub color_type_reduction: bool, // Try reducing color type.
     #[serde(default)]
-    pub palette_reduction: bool, // パレット削減を試行
+    pub palette_reduction: bool, // Try reducing palette.
     #[serde(default)]
-    pub grayscale_reduction: bool, // グレースケール変換を試行
+    pub grayscale_reduction: bool, // Try grayscale conversion.
     #[serde(default)]
-    pub interlace: Option<bool>, // インターレース (None=変更なし, Some(true)=有効, Some(false)=無効)
+    pub interlace: Option<bool>, // Interlace (None = unchanged, Some(true) = on, Some(false) = off).
     #[serde(default)]
-    pub optimize_alpha: bool, // 透明ピクセルの最適化
+    pub optimize_alpha: bool, // Optimize transparent pixels.
     #[serde(default)]
-    pub fast_evaluation: bool, // 高速評価モード (デフォルトtrue)
+    pub fast_evaluation: bool, // Fast evaluation mode (default true).
     #[serde(default)]
-    pub scale_16: bool, // 16ビットを強制的に8ビットにスケール
+    pub scale_16: bool, // Force 16-bit images down to 8-bit.
 }
 
-/// デフォルトの最適化レベル（バランス重視）
+/// Default optimization level (balanced).
 fn default_optimization_level() -> u8 {
     2
 }
 
-/// PNG エンコーダー (oxipng 10.0)
+/// PNG encoder backed by oxipng 10.0.
 ///
-/// oxipng はロスレス圧縮のみをサポートします。
-/// optimization_level: 0(最速/最小圧縮) ～ 6(最遅/最大圧縮)
+/// oxipng only supports lossless compression.
+/// optimization_level: 0 (fastest / least compression) - 6 (slowest / most compression).
 pub fn encode(
     pixel_data: &HighBitDepthImage,
     _icc_profile: Option<Vec<u8>>,
@@ -56,7 +56,7 @@ pub fn encode(
         opt_level, options.use_zopfli
     );
 
-    // image crate で PNG にエンコード
+    // Encode as PNG using the `image` crate.
     let mut png_buffer = Vec::new();
     {
         let mut cursor = Cursor::new(&mut png_buffer);
@@ -86,10 +86,10 @@ pub fn encode(
 
     println!("PNG: Initial PNG size: {} bytes", png_buffer.len());
 
-    // oxipng 10.0: オプションを設定
+    // oxipng 10.0: configure options.
     let mut opts = Options::from_preset(opt_level);
 
-    // 詳細オプションを適用
+    // Apply detailed options.
     if options.use_zopfli {
         use std::num::NonZero;
         let zopfli_opts = oxipng::ZopfliOptions {
@@ -106,28 +106,28 @@ pub fn encode(
         println!("PNG: Stripping metadata");
     }
 
-    // インターレース設定
+    // Interlace setting.
     if let Some(interlace) = options.interlace {
         opts.interlace = Some(interlace);
         println!("PNG: Interlace: {}", interlace);
     }
 
-    // 透明度最適化
+    // Alpha optimization.
     opts.optimize_alpha = options.optimize_alpha;
     if options.optimize_alpha {
         println!("PNG: Alpha optimization enabled");
     }
 
-    // 高速評価モード
+    // Fast evaluation mode.
     opts.fast_evaluation = options.fast_evaluation;
 
-    // 16ビット強制スケール
+    // Force 16-bit -> 8-bit scaling.
     opts.scale_16 = options.scale_16;
     if options.scale_16 {
         println!("PNG: 16-bit to 8-bit scaling enabled");
     }
 
-    // リダクション設定
+    // Reduction settings.
     opts.bit_depth_reduction = options.bit_depth_reduction;
     opts.color_type_reduction = options.color_type_reduction;
     opts.palette_reduction = options.palette_reduction;
@@ -164,10 +164,10 @@ pub fn encode(
     }
 }
 
-/// PNG形式のファイルサイズを推定します
+/// Estimate the encoded PNG size.
 ///
-/// PNGはロスレス圧縮のため、正確なサイズ推定は困難です。
-/// ここでは非圧縮サイズの60%を目安として返します。
+/// PNG is lossless, so size estimation is inherently rough; this function
+/// returns roughly 60% of the uncompressed size as a heuristic.
 pub fn estimate_size(pixel_data: &HighBitDepthImage, _options: &PngOptions) -> usize {
     let (width, height) = match pixel_data {
         HighBitDepthImage::Rgb(img) => (img.width(), img.height()),
@@ -180,19 +180,20 @@ pub fn estimate_size(pixel_data: &HighBitDepthImage, _options: &PngOptions) -> u
         HighBitDepthImage::Rgba(_) | HighBitDepthImage::Argb(_) => 4,
     };
 
-    // 非圧縮サイズ
+    // Uncompressed size.
     let raw_size = (width * height * bytes_per_pixel) as usize;
 
-    // PNGの圧縮率を60%と仮定（最適化により変動）
-    // Zopfli使用時はもう少し小さくなる可能性がありますが、保守的に見積もり
+    // Assume a PNG compression ratio of 60% (varies with optimization level).
+    // Zopfli may yield smaller files; we estimate conservatively here.
     (raw_size as f64 * 0.6) as usize
 }
 
-/// PNG エンコーダー (プログレス付き)
+/// PNG encoder with progress reporting.
 ///
-/// プログレスコールバックをサポートするPNGエンコード関数。
-/// oxipng自体はプログレスコールバックをサポートしていないため、
-/// 各段階で手動的にプログレスを報告します。
+/// Wraps `encode` with progress callbacks. oxipng itself does not expose progress
+/// callbacks, so we report progress at coarse-grained stages.
+// Used by the binary crate via `crate::encoder::png::encode_with_progress`.
+#[allow(dead_code)]
 pub fn encode_with_progress(
     pixel_data: &HighBitDepthImage,
     _icc_profile: Option<Vec<u8>>,
@@ -213,7 +214,7 @@ pub fn encode_with_progress(
 
     progress_callback.on_progress(10.0, "Encoding to PNG format");
 
-    // image crate で PNG にエンコード
+    // Encode to PNG using the `image` crate.
     let mut png_buffer = Vec::new();
     {
         let mut cursor = Cursor::new(&mut png_buffer);
@@ -253,11 +254,11 @@ pub fn encode_with_progress(
     println!("PNG: Initial PNG size: {} bytes", png_buffer.len());
     progress_callback.on_progress(30.0, "Initial encoding complete");
 
-    // oxipng 10.0: オプションを設定
+    // oxipng 10.0: configure options.
     progress_callback.on_progress(40.0, "Configuring optimizer");
     let mut opts = Options::from_preset(opt_level);
 
-    // 詳細オプションを適用
+    // Apply detailed options.
     if options.use_zopfli {
         use std::num::NonZero;
         let zopfli_opts = oxipng::ZopfliOptions {
@@ -277,28 +278,28 @@ pub fn encode_with_progress(
         println!("PNG: Stripping metadata");
     }
 
-    // インターレース設定
+    // Interlace setting.
     if let Some(interlace) = options.interlace {
         opts.interlace = Some(interlace);
         println!("PNG: Interlace: {}", interlace);
     }
 
-    // 透明度最適化
+    // Alpha optimization.
     opts.optimize_alpha = options.optimize_alpha;
     if options.optimize_alpha {
         println!("PNG: Alpha optimization enabled");
     }
 
-    // 高速評価モード
+    // Fast evaluation mode.
     opts.fast_evaluation = options.fast_evaluation;
 
-    // 16ビット強制スケール
+    // Force 16-bit -> 8-bit scaling.
     opts.scale_16 = options.scale_16;
     if options.scale_16 {
         println!("PNG: 16-bit to 8-bit scaling enabled");
     }
 
-    // リダクション設定
+    // Reduction settings.
     opts.bit_depth_reduction = options.bit_depth_reduction;
     opts.color_type_reduction = options.color_type_reduction;
     opts.palette_reduction = options.palette_reduction;

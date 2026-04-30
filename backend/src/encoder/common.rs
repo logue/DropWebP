@@ -1,7 +1,6 @@
 use crate::options::HighBitDepthImage;
 
 // Re-export IccProfileInfo from decoder for use in encoders
-pub use crate::decoder::IccProfileInfo;
 
 /// Encoding quality analysis and optimization
 #[allow(dead_code)]
@@ -69,7 +68,7 @@ impl EncodingAnalysis {
 
         // ICC profile analysis
         let (has_wide_gamut, transfer_function) = icc_profile
-            .map(|profile| analyze_icc_for_wide_gamut(profile))
+            .map(analyze_icc_for_wide_gamut)
             .unwrap_or((false, None));
 
         // HDR detection - consider both pixel values AND transfer function from ICC profile
@@ -429,7 +428,7 @@ fn embed_avif_icc_profile(avif_data: &[u8], _icc_profile: &[u8]) -> IccEmbedding
 
     println!("AVIF: Warning - ICC profile embedding is currently not supported for AVIF format");
     println!("AVIF: To minimize color changes, we recommend:");
-    println!("AVIF:   1. Use ColorModel::RGB");
+    println!("AVIF:   1. Use ColorModel::Rgb");
     println!("AVIF:   2. Use BitDepth::Ten or higher");
     println!("AVIF:   3. Use high quality settings");
 
@@ -465,7 +464,7 @@ pub fn provide_icc_recommendations(format_name: &str, has_wide_gamut: bool, is_h
             println!("{}:   ⚠ Limited ICC profile support", format_name);
             if has_wide_gamut || is_hdr {
                 println!(
-                    "{}:   → Use ColorModel::RGB for better compatibility",
+                    "{}:   → Use ColorModel::Rgb for better compatibility",
                     format_name
                 );
                 println!("{}:   → Use BitDepth::Ten or higher", format_name);

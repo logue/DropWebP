@@ -91,7 +91,7 @@ pub fn encode(
         width, height, channels
     );
 
-    // HDR範囲チェック
+    // Range check for HDR content.
     let (max_value, min_value) = match img {
         HighBitDepthImage::Rgb(buf) => {
             let pixels = buf.as_raw();
@@ -120,11 +120,11 @@ pub fn encode(
     if let Some(ref profile) = icc_profile {
         println!("JXL: ICC profile available ({} bytes)", profile.len());
 
-        // BT2020-PQマーカーチェック
+        // Check for the BT2020-PQ marker.
         if profile.len() >= 10 {
             let marker = &profile[profile.len() - 10..];
             if marker == b"\0BT2020-PQ\0" {
-                println!("JXL: ⚠️ BT2020-PQ marker detected in ICC profile!");
+                println!("JXL: BT2020-PQ marker detected in ICC profile");
             }
         }
     }
@@ -136,7 +136,7 @@ pub fn encode(
         }
         let _guard = EncoderGuard(enc);
 
-        // 1. BasicInfoを先に設定（ICC profileより前）
+        // 1. Set BasicInfo first (before the ICC profile).
         let mut basic_info = MaybeUninit::<jxl_sys::JxlBasicInfo>::uninit();
         jxl_sys::JxlEncoderInitBasicInfo(basic_info.as_mut_ptr());
         let mut basic_info = basic_info.assume_init();
@@ -148,7 +148,7 @@ pub fn encode(
         basic_info.alpha_bits = if channels == 4 { 32 } else { 0 };
         basic_info.alpha_exponent_bits = if channels == 4 { 8 } else { 0 };
         basic_info.num_extra_channels = if channels == 4 { 1 } else { 0 };
-        // ICC profileがある場合は強制的にuses_original_profileを1にする
+        // Force uses_original_profile to 1 when an ICC profile is provided.
         basic_info.uses_original_profile = if icc_profile.is_some() { 1 } else { 0 };
 
         println!(
@@ -163,7 +163,7 @@ pub fn encode(
             )));
         }
 
-        // 2. ICC profileを設定（BasicInfoの後）
+        // 2. Set the ICC profile (after BasicInfo).
         if let Some(ref profile) = icc_profile {
             println!(
                 "JXL: Setting ICC profile ({} bytes) AFTER BasicInfo",
@@ -180,7 +180,7 @@ pub fn encode(
             }
         }
 
-        // 3. Color encodingを設定（ICC profileがない場合のみ）
+        // 3. Set the color encoding (only when no ICC profile is provided).
         if icc_profile.is_none() {
             let mut color_encoding = MaybeUninit::<jxl_sys::JxlColorEncoding>::uninit();
             jxl_sys::JxlColorEncodingSetToSRGB(
@@ -253,7 +253,7 @@ pub fn encode(
 
         jxl_sys::JxlEncoderCloseInput(enc);
 
-        // 適切な初期バッファサイズを計算
+        // Compute a reasonable initial buffer size.
         let estimated_size = estimate_size(width, height, channels, options.quality);
         println!(
             "JXL: Estimated output size: {} bytes ({:.1} KB)",
@@ -276,15 +276,15 @@ pub fn encode(
                 }
                 jxl_sys::JxlEncoderStatus::JXL_ENC_NEED_MORE_OUTPUT => {
                     let offset = output.capacity() - avail_out;
-                    // 既に書き込まれた分をlenに反映
+                    // Reflect the bytes already written into len.
                     output.set_len(offset);
 
-                    // 容量を倍増（少なくとも64KB追加）
+                    // Double the capacity (add at least 64KB).
                     let additional = output.capacity().max(64 * 1024);
                     output.reserve(additional);
 
-                    // 新しいポインタと容量を取得
-                    next_out = unsafe { output.as_mut_ptr().add(offset) };
+                    // Refresh the pointer and remaining capacity.
+                    next_out = output.as_mut_ptr().add(offset);
                     avail_out = output.capacity() - offset;
                     println!(
                         "JXL: Need more output buffer (written: {} bytes, new capacity: {} bytes)",
@@ -302,6 +302,8 @@ pub fn encode(
     }
 }
 
+// Used by the binary crate via `crate::encoder::jxl::transcode`.
+#[allow(dead_code)]
 pub fn transcode(jpeg_data: &[u8]) -> Result<Vec<u8>, AppError> {
     println!("JXL: Starting JPEG transcode...");
 
@@ -347,15 +349,15 @@ pub fn transcode(jpeg_data: &[u8]) -> Result<Vec<u8>, AppError> {
                 }
                 jxl_sys::JxlEncoderStatus::JXL_ENC_NEED_MORE_OUTPUT => {
                     let offset = output.capacity() - avail_out;
-                    // 既に書き込まれた分をlenに反映
+                    // Reflect the bytes already written into len.
                     output.set_len(offset);
 
-                    // 容量を倍増（少なくとも64KB追加）
+                    // Double the capacity (add at least 64KB).
                     let additional = output.capacity().max(64 * 1024);
                     output.reserve(additional);
 
-                    // 新しいポインタと容量を取得
-                    next_out = unsafe { output.as_mut_ptr().add(offset) };
+                    // Refresh the pointer and remaining capacity.
+                    next_out = output.as_mut_ptr().add(offset);
                     avail_out = output.capacity() - offset;
                 }
                 _ => {
@@ -372,14 +374,14 @@ pub fn estimate_size(width: u32, height: u32, channels: u32, quality: f32) -> us
     let pixels = (width * height) as usize;
     let base_size = pixels * channels as usize;
 
-    // JXL distance: 値が小さいほど高品質（大きいファイル）
+    // JXL distance: smaller values mean higher quality (and larger files).
     // distance 0.0 = lossless
     // distance 1.0 = visually lossless (~35-40% of base)
     // distance 3.0 = high quality (~70% of base)
     // distance 7.0 = standard quality (~15% of base)
 
     let estimated_ratio = if quality < 0.5 {
-        // Lossless近似: 50-80%
+        // Lossless approximation: 50-80%.
         0.65
     } else if quality < 1.5 {
         // Visually lossless: 30-45%
@@ -392,9 +394,9 @@ pub fn estimate_size(width: u32, height: u32, channels: u32, quality: f32) -> us
         0.15
     };
 
-    // 余裕を持たせて1.5倍
+    // Add a 1.5x safety factor.
     let estimated = (base_size as f32 * estimated_ratio * 1.5) as usize;
 
-    // 最小256KB、最大16MB
+    // Clamp between 256KB and 16MB.
     estimated.clamp(256 * 1024, 16 * 1024 * 1024)
 }

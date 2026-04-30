@@ -14,6 +14,7 @@ pub struct IccProfileInfo {
 pub enum TransferFunction {
     Unknown,
     Srgb,
+    #[allow(dead_code)] // Retained for future ICC profile parsing support.
     Gamma(f32),
     Pq,  // ST.2084 PQ (HDR)
     Hlg, // HLG (HDR)
@@ -115,6 +116,7 @@ impl IccProfileInfo {
 /// Bit depth analysis result for decoder optimization
 #[derive(Debug, Clone)]
 pub struct BitDepthAnalysis {
+    #[allow(dead_code)]
     pub detected_depth: u8,
     pub max_value: u32,
     pub processing_type: ProcessingType,

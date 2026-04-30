@@ -1,11 +1,15 @@
-// 1. encoder.rs と decoder.rs をプライベートなモジュールとして宣言
+//! Library crate for the Drop Compress Image backend.
+//!
+//! Internal modules are kept private; only the items intentionally re-exported
+//! below form the public API consumed by the binary crate and tests.
+
 mod decoder;
 mod encoder;
-mod error; // errorモジュールなども同様
-mod logging; // ログシステム
-mod options; // optionsモジュールも同様
+mod error;
+mod logging;
+mod options;
 
-// 2. 各モジュールから、公開したい関数や型を "pub use" で再エクスポートする
+// Re-export the public API surface.
 pub use decoder::IccProfileInfo;
 pub use decoder::decode;
 pub use encoder::encode;
@@ -13,5 +17,5 @@ pub use encoder::estimate_size;
 pub use error::AppError;
 pub use logging::{LogLevel, ResultExt, init_logging, send_log};
 
-// オプションの型定義なども必要に応じて公開する
+// Encode option types are exposed for cross-module use.
 pub use options::EncodeOptions;

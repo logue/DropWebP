@@ -55,7 +55,7 @@
     "@intlify/eslint-plugin-vue-i18n": "^4.3.0",
     "@intlify/unplugin-vue-i18n": "^11.1.2",
     "@modyfi/vite-plugin-yaml": "^1.1.1",
-    "@tauri-apps/cli": "^2.10.1",
+    "@tauri-apps/cli": "^2.11.0",
     "@eslint-community/eslint-plugin-eslint-comments": "^4.7.1",
     "@eslint/markdown": "^8.0.1",
     "@tsconfig/node-lts": "^24.0.0",
