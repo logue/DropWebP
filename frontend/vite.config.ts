@@ -127,7 +127,9 @@ export default defineConfig(({ command, mode }): UserConfig => {
     build: {
       // Build Target
       // https://vitejs.dev/config/build-options.html#build-target
-      target: ['es2021', 'chrome97', 'safari13'],
+      // Tauri WebView (WKWebView on macOS, WebView2 on Windows, WebKitGTK on Linux)
+      // supports modern JS natively, no need for legacy browser targets.
+      target: 'esnext',
       // Minify option
       // https://vitejs.dev/config/build-options.html#build-minify
       minify: !process.env.TAURI_DEBUG ? 'esbuild' : false,
