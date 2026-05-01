@@ -87,6 +87,7 @@ const main = () => {
   const version = env.VERSION ?? "0.0.0";
   const identifier = env.APP_IDENTIFIER ?? "com.tauri.vue3.app";
   const appName = env.VITE_APP_NAME ?? env.APP_NAME ?? "Tauri Vue3 App";
+  const appNameKebab = env.APP_NAME_KEBAB ?? "tauri-vue3-app";
   const summary = env.APP_SUMMARY ?? "Modern desktop application template";
   const description =
     env.APP_DESCRIPTION ??
@@ -104,7 +105,7 @@ const main = () => {
   tauriConfig.version = version;
   tauriConfig.identifier = identifier;
   tauriConfig.productName = appName;
-  tauriConfig.mainBinaryName = appName;
+  tauriConfig.mainBinaryName = appNameKebab;
 
   if (
     Array.isArray(tauriConfig?.app?.windows) &&
@@ -132,6 +133,7 @@ const main = () => {
   console.log(`- version: ${version}`);
   console.log(`- identifier: ${identifier}`);
   console.log(`- appName: ${appName}`);
+  console.log(`- mainBinaryName: ${appNameKebab}`);
 };
 
 main();

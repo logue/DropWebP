@@ -5,7 +5,10 @@ export const useDownloads = () => {
   const { t } = useI18n();
   const config = useRuntimeConfig();
   const version = config.public.appVersion as string;
-  const urlPrefix = `https://github.com/logue/tauri-vuetify-starter/releases/download/${version}/tauri-vue3-app_${version}_`;
+  const githubUser = config.public.githubUser as string | undefined;
+  const githubRepo = config.public.githubRepo as string | undefined;
+  const appNameKebab = config.public.appNameKebab as string | undefined;
+  const urlPrefix = `https://github.com/${githubUser ?? 'logue'}/${githubRepo ?? 'DropWebP'}/releases/download/${version}/${appNameKebab ?? 'drop-compress-image'}_${version}_`;
 
   // OS検出
   const detectedOS = ref<'windows' | 'macos' | 'linux' | 'unknown'>('unknown');

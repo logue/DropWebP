@@ -17,6 +17,17 @@ const loadEnvValue = (key: string, defaultValue: string = ''): string => {
 
 const version = loadEnvValue('VERSION', '3.3.0');
 const googleAnalyticsId = loadEnvValue('GOOGLE_ANALYTICS_ID', '');
+const githubUser = loadEnvValue('GITHUB_USER', 'logue');
+const githubRepo = loadEnvValue('GITHUB_REPO', 'DropWebP');
+const appNameKebab = loadEnvValue('APP_NAME_KEBAB', 'drop-compress-image');
+const docsUrl = loadEnvValue('DOCS_URL', 'https://logue.dev/DropWebP');
+const docsOrigin = (() => {
+  try {
+    return new URL(docsUrl).origin;
+  } catch {
+    return 'https://logue.dev';
+  }
+})();
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -36,7 +47,10 @@ export default defineNuxtConfig({
   // Runtime config to expose version
   runtimeConfig: {
     public: {
-      appVersion: version
+      appVersion: version,
+      githubUser,
+      githubRepo,
+      appNameKebab
     }
   },
 
@@ -81,6 +95,7 @@ export default defineNuxtConfig({
 
   // i18n設定（<i18n>ブロック使用）
   i18n: {
+    baseUrl: process.env.NUXT_PUBLIC_I18N_BASE_URL || docsOrigin,
     locales: [
       { code: 'en', language: 'en-US', name: '🇺🇸 English', iso: 'en-US' },
       { code: 'fr', language: 'fr-FR', name: '🇫🇷 Français', iso: 'fr-FR' },

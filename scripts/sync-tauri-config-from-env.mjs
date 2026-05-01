@@ -45,6 +45,8 @@ export function syncTauriConfigFromEnv(repoRoot) {
   const env = parseEnvFile(envPath);
   const version = env.VERSION;
   const identifier = env.APP_IDENTIFIER;
+  const appName = env.VITE_APP_NAME || env.APP_NAME;
+  const appNameKebab = env.APP_NAME_KEBAB;
 
   if (!version) {
     throw new Error("VERSION is not defined in .env");
@@ -54,9 +56,25 @@ export function syncTauriConfigFromEnv(repoRoot) {
     throw new Error("APP_IDENTIFIER is not defined in .env");
   }
 
+  if (!appNameKebab) {
+    throw new Error("APP_NAME_KEBAB is not defined in .env");
+  }
+
   const tauriConf = JSON.parse(readFileSync(tauriConfPath, "utf8"));
   tauriConf.version = version;
   tauriConf.identifier = identifier;
+  tauriConf.mainBinaryName = appNameKebab;
+
+  if (appName) {
+    tauriConf.productName = appName;
+
+    if (
+      Array.isArray(tauriConf?.app?.windows) &&
+      tauriConf.app.windows.length > 0
+    ) {
+      tauriConf.app.windows[0].title = appName;
+    }
+  }
 
   writeFileSync(
     tauriConfPath,
@@ -64,15 +82,19 @@ export function syncTauriConfigFromEnv(repoRoot) {
     "utf8",
   );
 
-  return { version, identifier, tauriConfPath };
+  return { version, identifier, appName, appNameKebab, tauriConfPath };
 }
 
 const currentScriptPath = fileURLToPath(import.meta.url);
 if (process.argv[1] === currentScriptPath) {
   const repoRoot = resolve(dirname(currentScriptPath), "..");
-  const { version, identifier, tauriConfPath } =
+  const { version, identifier, appName, appNameKebab, tauriConfPath } =
     syncTauriConfigFromEnv(repoRoot);
   console.log(`Synced ${tauriConfPath}`);
   console.log(`  version=${version}`);
   console.log(`  identifier=${identifier}`);
+  if (appName) {
+    console.log(`  productName=${appName}`);
+  }
+  console.log(`  mainBinaryName=${appNameKebab}`);
 }
