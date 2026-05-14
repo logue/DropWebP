@@ -16,25 +16,27 @@
   },
   "engines": {
     "node": ">=24",
-    "pnpm": ">=10"
+    "pnpm": ">=11"
   },
   "workspaces": [
     "frontend",
     "docs"
   ],
-  "packageManager": "pnpm@10.33.0",
+  "packageManager": "pnpm@11.1.1",
   "scripts": {
     "dev": "pnpm --filter frontend dev",
     "dev:tauri": "pnpm --filter frontend dev:tauri",
     "dev:docs": "pnpm --filter docs dev",
     "clean": "pnpm --recursive exec rimraf node_modules/.vite",
     "build": "pnpm --filter frontend build",
-    "build:docs": "pnpm --filter docs build",
     "build:analyze": "pnpm --filter frontend build:analyze",
     "build:clean": "pnpm --recursive exec rimraf dist",
+    "build:mac": "pnpm run build:tauri:mac",
     "build:tauri": "pnpm --filter frontend build:tauri",
+    "build:tauri:mac": "pnpm --filter frontend build:tauri:mac",
     "build:tauri:linux-x64": "pnpm --filter frontend build:tauri:linux-docker-x64",
     "build:tauri:linux-arm64": "pnpm --filter frontend build:tauri:linux-docker-arm64",
+    "build:docs": "pnpm --filter docs build",
     "package:chocolatey": "pwsh ./scripts/build-chocolatey.ps1",
     "package:homebrew": "bash ./scripts/build-homebrew.sh",
     "generate": "pnpm --filter docs generate",
@@ -47,7 +49,42 @@
     "prepare": "husky",
     "postinstall": "pnpm --filter docs nuxt:prepare"
   },
-  "resolutions": {
-    "js-yaml": ">=4.1.1"
+  "devDependencies": {
+    "@eslint-community/eslint-plugin-eslint-comments": "^4.7.1",
+    "@eslint/markdown": "^8.0.1",
+    "@intlify/eslint-plugin-vue-i18n": "^4.4.0",
+    "@types/node": "^25.7.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.3",
+    "@vue/eslint-config-prettier": "^10.2.0",
+    "@vue/eslint-config-typescript": "^14.7.0",
+    "eslint": "^10.3.0",
+    "eslint-import-resolver-custom-alias": "^1.3.2",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import-x": "^4.16.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-oxlint": "^1.64.0",
+    "eslint-plugin-playwright": "^2.10.2",
+    "eslint-plugin-security": "^4.0.0",
+    "eslint-plugin-vue": "^10.9.1",
+    "eslint-plugin-vuejs-accessibility": "^2.5.0",
+    "eslint-plugin-vuetify": "^2.7.2",
+    "eslint-plugin-yml": "^3.3.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.4",
+    "npm-run-all2": "^8.0.4",
+    "oxlint": "^1.64.0",
+    "postcss-html": "^1.8.1",
+    "prettier": "^3.8.3",
+    "rimraf": "^6.1.3",
+    "sass-embedded": "^1.99.0",
+    "stylelint": "^17.11.0",
+    "stylelint-config-html": "^1.1.0",
+    "stylelint-config-recommended-scss": "^17.0.1",
+    "stylelint-config-recommended-vue": "^1.6.1",
+    "stylelint-order": "^8.1.1",
+    "stylelint-scss": "^7.1.1",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.59.3",
+    "yaml-eslint-parser": "^2.0.0"
   }
 }
