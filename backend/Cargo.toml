@@ -39,7 +39,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 [build-dependencies]
 cc = "1.2.62"
 pkg-config = "0.3.32"
-tauri-build = { version = "2.6.1", features = [] }
+tauri-build = { version = "2.6.2", features = [] }
 vcpkg = "0.2.15"
 
 [dependencies]
@@ -74,8 +74,8 @@ oxipng = "10.1.0"
 png = "0.18.1"
 rgb = "0.8.53"
 serde = "1.0.228"
-serde_json = "1.0.149"
-tauri = { version = "2.11.1", features = [] }
+serde_json = "1.0.150"
+tauri = { version = "2.11.2", features = [] }
 tauri-plugin-dialog = "2.7.1"
 tauri-plugin-fs = "2.5.1"
 tauri-plugin-log = "2.8.0"
