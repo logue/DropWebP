@@ -3,7 +3,7 @@ name = "drop-compress-image"
 version = "3.4.0"
 authors = ["Logue"]
 edition = "2024"
-rust-version = "1.95.0"
+rust-version = "1.96.0"
 description = "Drop Compress Image is a desktop application that converts images to WebP/Avif/JPEG XL format using drag-and-drop functionality. Built with Vite, Vue 3, TypeScript, and Tauri."
 readme = "../../ReadMe.md"
 repository = "https://github.com/logue/DropWebP"
@@ -37,14 +37,14 @@ name = "drop_compress_image_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-cc = "1.2.62"
+cc = "1.2.63"
 pkg-config = "0.3.32"
 tauri-build = { version = "2.6.2", features = [] }
 vcpkg = "0.2.15"
 
 [dependencies]
 bytemuck = "1.25.0"
-jiff = { version = "0.2.24", features = ["serde"] }
+jiff = { version = "0.2.28", features = ["serde"] }
 flate2 = "1.1.9"
 image = "0.25.9"
 imgref = "1.12.1"
