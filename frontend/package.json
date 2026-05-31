@@ -1,6 +1,6 @@
 {
   "name": "@drop-compress-image/frontend",
-  "version": "3.4.0",
+  "version": "3.4.1",
   "description": "A modern desktop application built with Tauri v2 and Vue 3",
   "license": "MIT",
   "type": "module",

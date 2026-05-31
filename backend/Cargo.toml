@@ -1,6 +1,6 @@
 [package]
 name = "drop-compress-image"
-version = "3.4.0"
+version = "3.4.1"
 authors = ["Logue"]
 edition = "2024"
 rust-version = "1.96.0"
