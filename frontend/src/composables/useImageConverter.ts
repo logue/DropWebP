@@ -103,7 +103,6 @@ export function useImageConverter() {
       [format]: toRaw(optionsMap[format])
     };
 
-    console.log(options);
     try {
       // rust側のVec<8>はnumber[]型になるのでUint8Arrayに変換する
       return new Uint8Array(await invoke<number[]>('convert', { data, options }));

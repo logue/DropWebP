@@ -53,6 +53,9 @@ export function useImageConversionController(t: ComposerTranslation) {
     await nextTick();
 
     for (let i = 0; i < files.length; i++) {
+      // キャンセルボタンでinProgressがfalseにされた場合は処理を中断
+      if (!state.inProgress.value) break;
+
       // eslint-disable-next-line security/detect-object-injection -- i is a numeric loop index over a controlled array
       const file = files[i];
       if (!file) continue;
@@ -92,6 +95,13 @@ export function useImageConversionController(t: ComposerTranslation) {
       }
 
       state.updateProgress(i + 1, files.length);
+    }
+
+    // キャンセルされた場合は完了通知を出さずにダイアログを閉じて終了
+    if (!state.inProgress.value) {
+      state.complete();
+      globalStore.setMessage(t('interrupted'), 'warn');
+      return;
     }
 
     // 完了通知
