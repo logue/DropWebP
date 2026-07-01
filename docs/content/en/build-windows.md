@@ -186,12 +186,12 @@ You can build Linux packages (.deb, .rpm) from Windows using Docker.
 
 > **Notice:** The C++ Desktop Development workload includes tools necessary for building Rust native extensions, such as MSVC (Microsoft's compiler), Windows SDK, and CMake.
 
-## 5. Install NASM and Ninja
+## 5. Install NASM, Ninja, and Meson
 
-1. Install NASM and Ninja, which are required for building image codec libraries:
+1. Install NASM, Ninja, and Meson, which are required for building image codec libraries:
 
    ```powershell
-   choco install nasm ninja -y
+   choco install nasm ninja meson -y
    ```
 
 2. After installation, verify the versions:
@@ -199,6 +199,7 @@ You can build Linux packages (.deb, .rpm) from Windows using Docker.
    ```powershell
    nasm -v
    ninja --version
+   meson --version
    ```
 
 3. Add NASM to your system PATH so that Cargo can find it during build time:
@@ -209,7 +210,7 @@ You can build Linux packages (.deb, .rpm) from Windows using Docker.
 
 4. Restart your terminal or PowerShell session for the PATH changes to take effect.
 
-> **Notice:** NASM is an assembler used for building optimized codec libraries like libavif. Ninja is a fast build system often used in conjunction with CMake.
+> **Notice:** NASM is an assembler used for building optimized codec libraries like libavif. Ninja is a fast build system often used in conjunction with CMake. Meson is required to build the dav1d library (used for AVIF decoding).
 
 ## 6. Install Node.js and pnpm
 
@@ -284,6 +285,8 @@ set(VCPKG_BUILD_TYPE release)
 ### Install Dependencies
 
 > **Note (Updated Feb 2026):** The project now uses `rav1e` (a Rust-based AV1 encoder) for AVIF encoding on Windows. This eliminates the need for `libaom` and `aom` packages. `rav1e` avoids NASM multipass optimization requirements and improves build stability on Windows.
+>
+> **Note (Updated Jul 2026):** Since `rav1e` is encode-only, AVIF **decoding** relies on `dav1d`, a decode-only AV1 decoder. `dav1d` is built automatically via Cargo (`libdav1d-sys`) rather than vcpkg, but the build requires Meson (see [step 5 above](#5-install-nasm-ninja-and-meson)).
 
 Use the automated installation script (recommended):
 
@@ -309,6 +312,7 @@ cd C:\vcpkg
 Installed libraries:
 
 - **rav1e**: AV1 encoder (Rust-based, for AVIF encoding) - automatically built by Cargo
+- **dav1d**: AV1 decoder (for AVIF decoding) - automatically built by Cargo (libdav1d-sys, uses Meson)
 - **libjxl**: JPEG XL image format
 - **libwebp**: WebP image format
 - **openjpeg**: JPEG 2000 image format

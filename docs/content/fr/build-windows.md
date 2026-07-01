@@ -126,12 +126,12 @@ Une fois l'installation terminée, vous pouvez vérifier les composants install�
 
 > **Remarque :** La charge de travail de développement de bureau C++ comprend les outils nécessaires pour construire des extensions natives Rust, tels que MSVC (le compilateur de Microsoft), le SDK Windows et CMake.
 
-## 5. Installer NASM et Ninja
+## 5. Installer NASM, Ninja et Meson
 
 Installez NASM et Ninja, qui sont nécessaires pour construire des bibliothèques de codecs d'images.
 
 ```powershell
-choco install nasm ninja -y
+choco install nasm ninja meson -y
 ```
 
 Après l'installation, vérifiez les versions.
@@ -139,6 +139,7 @@ Après l'installation, vérifiez les versions.
 ```powershell
 nasm -v
 ninja --version
+meson --version
 ```
 
 Ajoutez NASM à votre PATH système afin que Cargo puisse le trouver lors de la compilation.
@@ -224,6 +225,8 @@ set(VCPKG_BUILD_TYPE release)
 ### Installer les dépendances
 
 > **Note (Mise à jour février 2026)** : Le projet utilise maintenant `rav1e` (un encodeur AV1 basé sur Rust) pour l'encodage AVIF sous Windows. Cela élimine le besoin des paquets `libaom` et `aom`. `rav1e` évite les exigences d'optimisation multipass de NASM et améliore la stabilité de la compilation sous Windows.
+>
+> **Note (Mise à jour juillet 2026)** : `rav1e` étant uniquement un encodeur, le **décodage** AVIF repose sur `dav1d`, un décodeur AV1 dédié au décodage. `dav1d` est compilé automatiquement via Cargo (`libdav1d-sys`) plutôt que vcpkg, mais sa compilation nécessite Meson (voir l'étape 5 ci-dessus).
 
 Utilisez le script d'installation automatique (recommandé) :
 
@@ -249,6 +252,7 @@ cd C:\vcpkg
 Bibliothèques installées :
 
 - **rav1e** : Encodeur AV1 (basé sur Rust, pour l'encodage AVIF) - compilé automatiquement par Cargo
+- **dav1d** : Décodeur AV1 (pour le décodage AVIF) - compilé automatiquement par Cargo (libdav1d-sys, utilise Meson)
 - **libjxl** : Format d'image JPEG XL
 - **libwebp** : Format d'image WebP
 - **openjpeg** : Format d'image JPEG 2000

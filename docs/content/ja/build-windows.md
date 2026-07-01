@@ -186,12 +186,12 @@ WindowsからDockerを使用してLinux向けパッケージ（.deb、.rpm）を
 
 > **注意:** C++デスクトップ開発ワークロードには、MSVC（Microsoftのコンパイラ）、Windows SDK、CMakeなど、Rustのネイティブ拡張ビルドに必要なツールが含まれています。
 
-## 5. NASMとNinjaのインストール
+## 5. NASM、Ninja、Mesonのインストール
 
-1. NASMとNinjaをインストールします。これらは画像コーデックライブラリのビルドに必要です：
+1. NASM、Ninja、Mesonをインストールします。これらは画像コーデックライブラリのビルドに必要です：
 
    ```powershell
-   choco install nasm ninja -y
+   choco install nasm ninja meson -y
    ```
 
 2. インストール後、バージョンを確認しましょう：
@@ -199,6 +199,7 @@ WindowsからDockerを使用してLinux向けパッケージ（.deb、.rpm）を
    ```powershell
    nasm -v
    ninja --version
+   meson --version
    ```
 
 3. NASMをシステムのPATHに追加します。これによりCargoがビルド時にNASMを見つけられるようになります：
@@ -209,7 +210,7 @@ WindowsからDockerを使用してLinux向けパッケージ（.deb、.rpm）を
 
 4. 設定を反映させるため、ターミナルまたはPowerShellセッションを再起動してください。
 
-> **注意:** NASMはアセンブラで、libavifなどの高速化されたコーデックライブラリのビルドに使用されます。Ninjaは高速なビルドシステムで、CMakeと組み合わせて使用されます。
+> **注意:** NASMはアセンブラで、libavifなどの高速化されたコーデックライブラリのビルドに使用されます。Ninjaは高速なビルドシステムで、CMakeと組み合わせて使用されます。Mesonは、AVIFデコード用のdav1dライブラリ（libdav1d-sys経由）のビルドに必要です。
 
 ## 6. Node.jsとpnpmのインストール
 
@@ -284,6 +285,8 @@ set(VCPKG_BUILD_TYPE release)
 ### 依存ライブラリのインストール
 
 > **注意 (2026年2月更新):** AVIFエンコーダーとして、WindowsではRust製の`rav1e`を使用するようになりました。これにより、`libaom`および`aom`パッケージのインストールは不要になります。`rav1e`はNASMのmultipass optimization要件を回避し、Windowsでのビルドの安定性が向上します。
+>
+> **注意 (2026年7月更新):** `rav1e`はエンコード専用のため、AVIFの**デコード**には別途`dav1d`（decode専用のAV1デコーダー）を使用しています。`dav1d`はvcpkgではなくCargo経由（`libdav1d-sys`）で自動ビルドされますが、ビルドにはMesonが必要です（[上記の手順](#5-nasmninjameson%E3%81%AE%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB)参照）。
 
 自動インストールスクリプトを使用（推奨）:
 
@@ -309,6 +312,7 @@ cd C:\vcpkg
 インストールされるライブラリ:
 
 - **rav1e**: AV1エンコーダー（Rust製、AVIFエンコード用）- Cargoで自動ビルド
+- **dav1d**: AV1デコーダー（AVIFデコード用）- Cargo（libdav1d-sys、Meson使用）で自動ビルド
 - **libjxl**: JPEG XL画像フォーマット
 - **libwebp**: WebP画像フォーマット
 - **openjpeg**: JPEG 2000画像フォーマット

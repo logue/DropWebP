@@ -126,12 +126,12 @@ choco install visualstudio2022buildtools --package-parameters "--add Microsoft.V
 
 > **참고:** C++ 데스크톱 개발 워크로드에는 MSVC(마이크로소프트 컴파일러), Windows SDK 및 CMake와 같은 Rust 네이티브 확장 빌드에 필요한 도구가 포함되어 있습니다.
 
-## 5. NASM 및 Ninja 설치
+## 5. NASM, Ninja, Meson 설치
 
 이미지 코덱 라이브러리 빌드에 필요한 NASM 및 Ninja를 설치합니다.
 
 ```powershell
-choco install nasm ninja -y
+choco install nasm ninja meson -y
 ```
 
 설치 후 버전을 확인합니다.
@@ -139,6 +139,7 @@ choco install nasm ninja -y
 ```powershell
 nasm -v
 ninja --version
+meson --version
 ```
 
 Cargo가 빌드 시 NASM을 찾을 수 있도록 시스템 PATH에 NASM을 추가합니다.
@@ -224,6 +225,8 @@ set(VCPKG_BUILD_TYPE release)
 ### 종속성 설치
 
 > **참고 (2026년 2월 업데이트)**: 프로젝트는 이제 Windows에서 AVIF 인코딩을 위해 `rav1e`(Rust 기반 AV1 인코더)를 사용합니다. 이로 인해 `libaom` 및 `aom` 패키지가 더 이상 필요하지 않습니다. `rav1e`는 NASM의 멀티패스 최적화 요구 사항을 회피하고 Windows에서 빌드 안정성을 향상시킵니다.
+>
+> **참고 (2026년 7월 업데이트)**: `rav1e`는 인코딩 전용이므로, AVIF **디코딩**에는 디코딩 전용 AV1 디코더인 `dav1d`를 사용합니다. `dav1d`는 vcpkg가 아닌 Cargo(`libdav1d-sys`)를 통해 자동으로 빌드되지만, 빌드에는 Meson이 필요합니다(위의 5단계 참조).
 
 자동 설치 스크립트 사용(권장):
 
@@ -249,6 +252,7 @@ cd C:\vcpkg
 설치된 라이브러리:
 
 - **rav1e**: AV1 인코더(Rust 기반, AVIF 인코딩용) - Cargo에 의해 자동으로 빌드됨
+- **dav1d**: AV1 디코더(AVIF 디코딩용) - Cargo(libdav1d-sys, Meson 사용)에 의해 자동으로 빌드됨
 - **libjxl**: JPEG XL 이미지 형식
 - **libwebp**: WebP 이미지 형식
 - **openjpeg**: JPEG 2000 이미지 형식

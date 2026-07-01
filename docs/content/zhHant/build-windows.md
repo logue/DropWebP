@@ -126,12 +126,12 @@ choco install visualstudio2022buildtools --package-parameters "--add Microsoft.V
 
 > **注意：** C++桌面開發工作負載包括構建Rust本機擴展所需的工具，例如MSVC（Microsoft的編譯器）、Windows SDK和CMake。
 
-## 5. 安裝NASM和Ninja
+## 5. 安裝NASM、Ninja和Meson
 
 安裝NASM和Ninja，這些是構建圖像編解碼器庫所必需的。
 
 ```powershell
-choco install nasm ninja -y
+choco install nasm ninja meson -y
 ```
 
 安裝後，驗證版本。
@@ -139,6 +139,7 @@ choco install nasm ninja -y
 ```powershell
 nasm -v
 ninja --version
+meson --version
 ```
 
 將NASM添加到系統PATH中，以便Cargo在構建時可以找到它。
@@ -224,6 +225,8 @@ set(VCPKG_BUILD_TYPE release)
 ### 安裝依賴項
 
 > **注意（2026年2月更新）**：專案現在在Windows上使用`rav1e`（基於Rust的AV1編碼器）進行AVIF編碼。這樣就不再需要`libaom`和`aom`套件。`rav1e`避免了NASM的多遍最佳化要求，提高了Windows上的建構穩定性。
+>
+> **注意（2026年7月更新）**：由於`rav1e`僅支援編碼，AVIF**解碼**依賴於`dav1d`，一個僅支援解碼的AV1解碼器。`dav1d`透過Cargo（`libdav1d-sys`）而非vcpkg自動建構，但建構需要Meson（參見上面的第5步）。
 
 使用自動安裝腳本（推薦）：
 
@@ -249,6 +252,7 @@ cd C:\vcpkg
 已安裝的庫：
 
 - **rav1e**：AV1編碼器（基於Rust，用於AVIF編碼） - 由Cargo自動建構
+- **dav1d**：AV1解碼器（用於AVIF解碼） - 由Cargo自動建構（libdav1d-sys，使用Meson）
 - **libjxl**：JPEG XL圖像格式
 - **libwebp**：WebP圖像格式
 - **openjpeg**：JPEG 2000圖像格式

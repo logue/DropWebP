@@ -3,7 +3,7 @@ name = "drop-compress-image"
 version = "3.4.1"
 authors = ["Logue"]
 edition = "2024"
-rust-version = "1.96.0"
+rust-version = "1.96.1"
 description = "Drop Compress Image is a desktop application that converts images to WebP/Avif/JPEG XL format using drag-and-drop functionality. Built with Vite, Vue 3, TypeScript, and Tauri."
 readme = "../../ReadMe.md"
 repository = "https://github.com/logue/DropWebP"
@@ -44,7 +44,7 @@ vcpkg = "0.2.15"
 
 [dependencies]
 bytemuck = "1.25.0"
-jiff = { version = "0.2.28", features = ["serde"] }
+jiff = { version = "0.2.31", features = ["serde"] }
 flate2 = "1.1.9"
 image = "0.25.9"
 imgref = "1.12.1"
@@ -65,17 +65,21 @@ lcms2 = "6.1.1"        # Little CMS color management, linked via vcpkg
 # which can cause build failures depending on NASM version and CMake configuration.
 # rav1e is written in Rust, builds reliably across all platforms (Windows/macOS/Linux),
 # and provides comparable quality to libaom while avoiding native build dependencies.
+# AVIF decoder: rav1e is encode-only, so codec-dav1d is required for decoding.
+# dav1d is decode-only and does not reintroduce the aom encoder's NASM build issues.
+# Requires meson + ninja on the build machine (in addition to NASM/CMake already needed).
 libavif-sys = { version = "0.17.0", default-features = false, features = [
   "codec-rav1e",
+  "codec-dav1d",
 ] }
-libwebp-sys = "0.14.2" # WebP codec, linked via vcpkg
+libwebp-sys = "0.14.4" # WebP codec, linked via vcpkg
 openjpeg-sys = "1.0.12" # JPEG 2000 decoder, linked via vcpkg
-oxipng = "10.1.0"
+oxipng = "10.1.1"
 png = "0.18.1"
 rgb = "0.8.53"
 serde = "1.0.228"
 serde_json = "1.0.150"
-tauri = { version = "2.11.2", features = [] }
+tauri = { version = "2.11.4", features = [] }
 tauri-plugin-dialog = "2.7.1"
 tauri-plugin-fs = "2.5.1"
 tauri-plugin-log = "2.8.0"
@@ -87,7 +91,7 @@ thiserror = "2.0.18"
 # ultrahdr = { version = "0.1.3", default-features = true } # Ultra HDR (JPEG-R with gainmap) support - 将来の実装用
 
 [dev-dependencies]
-glib = "0.22.7"
+glib = "0.22.8"
 
 [profile.release]
 lto = "thin"       # Thin LTO (互換性重視)
