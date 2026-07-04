@@ -64,16 +64,18 @@ export function syncTauriConfigFromEnv(repoRoot) {
   tauriConf.version = version;
   tauriConf.identifier = identifier;
   tauriConf.mainBinaryName = appNameKebab;
+  // productName drives bundle/installer file names (msi, nsis, dmg, deb, rpm,
+  // appimage) as well as the Win32 exe's "ProductName" resource field, so it
+  // must stay kebab-case. The window title is set separately below so the
+  // human-readable name still shows in the title bar.
+  tauriConf.productName = appNameKebab;
 
-  if (appName) {
-    tauriConf.productName = appName;
-
-    if (
-      Array.isArray(tauriConf?.app?.windows) &&
-      tauriConf.app.windows.length > 0
-    ) {
-      tauriConf.app.windows[0].title = appName;
-    }
+  if (
+    appName &&
+    Array.isArray(tauriConf?.app?.windows) &&
+    tauriConf.app.windows.length > 0
+  ) {
+    tauriConf.app.windows[0].title = appName;
   }
 
   writeFileSync(
@@ -93,8 +95,9 @@ if (process.argv[1] === currentScriptPath) {
   console.log(`Synced ${tauriConfPath}`);
   console.log(`  version=${version}`);
   console.log(`  identifier=${identifier}`);
+  console.log(`  productName=${appNameKebab}`);
   if (appName) {
-    console.log(`  productName=${appName}`);
+    console.log(`  windowTitle=${appName}`);
   }
   console.log(`  mainBinaryName=${appNameKebab}`);
 }
