@@ -60,18 +60,8 @@ jpegli_rs = { version = "0.12.0", package = "jpegli-rs", default-features = fals
 jxl-sys = "0.1.10"     # MIT/Apache-2.0 FFI bindings to libjxl (BSD-3-Clause)
 kamadak-exif = "0.6.1"
 lcms2 = "6.1.1"        # Little CMS color management, linked via vcpkg
-# AVIF encoder: Using rav1e (pure Rust AV1 encoder) instead of codec-aom
-# Rationale: libaom requires NASM with multipass optimization support on Windows,
-# which can cause build failures depending on NASM version and CMake configuration.
-# rav1e is written in Rust, builds reliably across all platforms (Windows/macOS/Linux),
-# and provides comparable quality to libaom while avoiding native build dependencies.
-# AVIF decoder: rav1e is encode-only, so codec-dav1d is required for decoding.
-# dav1d is decode-only and does not reintroduce the aom encoder's NASM build issues.
-# Requires meson + ninja on the build machine (in addition to NASM/CMake already needed).
-libavif-sys = { version = "0.17.0", default-features = false, features = [
-  "codec-rav1e",
-  "codec-dav1d",
-] }
+# AVIF codec selection is platform-specific; see the target-specific
+# [target.'cfg(...)'.dependencies] sections below for libavif-sys features.
 libwebp-sys = "0.14.4" # WebP codec, linked via vcpkg
 openjpeg-sys = "1.0.12" # JPEG 2000 decoder, linked via vcpkg
 oxipng = "10.1.1"
@@ -107,6 +97,17 @@ windows = { version = "0.62.2", features = [
   "Win32_Graphics_Imaging",
   "Win32_System_Com",
 ] }
+# AVIF encoder: Using rav1e (pure Rust AV1 encoder) instead of codec-aom.
+# Rationale: libaom requires NASM with multipass optimization support on Windows,
+# which can cause build failures depending on NASM version and CMake configuration.
+# rav1e is written in Rust and avoids that native build dependency.
+# AVIF decoder: rav1e is encode-only, so codec-dav1d is used for decoding.
+# dav1d is decode-only and does not reintroduce the aom encoder's NASM build issues.
+# Requires meson + ninja on the build machine (in addition to NASM/CMake already needed).
+libavif-sys = { version = "0.17.0", default-features = false, features = [
+  "codec-rav1e",
+  "codec-dav1d",
+] }
 
 # macOS 固有の最適化
 [target.'cfg(target_os = "macos")'.dependencies]
@@ -114,6 +115,14 @@ cocoa = "0.26.1"
 core-foundation = "0.10.1"
 core-graphics = "0.25.0"
 objc = "0.2.7"
+# AVIF encoder/decoder: Using aom (both directions) on macOS.
+# Unlike Windows, NASM/CMake toolchain issues are not observed here, and aom's
+# CMake build cross-compiles correctly for the universal-apple-darwin (x86_64 +
+# aarch64 lipo) target, unlike codec-dav1d's meson build (which does not pass
+# the Cargo cross target to meson and silently builds host-arch objects).
+libavif-sys = { version = "0.17.0", default-features = false, features = [
+  "codec-aom",
+] }
 
 # Apple Silicon (ARM64) 向けの設定
 # [target.aarch64-apple-darwin]
@@ -122,3 +131,11 @@ objc = "0.2.7"
 # Linux 固有の最適化
 [target.'cfg(unix)'.dependencies]
 nix = "0.31.3"
+
+# Linux固有のAVIFコーデック設定（macOSはaomを上のセクションで別途指定済み）
+[target.'cfg(all(unix, not(target_os = "macos")))'.dependencies]
+# AVIF encoder/decoder: aom (both directions). macOS/Linux NASM+CMake toolchains
+# are stable, unlike the Windows build (see the Windows section above).
+libavif-sys = { version = "0.17.0", default-features = false, features = [
+  "codec-aom",
+] }
