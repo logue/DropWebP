@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { fileURLToPath, URL } from 'node:url';
 
 import vue from '@vitejs/plugin-vue';
@@ -9,9 +10,10 @@ import { checker } from 'vite-plugin-checker';
 import vueDevTools from 'vite-plugin-vue-devtools';
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify';
 
-import pkg from './package.json';
-
-const host = process.env.TAURI_DEV_HOST;
+const pkg = JSON.parse(readFileSync('./package.json', 'utf-8')) as {
+  name: string;
+  version: string;
+};
 
 /**
  * Vite Configure
@@ -22,7 +24,7 @@ export default defineConfig(({ command, mode }): UserConfig => {
   const buildDate = new Date().toISOString();
   const envRoot = fileURLToPath(new URL('..', import.meta.url));
   const env = loadEnv(mode, envRoot, '');
-  const appName = env.VITE_APP_NAME || 'Drop Compress Image';
+  const appName = env.VITE_APP_NAME || 'Tauri Vue3 App';
   const appVersion = env.VERSION || pkg.version;
 
   const config: UserConfig = {
@@ -45,12 +47,6 @@ export default defineConfig(({ command, mode }): UserConfig => {
         }
       }),
       vueDevTools(),
-      // Vuetify Loader
-      // https://github.com/vuetifyjs/vuetify-loader/tree/master/packages/vite-plugin
-      vuetify({
-        autoImport: true,
-        styles: { configFile: 'src/styles/settings.scss' }
-      }),
       // vite-plugin-checker
       // https://github.com/fi3ework/vite-plugin-checker
       checker({
@@ -59,14 +55,17 @@ export default defineConfig(({ command, mode }): UserConfig => {
         // eslint: { lintCommand: 'eslint' },
         // stylelint: { lintCommand: 'stylelint' },
       }),
+      // Vue I18n (YAML locale transform)
       VueI18nPlugin({
-        // trueにすると、<i18n>ブロックの警告が出なくなります
-        // See https://github.com/intlify/bundle-tools/issues/22
         compositionOnly: false,
-        // YAMLファイルを対象に（Vueファイルの<i18n>ブロックは自動検出される）
         include: [fileURLToPath(new URL('./src/locales/**/*.yaml', import.meta.url))],
-        // YAMLを実行時ではなくビルド時に処理
         runtimeOnly: false
+      }),
+      // Vuetify Loader
+      // https://github.com/vuetifyjs/vuetify-loader/tree/master/packages/vite-plugin
+      vuetify({
+        autoImport: true,
+        styles: { configFile: 'src/styles/settings.scss' }
       })
     ],
     // Resolver
@@ -78,50 +77,6 @@ export default defineConfig(({ command, mode }): UserConfig => {
       },
       extensions: ['.js', '.json', '.jsx', '.mjs', '.ts', '.tsx', '.vue']
     },
-    // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
-    //
-    // 1. prevent Vite from obscuring rust errors
-    clearScreen: false,
-    // 2. tauri expects a fixed port, fail if that port is not available
-    server: {
-      port: 1420,
-      strictPort: true,
-      host: host || false,
-      hmr: host
-        ? {
-            protocol: 'ws',
-            host,
-            port: 1421
-          }
-        : undefined,
-      watch: {
-        // 3. tell Vite to ignore watching backend and other unnecessary directories
-        ignored: [
-          '../backend/**',
-          '**/target/**',
-          '**/node_modules/**',
-          '**/.git/**',
-          '**/dist/**',
-          '**/*.lock',
-          '**/Meta.ts', // Prevent infinite loop from auto-generated file
-          '**/.DS_Store',
-          '**/*.swp',
-          '**/.turbo/**',
-          '**/pnpm-lock.yaml',
-          '**/.pnpm-debug.log',
-          '**/*.log'
-        ],
-        // macOS FSEvents対応：ポーリングを無効にし、バッチ処理を強化
-        usePolling: false,
-        interval: 500,
-        awaitWriteFinish: {
-          // ファイルの書き込みが完了するまで待機
-          stabilityThreshold: 100,
-          pollInterval: 100
-        }
-      }
-    },
-    envPrefix: ['VITE_', 'TAURI_'],
     // Build Options
     // https://vitejs.dev/config/build-options.html
     build: {
@@ -132,35 +87,30 @@ export default defineConfig(({ command, mode }): UserConfig => {
       target: 'esnext',
       // Minify option
       // https://vitejs.dev/config/build-options.html#build-minify
-      minify: !process.env.TAURI_DEBUG ? 'esbuild' : false,
-      sourcemap: !!process.env.TAURI_DEBUG,
+      minify: 'esbuild',
       // Rollup Options
       // https://vitejs.dev/config/build-options.html#build-rollupoptions
       rollupOptions: {
         output: {
           manualChunks: (id: string) => {
             // Split external library from transpiled code.
-            if (
-              id.includes('/node_modules/vuetify') ||
-              id.includes('/node_modules/webfontloader') ||
-              id.includes('/node_modules/@mdi')
-            ) {
+            if (id.includes('/node_modules/vuetify') || id.includes('/node_modules/@mdi')) {
               // Split Vuetify before vue.
               return 'vuetify';
             }
             if (
               id.includes('/node_modules/@vue/') ||
               id.includes('/node_modules/vue') ||
-              id.includes('/node_modules/pinia')
+              id.includes('/node_modules/pinia') ||
+              id.includes('/node_modules/destr/') || // pinia-plugin-persistedstate uses destr.
+              id.includes('/node_modules/deep-pick-omit/') // pinia-plugin-persistedstate uses deep-pick-omit.
             ) {
               // Combine Vue and Pinia into a single chunk.
               // This is because Pinia is a state management library for Vue.
               return 'vue';
             }
-            // Others
-            if (id.includes('/node_modules/')) {
-              return 'vendor';
-            }
+
+            return 'vendor';
           },
           plugins: [
             mode === 'analyze'
@@ -175,12 +125,14 @@ export default defineConfig(({ command, mode }): UserConfig => {
         }
       }
     },
+    // Keep Vite dev server URL stable for Tauri's configured devUrl.
+    server: {
+      port: 1420,
+      strictPort: true
+    },
     esbuild: {
       // Drop console when production build.
-      drop: command === 'serve' ? [] : ['console'],
-      supported: {
-        'top-level-await': true //browsers can handle top-level-await features
-      }
+      drop: command === 'serve' ? [] : ['console']
     }
   };
 

@@ -3,7 +3,7 @@ import { useI18n } from 'vue-i18n';
 
 import { openUrl } from '@tauri-apps/plugin-opener';
 
-import Meta from '@/Meta';
+import Meta from '@/types/Meta';
 
 const { t } = useI18n();
 
