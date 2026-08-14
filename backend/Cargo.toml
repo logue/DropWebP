@@ -47,7 +47,7 @@ bytemuck = "1.25.2"
 jiff = { version = "0.2.35", features = ["serde"] }
 flate2 = "1.1.9"
 image = "0.25.9"
-imgref = "1.12.1"
+imgref = "1.12.2"
 indexmap = "2.14.0"
 jpeg2k = "0.10.1"
 jpegli_rs = { version = "0.12.0", package = "jpegli-rs", default-features = false, features = [
@@ -62,12 +62,12 @@ kamadak-exif = "0.6.1"
 lcms2 = "6.1.1"        # Little CMS color management, linked via vcpkg
 # AVIF codec selection is platform-specific; see the target-specific
 # [target.'cfg(...)'.dependencies] sections below for libavif-sys features.
-libwebp-sys = "0.14.4" # WebP codec, linked via vcpkg
-openjpeg-sys = "1.0.12" # JPEG 2000 decoder, linked via vcpkg
+libwebp-sys = "0.14.4"                        # WebP codec, linked via vcpkg
+openjpeg-sys = "1.0.12"                       # JPEG 2000 decoder, linked via vcpkg
 oxipng = "10.2.0"
 png = "0.18.1"
 rgb = "0.8.53"
-serde = "1.0.228"
+serde = "1.0.229"
 serde_json = "1.0.151"
 tauri = { version = "2.11.4", features = [] }
 tauri-plugin-dialog = "2.7.2"
