@@ -227,17 +227,6 @@ fn main() {
         }
     }
 
-    // libjpeg-turbo (used by jpegli_rs).
-    match vcpkg::Config::new().lib_name("jpeg").probe("libjpeg-turbo") {
-        Ok(_lib) => {
-            println!("cargo:info=Found libjpeg-turbo via vcpkg");
-        }
-        Err(e) => {
-            println!("cargo:warning=libjpeg-turbo not found via vcpkg: {}", e);
-            println!("cargo:warning=Please install via vcpkg: vcpkg install libjpeg-turbo");
-        }
-    }
-
     // lcms2 (Little CMS color management)
     match vcpkg::Config::new().lib_name("lcms2").probe("lcms2") {
         Ok(lib) => {

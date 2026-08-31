@@ -1,7 +1,8 @@
 use crate::error::AppError;
 use crate::options::HighBitDepthImage;
-use jpegli_rs::encoder::{ChromaSubsampling, EncoderConfig, PixelLayout, Unstoppable};
+use jpegli::{ColorSpace, Compress};
 use serde::{Deserialize, Serialize};
+use std::panic;
 
 /// Default quality.
 const DEFAULT_QUALITY: u8 = 95;
@@ -139,34 +140,50 @@ pub fn encode(
         rgb_data.len()
     );
 
-    // jpegli-rs 0.12 API: build a config via ycbcr().
-    let mut config = EncoderConfig::ycbcr(options.quality, ChromaSubsampling::Quarter);
-
-    if options.progressive {
-        config = config.progressive(true);
-    }
-
-    if options.optimize {
-        config = config.optimize_huffman(true);
-    }
-
-    // Add the ICC profile to the config (jpegli-rs 0.8+ supports this natively).
-    if let Some(ref icc) = icc_profile {
-        config = config.icc_profile(icc.clone());
-    }
-
     println!("Encoding image data...");
-    let mut encoder = config
-        .encode_from_bytes(width, height, PixelLayout::Rgb8Srgb)
-        .map_err(|e| AppError::Encode(format!("Failed to create JPEG encoder: {:?}", e)))?;
 
-    encoder
-        .push_packed(&rgb_data, Unstoppable)
-        .map_err(|e| AppError::Encode(format!("Failed to push image data: {:?}", e)))?;
+    let quality = options.quality as f32;
+    let progressive = options.progressive;
+    let optimize = options.optimize;
 
-    let jpeg_data = encoder
-        .finish()
-        .map_err(|e| AppError::Encode(format!("Failed to finish encoding: {:?}", e)))?;
+    // The jpegli encoder panics on internal errors (its default error manager
+    // unwinds through the C code), so all use of it must be wrapped in
+    // `catch_unwind` per the crate's documentation.
+    let jpeg_data = panic::catch_unwind(move || -> Result<Vec<u8>, AppError> {
+        let mut compress = Compress::new(ColorSpace::JCS_RGB);
+        compress.set_size(width as usize, height as usize);
+        compress.set_quality(quality);
+        compress.set_optimize_coding(optimize);
+        // 4:2:0 chroma subsampling.
+        compress.set_chroma_sampling_pixel_sizes((2, 2), (2, 2));
+        if progressive {
+            compress.set_progressive_mode();
+        }
+
+        let mut started = compress
+            .start_compress(Vec::new())
+            .map_err(|e| AppError::Encode(format!("Failed to start JPEG encoder: {e}")))?;
+
+        if let Some(ref icc) = icc_profile {
+            started.write_icc_profile(icc);
+        }
+
+        started
+            .write_scanlines(&rgb_data)
+            .map_err(|e| AppError::Encode(format!("Failed to write image data: {e}")))?;
+
+        started
+            .finish()
+            .map_err(|e| AppError::Encode(format!("Failed to finish encoding: {e}")))
+    })
+    .map_err(|e| {
+        let msg = e
+            .downcast_ref::<&str>()
+            .map(|s| (*s).to_string())
+            .or_else(|| e.downcast_ref::<String>().cloned())
+            .unwrap_or_else(|| "unknown panic".to_string());
+        AppError::Encode(format!("jpegli encoder panicked: {msg}"))
+    })??;
 
     println!("jpegli encoding completed: {} bytes", jpeg_data.len());
 
@@ -178,8 +195,8 @@ pub fn encode(
 /// In JPEG, ICC profiles are embedded in APP2 markers.
 ///
 /// # Notes
-/// jpegli-rs 0.8 and later support ICC profiles natively, so this helper is
-/// retained only for backwards compatibility.
+/// `jpegli::CompressStarted::write_icc_profile` handles this natively during
+/// encoding, so this helper is retained only for backwards compatibility.
 #[allow(dead_code)]
 fn add_icc_profile(jpeg_data: Vec<u8>, icc: &[u8]) -> Result<Vec<u8>, AppError> {
     // JPEG marker: insert APP2 right after the SOI (0xFFD8) marker.
