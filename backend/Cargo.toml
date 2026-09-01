@@ -50,7 +50,14 @@ image = "0.25.9"
 imgref = "1.12.2"
 indexmap = "2.14.1"
 jpeg2k = "0.10.1"
-jpegli = "0.1.0" # Safe wrapper around Google's jpegli JPEG encoder (BSD-3-Clause)
+jpegli = "0.1.0" # Safe wrapper around Google's jpegli JPEG encoder (BSD-3-Clause).
+# jpegli itself (and, transitively, its FFI layer jpegli-sys) is patched
+# below to ../jpegli / ../jpegli-sys: the crates.io jpegli-sys builds the
+# whole ~30MB libjxl tree via CMake and is unmaintained since 2024-04, so we
+# build just jpegli's own sources directly instead. jpegli-sys is published
+# standalone as `logue-jpegli-sys` (crates.io's `jpegli-sys` name is taken),
+# which is why the rename happens inside the ../jpegli fork's own
+# Cargo.toml rather than via [patch] here (Cargo's [patch] can't rename).
 # Note: jxl-sys requires LLVM/Clang for bindgen on Windows
 # Install from: https://github.com/llvm/llvm-project/releases (e.g., LLVM-19.1.6-win64.exe)
 # Or install via winget: winget install LLVM.LLVM
@@ -67,11 +74,11 @@ rgb = "0.8.53"
 serde = "1.0.229"
 serde_json = "1.0.151"
 tauri = { version = "2.11.5", features = [] }
-tauri-plugin-dialog = "2.7.2"
-tauri-plugin-fs = "2.5.1"
-tauri-plugin-log = "2.9.0"
-tauri-plugin-notification = "2.3.3"
-tauri-plugin-opener = "2.5.4"
+tauri-plugin-dialog = "2.7.3"
+tauri-plugin-fs = "2.5.2"
+tauri-plugin-log = "2.9.1"
+tauri-plugin-notification = "2.4.0"
+tauri-plugin-opener = "2.5.5"
 tauri-plugin-os = "2.3.2"
 tempfile = "3.27.0"
 thiserror = "2.0.20"
@@ -136,3 +143,6 @@ nix = "0.31.3"
 libavif-sys = { version = "0.17.0", default-features = false, features = [
   "codec-aom",
 ] }
+
+[patch.crates-io]
+jpegli = { path = "../jpegli" }

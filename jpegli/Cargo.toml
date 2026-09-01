@@ -1,0 +1,30 @@
+[package]
+name = "jpegli"
+version = "0.1.0"
+authors = ["Kornel <kornel@geekhood.net>", "Piotr Rogowski <piotrekrogowski@gmail.com>", "Logue"]
+edition = "2021"
+rust-version = "1.71"
+description = "Higher-level wrapper for Jpegli library"
+license = "BSD-3-Clause"
+repository = "https://github.com/logue/DropWebP"
+include = ["/src/*.rs", "/Cargo.toml", "/LICENSE"]
+
+# Local fork of Szpadel/jpegli-rs's `jpegli` (crates.io, BSD-3-Clause,
+# unmaintained since 2024-04). All src/*.rs are copied verbatim from that
+# crate; the only change is the jpegli-sys dependency below, which points at
+# this workspace's own ../jpegli-sys (published as `logue-jpegli-sys`, since
+# crates.io's `jpegli-sys` name is taken and its unmaintained owner builds
+# the whole libjxl tree via CMake). This is patched in from backend/Cargo.toml
+# via [patch.crates-io] jpegli = { path = "../jpegli" } — Cargo's [patch]
+# mechanism requires the patched package to keep the exact upstream name
+# ("jpegli"), so the rename has to happen here, one level down, using the
+# regular (and fully supported) `package = "..."` dependency rename instead.
+
+[dependencies]
+arrayvec = "0.7.4"
+jpegli-sys = { package = "logue-jpegli-sys", path = "../jpegli-sys" }
+libc = "0.2.150"
+rgb = { version = "0.8.34", features = ["as-bytes"] }
+
+[dev-dependencies]
+bytemuck = "1.12.1"

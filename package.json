@@ -22,7 +22,7 @@
     "frontend",
     "docs"
   ],
-  "packageManager": "pnpm@11.24.0",
+  "packageManager": "pnpm@11.25.0",
   "scripts": {
     "dev": "pnpm --filter frontend dev",
     "dev:tauri": "pnpm --filter frontend dev:tauri",
@@ -53,7 +53,7 @@
     "@eslint/markdown": "^8.0.3",
     "@intlify/eslint-plugin-vue-i18n": "^4.5.1",
     "@types/node": "^26.4.0",
-    "@typescript-eslint/eslint-plugin": "^8.68.0",
+    "@typescript-eslint/eslint-plugin": "^8.69.0",
     "@vue/eslint-config-prettier": "^10.2.0",
     "@vue/eslint-config-typescript": "^14.9.0",
     "eslint": "^10.9.1",
@@ -81,7 +81,7 @@
     "stylelint-order": "^8.1.1",
     "stylelint-scss": "^7.2.0",
     "typescript": "^7.0.2",
-    "typescript-eslint": "^8.68.0",
+    "typescript-eslint": "^8.69.0",
     "yaml-eslint-parser": "^2.1.0"
   }
 }

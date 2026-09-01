@@ -1,0 +1,44 @@
+[package]
+name = "logue-jpegli-sys"
+version = "0.2.0"
+authors = ["Inflation", "Logue"]
+edition = "2024"
+description = "FFI bindings for jpegli (Google's perceptually-tuned JPEG encoder from libjxl), built directly from vendored sources without CMake."
+license = "BSD-3-Clause AND IJG"
+repository = "https://github.com/logue/DropWebP"
+include = [
+  "/src/*.rs",
+  "/vendor/**",
+  "/build.rs",
+  "/LICENSE",
+  "/LICENSE-libjpeg-turbo.md",
+]
+
+# Published as `logue-jpegli-sys` (crates.io name `jpegli-sys` is taken by
+# Szpadel/jpegli-rs's unmaintained crate). The library target keeps the
+# `jpegli_sys` name below so downstream code and the `jpegli` crate's
+# `use jpegli_sys::...` keep working unchanged when this is patched in.
+[lib]
+name = "jpegli_sys"
+
+# Local fork of Szpadel/jpegli-rs's `jpegli-sys` (crates.io, BSD-3-Clause,
+# unmaintained since 2024-04). The Rust FFI layer (src/lib.rs, src/jerror.rs)
+# is copied verbatim from that crate's bindgen output, since the C ABI is
+# unchanged. Only the build strategy differs: instead of compiling the whole
+# ~30MB libjxl tree via CMake, this crate compiles just the self-contained
+# lib/jpegli/*.cc sources directly with the `cc` crate (mozjpeg-sys style)
+# and links against the `highway` (hwy) library that this project's vcpkg
+# setup already provides as a libjxl dependency. It does not link libjxl
+# (the JPEG XL codec) itself — vendor/ is sourced from libjxl v0.10.2's
+# lib/jpegli/ directory only; bump that source snapshot manually if needed.
+
+[dependencies]
+libc = "0.2"
+
+[build-dependencies]
+cc = "1.4"
+vcpkg = "0.2.15"
+
+[[example]]
+name = "roundtrip"
+path = "examples/roundtrip.rs"

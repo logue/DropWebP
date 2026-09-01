@@ -10,6 +10,24 @@ allowBuilds:
   unrs-resolver: true
   vue-demi: true
 
+minimumReleaseAgeExclude:
+  - '@tauri-apps/plugin-dialog@2.7.3'
+  - '@tauri-apps/plugin-fs@2.5.2'
+  - '@tauri-apps/plugin-http@2.6.0'
+  - '@tauri-apps/plugin-notification@2.4.0'
+  - '@tauri-apps/plugin-opener@2.5.5'
+  - '@typescript-eslint/eslint-plugin@8.69.0'
+  - '@typescript-eslint/parser@8.69.0'
+  - '@typescript-eslint/project-service@8.69.0'
+  - '@typescript-eslint/scope-manager@8.69.0'
+  - '@typescript-eslint/tsconfig-utils@8.69.0'
+  - '@typescript-eslint/type-utils@8.69.0'
+  - '@typescript-eslint/types@8.69.0'
+  - '@typescript-eslint/typescript-estree@8.69.0'
+  - '@typescript-eslint/utils@8.69.0'
+  - '@typescript-eslint/visitor-keys@8.69.0'
+  - typescript-eslint@8.69.0
+
 overrides:
   brace-expansion: ">=5.0.9"
   valibot: ">=1.4.2"
