@@ -114,52 +114,57 @@ const onPasteFromContextMenu = async () => {
           class="d-flex justify-end"
           inline
         >
-          <v-tooltip
-            v-for="(format, key) in formats"
-            :key="key"
-            :text="format.description"
-            location="top"
-          >
-            <template #activator="{ props }">
-              <v-radio v-bind="props" :value="key" :color="format.color">
-                <template #label>
-                  {{ format.label }}
-                  <template v-if="format.badge">
-                    &nbsp;
-                    <v-chip size="x-small">{{ format.badge }}</v-chip>
-                  </template>
+          <v-row>
+            <v-col cols="8">
+              <v-tooltip
+                v-for="(format, key) in formats"
+                :key="key"
+                :text="format.description"
+                location="top"
+              >
+                <template #activator="{ props }">
+                  <v-radio v-bind="props" :value="key" :color="format.color">
+                    <template #label>
+                      {{ format.label }}
+                      <template v-if="format.badge">
+                        &nbsp;
+                        <v-chip size="x-small">{{ format.badge }}</v-chip>
+                      </template>
+                    </template>
+                  </v-radio>
                 </template>
-              </v-radio>
-            </template>
-          </v-tooltip>
+              </v-tooltip>
+            </v-col>
+            <v-col cols="4">
+              <!-- WebP/JXL選択時のロスレススイッチ -->
+              <v-switch
+                v-if="settingsStore.commonOptions.format === OutputFormat.WebP"
+                v-model="settingsStore.webpOptions.lossless"
+                :label="t('lossless_compression')"
+                :hint="t('lossless_hint_webp')"
+                color="primary"
+                density="comfortable"
+                persistent-hint
+              />
+              <v-switch
+                v-else-if="settingsStore.commonOptions.format === OutputFormat.JXL"
+                v-model="settingsStore.jxlOptions.lossless"
+                :label="t('lossless_compression')"
+                :hint="t('lossless_hint_jxl')"
+                color="primary"
+                density="comfortable"
+                persistent-hint
+              />
+              <v-switch
+                v-else
+                color="primary"
+                density="comfortable"
+                :label="t('lossless_compression')"
+                disabled
+              />
+            </v-col>
+          </v-row>
         </v-radio-group>
-
-        <!-- WebP/JXL選択時のロスレススイッチ -->
-        <v-expand-transition>
-          <div v-if="settingsStore.commonOptions.format === OutputFormat.WebP">
-            <v-switch
-              v-model="settingsStore.webpOptions.lossless"
-              :label="t('lossless_compression')"
-              :hint="t('lossless_hint_webp')"
-              color="primary"
-              density="comfortable"
-              persistent-hint
-            />
-          </div>
-        </v-expand-transition>
-
-        <v-expand-transition>
-          <div v-if="settingsStore.commonOptions.format === OutputFormat.JXL">
-            <v-switch
-              v-model="settingsStore.jxlOptions.lossless"
-              :label="t('lossless_compression')"
-              :hint="t('lossless_hint_jxl')"
-              color="primary"
-              density="comfortable"
-              persistent-hint
-            />
-          </div>
-        </v-expand-transition>
       </v-card-actions>
     </v-card>
   </v-container>

@@ -2,8 +2,8 @@
 name = "jpegli"
 version = "0.1.0"
 authors = ["Kornel <kornel@geekhood.net>", "Piotr Rogowski <piotrekrogowski@gmail.com>", "Logue"]
-edition = "2021"
-rust-version = "1.71"
+edition = "2024"
+rust-version = "1.98.1"
 description = "Higher-level wrapper for Jpegli library"
 license = "BSD-3-Clause"
 repository = "https://github.com/logue/DropWebP"
@@ -21,10 +21,10 @@ include = ["/src/*.rs", "/Cargo.toml", "/LICENSE"]
 # regular (and fully supported) `package = "..."` dependency rename instead.
 
 [dependencies]
-arrayvec = "0.7.4"
+arrayvec = "0.7"
 jpegli-sys = { package = "logue-jpegli-sys", path = "../jpegli-sys" }
-libc = "0.2.150"
-rgb = { version = "0.8.34", features = ["as-bytes"] }
+libc = "0.2"
+rgb = { version = "0.8", features = ["as-bytes"] }
 
 [dev-dependencies]
-bytemuck = "1.12.1"
+bytemuck = "1.12"

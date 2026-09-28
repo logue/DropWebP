@@ -3,7 +3,7 @@ name = "drop-compress-image"
 version = "3.4.3"
 authors = ["Logue"]
 edition = "2024"
-rust-version = "1.98.0"
+rust-version = "1.98.1"
 description = "Drop Compress Image is a desktop application that converts images to WebP/Avif/JPEG XL format using drag-and-drop functionality. Built with Vite, Vue 3, TypeScript, and Tauri."
 readme = "../../ReadMe.md"
 repository = "https://github.com/logue/DropWebP"
@@ -37,20 +37,20 @@ name = "drop_compress_image_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-cc = "1.4.4"
-pkg-config = "0.3.34"
-tauri-build = { version = "2.6.2", features = [] }
+cc = "1.5"
+pkg-config = "0.3"
+tauri-build = { version = "2.6", features = [] }
 vcpkg = "0.2.15"
 
 [dependencies]
-bytemuck = "1.25.2"
-jiff = { version = "0.2.35", features = ["serde"] }
-flate2 = "1.1.10"
-image = "0.25.9"
-imgref = "1.12.2"
-indexmap = "2.14.1"
-jpeg2k = "0.10.1"
-jpegli = "0.1.0" # Safe wrapper around Google's jpegli JPEG encoder (BSD-3-Clause).
+bytemuck = "1.25"
+jiff = { version = "0.2", features = ["serde"] }
+flate2 = "1.1"
+image = "0.25"
+imgref = "1.12"
+indexmap = "2.14"
+jpeg2k = "0.10"
+jpegli = "0.1" # Safe wrapper around Google's jpegli JPEG encoder (BSD-3-Clause).
 # jpegli itself (and, transitively, its FFI layer jpegli-sys) is patched
 # below to ../jpegli / ../jpegli-sys: the crates.io jpegli-sys builds the
 # whole ~30MB libjxl tree via CMake and is unmaintained since 2024-04, so we
@@ -61,31 +61,31 @@ jpegli = "0.1.0" # Safe wrapper around Google's jpegli JPEG encoder (BSD-3-Claus
 # Note: jxl-sys requires LLVM/Clang for bindgen on Windows
 # Install from: https://github.com/llvm/llvm-project/releases (e.g., LLVM-19.1.6-win64.exe)
 # Or install via winget: winget install LLVM.LLVM
-jxl-sys = "0.1.12"     # MIT/Apache-2.0 FFI bindings to libjxl (BSD-3-Clause)
-kamadak-exif = "0.6.1"
-lcms2 = "6.1.1"        # Little CMS color management, linked via vcpkg
+jxl-sys = "0.1"     # MIT/Apache-2.0 FFI bindings to libjxl (BSD-3-Clause)
+kamadak-exif = "0.6"
+lcms2 = "6.1"        # Little CMS color management, linked via vcpkg
 # AVIF codec selection is platform-specific; see the target-specific
 # [target.'cfg(...)'.dependencies] sections below for libavif-sys features.
-libwebp-sys = "0.14.4"                        # WebP codec, linked via vcpkg
-openjpeg-sys = "1.0.12"                       # JPEG 2000 decoder, linked via vcpkg
-oxipng = "10.2.0"
-png = "0.18.1"
-rgb = "0.8.53"
-serde = "1.0.229"
-serde_json = "1.0.151"
-tauri = { version = "2.11.5", features = [] }
-tauri-plugin-dialog = "2.7.3"
-tauri-plugin-fs = "2.5.2"
-tauri-plugin-log = "2.9.1"
-tauri-plugin-notification = "2.4.0"
-tauri-plugin-opener = "2.5.5"
-tauri-plugin-os = "2.3.2"
-tempfile = "3.27.0"
-thiserror = "2.0.20"
+libwebp-sys = "0.14"                        # WebP codec, linked via vcpkg
+openjpeg-sys = "1.0"                       # JPEG 2000 decoder, linked via vcpkg
+oxipng = "10.2"
+png = "0.18"
+rgb = "0.8"
+serde = "1.0"
+serde_json = "1.0"
+tauri = { version = "2.11", features = [] }
+tauri-plugin-dialog = "2.8"
+tauri-plugin-fs = "2.6"
+tauri-plugin-log = "2.10"
+tauri-plugin-notification = "2.5"
+tauri-plugin-opener = "2.6"
+tauri-plugin-os = "2.4"
+tempfile = "3.27"
+thiserror = "2.0"
 # ultrahdr = { version = "0.1.3", default-features = true } # Ultra HDR (JPEG-R with gainmap) support - 将来の実装用
 
 [dev-dependencies]
-glib = "0.22.9"
+glib = "0.22"
 
 [profile.release]
 lto = "thin"       # Thin LTO (互換性重視)
@@ -96,7 +96,7 @@ opt-level = 3      # 速度最適化（互換性重視）
 
 # Windows 固有の最適化
 [target.'cfg(windows)'.dependencies]
-windows = { version = "0.62.2", features = [
+windows = { version = "0.62", features = [
   "Win32_Foundation",
   "Win32_Graphics_Imaging",
   "Win32_System_Com",
@@ -108,23 +108,23 @@ windows = { version = "0.62.2", features = [
 # AVIF decoder: rav1e is encode-only, so codec-dav1d is used for decoding.
 # dav1d is decode-only and does not reintroduce the aom encoder's NASM build issues.
 # Requires meson + ninja on the build machine (in addition to NASM/CMake already needed).
-libavif-sys = { version = "0.17.0", default-features = false, features = [
+libavif-sys = { version = "0.17", default-features = false, features = [
   "codec-rav1e",
   "codec-dav1d",
 ] }
 
 # macOS 固有の最適化
 [target.'cfg(target_os = "macos")'.dependencies]
-cocoa = "0.26.1"
-core-foundation = "0.10.1"
-core-graphics = "0.25.0"
-objc = "0.2.7"
+cocoa = "0.27"
+core-foundation = "0.10"
+core-graphics = "0.25"
+objc = "0.2"
 # AVIF encoder/decoder: Using aom (both directions) on macOS.
 # Unlike Windows, NASM/CMake toolchain issues are not observed here, and aom's
 # CMake build cross-compiles correctly for the universal-apple-darwin (x86_64 +
 # aarch64 lipo) target, unlike codec-dav1d's meson build (which does not pass
 # the Cargo cross target to meson and silently builds host-arch objects).
-libavif-sys = { version = "0.17.0", default-features = false, features = [
+libavif-sys = { version = "0.17", default-features = false, features = [
   "codec-aom",
 ] }
 
@@ -134,13 +134,13 @@ libavif-sys = { version = "0.17.0", default-features = false, features = [
 
 # Linux 固有の最適化
 [target.'cfg(unix)'.dependencies]
-nix = "0.31.3"
+nix = "0.31"
 
 # Linux固有のAVIFコーデック設定（macOSはaomを上のセクションで別途指定済み）
 [target.'cfg(all(unix, not(target_os = "macos")))'.dependencies]
 # AVIF encoder/decoder: aom (both directions). macOS/Linux NASM+CMake toolchains
 # are stable, unlike the Windows build (see the Windows section above).
-libavif-sys = { version = "0.17.0", default-features = false, features = [
+libavif-sys = { version = "0.17", default-features = false, features = [
   "codec-aom",
 ] }
 
