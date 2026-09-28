@@ -1,6 +1,6 @@
 # Linux x86_64向けTauriアプリケーションビルド用Dockerfile
 # x86_64ネイティブビルド（ARM64 Macではエミュレーション）
-FROM --platform=linux/amd64 rust:latest
+FROM rust:latest
 
 # 環境変数設定
 ENV DEBIAN_FRONTEND=noninteractive
@@ -39,6 +39,7 @@ RUN apt-get update && apt-get install -y \
     libopenexr-dev \
     libpng-dev \
     libwebp-dev \
+    libhwy-dev \
     # Node.js用
     ca-certificates \
     gnupg \

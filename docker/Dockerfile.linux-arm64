@@ -1,6 +1,6 @@
 # Linux ARM64向けTauriアプリケーションビルド用Dockerfile
 # ARM64ネイティブビルド
-FROM --platform=linux/arm64 rust:latest
+FROM rust:latest
 
 # 環境変数設定
 ENV DEBIAN_FRONTEND=noninteractive
@@ -39,6 +39,7 @@ RUN apt-get update && apt-get install -y \
     libopenexr-dev \
     libpng-dev \
     libwebp-dev \
+    libhwy-dev \
     # Node.js用
     ca-certificates \
     gnupg \

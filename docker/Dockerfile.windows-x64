@@ -2,7 +2,7 @@
 # Windows x86_64向けTauriアプリケーションビルド用Dockerfile
 # MSVC環境でのビルド（Windows実機のDocker Desktop上で実行）
 
-FROM mcr.microsoft.com/windows/servercore:ltsc2022
+FROM mcr.microsoft.com/windows/servercore:ltsc2025
 
 # 環境変数設定
 ENV PNPM_HOME="C:\pnpm"
@@ -18,8 +18,8 @@ RUN choco install -y `
     visualstudio2022-workload-vctools `
     git `
     cmake `
-    && choco install -y nodejs --version=24.12.0 `
-    && choco install -y nasm --version=2.16.03
+    && choco install -y nodejs --version=24.21.0 `
+    && choco install -y nasm --version=3.02
 
 # pnpmをインストール
 RUN powershell -Command `
@@ -29,7 +29,7 @@ RUN powershell -Command `
 RUN powershell -NoProfile -ExecutionPolicy Bypass -Command `
     "[System.Net.ServicePointManager]::SecurityProtocol = 3072; `
     Invoke-WebRequest -Uri https://win.rustup.rs/x86_64 -OutFile rustup-init.exe; `
-    .\rustup-init.exe -y --default-toolchain 1.92.0 --default-host x86_64-pc-windows-msvc; `
+    .\rustup-init.exe -y --default-toolchain 1.98.1 --default-host x86_64-pc-windows-msvc; `
     Remove-Item rustup-init.exe"
 
 # 環境変数を設定（setxでマシンレベルのPATHに追加）
