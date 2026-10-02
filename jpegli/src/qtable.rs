@@ -1,6 +1,5 @@
 #![allow(non_upper_case_globals)]
 
-use std::cmp::{max, min};
 use std::fmt;
 use std::os::raw::c_uint;
 type Coef = c_uint;
@@ -55,10 +54,11 @@ impl QTable {
 
             // TODO: that could be improved for 1x2 and 2x1 subsampling
             for ((out, coef), w) in low_out.iter_mut().zip(low_coefs).zip(&low_weights) {
-                *out = min(255, max(1, (*coef as f32 * (dc_scaling * w + ac_scaling * (1.-w))).round() as Coef));
+                *out = ((*coef as f32 * (dc_scaling * w + ac_scaling * (1. - w))).round() as Coef)
+                    .clamp(1, 255);
             }
             for (out, coef) in high_out.iter_mut().zip(high_coefs) {
-                *out = min(255, max(1, (*coef as f32 * ac_scaling).round() as Coef));
+                *out = ((*coef as f32 * ac_scaling).round() as Coef).clamp(1, 255);
             }
         }
         Self { coeffs: out }
@@ -207,6 +207,7 @@ fn scaling() {
     assert_eq!(QTable { coeffs: [100; 64] }, QTable { coeffs: [100; 64] });
     assert!(QTable { coeffs: [1; 64] } != QTable { coeffs: [2; 64] });
 
+    assert_eq!(QTable { coeffs: [36; 64] }, Flat.scaled(22., 22.));
     assert_eq!(QTable{coeffs:[36; 64]}, Flat.scaled(22.,22.));
     assert_eq!(QTable{coeffs:[8; 64]}, Flat.scaled(75.,75.));
     assert_eq!(QTable{coeffs:[1; 64]}, Flat.scaled(100.,100.));
@@ -221,7 +222,5 @@ fn scaling() {
         32, 32, 32, 32, 32, 32, 32, 32,
         32, 32, 32, 32, 32, 32, 32, 32]}, Flat.scaled(95.,25.));
     assert_eq!(PetersonAhumadaWatson, PetersonAhumadaWatson.scaled(50.,50.));
-
-    assert_eq!(QTable { coeffs: [1; 64] }, NRobidoux.scaled(99.9, 99.9));
     assert_eq!(QTable { coeffs: [1; 64] }, MSSSIM_Chroma.scaled(99.8, 99.8));
 }

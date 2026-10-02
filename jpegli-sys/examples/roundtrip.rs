@@ -21,7 +21,7 @@ fn main() {
         jpegli_simple_progression(&mut cinfo);
         jpegli_start_compress(&mut cinfo, 1);
 
-        let row = vec![128u8; 32 * 3];
+        let row = [128u8; 32 * 3];
         while cinfo.next_scanline < cinfo.image_height {
             let ptrs = [row.as_ptr()];
             jpegli_write_scanlines(&mut cinfo, ptrs.as_ptr(), 1);

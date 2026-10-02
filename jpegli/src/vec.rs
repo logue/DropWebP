@@ -7,6 +7,7 @@ impl<T: Copy> VecUninitExtender for Vec<T> {
         let new_len = self.len() + items;
         self.try_reserve_exact(items).expect("oom");
         debug_assert!(self.capacity() >= new_len);
-        self.set_len(new_len);
+        // SAFETY: The caller initializes all newly exposed elements before using or dropping the Vec.
+        unsafe { self.set_len(new_len) };
     }
 }

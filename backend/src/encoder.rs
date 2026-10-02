@@ -106,12 +106,7 @@ pub fn extract_pixel_data(img: &HighBitDepthImage) -> (Cow<'_, [f32]>, bool) {
             let mut rgba_pixels = Vec::with_capacity(argb_pixels.len());
 
             // Convert each ARGB pixel (A, R, G, B) to RGBA pixel (R, G, B, A).
-            for chunk in argb_pixels.chunks_exact(4) {
-                let a = chunk[0]; // Alpha
-                let r = chunk[1]; // Red
-                let g = chunk[2]; // Green
-                let b = chunk[3]; // Blue
-
+            for &[a, r, g, b] in argb_pixels.as_chunks::<4>().0 {
                 // Store in RGBA order.
                 rgba_pixels.extend_from_slice(&[r, g, b, a]);
             }

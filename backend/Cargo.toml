@@ -3,7 +3,7 @@ name = "drop-compress-image"
 version = "3.5.0"
 authors = ["Logue"]
 edition = "2024"
-rust-version = "1.98.1"
+rust-version = "1.99.0"
 description = "Drop Compress Image is a desktop application that converts images to WebP/Avif/JPEG XL format using drag-and-drop functionality. Built with Vite, Vue 3, TypeScript, and Tauri."
 readme = "../../ReadMe.md"
 repository = "https://github.com/logue/DropWebP"
@@ -87,13 +87,6 @@ thiserror = "2.0"
 [dev-dependencies]
 glib = "0.22"
 
-[profile.release]
-lto = "thin"       # Thin LTO (互換性重視)
-codegen-units = 16 # 並列コンパイルで互換性向上
-panic = "abort"    # 高速パニック処理
-strip = true       # シンボル除去
-opt-level = 3      # 速度最適化（互換性重視）
-
 # Windows 固有の最適化
 [target.'cfg(windows)'.dependencies]
 windows = { version = "0.62", features = [
@@ -144,5 +137,3 @@ libavif-sys = { version = "0.17", default-features = false, features = [
   "codec-aom",
 ] }
 
-[patch.crates-io]
-jpegli = { path = "../jpegli" }

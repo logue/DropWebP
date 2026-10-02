@@ -130,6 +130,12 @@ impl<'markers> DecompressBuilder<'markers> {
     }
 }
 
+impl Default for DecompressBuilder<'_> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// Get pixels out of a JPEG file
 ///
 /// High-level wrapper for `jpegli_decompress_struct`
@@ -287,10 +293,7 @@ impl<R> Decompress<R> {
         if res == 1 {
             Ok(())
         } else {
-            Err(io::Error::new(
-                io::ErrorKind::Other,
-                "no image in the JPEG file",
-            ))
+            Err(io::Error::other("no image in the JPEG file"))
         }
     }
 
@@ -438,7 +441,7 @@ impl<R> Decompress<R> {
     #[inline]
     pub fn scale(&mut self, numerator: u8) {
         assert!(
-            1 <= numerator && numerator <= 16,
+            (1..=16).contains(&numerator),
             "numerator must be between 1 and 16"
         );
         self.cinfo.scale_num = numerator.into();
@@ -514,12 +517,12 @@ impl<R> DecompressStarted<R> {
                 let comp_height = comp_info.v_samp_factor as usize * DCTSIZE;
                 let original_len = image_dest[ci].len();
                 image_dest[ci].extend_uninit(comp_height * row_stride);
-                for ri in 0..comp_height {
+                for (ri, row_ptr) in row_ptrs[ci].iter_mut().take(comp_height).enumerate() {
                     let start = original_len + ri * row_stride;
-                    row_ptrs[ci][ri] = image_dest[ci][start..start + row_stride].as_mut_ptr();
+                    *row_ptr = image_dest[ci][start..start + row_stride].as_mut_ptr();
                 }
-                for ri in comp_height..mcu_height {
-                    row_ptrs[ci][ri] = ptr::null_mut();
+                for row_ptr in row_ptrs[ci].iter_mut().take(mcu_height).skip(comp_height) {
+                    *row_ptr = ptr::null_mut();
                 }
                 comp_ptrs[ci] = row_ptrs[ci].as_mut_ptr();
             }
@@ -598,7 +601,7 @@ impl<R> DecompressStarted<R> {
         let width = self.width();
         let height = self.height();
         let line_width = width * item_size;
-        if dest.len() % line_width != 0 {
+        if !dest.len().is_multiple_of(line_width) {
             return Err(io::Error::new(io::ErrorKind::Unsupported, format!("destination slice length must be multiple of {width}x{num_components} bytes long, got {}B", std::mem::size_of_val(dest))));
         }
         for row in dest.chunks_exact_mut(line_width) {
@@ -943,7 +946,7 @@ fn drops_reader() {
 
     impl<R> Drop for CountsDrops<'_, R> {
         fn drop(&mut self) {
-            assert!(self as *mut _ as usize % 1024 == 0); // alignment
+            assert!((self as *mut _ as usize).is_multiple_of(1024)); // alignment
             *self.drop_count += 1;
         }
     }

@@ -1,13 +1,13 @@
 use crate::boolean;
 use crate::fail;
-use crate::ffi::jpegli_common_struct;
-use crate::ffi::jpegli_compress_struct;
-use crate::ffi::jpegli_destination_mgr;
+use crate::ffi::J_MESSAGE_CODE;
 use crate::ffi::JERR_BUFFER_SIZE;
 use crate::ffi::JERR_FILE_WRITE;
 use crate::ffi::JERR_INPUT_EOF;
 use crate::ffi::JWRN_JPEG_EOF;
-use crate::ffi::J_MESSAGE_CODE;
+use crate::ffi::jpegli_common_struct;
+use crate::ffi::jpegli_compress_struct;
+use crate::ffi::jpegli_destination_mgr;
 use crate::ffi::{JPOOL_IMAGE, JPOOL_PERMANENT};
 use crate::warn;
 use std::io;
@@ -81,11 +81,15 @@ impl<W: Write> DestinationMgr<W> {
     }
 
     unsafe fn cast(cinfo: &mut jpegli_compress_struct) -> &mut Self {
-        let this: &mut Self = &mut *cinfo.dest.cast();
+        // SAFETY: `DestinationMgr::new` installs callbacks with `cinfo.dest` pointing to its first field.
+        let this: &mut Self = unsafe { &mut *cinfo.dest.cast() };
         // Type alias to unify higher-ranked lifetimes
         type FnPtr<'a> = unsafe extern "C-unwind" fn(cinfo: &'a mut jpegli_compress_struct);
         // This is a redundant safety check to ensure the struct is ours
-        if Some::<FnPtr>(Self::init_destination) != this.iface.init_destination {
+        let owns_destination = this.iface.init_destination.is_some_and(|init_destination| {
+            std::ptr::fn_addr_eq(init_destination, Self::init_destination as FnPtr)
+        });
+        if !owns_destination {
             fail(&mut cinfo.common, JERR_BUFFER_SIZE);
         }
         this
@@ -94,24 +98,29 @@ impl<W: Write> DestinationMgr<W> {
     /// This is called by `jcphuff`'s `dump_buffer()`, which does NOT keep
     /// the position up to date, and expects full buffer write every time.
     unsafe extern "C-unwind" fn empty_output_buffer(cinfo: &mut jpegli_compress_struct) -> boolean {
-        let this = Self::cast(cinfo);
-        if let Err(code) = this.write_buffer(true) {
+        // SAFETY: The installed callback's `cinfo.dest` points to its owning DestinationMgr.
+        let this = unsafe { Self::cast(cinfo) };
+        // SAFETY: The codec calls this callback only after filling the output buffer.
+        if let Err(code) = unsafe { this.write_buffer(true) } {
             fail(&mut cinfo.common, code);
         }
         1
     }
 
     unsafe extern "C-unwind" fn init_destination(cinfo: &mut jpegli_compress_struct) {
-        let this = Self::cast(cinfo);
+        // SAFETY: The installed callback's `cinfo.dest` points to its owning DestinationMgr.
+        let this = unsafe { Self::cast(cinfo) };
         this.reset_buffer();
     }
 
     unsafe extern "C-unwind" fn term_destination(cinfo: &mut jpegli_compress_struct) {
-        let this = Self::cast(cinfo);
-        if let Err(code) = this.write_buffer(false) {
+        // SAFETY: The installed callback's `cinfo.dest` points to its owning DestinationMgr.
+        let this = unsafe { Self::cast(cinfo) };
+        // SAFETY: The codec's free-in-buffer count identifies the initialized output bytes.
+        if let Err(code) = unsafe { this.write_buffer(false) } {
             fail(&mut cinfo.common, code);
         }
-        if let Err(_) = this.writer.flush() {
+        if this.writer.flush().is_err() {
             fail(&mut cinfo.common, JERR_FILE_WRITE);
         }
         this.iface.free_in_buffer = 0;

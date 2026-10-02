@@ -776,18 +776,36 @@ unsafe extern "C-unwind" {
     ) -> boolean;
 }
 
+/// Initializes a JPEG decompressor using the current library ABI.
+///
+/// # Safety
+/// `dinfo.common.err` must point to a valid error manager that remains valid
+/// while the decompressor is in use. `dinfo` must not contain an initialized
+/// decompressor; destroy any existing decompressor before reusing it.
 pub unsafe fn jpegli_create_decompress(dinfo: &mut jpegli_decompress_struct) {
-    jpegli_CreateDecompress(
-        dinfo,
-        JPEG_LIB_VERSION,
-        std::mem::size_of::<jpegli_decompress_struct>(),
-    );
+    // SAFETY: The caller guarantees the error manager and struct lifecycle above.
+    unsafe {
+        jpegli_CreateDecompress(
+            dinfo,
+            JPEG_LIB_VERSION,
+            std::mem::size_of::<jpegli_decompress_struct>(),
+        );
+    }
 }
 
+/// Initializes a JPEG compressor using the current library ABI.
+///
+/// # Safety
+/// `cinfo.common.err` must point to a valid error manager that remains valid
+/// while the compressor is in use. `cinfo` must not contain an initialized
+/// compressor; destroy any existing compressor before reusing it.
 pub unsafe fn jpegli_create_compress(cinfo: &mut jpegli_compress_struct) {
-    jpegli_CreateCompress(
-        cinfo,
-        JPEG_LIB_VERSION,
-        std::mem::size_of::<jpegli_compress_struct>(),
-    );
+    // SAFETY: The caller guarantees the error manager and struct lifecycle above.
+    unsafe {
+        jpegli_CreateCompress(
+            cinfo,
+            JPEG_LIB_VERSION,
+            std::mem::size_of::<jpegli_compress_struct>(),
+        );
+    }
 }

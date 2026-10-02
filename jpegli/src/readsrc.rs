@@ -1,9 +1,9 @@
+use crate::ffi::JERR_BAD_LENGTH;
 use crate::ffi::boolean;
 use crate::ffi::jpegli_decompress_struct;
-use crate::ffi::JERR_BAD_LENGTH;
-use crate::ffi::{jpegli_common_struct, jpegli_resync_to_restart, jpegli_source_mgr};
 use crate::ffi::{JERR_FILE_READ, JERR_VIRTUAL_BUG};
 use crate::ffi::{JPOOL_IMAGE, JPOOL_PERMANENT, JWRN_JPEG_EOF};
+use crate::ffi::{jpegli_common_struct, jpegli_resync_to_restart, jpegli_source_mgr};
 use crate::{fail, warn};
 use std::io::{self, BufRead, BufReader, Read};
 use std::mem::MaybeUninit;
@@ -41,11 +41,15 @@ impl<R: BufRead> SourceMgr<R> {
 
     #[inline]
     unsafe fn cast(cinfo: &mut jpegli_decompress_struct) -> &mut Self {
-        let this: &mut Self = &mut *cinfo.src.cast();
+        // SAFETY: `SourceMgr::new` installs callbacks with `cinfo.src` pointing to its first field.
+        let this: &mut Self = unsafe { &mut *cinfo.src.cast() };
         // Type alias to unify higher-ranked lifetimes
         type FnPtr<'a> = unsafe extern "C-unwind" fn(cinfo: &'a mut jpegli_decompress_struct);
         // This is a redundant safety check to ensure the struct is ours
-        if Some::<FnPtr>(Self::init_source) != this.iface.init_source {
+        let owns_source = this.iface.init_source.is_some_and(|init_source| {
+            std::ptr::fn_addr_eq(init_source, Self::init_source as FnPtr)
+        });
+        if !owns_source {
             fail(&mut cinfo.common, JERR_VIRTUAL_BUG);
         }
         this
@@ -53,7 +57,8 @@ impl<R: BufRead> SourceMgr<R> {
 
     unsafe extern "C-unwind" fn init_source(cinfo: &mut jpegli_decompress_struct) {
         // Do nothing, buffer has been filled by new()
-        let _s = Self::cast(cinfo);
+        // SAFETY: The installed callback's `cinfo.src` points to its owning SourceMgr.
+        let _s = unsafe { Self::cast(cinfo) };
         debug_assert!(!_s.iface.next_input_byte.is_null());
         debug_assert!(_s.iface.bytes_in_buffer > 0);
     }
@@ -93,7 +98,8 @@ impl<R: BufRead> SourceMgr<R> {
     ///    into the buffer (ignoring the current state of `next_input_byte` and
     ///    `bytes_in_buffer`)
     unsafe extern "C-unwind" fn fill_input_buffer(cinfo: &mut jpegli_decompress_struct) -> boolean {
-        let this = Self::cast(cinfo);
+        // SAFETY: The installed callback's `cinfo.src` points to its owning SourceMgr.
+        let this = unsafe { Self::cast(cinfo) };
         match this.fill_input_buffer_impl() {
             Ok(()) => 1,
             Err(e) if e.kind() == io::ErrorKind::UnexpectedEof => {
@@ -116,20 +122,23 @@ impl<R: BufRead> SourceMgr<R> {
         if num_bytes <= 0 {
             return;
         }
-        let this = Self::cast(cinfo);
+        // SAFETY: The installed callback's `cinfo.src` points to its owning SourceMgr.
+        let this = unsafe { Self::cast(cinfo) };
         let mut num_bytes = num_bytes as usize;
 
         loop {
             if this.iface.bytes_in_buffer > 0 {
                 let skip_from_buffer = this.iface.bytes_in_buffer.min(num_bytes);
                 this.iface.bytes_in_buffer -= skip_from_buffer;
-                this.iface.next_input_byte = this.iface.next_input_byte.add(skip_from_buffer);
+                // SAFETY: `skip_from_buffer` is bounded by the remaining buffer length.
+                this.iface.next_input_byte =
+                    unsafe { this.iface.next_input_byte.add(skip_from_buffer) };
                 num_bytes -= skip_from_buffer;
             }
             if num_bytes == 0 {
                 break;
             }
-            if let Err(_) = this.fill_input_buffer_impl() {
+            if this.fill_input_buffer_impl().is_err() {
                 fail(&mut cinfo.common, JERR_FILE_READ);
             }
         }
@@ -143,7 +152,8 @@ impl<R: BufRead> SourceMgr<R> {
 
     /// `jpegli_finish_decompress` consumes data up to EOI before calling this
     unsafe extern "C-unwind" fn term_source(cinfo: &mut jpegli_decompress_struct) {
-        let this = Self::cast(cinfo);
+        // SAFETY: The installed callback's `cinfo.src` points to its owning SourceMgr.
+        let this = unsafe { Self::cast(cinfo) };
         this.return_unconsumed_data();
     }
 

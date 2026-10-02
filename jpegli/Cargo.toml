@@ -3,7 +3,7 @@ name = "jpegli"
 version = "0.1.0"
 authors = ["Kornel <kornel@geekhood.net>", "Piotr Rogowski <piotrekrogowski@gmail.com>", "Logue"]
 edition = "2024"
-rust-version = "1.98.1"
+rust-version = "1.99.0"
 description = "Higher-level wrapper for Jpegli library"
 license = "BSD-3-Clause"
 repository = "https://github.com/logue/DropWebP"
@@ -27,4 +27,4 @@ libc = "0.2"
 rgb = { version = "0.8", features = ["as-bytes"] }
 
 [dev-dependencies]
-bytemuck = "1.12"
+bytemuck = "1"

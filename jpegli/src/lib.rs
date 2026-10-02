@@ -54,7 +54,7 @@ fn recompress() {
     assert_eq!(ColorSpace::JCS_YCbCr, dinfo.color_space());
     assert_eq!(
         dinfo.components().len(),
-        dinfo.color_space().num_components() as usize
+        dinfo.color_space().num_components()
     );
 
     let samp_factors = dinfo

@@ -1,0 +1,13 @@
+[workspace]
+resolver = "3"
+members = ["backend", "jpegli", "jpegli-sys"]
+
+[patch.crates-io]
+jpegli = { path = "jpegli" }
+
+[profile.release]
+lto = "thin"
+codegen-units = 16
+panic = "abort"
+strip = true
+opt-level = 3

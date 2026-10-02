@@ -87,7 +87,7 @@ export default defineConfig(({ command, mode }): UserConfig => {
       target: 'esnext',
       // Minify option
       // https://vitejs.dev/config/build-options.html#build-minify
-      minify: 'esbuild',
+      minify: 'oxc',
       // Rollup Options
       // https://vitejs.dev/config/build-options.html#build-rollupoptions
       rollupOptions: {
@@ -115,11 +115,11 @@ export default defineConfig(({ command, mode }): UserConfig => {
           plugins: [
             mode === 'analyze'
               ? // rollup-plugin-visualizer
-                // https://github.com/btd/rollup-plugin-visualizer
-                visualizer({
-                  open: true,
-                  filename: 'dist/stats.html'
-                })
+              // https://github.com/btd/rollup-plugin-visualizer
+              visualizer({
+                open: true,
+                filename: 'dist/stats.html'
+              })
               : undefined
           ]
         }

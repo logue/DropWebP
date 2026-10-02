@@ -308,13 +308,12 @@ impl<W> CompressStarted<W> {
                     );
                     assert!(comp_height >= 8);
 
-                    for ri in 0..comp_height {
+                    for (ri, row_ptr) in row_ptrs[ci].iter_mut().take(comp_height).enumerate() {
                         let start_offset = (comp_start_row + ri) * row_stride;
-                        row_ptrs[ci][ri] =
-                            image_src[ci][start_offset..start_offset + row_stride].as_ptr();
+                        *row_ptr = image_src[ci][start_offset..start_offset + row_stride].as_ptr();
                     }
-                    for ri in comp_height..mcu_height {
-                        row_ptrs[ci][ri] = ptr::null();
+                    for row_ptr in row_ptrs[ci].iter_mut().take(mcu_height).skip(comp_height) {
+                        *row_ptr = ptr::null();
                     }
                     comp_ptrs[ci] = row_ptrs[ci].as_ptr();
                 }

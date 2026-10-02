@@ -15,7 +15,7 @@ const loadEnvValue = (key: string, defaultValue: string = ''): string => {
   }
 };
 
-const version = loadEnvValue('VERSION', '3.3.0');
+const version = loadEnvValue('VERSION', '3.5.0');
 const googleAnalyticsId = loadEnvValue('GOOGLE_ANALYTICS_ID', '');
 const githubUser = loadEnvValue('GITHUB_USER', 'logue');
 const githubRepo = loadEnvValue('GITHUB_REPO', 'DropWebP');
@@ -57,7 +57,7 @@ export default defineNuxtConfig({
   // サイト設定
   site: {
     url: process.env.NUXT_PUBLIC_SITE_URL || 'https://logue.dev',
-    name: 'Tauri Vue3 App'
+    name: loadEnvValue('APP_NAME') || 'Tauri Vue3 App'
   },
 
   // アプリ設定
@@ -92,6 +92,11 @@ export default defineNuxtConfig({
     'nuxt-gtag',
     'vuetify-nuxt-module'
   ],
+  vuetify: {
+    moduleOptions: {
+      importComposables: false
+    }
+  },
 
   // i18n設定（<i18n>ブロック使用）
   i18n: {
@@ -115,8 +120,8 @@ export default defineNuxtConfig({
   // Google Analytics設定（.envからIDを読み込み、空の場合は無効）
   gtag: googleAnalyticsId
     ? {
-        id: googleAnalyticsId
-      }
+      id: googleAnalyticsId
+    }
     : undefined,
 
   // TypeScript パスエイリアス設定
