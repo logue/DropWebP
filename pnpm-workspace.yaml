@@ -18,5 +18,3 @@ minimumReleaseAge: 0
 overrides:
   eslint: "-"
   node-forge: ">=1.4.0"
-cargo:
-  enabled: true

@@ -37,7 +37,7 @@ name = "jpegli_sys"
 libc = "0.2"
 
 [build-dependencies]
-cc = "1.5"
+cc = "1.6"
 pkg-config = "0.3"
 vcpkg = "0.2"
 

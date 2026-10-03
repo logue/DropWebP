@@ -45,8 +45,7 @@
     "preview": "pnpm --filter frontend preview",
     "preview:docs": "pnpm --filter docs preview",
     "type-check": "pnpm --recursive exec vue-tsc --build --force",
-    "tauri": "pnpm --filter frontend tauri",
-    "postinstall": "pnpm --filter docs nuxt:prepare"
+    "tauri": "pnpm --filter frontend tauri"
   },
   "devDependencies": {
     "@eslint-community/eslint-plugin-eslint-comments": "^4.8.1",
