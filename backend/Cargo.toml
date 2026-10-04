@@ -37,7 +37,7 @@ name = "drop_compress_image_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-cc = "1.5"
+cc = "1.6"
 pkg-config = "0.3"
 tauri-build = { version = "2.6", features = [] }
 vcpkg = "0.2.15"
