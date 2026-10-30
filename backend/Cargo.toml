@@ -3,7 +3,7 @@ name = "drop-compress-image"
 version = "3.5.0"
 authors = ["Logue"]
 edition = "2024"
-rust-version = "1.99.0"
+rust-version = "1.99.1"
 description = "Drop Compress Image is a desktop application that converts images to WebP/Avif/JPEG XL format using drag-and-drop functionality. Built with Vite, Vue 3, TypeScript, and Tauri."
 readme = "../../ReadMe.md"
 repository = "https://github.com/logue/DropWebP"
@@ -37,10 +37,10 @@ name = "drop_compress_image_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-cc = "1.6"
+cc = "1.10"
 pkg-config = "0.3"
-tauri-build = { version = "2.6", features = [] }
-vcpkg = "0.2.15"
+tauri-build = { version = "2.7", features = [] }
+vcpkg = "0.2"
 
 [dependencies]
 bytemuck = "1.25"
@@ -73,12 +73,12 @@ png = "0.18"
 rgb = "0.8"
 serde = "1.0"
 serde_json = "1.0"
-tauri = { version = "2.11", features = [] }
+tauri = { version = "2.12", features = [] }
 tauri-plugin-dialog = "2.8"
-tauri-plugin-fs = "2.6"
+tauri-plugin-fs = "2.7"
 tauri-plugin-log = "2.10"
-tauri-plugin-notification = "2.5"
-tauri-plugin-opener = "2.6"
+tauri-plugin-notification = "2.8"
+tauri-plugin-opener = "2.7"
 tauri-plugin-os = "2.4"
 tempfile = "3.27"
 thiserror = "2.0"

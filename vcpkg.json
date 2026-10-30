@@ -1,0 +1,13 @@
+{
+  "name": "drop-compress-image",
+  "version": "3.5.0",
+  "dependencies": [
+    "aom",
+    "libavif",
+    "libjxl",
+    "libwebp",
+    "openjpeg",
+    "libjpeg-turbo",
+    "lcms"
+  ]
+}
